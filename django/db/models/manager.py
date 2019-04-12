@@ -33,7 +33,7 @@ class BaseManager:
 
     def __str__(self):
         """Return "app_label.model_label.manager_name"."""
-        return '%s.%s' % (self.model._meta.label, self.name)
+        return "%s.%s" % (self.model._meta.label, self.name)
 
     def deconstruct(self):
         """
@@ -43,12 +43,12 @@ class BaseManager:
         Raise a ValueError if the manager is dynamically generated.
         """
         qs_class = self._queryset_class
-        if getattr(self, '_built_with_as_manager', False):
+        if getattr(self, "_built_with_as_manager", False):
             # using MyQuerySet.as_manager()
             return (
                 True,  # as_manager
                 None,  # manager_class
-                '%s.%s' % (qs_class.__module__, qs_class.__name__),  # qs_class
+                "%s.%s" % (qs_class.__module__, qs_class.__name__),  # qs_class
                 None,  # args
                 None,  # kwargs
             )
@@ -61,12 +61,11 @@ class BaseManager:
                 raise ValueError(
                     "Could not find manager %s in %s.\n"
                     "Please note that you need to inherit from managers you "
-                    "dynamically generated with 'from_queryset()'."
-                    % (name, module_name)
+                    "dynamically generated with 'from_queryset()'." % (name, module_name)
                 )
             return (
                 False,  # as_manager
-                '%s.%s' % (module_name, name),  # manager_class
+                "%s.%s" % (module_name, name),  # manager_class
                 None,  # qs_class
                 self._constructor_args[0],  # args
                 self._constructor_args[1],  # kwargs
@@ -80,6 +79,7 @@ class BaseManager:
         def create_method(name, method):
             def manager_method(self, *args, **kwargs):
                 return getattr(self.get_queryset(), name)(*args, **kwargs)
+
             manager_method.__name__ = method.__name__
             manager_method.__doc__ = method.__doc__
             return manager_method
@@ -90,8 +90,8 @@ class BaseManager:
             if hasattr(cls, name):
                 continue
             # Only copy public methods or methods with the attribute `queryset_only=False`.
-            queryset_only = getattr(method, 'queryset_only', None)
-            if queryset_only or (queryset_only is None and name.startswith('_')):
+            queryset_only = getattr(method, "queryset_only", None)
+            if queryset_only or (queryset_only is None and name.startswith("_")):
                 continue
             # Copy the method onto the manager.
             new_methods[name] = create_method(name, method)
@@ -100,11 +100,10 @@ class BaseManager:
     @classmethod
     def from_queryset(cls, queryset_class, class_name=None):
         if class_name is None:
-            class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__)
-        return type(class_name, (cls,), {
-            '_queryset_class': queryset_class,
-            **cls._get_queryset_methods(queryset_class),
-        })
+            class_name = "%sFrom%s" % (cls.__name__, queryset_class.__name__)
+        return type(
+            class_name, (cls,), {"_queryset_class": queryset_class, **cls._get_queryset_methods(queryset_class)}
+        )
 
     def contribute_to_class(self, model, name):
         self.name = self.name or name
@@ -153,10 +152,7 @@ class BaseManager:
         return self.get_queryset()
 
     def __eq__(self, other):
-        return (
-            isinstance(other, self.__class__) and
-            self._constructor_args == other._constructor_args
-        )
+        return isinstance(other, self.__class__) and self._constructor_args == other._constructor_args
 
     def __hash__(self):
         return id(self)
@@ -167,7 +163,6 @@ class Manager(BaseManager.from_queryset(QuerySet)):
 
 
 class ManagerDescriptor:
-
     def __init__(self, manager):
         self.manager = manager
 
@@ -176,17 +171,12 @@ class ManagerDescriptor:
             raise AttributeError("Manager isn't accessible via %s instances" % cls.__name__)
 
         if cls._meta.abstract:
-            raise AttributeError("Manager isn't available; %s is abstract" % (
-                cls._meta.object_name,
-            ))
+            raise AttributeError("Manager isn't available; %s is abstract" % (cls._meta.object_name,))
 
         if cls._meta.swapped:
             raise AttributeError(
-                "Manager isn't available; '%s.%s' has been swapped for '%s'" % (
-                    cls._meta.app_label,
-                    cls._meta.object_name,
-                    cls._meta.swapped,
-                )
+                "Manager isn't available; '%s.%s' has been swapped for '%s'"
+                % (cls._meta.app_label, cls._meta.object_name, cls._meta.swapped)
             )
 
         return cls._meta.managers_map[self.manager.name]

@@ -70,10 +70,7 @@ class XmlSerializerTestCase(SerializersTestBase, TestCase):
         with self.assertRaisesMessage(ValueError, msg):
             serializers.serialize(self.serializer_name, [self.a1])
         self.a1.headline = "HT \u0009, LF \u000A, and CR \u000D are allowed"
-        self.assertIn(
-            "HT \t, LF \n, and CR \r are allowed",
-            serializers.serialize(self.serializer_name, [self.a1])
-        )
+        self.assertIn("HT \t, LF \n, and CR \r are allowed", serializers.serialize(self.serializer_name, [self.a1]))
 
     def test_no_dtd(self):
         """
@@ -84,7 +81,7 @@ class XmlSerializerTestCase(SerializersTestBase, TestCase):
         """
         xml = '<?xml version="1.0" standalone="no"?><!DOCTYPE example SYSTEM "http://example.com/example.dtd">'
         with self.assertRaises(DTDForbidden):
-            next(serializers.deserialize('xml', xml))
+            next(serializers.deserialize("xml", xml))
 
 
 class XmlSerializerTransactionTestCase(SerializersTransactionTestBase, TransactionTestCase):

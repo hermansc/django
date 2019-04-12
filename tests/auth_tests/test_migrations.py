@@ -7,15 +7,11 @@ from django.test import TestCase
 
 from .models import Proxy, UserProxy
 
-update_proxy_permissions = import_module('django.contrib.auth.migrations.0011_update_proxy_permissions')
+update_proxy_permissions = import_module("django.contrib.auth.migrations.0011_update_proxy_permissions")
 
 
 class ProxyModelWithDifferentAppLabelTests(TestCase):
-    available_apps = [
-        'auth_tests',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-    ]
+    available_apps = ["auth_tests", "django.contrib.auth", "django.contrib.contenttypes"]
 
     def setUp(self):
         """
@@ -26,14 +22,12 @@ class ProxyModelWithDifferentAppLabelTests(TestCase):
         Permission.objects.all().delete()
         self.concrete_content_type = ContentType.objects.get_for_model(UserProxy)
         self.default_permission = Permission.objects.create(
-            content_type=self.concrete_content_type,
-            codename='add_userproxy',
-            name='Can add userproxy',
+            content_type=self.concrete_content_type, codename="add_userproxy", name="Can add userproxy"
         )
         self.custom_permission = Permission.objects.create(
             content_type=self.concrete_content_type,
-            codename='use_different_app_label',
-            name='May use a different app label',
+            codename="use_different_app_label",
+            name="May use a different app label",
         )
 
     def test_proxy_model_permissions_contenttype(self):
@@ -51,14 +45,14 @@ class ProxyModelWithDifferentAppLabelTests(TestCase):
         user.user_permissions.add(self.default_permission)
         user.user_permissions.add(self.custom_permission)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertTrue(user.has_perm('auth.' + permission.codename))
-            self.assertFalse(user.has_perm('auth_tests.' + permission.codename))
+            self.assertTrue(user.has_perm("auth." + permission.codename))
+            self.assertFalse(user.has_perm("auth_tests." + permission.codename))
         update_proxy_permissions.update_proxy_model_permissions(apps, None)
         # Reload user to purge the _perm_cache.
         user = User._default_manager.get(pk=user.pk)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertFalse(user.has_perm('auth.' + permission.codename))
-            self.assertTrue(user.has_perm('auth_tests.' + permission.codename))
+            self.assertFalse(user.has_perm("auth." + permission.codename))
+            self.assertTrue(user.has_perm("auth_tests." + permission.codename))
 
     def test_migrate_backwards(self):
         update_proxy_permissions.update_proxy_model_permissions(apps, None)
@@ -73,23 +67,19 @@ class ProxyModelWithDifferentAppLabelTests(TestCase):
         user.user_permissions.add(self.default_permission)
         user.user_permissions.add(self.custom_permission)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertTrue(user.has_perm('auth.' + permission.codename))
-            self.assertFalse(user.has_perm('auth_tests.' + permission.codename))
+            self.assertTrue(user.has_perm("auth." + permission.codename))
+            self.assertFalse(user.has_perm("auth_tests." + permission.codename))
         update_proxy_permissions.update_proxy_model_permissions(apps, None)
         update_proxy_permissions.revert_proxy_model_permissions(apps, None)
         # Reload user to purge the _perm_cache.
         user = User._default_manager.get(pk=user.pk)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertTrue(user.has_perm('auth.' + permission.codename))
-            self.assertFalse(user.has_perm('auth_tests.' + permission.codename))
+            self.assertTrue(user.has_perm("auth." + permission.codename))
+            self.assertFalse(user.has_perm("auth_tests." + permission.codename))
 
 
 class ProxyModelWithSameAppLabelTests(TestCase):
-    available_apps = [
-        'auth_tests',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-    ]
+    available_apps = ["auth_tests", "django.contrib.auth", "django.contrib.contenttypes"]
 
     def setUp(self):
         """
@@ -100,14 +90,10 @@ class ProxyModelWithSameAppLabelTests(TestCase):
         Permission.objects.all().delete()
         self.concrete_content_type = ContentType.objects.get_for_model(Proxy)
         self.default_permission = Permission.objects.create(
-            content_type=self.concrete_content_type,
-            codename='add_proxy',
-            name='Can add proxy',
+            content_type=self.concrete_content_type, codename="add_proxy", name="Can add proxy"
         )
         self.custom_permission = Permission.objects.create(
-            content_type=self.concrete_content_type,
-            codename='display_proxys',
-            name='May display proxys information',
+            content_type=self.concrete_content_type, codename="display_proxys", name="May display proxys information"
         )
 
     def test_proxy_model_permissions_contenttype(self):
@@ -125,12 +111,12 @@ class ProxyModelWithSameAppLabelTests(TestCase):
         user.user_permissions.add(self.default_permission)
         user.user_permissions.add(self.custom_permission)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertTrue(user.has_perm('auth_tests.' + permission.codename))
+            self.assertTrue(user.has_perm("auth_tests." + permission.codename))
         update_proxy_permissions.update_proxy_model_permissions(apps, None)
         # Reload user to purge the _perm_cache.
         user = User._default_manager.get(pk=user.pk)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertTrue(user.has_perm('auth_tests.' + permission.codename))
+            self.assertTrue(user.has_perm("auth_tests." + permission.codename))
 
     def test_migrate_backwards(self):
         update_proxy_permissions.update_proxy_model_permissions(apps, None)
@@ -145,10 +131,10 @@ class ProxyModelWithSameAppLabelTests(TestCase):
         user.user_permissions.add(self.default_permission)
         user.user_permissions.add(self.custom_permission)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertTrue(user.has_perm('auth_tests.' + permission.codename))
+            self.assertTrue(user.has_perm("auth_tests." + permission.codename))
         update_proxy_permissions.update_proxy_model_permissions(apps, None)
         update_proxy_permissions.revert_proxy_model_permissions(apps, None)
         # Reload user to purge the _perm_cache.
         user = User._default_manager.get(pk=user.pk)
         for permission in [self.default_permission, self.custom_permission]:
-            self.assertTrue(user.has_perm('auth_tests.' + permission.codename))
+            self.assertTrue(user.has_perm("auth_tests." + permission.codename))

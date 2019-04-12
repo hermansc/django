@@ -1,12 +1,11 @@
 from contextlib import ContextDecorator, contextmanager
 
-from django.db import (
-    DEFAULT_DB_ALIAS, DatabaseError, Error, ProgrammingError, connections,
-)
+from django.db import DEFAULT_DB_ALIAS, DatabaseError, Error, ProgrammingError, connections
 
 
 class TransactionManagementError(ProgrammingError):
     """Transaction management is used improperly."""
+
     pass
 
 
@@ -131,6 +130,7 @@ def on_commit(func, using=None):
 #################################
 # Decorators / context managers #
 #################################
+
 
 class Atomic(ContextDecorator):
     """

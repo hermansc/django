@@ -16,11 +16,12 @@ from django.utils import tree
 # PathInfo is used when converting lookups (fk__somecol). The contents
 # describe the relation in Model terms (model Options and Fields for both
 # sides of the relation. The join_field is the field backing the relation.
-PathInfo = namedtuple('PathInfo', 'from_opts to_opts target_fields join_field m2m direct filtered_relation')
+PathInfo = namedtuple("PathInfo", "from_opts to_opts target_fields join_field m2m direct filtered_relation")
 
 
 class InvalidQuery(Exception):
     """The query passed to raw() isn't a safe query to use with raw()."""
+
     pass
 
 
@@ -35,6 +36,7 @@ class QueryWrapper:
     A type that indicates the contents are an SQL fragment and the associate
     parameters. Can be used to pass opaque data to a where-clause, for example.
     """
+
     contains_aggregate = False
 
     def __init__(self, sql, params):
@@ -49,9 +51,10 @@ class Q(tree.Node):
     Encapsulate filters as objects that can then be combined logically (using
     `&` and `|`).
     """
+
     # Connection types
-    AND = 'AND'
-    OR = 'OR'
+    AND = "AND"
+    OR = "OR"
     default = AND
     conditional = True
 
@@ -95,9 +98,9 @@ class Q(tree.Node):
         return clause
 
     def deconstruct(self):
-        path = '%s.%s' % (self.__class__.__module__, self.__class__.__name__)
-        if path.startswith('django.db.models.query_utils'):
-            path = path.replace('django.db.models.query_utils', 'django.db.models')
+        path = "%s.%s" % (self.__class__.__module__, self.__class__.__name__)
+        if path.startswith("django.db.models.query_utils"):
+            path = path.replace("django.db.models.query_utils", "django.db.models")
         args, kwargs = (), {}
         if len(self.children) == 1 and not isinstance(self.children[0], Q):
             child = self.children[0]
@@ -105,9 +108,9 @@ class Q(tree.Node):
         else:
             args = tuple(self.children)
             if self.connector != self.default:
-                kwargs = {'_connector': self.connector}
+                kwargs = {"_connector": self.connector}
         if self.negated:
-            kwargs['_negated'] = True
+            kwargs["_negated"] = True
         return path, args, kwargs
 
 
@@ -116,6 +119,7 @@ class DeferredAttribute:
     A wrapper for a deferred-loading field. When the value is read from this
     object the first time, the query is executed.
     """
+
     def __init__(self, field_name):
         self.field_name = field_name
 
@@ -152,7 +156,6 @@ class DeferredAttribute:
 
 
 class RegisterLookupMixin:
-
     @classmethod
     def _get_lookup(cls, lookup_name):
         return cls.get_lookups().get(lookup_name, None)
@@ -160,13 +163,14 @@ class RegisterLookupMixin:
     @classmethod
     @functools.lru_cache(maxsize=None)
     def get_lookups(cls):
-        class_lookups = [parent.__dict__.get('class_lookups', {}) for parent in inspect.getmro(cls)]
+        class_lookups = [parent.__dict__.get("class_lookups", {}) for parent in inspect.getmro(cls)]
         return cls.merge_dicts(class_lookups)
 
     def get_lookup(self, lookup_name):
         from django.db.models.lookups import Lookup
+
         found = self._get_lookup(lookup_name)
-        if found is None and hasattr(self, 'output_field'):
+        if found is None and hasattr(self, "output_field"):
             return self.output_field.get_lookup(lookup_name)
         if found is not None and not issubclass(found, Lookup):
             return None
@@ -174,8 +178,9 @@ class RegisterLookupMixin:
 
     def get_transform(self, lookup_name):
         from django.db.models.lookups import Transform
+
         found = self._get_lookup(lookup_name)
-        if found is None and hasattr(self, 'output_field'):
+        if found is None and hasattr(self, "output_field"):
             return self.output_field.get_transform(lookup_name)
         if found is not None and not issubclass(found, Transform):
             return None
@@ -201,7 +206,7 @@ class RegisterLookupMixin:
     def register_lookup(cls, lookup, lookup_name=None):
         if lookup_name is None:
             lookup_name = lookup.lookup_name
-        if 'class_lookups' not in cls.__dict__:
+        if "class_lookups" not in cls.__dict__:
             cls.class_lookups = {}
         cls.class_lookups[lookup_name] = lookup
         cls._clear_cached_lookups()
@@ -247,10 +252,11 @@ def select_related_descend(field, restricted, requested, load_fields, reverse=Fa
     if load_fields:
         if field.attname not in load_fields:
             if restricted and field.name in requested:
-                raise InvalidQuery("Field %s.%s cannot be both deferred"
-                                   " and traversed using select_related"
-                                   " at the same time." %
-                                   (field.model._meta.object_name, field.name))
+                raise InvalidQuery(
+                    "Field %s.%s cannot be both deferred"
+                    " and traversed using select_related"
+                    " at the same time." % (field.model._meta.object_name, field.name)
+                )
     return True
 
 
@@ -274,12 +280,14 @@ def check_rel_lookup_compatibility(model, target_opts, field):
       1) model and opts match (where proxy inheritance is removed)
       2) model is parent of opts' model or the other way around
     """
+
     def check(opts):
         return (
-            model._meta.concrete_model == opts.concrete_model or
-            opts.concrete_model in model._meta.get_parent_list() or
-            model in opts.get_parent_list()
+            model._meta.concrete_model == opts.concrete_model
+            or opts.concrete_model in model._meta.get_parent_list()
+            or model in opts.get_parent_list()
         )
+
     # If the field is a primary key, then doing a query against the field's
     # model is ok, too. Consider the case:
     # class Restaurant(models.Model):
@@ -289,10 +297,7 @@ def check_rel_lookup_compatibility(model, target_opts, field):
     # give Place's opts as the target opts, but Restaurant isn't compatible
     # with that. This logic applies only to primary keys, as when doing __in=qs,
     # we are going to turn this into __in=qs.values('pk') later on.
-    return (
-        check(target_opts) or
-        (getattr(field, 'primary_key', False) and check(field.model._meta))
-    )
+    return check(target_opts) or (getattr(field, "primary_key", False) and check(field.model._meta))
 
 
 class FilteredRelation:
@@ -300,20 +305,20 @@ class FilteredRelation:
 
     def __init__(self, relation_name, *, condition=Q()):
         if not relation_name:
-            raise ValueError('relation_name cannot be empty.')
+            raise ValueError("relation_name cannot be empty.")
         self.relation_name = relation_name
         self.alias = None
         if not isinstance(condition, Q):
-            raise ValueError('condition argument must be a Q() instance.')
+            raise ValueError("condition argument must be a Q() instance.")
         self.condition = condition
         self.path = []
 
     def __eq__(self, other):
         return (
-            isinstance(other, self.__class__) and
-            self.relation_name == other.relation_name and
-            self.alias == other.alias and
-            self.condition == other.condition
+            isinstance(other, self.__class__)
+            and self.relation_name == other.relation_name
+            and self.alias == other.alias
+            and self.condition == other.condition
         )
 
     def clone(self):
@@ -327,7 +332,7 @@ class FilteredRelation:
         QuerySet.annotate() only accepts expression-like arguments
         (with a resolve_expression() method).
         """
-        raise NotImplementedError('FilteredRelation.resolve_expression() is unused.')
+        raise NotImplementedError("FilteredRelation.resolve_expression() is unused.")
 
     def as_sql(self, compiler, connection):
         # Resolve the condition in Join.filtered_relation.

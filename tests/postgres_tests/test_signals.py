@@ -3,15 +3,12 @@ from django.db import connection
 from . import PostgreSQLTestCase
 
 try:
-    from django.contrib.postgres.signals import (
-        get_citext_oids, get_hstore_oids, register_type_handlers,
-    )
+    from django.contrib.postgres.signals import get_citext_oids, get_hstore_oids, register_type_handlers
 except ImportError:
     pass  # pyscogp2 isn't installed.
 
 
 class OIDTests(PostgreSQLTestCase):
-
     def assertOIDs(self, oids):
         self.assertIsInstance(oids, tuple)
         self.assertGreater(len(oids), 0)

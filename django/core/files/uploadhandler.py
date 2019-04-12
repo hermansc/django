@@ -5,15 +5,18 @@ Base file upload handler classes, and the built-in concrete subclasses
 from io import BytesIO
 
 from django.conf import settings
-from django.core.files.uploadedfile import (
-    InMemoryUploadedFile, TemporaryUploadedFile,
-)
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from django.utils.module_loading import import_string
 
 __all__ = [
-    'UploadFileException', 'StopUpload', 'SkipFile', 'FileUploadHandler',
-    'TemporaryFileUploadHandler', 'MemoryFileUploadHandler', 'load_handler',
-    'StopFutureHandlers'
+    "UploadFileException",
+    "StopUpload",
+    "SkipFile",
+    "FileUploadHandler",
+    "TemporaryFileUploadHandler",
+    "MemoryFileUploadHandler",
+    "load_handler",
+    "StopFutureHandlers",
 ]
 
 
@@ -21,6 +24,7 @@ class UploadFileException(Exception):
     """
     Any error having to do with uploading files.
     """
+
     pass
 
 
@@ -28,6 +32,7 @@ class StopUpload(UploadFileException):
     """
     This exception is raised when an upload must abort.
     """
+
     def __init__(self, connection_reset=False):
         """
         If ``connection_reset`` is ``True``, Django knows will halt the upload
@@ -38,15 +43,16 @@ class StopUpload(UploadFileException):
 
     def __str__(self):
         if self.connection_reset:
-            return 'StopUpload: Halt current upload.'
+            return "StopUpload: Halt current upload."
         else:
-            return 'StopUpload: Consume request data, then halt.'
+            return "StopUpload: Consume request data, then halt."
 
 
 class SkipFile(UploadFileException):
     """
     This exception is raised by an upload handler that wants to skip a given file.
     """
+
     pass
 
 
@@ -55,6 +61,7 @@ class StopFutureHandlers(UploadFileException):
     Upload handers that have handled a file and do not want future handlers to
     run should raise this exception instead of returning None.
     """
+
     pass
 
 
@@ -62,6 +69,7 @@ class FileUploadHandler:
     """
     Base class for streaming upload handlers.
     """
+
     chunk_size = 64 * 2 ** 10  # : The default chunk size is 64 KB.
 
     def __init__(self, request=None):
@@ -109,7 +117,7 @@ class FileUploadHandler:
         Receive data from the streamed upload parser. ``start`` is the position
         in the file of the chunk.
         """
-        raise NotImplementedError('subclasses of FileUploadHandler must provide a receive_data_chunk() method')
+        raise NotImplementedError("subclasses of FileUploadHandler must provide a receive_data_chunk() method")
 
     def file_complete(self, file_size):
         """
@@ -118,7 +126,7 @@ class FileUploadHandler:
 
         Subclasses should return a valid ``UploadedFile`` object.
         """
-        raise NotImplementedError('subclasses of FileUploadHandler must provide a file_complete() method')
+        raise NotImplementedError("subclasses of FileUploadHandler must provide a file_complete() method")
 
     def upload_complete(self):
         """
@@ -132,6 +140,7 @@ class TemporaryFileUploadHandler(FileUploadHandler):
     """
     Upload handler that streams data into a temporary file.
     """
+
     def new_file(self, *args, **kwargs):
         """
         Create the file object to append to as data is coming in.
@@ -188,7 +197,7 @@ class MemoryFileUploadHandler(FileUploadHandler):
             content_type=self.content_type,
             size=file_size,
             charset=self.charset,
-            content_type_extra=self.content_type_extra
+            content_type_extra=self.content_type_extra,
         )
 
 

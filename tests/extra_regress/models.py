@@ -6,7 +6,7 @@ from django.db import models
 
 
 class RevisionableModel(models.Model):
-    base = models.ForeignKey('self', models.SET_NULL, null=True)
+    base = models.ForeignKey("self", models.SET_NULL, null=True)
     title = models.CharField(blank=True, max_length=255)
     when = models.DateTimeField(default=datetime.datetime.now)
 
@@ -36,4 +36,4 @@ class TestObject(models.Model):
     third = models.CharField(max_length=20)
 
     def __str__(self):
-        return 'TestObject: %s,%s,%s' % (self.first, self.second, self.third)
+        return "TestObject: %s,%s,%s" % (self.first, self.second, self.third)

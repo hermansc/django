@@ -9,9 +9,7 @@
 
 import re
 import time as ttime
-from datetime import (
-    date as real_date, datetime as real_datetime, time as real_time,
-)
+from datetime import date as real_date, datetime as real_datetime, time as real_time
 
 
 class date(real_date):
@@ -25,9 +23,7 @@ class datetime(real_datetime):
 
     @classmethod
     def combine(cls, date, time):
-        return cls(date.year, date.month, date.day,
-                   time.hour, time.minute, time.second,
-                   time.microsecond, time.tzinfo)
+        return cls(date.year, date.month, date.day, time.hour, time.minute, time.second, time.microsecond, time.tzinfo)
 
     def date(self):
         return date(self.year, self.month, self.day)
@@ -101,5 +97,5 @@ def strftime(dt, fmt):
     s = s1
     syear = "%04d" % (dt.year,)
     for site in sites:
-        s = s[:site] + syear + s[site + 4:]
+        s = s[:site] + syear + s[site + 4 :]
     return s

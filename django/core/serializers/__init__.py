@@ -41,6 +41,7 @@ class BadSerializer:
     is an error raised in the process of creating a serializer it will be
     raised and passed along to the caller when the serializer is used.
     """
+
     internal_use_only = False
 
     def __init__(self, exception):
@@ -71,10 +72,7 @@ def register_serializer(format, serializer_module, serializers=None):
     except ImportError as exc:
         bad_serializer = BadSerializer(exc)
 
-        module = type('BadSerializerModule', (), {
-            'Deserializer': bad_serializer,
-            'Serializer': bad_serializer,
-        })
+        module = type("BadSerializerModule", (), {"Deserializer": bad_serializer, "Serializer": bad_serializer})
 
     if serializers is None:
         _serializers[format] = module
@@ -173,8 +171,8 @@ def sort_dependencies(app_list):
         for model in model_list:
             models.add(model)
             # Add any explicitly defined dependencies
-            if hasattr(model, 'natural_key'):
-                deps = getattr(model.natural_key, 'dependencies', [])
+            if hasattr(model, "natural_key"):
+                deps = getattr(model.natural_key, "dependencies", [])
                 if deps:
                     deps = [apps.get_model(dep) for dep in deps]
             else:
@@ -185,7 +183,7 @@ def sort_dependencies(app_list):
             for field in model._meta.fields:
                 if field.remote_field:
                     rel_model = field.remote_field.model
-                    if hasattr(rel_model, 'natural_key') and rel_model != model:
+                    if hasattr(rel_model, "natural_key") and rel_model != model:
                         deps.append(rel_model)
             # Also add a dependency for any simple M2M relation with a model
             # that defines a natural key.  M2M relations with explicit through
@@ -193,7 +191,7 @@ def sort_dependencies(app_list):
             for field in model._meta.many_to_many:
                 if field.remote_field.through._meta.auto_created:
                     rel_model = field.remote_field.model
-                    if hasattr(rel_model, 'natural_key') and rel_model != model:
+                    if hasattr(rel_model, "natural_key") and rel_model != model:
                         deps.append(rel_model)
             model_dependencies.append((model, deps))
 
@@ -223,9 +221,9 @@ def sort_dependencies(app_list):
                 skipped.append((model, deps))
         if not changed:
             raise RuntimeError(
-                "Can't resolve dependencies for %s in serialized app list." %
-                ', '.join(
-                    '%s.%s' % (model._meta.app_label, model._meta.object_name)
+                "Can't resolve dependencies for %s in serialized app list."
+                % ", ".join(
+                    "%s.%s" % (model._meta.app_label, model._meta.object_name)
                     for model, deps in sorted(skipped, key=lambda obj: obj[0].__name__)
                 )
             )

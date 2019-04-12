@@ -8,7 +8,9 @@ from django.db.models import DO_NOTHING
 from django.db.models.base import ModelBase, make_foreign_order_accessors
 from django.db.models.fields.mixins import FieldCacheMixin
 from django.db.models.fields.related import (
-    ForeignObject, ForeignObjectRel, ReverseManyToOneDescriptor,
+    ForeignObject,
+    ForeignObjectRel,
+    ReverseManyToOneDescriptor,
     lazy_related_operation,
 )
 from django.db.models.query_utils import PathInfo
@@ -38,7 +40,7 @@ class GenericForeignKey(FieldCacheMixin):
     related_model = None
     remote_field = None
 
-    def __init__(self, ct_field='content_type', fk_field='object_id', for_concrete_model=True):
+    def __init__(self, ct_field="content_type", fk_field="object_id", for_concrete_model=True):
         self.ct_field = ct_field
         self.fk_field = fk_field
         self.for_concrete_model = for_concrete_model
@@ -54,39 +56,23 @@ class GenericForeignKey(FieldCacheMixin):
 
     def get_filter_kwargs_for_object(self, obj):
         """See corresponding method on Field"""
-        return {
-            self.fk_field: getattr(obj, self.fk_field),
-            self.ct_field: getattr(obj, self.ct_field),
-        }
+        return {self.fk_field: getattr(obj, self.fk_field), self.ct_field: getattr(obj, self.ct_field)}
 
     def get_forward_related_filter(self, obj):
         """See corresponding method on RelatedField"""
-        return {
-            self.fk_field: obj.pk,
-            self.ct_field: ContentType.objects.get_for_model(obj).pk,
-        }
+        return {self.fk_field: obj.pk, self.ct_field: ContentType.objects.get_for_model(obj).pk}
 
     def __str__(self):
         model = self.model
         app = model._meta.app_label
-        return '%s.%s.%s' % (app, model._meta.object_name, self.name)
+        return "%s.%s.%s" % (app, model._meta.object_name, self.name)
 
     def check(self, **kwargs):
-        return [
-            *self._check_field_name(),
-            *self._check_object_id_field(),
-            *self._check_content_type_field(),
-        ]
+        return [*self._check_field_name(), *self._check_object_id_field(), *self._check_content_type_field()]
 
     def _check_field_name(self):
         if self.name.endswith("_"):
-            return [
-                checks.Error(
-                    'Field names must not end with an underscore.',
-                    obj=self,
-                    id='fields.E001',
-                )
-            ]
+            return [checks.Error("Field names must not end with an underscore.", obj=self, id="fields.E001")]
         else:
             return []
 
@@ -96,10 +82,9 @@ class GenericForeignKey(FieldCacheMixin):
         except FieldDoesNotExist:
             return [
                 checks.Error(
-                    "The GenericForeignKey object ID references the "
-                    "nonexistent field '%s'." % self.fk_field,
+                    "The GenericForeignKey object ID references the " "nonexistent field '%s'." % self.fk_field,
                     obj=self,
-                    id='contenttypes.E001',
+                    id="contenttypes.E001",
                 )
             ]
         else:
@@ -116,40 +101,35 @@ class GenericForeignKey(FieldCacheMixin):
             return [
                 checks.Error(
                     "The GenericForeignKey content type references the "
-                    "nonexistent field '%s.%s'." % (
-                        self.model._meta.object_name, self.ct_field
-                    ),
+                    "nonexistent field '%s.%s'." % (self.model._meta.object_name, self.ct_field),
                     obj=self,
-                    id='contenttypes.E002',
+                    id="contenttypes.E002",
                 )
             ]
         else:
             if not isinstance(field, models.ForeignKey):
                 return [
                     checks.Error(
-                        "'%s.%s' is not a ForeignKey." % (
-                            self.model._meta.object_name, self.ct_field
-                        ),
+                        "'%s.%s' is not a ForeignKey." % (self.model._meta.object_name, self.ct_field),
                         hint=(
                             "GenericForeignKeys must use a ForeignKey to "
                             "'contenttypes.ContentType' as the 'content_type' field."
                         ),
                         obj=self,
-                        id='contenttypes.E003',
+                        id="contenttypes.E003",
                     )
                 ]
             elif field.remote_field.model != ContentType:
                 return [
                     checks.Error(
-                        "'%s.%s' is not a ForeignKey to 'contenttypes.ContentType'." % (
-                            self.model._meta.object_name, self.ct_field
-                        ),
+                        "'%s.%s' is not a ForeignKey to 'contenttypes.ContentType'."
+                        % (self.model._meta.object_name, self.ct_field),
                         hint=(
                             "GenericForeignKeys must use a ForeignKey to "
                             "'contenttypes.ContentType' as the 'content_type' field."
                         ),
                         obj=self,
-                        id='contenttypes.E004',
+                        id="contenttypes.E004",
                     )
                 ]
             else:
@@ -161,7 +141,8 @@ class GenericForeignKey(FieldCacheMixin):
     def get_content_type(self, obj=None, id=None, using=None):
         if obj is not None:
             return ContentType.objects.db_manager(obj._state.db).get_for_model(
-                obj, for_concrete_model=self.for_concrete_model)
+                obj, for_concrete_model=self.for_concrete_model
+            )
         elif id is not None:
             return ContentType.objects.db_manager(using).get_for_id(id)
         else:
@@ -200,19 +181,10 @@ class GenericForeignKey(FieldCacheMixin):
             if ct_id is None:
                 return None
             else:
-                model = self.get_content_type(id=ct_id,
-                                              using=obj._state.db).model_class()
-                return (model._meta.pk.get_prep_value(getattr(obj, self.fk_field)),
-                        model)
+                model = self.get_content_type(id=ct_id, using=obj._state.db).model_class()
+                return (model._meta.pk.get_prep_value(getattr(obj, self.fk_field)), model)
 
-        return (
-            ret_val,
-            lambda obj: (obj.pk, obj.__class__),
-            gfk_key,
-            True,
-            self.name,
-            True,
-        )
+        return (ret_val, lambda obj: (obj.pk, obj.__class__), gfk_key, True, self.name, True)
 
     def __get__(self, instance, cls=None):
         if instance is None:
@@ -262,9 +234,12 @@ class GenericRel(ForeignObjectRel):
 
     def __init__(self, field, to, related_name=None, related_query_name=None, limit_choices_to=None):
         super().__init__(
-            field, to, related_name=related_query_name or '+',
+            field,
+            to,
+            related_name=related_query_name or "+",
             related_query_name=related_query_name,
-            limit_choices_to=limit_choices_to, on_delete=DO_NOTHING,
+            limit_choices_to=limit_choices_to,
+            on_delete=DO_NOTHING,
         )
 
 
@@ -285,18 +260,24 @@ class GenericRelation(ForeignObject):
 
     mti_inherited = False
 
-    def __init__(self, to, object_id_field='object_id', content_type_field='content_type',
-                 for_concrete_model=True, related_query_name=None, limit_choices_to=None, **kwargs):
-        kwargs['rel'] = self.rel_class(
-            self, to,
-            related_query_name=related_query_name,
-            limit_choices_to=limit_choices_to,
+    def __init__(
+        self,
+        to,
+        object_id_field="object_id",
+        content_type_field="content_type",
+        for_concrete_model=True,
+        related_query_name=None,
+        limit_choices_to=None,
+        **kwargs,
+    ):
+        kwargs["rel"] = self.rel_class(
+            self, to, related_query_name=related_query_name, limit_choices_to=limit_choices_to
         )
 
-        kwargs['blank'] = True
-        kwargs['on_delete'] = models.CASCADE
-        kwargs['editable'] = False
-        kwargs['serialize'] = False
+        kwargs["blank"] = True
+        kwargs["on_delete"] = models.CASCADE
+        kwargs["editable"] = False
+        kwargs["serialize"] = False
 
         # This construct is somewhat of an abuse of ForeignObject. This field
         # represents a relation from pk to object_id field. But, this relation
@@ -310,10 +291,7 @@ class GenericRelation(ForeignObject):
         self.for_concrete_model = for_concrete_model
 
     def check(self, **kwargs):
-        return [
-            *super().check(**kwargs),
-            *self._check_generic_foreign_key_existence(),
-        ]
+        return [*super().check(**kwargs), *self._check_generic_foreign_key_existence()]
 
     def _is_matching_generic_foreign_key(self, field):
         """
@@ -322,9 +300,9 @@ class GenericRelation(ForeignObject):
         GenericRelation.
         """
         return (
-            isinstance(field, GenericForeignKey) and
-            field.ct_field == self.content_type_field_name and
-            field.fk_field == self.object_id_field_name
+            isinstance(field, GenericForeignKey)
+            and field.ct_field == self.content_type_field_name
+            and field.fk_field == self.object_id_field_name
         )
 
     def _check_generic_foreign_key_existence(self):
@@ -337,11 +315,10 @@ class GenericRelation(ForeignObject):
                 return [
                     checks.Error(
                         "The GenericRelation defines a relation with the model "
-                        "'%s.%s', but that model does not have a GenericForeignKey." % (
-                            target._meta.app_label, target._meta.object_name
-                        ),
+                        "'%s.%s', but that model does not have a GenericForeignKey."
+                        % (target._meta.app_label, target._meta.object_name),
                         obj=self,
-                        id='contenttypes.E004',
+                        id="contenttypes.E004",
                     )
                 ]
         else:
@@ -368,15 +345,17 @@ class GenericRelation(ForeignObject):
         opts = self.remote_field.model._meta.concrete_model._meta
         parent_opts = opts.get_field(self.object_id_field_name).model._meta
         target = parent_opts.pk
-        path.append(PathInfo(
-            from_opts=self.model._meta,
-            to_opts=parent_opts,
-            target_fields=(target,),
-            join_field=self.remote_field,
-            m2m=True,
-            direct=False,
-            filtered_relation=filtered_relation,
-        ))
+        path.append(
+            PathInfo(
+                from_opts=self.model._meta,
+                to_opts=parent_opts,
+                target_fields=(target,),
+                join_field=self.remote_field,
+                m2m=True,
+                direct=False,
+                filtered_relation=filtered_relation,
+            )
+        )
         # Collect joins needed for the parent -> child chain. This is easiest
         # to do if we collect joins for the child -> parent chain and then
         # reverse the direction (call to reverse() and use of
@@ -398,42 +377,46 @@ class GenericRelation(ForeignObject):
             return self._get_path_info_with_parent(filtered_relation)
         else:
             target = opts.pk
-            return [PathInfo(
-                from_opts=self.model._meta,
-                to_opts=opts,
-                target_fields=(target,),
-                join_field=self.remote_field,
-                m2m=True,
-                direct=False,
-                filtered_relation=filtered_relation,
-            )]
+            return [
+                PathInfo(
+                    from_opts=self.model._meta,
+                    to_opts=opts,
+                    target_fields=(target,),
+                    join_field=self.remote_field,
+                    m2m=True,
+                    direct=False,
+                    filtered_relation=filtered_relation,
+                )
+            ]
 
     def get_reverse_path_info(self, filtered_relation=None):
         opts = self.model._meta
         from_opts = self.remote_field.model._meta
-        return [PathInfo(
-            from_opts=from_opts,
-            to_opts=opts,
-            target_fields=(opts.pk,),
-            join_field=self,
-            m2m=not self.unique,
-            direct=False,
-            filtered_relation=filtered_relation,
-        )]
+        return [
+            PathInfo(
+                from_opts=from_opts,
+                to_opts=opts,
+                target_fields=(opts.pk,),
+                join_field=self,
+                m2m=not self.unique,
+                direct=False,
+                filtered_relation=filtered_relation,
+            )
+        ]
 
     def value_to_string(self, obj):
         qs = getattr(obj, self.name).all()
         return str([instance.pk for instance in qs])
 
     def contribute_to_class(self, cls, name, **kwargs):
-        kwargs['private_only'] = True
+        kwargs["private_only"] = True
         super().contribute_to_class(cls, name, **kwargs)
         self.model = cls
         # Disable the reverse relation for fields inherited by subclasses of a
         # model in multi-table inheritance. The reverse relation points to the
         # field of the base model.
         if self.mti_inherited:
-            self.remote_field.related_name = '+'
+            self.remote_field.related_name = "+"
             self.remote_field.related_query_name = None
         setattr(cls, self.name, ReverseGenericManyToOneDescriptor(self.remote_field))
 
@@ -458,26 +441,29 @@ class GenericRelation(ForeignObject):
         """
         Return the content type associated with this field's model.
         """
-        return ContentType.objects.get_for_model(self.model,
-                                                 for_concrete_model=self.for_concrete_model)
+        return ContentType.objects.get_for_model(self.model, for_concrete_model=self.for_concrete_model)
 
     def get_extra_restriction(self, where_class, alias, remote_alias):
         field = self.remote_field.model._meta.get_field(self.content_type_field_name)
         contenttype_pk = self.get_content_type().pk
         cond = where_class()
-        lookup = field.get_lookup('exact')(field.get_col(remote_alias), contenttype_pk)
-        cond.add(lookup, 'AND')
+        lookup = field.get_lookup("exact")(field.get_col(remote_alias), contenttype_pk)
+        cond.add(lookup, "AND")
         return cond
 
     def bulk_related_objects(self, objs, using=DEFAULT_DB_ALIAS):
         """
         Return all objects related to ``objs`` via this ``GenericRelation``.
         """
-        return self.remote_field.model._base_manager.db_manager(using).filter(**{
-            "%s__pk" % self.content_type_field_name: ContentType.objects.db_manager(using).get_for_model(
-                self.model, for_concrete_model=self.for_concrete_model).pk,
-            "%s__in" % self.object_id_field_name: [obj.pk for obj in objs]
-        })
+        return self.remote_field.model._base_manager.db_manager(using).filter(
+            **{
+                "%s__pk"
+                % self.content_type_field_name: ContentType.objects.db_manager(using)
+                .get_for_model(self.model, for_concrete_model=self.for_concrete_model)
+                .pk,
+                "%s__in" % self.object_id_field_name: [obj.pk for obj in objs],
+            }
+        )
 
 
 class ReverseGenericManyToOneDescriptor(ReverseManyToOneDescriptor):
@@ -495,10 +481,7 @@ class ReverseGenericManyToOneDescriptor(ReverseManyToOneDescriptor):
 
     @cached_property
     def related_manager_cls(self):
-        return create_generic_related_manager(
-            self.rel.model._default_manager.__class__,
-            self.rel,
-        )
+        return create_generic_related_manager(self.rel.model._default_manager.__class__, self.rel)
 
 
 def create_generic_related_manager(superclass, rel):
@@ -517,7 +500,8 @@ def create_generic_related_manager(superclass, rel):
             self.model = rel.model
 
             content_type = ContentType.objects.db_manager(instance._state.db).get_for_model(
-                instance, for_concrete_model=rel.field.for_concrete_model)
+                instance, for_concrete_model=rel.field.for_concrete_model
+            )
             self.content_type = content_type
             self.content_type_field_name = rel.field.content_type_field_name
             self.object_id_field_name = rel.field.object_id_field_name
@@ -525,7 +509,7 @@ def create_generic_related_manager(superclass, rel):
             self.pk_val = instance.pk
 
             self.core_filters = {
-                '%s__pk' % self.content_type_field_name: content_type.id,
+                "%s__pk" % self.content_type_field_name: content_type.id,
                 self.object_id_field_name: self.pk_val,
             }
 
@@ -533,6 +517,7 @@ def create_generic_related_manager(superclass, rel):
             manager = getattr(self.model, manager)
             manager_class = create_generic_related_manager(manager.__class__, rel)
             return manager_class(instance=self.instance)
+
         do_not_call_in_templates = True
 
         def __str__(self):
@@ -566,8 +551,8 @@ def create_generic_related_manager(superclass, rel):
             queryset = queryset.using(queryset._db or self._db)
 
             query = {
-                '%s__pk' % self.content_type_field_name: self.content_type.id,
-                '%s__in' % self.object_id_field_name: {obj.pk for obj in instances}
+                "%s__pk" % self.content_type_field_name: self.content_type.id,
+                "%s__in" % self.object_id_field_name: {obj.pk for obj in instances},
             }
 
             # We (possibly) need to convert object IDs to the type of the
@@ -588,9 +573,7 @@ def create_generic_related_manager(superclass, rel):
 
             def check_and_update_obj(obj):
                 if not isinstance(obj, self.model):
-                    raise TypeError("'%s' instance expected, got %r" % (
-                        self.model._meta.object_name, obj
-                    ))
+                    raise TypeError("'%s' instance expected, got %r" % (self.model._meta.object_name, obj))
                 setattr(obj, self.content_type_field_name, self.content_type)
                 setattr(obj, self.object_id_field_name, self.pk_val)
 
@@ -598,32 +581,31 @@ def create_generic_related_manager(superclass, rel):
                 pks = []
                 for obj in objs:
                     if obj._state.adding or obj._state.db != db:
-                        raise ValueError(
-                            "%r instance isn't saved. Use bulk=False or save "
-                            "the object first." % obj
-                        )
+                        raise ValueError("%r instance isn't saved. Use bulk=False or save " "the object first." % obj)
                     check_and_update_obj(obj)
                     pks.append(obj.pk)
 
-                self.model._base_manager.using(db).filter(pk__in=pks).update(**{
-                    self.content_type_field_name: self.content_type,
-                    self.object_id_field_name: self.pk_val,
-                })
+                self.model._base_manager.using(db).filter(pk__in=pks).update(
+                    **{self.content_type_field_name: self.content_type, self.object_id_field_name: self.pk_val}
+                )
             else:
                 with transaction.atomic(using=db, savepoint=False):
                     for obj in objs:
                         check_and_update_obj(obj)
                         obj.save()
+
         add.alters_data = True
 
         def remove(self, *objs, bulk=True):
             if not objs:
                 return
             self._clear(self.filter(pk__in=[o.pk for o in objs]), bulk)
+
         remove.alters_data = True
 
         def clear(self, *, bulk=True):
             self._clear(self, bulk)
+
         clear.alters_data = True
 
         def _clear(self, queryset, bulk):
@@ -638,6 +620,7 @@ def create_generic_related_manager(superclass, rel):
                 with transaction.atomic(using=db, savepoint=False):
                     for obj in queryset:
                         obj.delete()
+
         _clear.alters_data = True
 
         def set(self, objs, *, bulk=True, clear=False):
@@ -661,6 +644,7 @@ def create_generic_related_manager(superclass, rel):
 
                     self.remove(*old_objs)
                     self.add(*new_objs, bulk=bulk)
+
         set.alters_data = True
 
         def create(self, **kwargs):
@@ -669,6 +653,7 @@ def create_generic_related_manager(superclass, rel):
             kwargs[self.object_id_field_name] = self.pk_val
             db = router.db_for_write(self.model, instance=self.instance)
             return super().using(db).create(**kwargs)
+
         create.alters_data = True
 
         def get_or_create(self, **kwargs):
@@ -676,6 +661,7 @@ def create_generic_related_manager(superclass, rel):
             kwargs[self.object_id_field_name] = self.pk_val
             db = router.db_for_write(self.model, instance=self.instance)
             return super().using(db).get_or_create(**kwargs)
+
         get_or_create.alters_data = True
 
         def update_or_create(self, **kwargs):
@@ -683,6 +669,7 @@ def create_generic_related_manager(superclass, rel):
             kwargs[self.object_id_field_name] = self.pk_val
             db = router.db_for_write(self.model, instance=self.instance)
             return super().using(db).update_or_create(**kwargs)
+
         update_or_create.alters_data = True
 
     return GenericRelatedObjectManager

@@ -8,10 +8,7 @@ from django.test import TestCase, skipUnlessDBFeature
 from django.test.utils import isolate_apps
 from django.utils.timezone import get_fixed_timezone
 
-from .models import (
-    Article, Department, Event, Model1, Model2, Model3, NonAutoPK, Party,
-    Worker,
-)
+from .models import Article, Department, Event, Model1, Model2, Model3, NonAutoPK, Party, Worker
 
 
 class ModelTests(TestCase):
@@ -47,23 +44,19 @@ class ModelTests(TestCase):
     def test_empty_choice(self):
         # NOTE: Part of the regression test here is merely parsing the model
         # declaration. The verbose_name, in particular, did not always work.
-        a = Article.objects.create(
-            headline="Look at me!", pub_date=datetime.datetime.now()
-        )
+        a = Article.objects.create(headline="Look at me!", pub_date=datetime.datetime.now())
         # An empty choice field should return None for the display name.
         self.assertIs(a.get_status_display(), None)
 
         # Empty strings should be returned as string
         a = Article.objects.get(pk=a.pk)
-        self.assertEqual(a.misc_data, '')
+        self.assertEqual(a.misc_data, "")
 
     def test_long_textfield(self):
         # TextFields can hold more than 4000 characters (this was broken in
         # Oracle).
         a = Article.objects.create(
-            headline="Really, really big",
-            pub_date=datetime.datetime.now(),
-            article_text="ABCDE" * 1000
+            headline="Really, really big", pub_date=datetime.datetime.now(), article_text="ABCDE" * 1000
         )
         a = Article.objects.get(pk=a.pk)
         self.assertEqual(len(a.article_text), 5000)
@@ -72,9 +65,7 @@ class ModelTests(TestCase):
         # TextFields can hold more than 4000 bytes also when they are
         # less than 4000 characters
         a = Article.objects.create(
-            headline="Really, really big",
-            pub_date=datetime.datetime.now(),
-            article_text='\u05d0\u05d1\u05d2' * 1000
+            headline="Really, really big", pub_date=datetime.datetime.now(), article_text="\u05d0\u05d1\u05d2" * 1000
         )
         a = Article.objects.get(pk=a.pk)
         self.assertEqual(len(a.article_text), 3000)
@@ -85,66 +76,37 @@ class ModelTests(TestCase):
         Party.objects.create(when=datetime.datetime(1998, 12, 31))
         Party.objects.create(when=datetime.datetime(1999, 1, 1))
         Party.objects.create(when=datetime.datetime(1, 3, 3))
+        self.assertQuerysetEqual(Party.objects.filter(when__month=2), [])
+        self.assertQuerysetEqual(Party.objects.filter(when__month=1), [datetime.date(1999, 1, 1)], attrgetter("when"))
         self.assertQuerysetEqual(
-            Party.objects.filter(when__month=2), []
-        )
-        self.assertQuerysetEqual(
-            Party.objects.filter(when__month=1), [
-                datetime.date(1999, 1, 1)
-            ],
-            attrgetter("when")
-        )
-        self.assertQuerysetEqual(
-            Party.objects.filter(when__month=12), [
-                datetime.date(1999, 12, 31),
-                datetime.date(1998, 12, 31),
-            ],
+            Party.objects.filter(when__month=12),
+            [datetime.date(1999, 12, 31), datetime.date(1998, 12, 31)],
             attrgetter("when"),
-            ordered=False
+            ordered=False,
         )
         self.assertQuerysetEqual(
-            Party.objects.filter(when__year=1998), [
-                datetime.date(1998, 12, 31),
-            ],
-            attrgetter("when")
+            Party.objects.filter(when__year=1998), [datetime.date(1998, 12, 31)], attrgetter("when")
         )
         # Regression test for #8510
         self.assertQuerysetEqual(
-            Party.objects.filter(when__day="31"), [
-                datetime.date(1999, 12, 31),
-                datetime.date(1998, 12, 31),
-            ],
+            Party.objects.filter(when__day="31"),
+            [datetime.date(1999, 12, 31), datetime.date(1998, 12, 31)],
             attrgetter("when"),
-            ordered=False
+            ordered=False,
         )
         self.assertQuerysetEqual(
-            Party.objects.filter(when__month="12"), [
-                datetime.date(1999, 12, 31),
-                datetime.date(1998, 12, 31),
-            ],
+            Party.objects.filter(when__month="12"),
+            [datetime.date(1999, 12, 31), datetime.date(1998, 12, 31)],
             attrgetter("when"),
-            ordered=False
+            ordered=False,
         )
         self.assertQuerysetEqual(
-            Party.objects.filter(when__year="1998"), [
-                datetime.date(1998, 12, 31),
-            ],
-            attrgetter("when")
+            Party.objects.filter(when__year="1998"), [datetime.date(1998, 12, 31)], attrgetter("when")
         )
 
         # Regression test for #18969
-        self.assertQuerysetEqual(
-            Party.objects.filter(when__year=1), [
-                datetime.date(1, 3, 3),
-            ],
-            attrgetter("when")
-        )
-        self.assertQuerysetEqual(
-            Party.objects.filter(when__year='1'), [
-                datetime.date(1, 3, 3),
-            ],
-            attrgetter("when")
-        )
+        self.assertQuerysetEqual(Party.objects.filter(when__year=1), [datetime.date(1, 3, 3)], attrgetter("when"))
+        self.assertQuerysetEqual(Party.objects.filter(when__year="1"), [datetime.date(1, 3, 3)], attrgetter("when"))
 
     def test_date_filter_null(self):
         # Date filtering was failing with NULL date values in SQLite
@@ -153,12 +115,7 @@ class ModelTests(TestCase):
         Party.objects.create()
         p = Party.objects.filter(when__month=1)[0]
         self.assertEqual(p.when, datetime.date(1999, 1, 1))
-        self.assertQuerysetEqual(
-            Party.objects.filter(pk=p.pk).dates("when", "month"), [
-                1
-            ],
-            attrgetter("month")
-        )
+        self.assertQuerysetEqual(Party.objects.filter(pk=p.pk).dates("when", "month"), [1], attrgetter("month"))
 
     def test_get_next_prev_by_field(self):
         # get_next_by_FIELD() and get_previous_by_FIELD() don't crash when
@@ -167,15 +124,11 @@ class ModelTests(TestCase):
         Event.objects.create(when=datetime.datetime(2000, 1, 1, 6, 1, 1))
         Event.objects.create(when=datetime.datetime(2000, 1, 1, 13, 1, 1))
         e = Event.objects.create(when=datetime.datetime(2000, 1, 1, 12, 0, 20, 24))
-        self.assertEqual(
-            e.get_next_by_when().when, datetime.datetime(2000, 1, 1, 13, 1, 1)
-        )
-        self.assertEqual(
-            e.get_previous_by_when().when, datetime.datetime(2000, 1, 1, 6, 1, 1)
-        )
+        self.assertEqual(e.get_next_by_when().when, datetime.datetime(2000, 1, 1, 13, 1, 1))
+        self.assertEqual(e.get_previous_by_when().when, datetime.datetime(2000, 1, 1, 6, 1, 1))
 
     def test_get_next_prev_by_field_unsaved(self):
-        msg = 'get_next/get_previous cannot be used on unsaved objects.'
+        msg = "get_next/get_previous cannot be used on unsaved objects."
         with self.assertRaisesMessage(ValueError, msg):
             Event().get_next_by_when()
         with self.assertRaisesMessage(ValueError, msg):
@@ -195,15 +148,10 @@ class ModelTests(TestCase):
         # crashing. It's not rocket science.
         dt1 = datetime.datetime(2008, 8, 31, 16, 20, tzinfo=get_fixed_timezone(600))
         dt2 = datetime.datetime(2008, 8, 31, 17, 20, tzinfo=get_fixed_timezone(600))
-        obj = Article.objects.create(
-            headline="A headline", pub_date=dt1, article_text="foo"
-        )
+        obj = Article.objects.create(headline="A headline", pub_date=dt1, article_text="foo")
         obj.pub_date = dt2
         obj.save()
-        self.assertEqual(
-            Article.objects.filter(headline="A headline").update(pub_date=dt1),
-            1
-        )
+        self.assertEqual(Article.objects.filter(headline="A headline").update(pub_date=dt1), 1)
 
     def test_chained_fks(self):
         """
@@ -218,16 +166,17 @@ class ModelTests(TestCase):
         m3 = Model3.objects.get(model2=1000)
         m3.model2
 
-    @isolate_apps('model_regress')
+    @isolate_apps("model_regress")
     def test_metaclass_can_access_attribute_dict(self):
         """
         Model metaclasses have access to the class attribute dict in
         __init__() (#30254).
         """
+
         class HorseBase(models.base.ModelBase):
             def __init__(cls, name, bases, attrs):
                 super(HorseBase, cls).__init__(name, bases, attrs)
-                cls.horns = (1 if 'magic' in attrs else 0)
+                cls.horns = 1 if "magic" in attrs else 0
 
         class Horse(models.Model, metaclass=HorseBase):
             name = models.CharField(max_length=255)
@@ -253,6 +202,6 @@ class EvaluateMethodTest(TestCase):
         """
         You can filter by objects that have an 'evaluate' attr
         """
-        dept = Department.objects.create(pk=1, name='abc')
-        dept.evaluate = 'abc'
+        dept = Department.objects.create(pk=1, name="abc")
+        dept.evaluate = "abc"
         Worker.objects.filter(department=dept)

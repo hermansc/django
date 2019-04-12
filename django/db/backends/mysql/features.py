@@ -20,7 +20,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_duration_field = False
     can_introspect_small_integer_field = True
     can_introspect_positive_integer_field = True
-    introspected_boolean_field_type = 'IntegerField'
+    introspected_boolean_field_type = "IntegerField"
     supports_index_column_ordering = False
     supports_timezones = False
     requires_explicit_null_ordering_when_grouping = True
@@ -52,7 +52,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     """
     db_functions_convert_bytes_to_str = True
     # Alias MySQL's TRADITIONAL to TEXT for consistency with other backends.
-    supported_explain_formats = {'JSON', 'TEXT', 'TRADITIONAL'}
+    supported_explain_formats = {"JSON", "TEXT", "TRADITIONAL"}
     # Neither MySQL nor MariaDB support partial indexes.
     supports_partial_indexes = False
 
@@ -67,7 +67,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     @cached_property
     def can_introspect_foreign_keys(self):
         "Confirm support for introspected foreign keys"
-        return self._mysql_storage_engine != 'MyISAM'
+        return self._mysql_storage_engine != "MyISAM"
 
     @cached_property
     def has_zoneinfo_database(self):
@@ -79,7 +79,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     @cached_property
     def is_sql_auto_is_null_enabled(self):
         with self.connection.cursor() as cursor:
-            cursor.execute('SELECT @@SQL_AUTO_IS_NULL')
+            cursor.execute("SELECT @@SQL_AUTO_IS_NULL")
             result = cursor.fetchone()
             return result and result[0] == 1
 
@@ -93,7 +93,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     def has_select_for_update_skip_locked(self):
         return not self.connection.mysql_is_mariadb and self.connection.mysql_version >= (8, 0, 1)
 
-    has_select_for_update_nowait = property(operator.attrgetter('has_select_for_update_skip_locked'))
+    has_select_for_update_nowait = property(operator.attrgetter("has_select_for_update_skip_locked"))
 
     @cached_property
     def needs_explain_extended(self):
@@ -105,12 +105,12 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         """
         All storage engines except MyISAM support transactions.
         """
-        return self._mysql_storage_engine != 'MyISAM'
+        return self._mysql_storage_engine != "MyISAM"
 
     @cached_property
     def ignores_table_name_case(self):
         with self.connection.cursor() as cursor:
-            cursor.execute('SELECT @@LOWER_CASE_TABLE_NAMES')
+            cursor.execute("SELECT @@LOWER_CASE_TABLE_NAMES")
             result = cursor.fetchone()
             return result and result[0] != 0
 

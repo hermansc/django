@@ -17,8 +17,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     sql_delete_unique = "ALTER TABLE %(table)s DROP INDEX %(name)s"
     sql_create_column_inline_fk = (
-        ', ADD CONSTRAINT %(name)s FOREIGN KEY (%(column)s) '
-        'REFERENCES %(to_table)s(%(to_column)s)'
+        ", ADD CONSTRAINT %(name)s FOREIGN KEY (%(column)s) " "REFERENCES %(to_table)s(%(to_column)s)"
     )
     sql_delete_fk = "ALTER TABLE %(table)s DROP FOREIGN KEY %(name)s"
 
@@ -27,7 +26,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_create_pk = "ALTER TABLE %(table)s ADD CONSTRAINT %(name)s PRIMARY KEY (%(columns)s)"
     sql_delete_pk = "ALTER TABLE %(table)s DROP PRIMARY KEY"
 
-    sql_create_index = 'CREATE INDEX %(name)s ON %(table)s (%(columns)s)%(extra)s'
+    sql_create_index = "CREATE INDEX %(name)s ON %(table)s (%(columns)s)%(extra)s"
 
     def quote_value(self, value):
         self.connection.ensure_connection()
@@ -50,23 +49,19 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # field.default may be unhashable, so a set isn't used for "in" check.
         if self.skip_default(field) and field.default not in (None, NOT_PROVIDED):
             effective_default = self.effective_default(field)
-            self.execute('UPDATE %(table)s SET %(column)s = %%s' % {
-                'table': self.quote_name(model._meta.db_table),
-                'column': self.quote_name(field.column),
-            }, [effective_default])
+            self.execute(
+                "UPDATE %(table)s SET %(column)s = %%s"
+                % {"table": self.quote_name(model._meta.db_table), "column": self.quote_name(field.column)},
+                [effective_default],
+            )
 
     def _field_should_be_indexed(self, model, field):
         create_index = super()._field_should_be_indexed(model, field)
-        storage = self.connection.introspection.get_storage_engine(
-            self.connection.cursor(), model._meta.db_table
-        )
+        storage = self.connection.introspection.get_storage_engine(self.connection.cursor(), model._meta.db_table)
         # No need to create an index for ForeignKey fields except if
         # db_constraint=False because the index from that constraint won't be
         # created.
-        if (storage == "InnoDB" and
-                create_index and
-                field.get_internal_type() == 'ForeignKey' and
-                field.db_constraint):
+        if storage == "InnoDB" and create_index and field.get_internal_type() == "ForeignKey" and field.db_constraint:
             return False
         return not self._is_limited_data_type(field) and create_index
 
@@ -80,7 +75,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         recreate a FK index.
         """
         first_field = model._meta.get_field(fields[0])
-        if first_field.get_internal_type() == 'ForeignKey':
+        if first_field.get_internal_type() == "ForeignKey":
             constraint_names = self._constraint_names(model, [first_field.column], index=True)
             if not constraint_names:
                 self.execute(self._create_index_sql(model, [first_field], suffix=""))

@@ -13,8 +13,10 @@ from django.core.management import call_command
 from django.db import connections
 from django.test import SimpleTestCase, TestCase
 from django.test.utils import (
-    setup_databases as _setup_databases, setup_test_environment,
-    teardown_databases as _teardown_databases, teardown_test_environment,
+    setup_databases as _setup_databases,
+    setup_test_environment,
+    teardown_databases as _teardown_databases,
+    teardown_test_environment,
 )
 from django.utils.datastructures import OrderedSet
 
@@ -26,7 +28,7 @@ except ImportError:
 
 class DebugSQLTextTestResult(unittest.TextTestResult):
     def __init__(self, stream, descriptions, verbosity):
-        self.logger = logging.getLogger('django.db.backends')
+        self.logger = logging.getLogger("django.db.backends")
         self.logger.setLevel(logging.DEBUG)
         super().__init__(stream, descriptions, verbosity)
 
@@ -104,7 +106,8 @@ class RemoteTestResult:
         pickle.loads(pickle.dumps(obj))
 
     def _print_unpicklable_subtest(self, test, subtest, pickle_exc):
-        print("""
+        print(
+            """
 Subtest failed:
 
     test: {}
@@ -117,7 +120,10 @@ test runner cannot handle it cleanly. Here is the pickling error:
 
 You should re-run this test with --parallel=1 to reproduce the failure
 with a cleaner failure message.
-""".format(test, subtest, pickle_exc))
+""".format(
+                test, subtest, pickle_exc
+            )
+        )
 
     def check_picklable(self, test, err):
         # Ensure that sys.exc_info() tuples are picklable. This displays a
@@ -130,11 +136,12 @@ with a cleaner failure message.
             self._confirm_picklable(err)
         except Exception as exc:
             original_exc_txt = repr(err[1])
-            original_exc_txt = textwrap.fill(original_exc_txt, 75, initial_indent='    ', subsequent_indent='    ')
+            original_exc_txt = textwrap.fill(original_exc_txt, 75, initial_indent="    ", subsequent_indent="    ")
             pickle_exc_txt = repr(exc)
-            pickle_exc_txt = textwrap.fill(pickle_exc_txt, 75, initial_indent='    ', subsequent_indent='    ')
+            pickle_exc_txt = textwrap.fill(pickle_exc_txt, 75, initial_indent="    ", subsequent_indent="    ")
             if tblib is None:
-                print("""
+                print(
+                    """
 
 {} failed:
 
@@ -146,9 +153,13 @@ parallel test runner to handle this exception cleanly.
 In order to see the traceback, you should install tblib:
 
     pip install tblib
-""".format(test, original_exc_txt))
+""".format(
+                        test, original_exc_txt
+                    )
+                )
             else:
-                print("""
+                print(
+                    """
 
 {} failed:
 
@@ -163,7 +174,10 @@ Here's the error encountered while trying to pickle the exception:
 
 You should re-run this test with the --parallel=1 option to reproduce the
 failure and get a correct traceback.
-""".format(test, original_exc_txt, pickle_exc_txt))
+""".format(
+                        test, original_exc_txt, pickle_exc_txt
+                    )
+                )
             raise
 
     def check_subtest_picklable(self, test, subtest):
@@ -181,26 +195,26 @@ failure and get a correct traceback.
         self.shouldStop = True
 
     def startTestRun(self):
-        self.events.append(('startTestRun',))
+        self.events.append(("startTestRun",))
 
     def stopTestRun(self):
-        self.events.append(('stopTestRun',))
+        self.events.append(("stopTestRun",))
 
     def startTest(self, test):
         self.testsRun += 1
-        self.events.append(('startTest', self.test_index))
+        self.events.append(("startTest", self.test_index))
 
     def stopTest(self, test):
-        self.events.append(('stopTest', self.test_index))
+        self.events.append(("stopTest", self.test_index))
 
     def addError(self, test, err):
         self.check_picklable(test, err)
-        self.events.append(('addError', self.test_index, err))
+        self.events.append(("addError", self.test_index, err))
         self.stop_if_failfast()
 
     def addFailure(self, test, err):
         self.check_picklable(test, err)
-        self.events.append(('addFailure', self.test_index, err))
+        self.events.append(("addFailure", self.test_index, err))
         self.stop_if_failfast()
 
     def addSubTest(self, test, subtest, err):
@@ -211,14 +225,14 @@ failure and get a correct traceback.
             # check_picklable() performs the tblib check.
             self.check_picklable(test, err)
             self.check_subtest_picklable(test, subtest)
-            self.events.append(('addSubTest', self.test_index, subtest, err))
+            self.events.append(("addSubTest", self.test_index, subtest, err))
             self.stop_if_failfast()
 
     def addSuccess(self, test):
-        self.events.append(('addSuccess', self.test_index))
+        self.events.append(("addSuccess", self.test_index))
 
     def addSkip(self, test, reason):
-        self.events.append(('addSkip', self.test_index, reason))
+        self.events.append(("addSkip", self.test_index, reason))
 
     def addExpectedFailure(self, test, err):
         # If tblib isn't installed, pickling the traceback will always fail.
@@ -228,10 +242,10 @@ failure and get a correct traceback.
         if tblib is None:
             err = err[0], err[1], None
         self.check_picklable(test, err)
-        self.events.append(('addExpectedFailure', self.test_index, err))
+        self.events.append(("addExpectedFailure", self.test_index, err))
 
     def addUnexpectedSuccess(self, test):
-        self.events.append(('addUnexpectedSuccess', self.test_index))
+        self.events.append(("addUnexpectedSuccess", self.test_index))
         self.stop_if_failfast()
 
 
@@ -261,10 +275,10 @@ def default_test_processes():
     """Default number of test processes when using the --parallel option."""
     # The current implementation of the parallel test runner requires
     # multiprocessing to start subprocesses with fork().
-    if multiprocessing.get_start_method() != 'fork':
+    if multiprocessing.get_start_method() != "fork":
         return 1
     try:
-        return int(os.environ['DJANGO_TEST_PROCESSES'])
+        return int(os.environ["DJANGO_TEST_PROCESSES"])
     except KeyError:
         return multiprocessing.cpu_count()
 
@@ -354,14 +368,9 @@ class ParallelTestSuite(unittest.TestSuite):
         """
         counter = multiprocessing.Value(ctypes.c_int, 0)
         pool = multiprocessing.Pool(
-            processes=self.processes,
-            initializer=self.init_worker.__func__,
-            initargs=[counter],
+            processes=self.processes, initializer=self.init_worker.__func__, initargs=[counter]
         )
-        args = [
-            (self.runner_class, index, subsuite, self.failfast)
-            for index, subsuite in enumerate(self.subsuites)
-        ]
+        args = [(self.runner_class, index, subsuite, self.failfast) for index, subsuite in enumerate(self.subsuites)]
         test_results = pool.imap_unordered(self.run_subsuite.__func__, args)
 
         while True:
@@ -404,10 +413,22 @@ class DiscoverRunner:
     test_loader = unittest.defaultTestLoader
     reorder_by = (TestCase, SimpleTestCase)
 
-    def __init__(self, pattern=None, top_level=None, verbosity=1,
-                 interactive=True, failfast=False, keepdb=False,
-                 reverse=False, debug_mode=False, debug_sql=False, parallel=0,
-                 tags=None, exclude_tags=None, **kwargs):
+    def __init__(
+        self,
+        pattern=None,
+        top_level=None,
+        verbosity=1,
+        interactive=True,
+        failfast=False,
+        keepdb=False,
+        reverse=False,
+        debug_mode=False,
+        debug_sql=False,
+        parallel=0,
+        tags=None,
+        exclude_tags=None,
+        **kwargs,
+    ):
 
         self.pattern = pattern
         self.top_level = top_level
@@ -425,41 +446,35 @@ class DiscoverRunner:
     @classmethod
     def add_arguments(cls, parser):
         parser.add_argument(
-            '-t', '--top-level-directory', dest='top_level',
-            help='Top level of project for unittest discovery.',
+            "-t", "--top-level-directory", dest="top_level", help="Top level of project for unittest discovery."
         )
         parser.add_argument(
-            '-p', '--pattern', default="test*.py",
-            help='The test matching pattern. Defaults to test*.py.',
+            "-p", "--pattern", default="test*.py", help="The test matching pattern. Defaults to test*.py."
+        )
+        parser.add_argument("-k", "--keepdb", action="store_true", help="Preserves the test DB between runs.")
+        parser.add_argument("-r", "--reverse", action="store_true", help="Reverses test cases order.")
+        parser.add_argument("--debug-mode", action="store_true", help="Sets settings.DEBUG to True.")
+        parser.add_argument("-d", "--debug-sql", action="store_true", help="Prints logged SQL queries on failure.")
+        parser.add_argument(
+            "--parallel",
+            nargs="?",
+            default=1,
+            type=int,
+            const=default_test_processes(),
+            metavar="N",
+            help="Run tests using up to N parallel processes.",
         )
         parser.add_argument(
-            '-k', '--keepdb', action='store_true',
-            help='Preserves the test DB between runs.'
+            "--tag",
+            action="append",
+            dest="tags",
+            help="Run only tests with the specified tag. Can be used multiple times.",
         )
         parser.add_argument(
-            '-r', '--reverse', action='store_true',
-            help='Reverses test cases order.',
-        )
-        parser.add_argument(
-            '--debug-mode', action='store_true',
-            help='Sets settings.DEBUG to True.',
-        )
-        parser.add_argument(
-            '-d', '--debug-sql', action='store_true',
-            help='Prints logged SQL queries on failure.',
-        )
-        parser.add_argument(
-            '--parallel', nargs='?', default=1, type=int,
-            const=default_test_processes(), metavar='N',
-            help='Run tests using up to N parallel processes.',
-        )
-        parser.add_argument(
-            '--tag', action='append', dest='tags',
-            help='Run only tests with the specified tag. Can be used multiple times.',
-        )
-        parser.add_argument(
-            '--exclude-tag', action='append', dest='exclude_tags',
-            help='Do not run tests with the specified tag. Can be used multiple times.',
+            "--exclude-tag",
+            action="append",
+            dest="exclude_tags",
+            help="Do not run tests with the specified tag. Can be used multiple times.",
         )
 
     def setup_test_environment(self, **kwargs):
@@ -468,14 +483,14 @@ class DiscoverRunner:
 
     def build_suite(self, test_labels=None, extra_tests=None, **kwargs):
         suite = self.test_suite()
-        test_labels = test_labels or ['.']
+        test_labels = test_labels or ["."]
         extra_tests = extra_tests or []
 
         discover_kwargs = {}
         if self.pattern is not None:
-            discover_kwargs['pattern'] = self.pattern
+            discover_kwargs["pattern"] = self.pattern
         if self.top_level is not None:
-            discover_kwargs['top_level_dir'] = self.top_level
+            discover_kwargs["top_level_dir"] = self.top_level
 
         for label in test_labels:
             kwargs = discover_kwargs.copy()
@@ -501,7 +516,7 @@ class DiscoverRunner:
 
                 top_level = label_as_path
                 while True:
-                    init_py = os.path.join(top_level, '__init__.py')
+                    init_py = os.path.join(top_level, "__init__.py")
                     if os.path.exists(init_py):
                         try_next = os.path.dirname(top_level)
                         if try_next == top_level:
@@ -510,7 +525,7 @@ class DiscoverRunner:
                         top_level = try_next
                         continue
                     break
-                kwargs['top_level_dir'] = top_level
+                kwargs["top_level_dir"] = top_level
 
             if not (tests and tests.countTestCases()) and is_discoverable(label):
                 # Try discovery if path is a package or directory
@@ -528,9 +543,9 @@ class DiscoverRunner:
         if self.tags or self.exclude_tags:
             if self.verbosity >= 2:
                 if self.tags:
-                    print('Including test tag(s): %s.' % ', '.join(sorted(self.tags)))
+                    print("Including test tag(s): %s." % ", ".join(sorted(self.tags)))
                 if self.exclude_tags:
-                    print('Excluding test tag(s): %s.' % ', '.join(sorted(self.exclude_tags)))
+                    print("Excluding test tag(s): %s." % ", ".join(sorted(self.exclude_tags)))
             suite = filter_tests_by_tags(suite, self.tags, self.exclude_tags)
         suite = reorder_suite(suite, self.reorder_by, self.reverse)
 
@@ -549,25 +564,18 @@ class DiscoverRunner:
         return suite
 
     def setup_databases(self, **kwargs):
-        return _setup_databases(
-            self.verbosity, self.interactive, self.keepdb, self.debug_sql,
-            self.parallel, **kwargs
-        )
+        return _setup_databases(self.verbosity, self.interactive, self.keepdb, self.debug_sql, self.parallel, **kwargs)
 
     def get_resultclass(self):
         return DebugSQLTextTestResult if self.debug_sql else None
 
     def get_test_runner_kwargs(self):
-        return {
-            'failfast': self.failfast,
-            'resultclass': self.get_resultclass(),
-            'verbosity': self.verbosity,
-        }
+        return {"failfast": self.failfast, "resultclass": self.get_resultclass(), "verbosity": self.verbosity}
 
     def run_checks(self):
         # Checks are run after database creation since some checks require
         # database access.
-        call_command('check', verbosity=self.verbosity)
+        call_command("check", verbosity=self.verbosity)
 
     def run_suite(self, suite, **kwargs):
         kwargs = self.get_test_runner_kwargs()
@@ -576,12 +584,7 @@ class DiscoverRunner:
 
     def teardown_databases(self, old_config, **kwargs):
         """Destroy all the non-mirror databases."""
-        _teardown_databases(
-            old_config,
-            verbosity=self.verbosity,
-            parallel=self.parallel,
-            keepdb=self.keepdb,
-        )
+        _teardown_databases(old_config, verbosity=self.verbosity, parallel=self.parallel, keepdb=self.keepdb)
 
     def teardown_test_environment(self, **kwargs):
         unittest.removeHandler()
@@ -594,8 +597,8 @@ class DiscoverRunner:
         databases = set()
         for test in suite:
             if isinstance(test, unittest.TestCase):
-                test_databases = getattr(test, 'databases', None)
-                if test_databases == '__all__':
+                test_databases = getattr(test, "databases", None)
+                if test_databases == "__all__":
                     return set(connections)
                 if test_databases:
                     databases.update(test_databases)
@@ -608,7 +611,7 @@ class DiscoverRunner:
         if self.verbosity >= 2:
             unused_databases = [alias for alias in connections if alias not in databases]
             if unused_databases:
-                print('Skipping setup of unused database(s): %s.' % ', '.join(sorted(unused_databases)))
+                print("Skipping setup of unused database(s): %s." % ", ".join(sorted(unused_databases)))
         return databases
 
     def run_tests(self, test_labels, extra_tests=None, **kwargs):
@@ -657,7 +660,7 @@ def is_discoverable(label):
     except (ImportError, TypeError):
         pass
     else:
-        return hasattr(mod, '__path__')
+        return hasattr(mod, "__path__")
 
     return os.path.isdir(os.path.abspath(label))
 
@@ -731,10 +734,10 @@ def filter_tests_by_tags(suite, tags, exclude_tags):
         if isinstance(test, suite_class):
             filtered_suite.addTests(filter_tests_by_tags(test, tags, exclude_tags))
         else:
-            test_tags = set(getattr(test, 'tags', set()))
-            test_fn_name = getattr(test, '_testMethodName', str(test))
+            test_tags = set(getattr(test, "tags", set()))
+            test_fn_name = getattr(test, "_testMethodName", str(test))
             test_fn = getattr(test, test_fn_name, test)
-            test_fn_tags = set(getattr(test_fn, 'tags', set()))
+            test_fn_tags = set(getattr(test_fn, "tags", set()))
             all_tags = test_tags.union(test_fn_tags)
             matched_tags = all_tags.intersection(tags)
             if (matched_tags or not tags) and not all_tags.intersection(exclude_tags):

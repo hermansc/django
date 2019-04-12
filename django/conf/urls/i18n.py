@@ -12,12 +12,7 @@ def i18n_patterns(*urls, prefix_default_language=True):
     """
     if not settings.USE_I18N:
         return list(urls)
-    return [
-        URLResolver(
-            LocalePrefixPattern(prefix_default_language=prefix_default_language),
-            list(urls),
-        )
-    ]
+    return [URLResolver(LocalePrefixPattern(prefix_default_language=prefix_default_language), list(urls))]
 
 
 @functools.lru_cache(maxsize=None)
@@ -34,6 +29,4 @@ def is_language_prefix_patterns_used(urlconf):
     return False, False
 
 
-urlpatterns = [
-    path('setlang/', set_language, name='set_language'),
-]
+urlpatterns = [path("setlang/", set_language, name="set_language")]

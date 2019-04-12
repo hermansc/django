@@ -2,18 +2,10 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.admin import FieldListFilter
-from django.contrib.admin.exceptions import (
-    DisallowedModelAdminLookup, DisallowedModelAdminToField,
-)
-from django.contrib.admin.options import (
-    IS_POPUP_VAR, TO_FIELD_VAR, IncorrectLookupParameters,
-)
-from django.contrib.admin.utils import (
-    get_fields_from_path, lookup_needs_distinct, prepare_lookup_value, quote,
-)
-from django.core.exceptions import (
-    FieldDoesNotExist, ImproperlyConfigured, SuspiciousOperation,
-)
+from django.contrib.admin.exceptions import DisallowedModelAdminLookup, DisallowedModelAdminToField
+from django.contrib.admin.options import IS_POPUP_VAR, TO_FIELD_VAR, IncorrectLookupParameters
+from django.contrib.admin.utils import get_fields_from_path, lookup_needs_distinct, prepare_lookup_value, quote
+from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured, SuspiciousOperation
 from django.core.paginator import InvalidPage
 from django.db import models
 from django.db.models.expressions import Combinable, F, OrderBy
@@ -23,21 +15,33 @@ from django.utils.timezone import make_aware
 from django.utils.translation import gettext
 
 # Changelist settings
-ALL_VAR = 'all'
-ORDER_VAR = 'o'
-ORDER_TYPE_VAR = 'ot'
-PAGE_VAR = 'p'
-SEARCH_VAR = 'q'
-ERROR_FLAG = 'e'
+ALL_VAR = "all"
+ORDER_VAR = "o"
+ORDER_TYPE_VAR = "ot"
+PAGE_VAR = "p"
+SEARCH_VAR = "q"
+ERROR_FLAG = "e"
 
-IGNORED_PARAMS = (
-    ALL_VAR, ORDER_VAR, ORDER_TYPE_VAR, SEARCH_VAR, IS_POPUP_VAR, TO_FIELD_VAR)
+IGNORED_PARAMS = (ALL_VAR, ORDER_VAR, ORDER_TYPE_VAR, SEARCH_VAR, IS_POPUP_VAR, TO_FIELD_VAR)
 
 
 class ChangeList:
-    def __init__(self, request, model, list_display, list_display_links,
-                 list_filter, date_hierarchy, search_fields, list_select_related,
-                 list_per_page, list_max_show_all, list_editable, model_admin, sortable_by):
+    def __init__(
+        self,
+        request,
+        model,
+        list_display,
+        list_display_links,
+        list_filter,
+        date_hierarchy,
+        search_fields,
+        list_select_related,
+        list_per_page,
+        list_max_show_all,
+        list_editable,
+        model_admin,
+        sortable_by,
+    ):
         self.model = model
         self.opts = model._meta
         self.lookup_opts = self.opts
@@ -76,15 +80,15 @@ class ChangeList:
             self.list_editable = ()
         else:
             self.list_editable = list_editable
-        self.query = request.GET.get(SEARCH_VAR, '')
+        self.query = request.GET.get(SEARCH_VAR, "")
         self.queryset = self.get_queryset(request)
         self.get_results(request)
         if self.is_popup:
-            title = gettext('Select %s')
+            title = gettext("Select %s")
         elif self.model_admin.has_change_permission(request):
-            title = gettext('Select %s to change')
+            title = gettext("Select %s to change")
         else:
-            title = gettext('Select %s to view')
+            title = gettext("Select %s to view")
         self.title = title % self.opts.verbose_name
         self.pk_attname = self.lookup_opts.pk.attname
 
@@ -130,8 +134,7 @@ class ChangeList:
 
                 lookup_params_count = len(lookup_params)
                 spec = field_list_filter_class(
-                    field, request, lookup_params,
-                    self.model, self.model_admin, field_path=field_path,
+                    field, request, lookup_params, self.model, self.model_admin, field_path=field_path
                 )
                 # field_list_filter_class removes any lookup_params it
                 # processes. If that happened, check if distinct() is needed to
@@ -144,15 +147,13 @@ class ChangeList:
         if self.date_hierarchy:
             # Create bounded lookup parameters so that the query is more
             # efficient.
-            year = lookup_params.pop('%s__year' % self.date_hierarchy, None)
+            year = lookup_params.pop("%s__year" % self.date_hierarchy, None)
             if year is not None:
-                month = lookup_params.pop('%s__month' % self.date_hierarchy, None)
-                day = lookup_params.pop('%s__day' % self.date_hierarchy, None)
+                month = lookup_params.pop("%s__month" % self.date_hierarchy, None)
+                day = lookup_params.pop("%s__day" % self.date_hierarchy, None)
                 try:
                     from_date = datetime(
-                        int(year),
-                        int(month if month is not None else 1),
-                        int(day if day is not None else 1),
+                        int(year), int(month if month is not None else 1), int(day if day is not None else 1)
                     )
                 except ValueError as e:
                     raise IncorrectLookupParameters(e) from e
@@ -166,10 +167,9 @@ class ChangeList:
                     to_date = (from_date + timedelta(days=32)).replace(day=1)
                 else:
                     to_date = from_date.replace(year=from_date.year + 1)
-                lookup_params.update({
-                    '%s__gte' % self.date_hierarchy: from_date,
-                    '%s__lt' % self.date_hierarchy: to_date,
-                })
+                lookup_params.update(
+                    {"%s__gte" % self.date_hierarchy: from_date, "%s__lt" % self.date_hierarchy: to_date}
+                )
 
         # At this point, all the parameters used by the various ListFilters
         # have been removed from lookup_params, which now only contains other
@@ -201,7 +201,7 @@ class ChangeList:
                     del p[k]
             else:
                 p[k] = v
-        return '?%s' % urlencode(sorted(p.items()))
+        return "?%s" % urlencode(sorted(p.items()))
 
     def get_results(self, request):
         paginator = self.model_admin.get_paginator(request, self.queryset, self.list_per_page)
@@ -264,9 +264,9 @@ class ChangeList:
                 attr = getattr(self.model_admin, field_name)
             else:
                 attr = getattr(self.model, field_name)
-            if isinstance(attr, property) and hasattr(attr, 'fget'):
+            if isinstance(attr, property) and hasattr(attr, "fget"):
                 attr = attr.fget
-            return getattr(attr, 'admin_order_field', None)
+            return getattr(attr, "admin_order_field", None)
 
     def get_ordering(self, request, queryset):
         """
@@ -282,19 +282,19 @@ class ChangeList:
         if ORDER_VAR in params:
             # Clear ordering and used params
             ordering = []
-            order_params = params[ORDER_VAR].split('.')
+            order_params = params[ORDER_VAR].split(".")
             for p in order_params:
                 try:
-                    none, pfx, idx = p.rpartition('-')
+                    none, pfx, idx = p.rpartition("-")
                     field_name = self.list_display[int(idx)]
                     order_field = self.get_ordering_field(field_name)
                     if not order_field:
                         continue  # No 'admin_order_field', skip it
-                    if hasattr(order_field, 'as_sql'):
+                    if hasattr(order_field, "as_sql"):
                         # order_field is an expression.
-                        ordering.append(order_field.desc() if pfx == '-' else order_field.asc())
+                        ordering.append(order_field.desc() if pfx == "-" else order_field.asc())
                     # reverse order if order_field has already "-" as prefix
-                    elif order_field.startswith('-') and pfx == '-':
+                    elif order_field.startswith("-") and pfx == "-":
                         ordering.append(order_field[1:])
                     else:
                         ordering.append(pfx + order_field)
@@ -315,15 +315,14 @@ class ChangeList:
         """
         ordering = list(ordering)
         ordering_fields = set()
-        total_ordering_fields = {'pk'} | {
-            field.attname for field in self.lookup_opts.fields
-            if field.unique and not field.null
+        total_ordering_fields = {"pk"} | {
+            field.attname for field in self.lookup_opts.fields if field.unique and not field.null
         }
         for part in ordering:
             # Search for single field providing a total ordering.
             field_name = None
             if isinstance(part, str):
-                field_name = part.lstrip('-')
+                field_name = part.lstrip("-")
             elif isinstance(part, F):
                 field_name = part.name
             elif isinstance(part, OrderBy) and isinstance(part.expression, F):
@@ -357,7 +356,7 @@ class ChangeList:
             else:
                 # If no set of unique fields is present in the ordering, rely
                 # on the primary key to provide total ordering.
-                ordering.append('-pk')
+                ordering.append("-pk")
         return ordering
 
     def get_ordering_field_columns(self):
@@ -377,33 +376,34 @@ class ChangeList:
                     if not isinstance(field, OrderBy):
                         field = field.asc()
                     if isinstance(field.expression, F):
-                        order_type = 'desc' if field.descending else 'asc'
+                        order_type = "desc" if field.descending else "asc"
                         field = field.expression.name
                     else:
                         continue
-                elif field.startswith('-'):
+                elif field.startswith("-"):
                     field = field[1:]
-                    order_type = 'desc'
+                    order_type = "desc"
                 else:
-                    order_type = 'asc'
+                    order_type = "asc"
                 for index, attr in enumerate(self.list_display):
                     if self.get_ordering_field(attr) == field:
                         ordering_fields[index] = order_type
                         break
         else:
-            for p in self.params[ORDER_VAR].split('.'):
-                none, pfx, idx = p.rpartition('-')
+            for p in self.params[ORDER_VAR].split("."):
+                none, pfx, idx = p.rpartition("-")
                 try:
                     idx = int(idx)
                 except ValueError:
                     continue  # skip it
-                ordering_fields[idx] = 'desc' if pfx == '-' else 'asc'
+                ordering_fields[idx] = "desc" if pfx == "-" else "asc"
         return ordering_fields
 
     def get_queryset(self, request):
         # First, we collect all the declared list filters.
-        (self.filter_specs, self.has_filters, remaining_lookup_params,
-         filters_use_distinct) = self.get_filters(request)
+        (self.filter_specs, self.has_filters, remaining_lookup_params, filters_use_distinct) = self.get_filters(
+            request
+        )
 
         # Then, we let every list filter modify the queryset to its liking.
         qs = self.root_queryset
@@ -472,7 +472,8 @@ class ChangeList:
 
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
-        return reverse('admin:%s_%s_change' % (self.opts.app_label,
-                                               self.opts.model_name),
-                       args=(quote(pk),),
-                       current_app=self.model_admin.admin_site.name)
+        return reverse(
+            "admin:%s_%s_change" % (self.opts.app_label, self.opts.model_name),
+            args=(quote(pk),),
+            current_app=self.model_admin.admin_site.name,
+        )
