@@ -10,13 +10,15 @@ from .base import WidgetTest
 
 class SelectDateWidgetTest(WidgetTest):
     maxDiff = None
-    widget = SelectDateWidget(
-        years=('2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'),
-    )
+    widget = SelectDateWidget(years=('2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'))
 
     def test_render_empty(self):
-        self.check_html(self.widget, 'mydate', '', html=(
-            """
+        self.check_html(
+            self.widget,
+            'mydate',
+            '',
+            html=(
+                """
             <select name="mydate_month" id="id_mydate_month">
                 <option selected value="">---</option>
                 <option value="1">January</option>
@@ -82,20 +84,22 @@ class SelectDateWidgetTest(WidgetTest):
                 <option value="2016">2016</option>
             </select>
             """
-        ))
+            ),
+        )
 
     def test_render_none(self):
         """
         Rendering the None or '' values should yield the same output.
         """
-        self.assertHTMLEqual(
-            self.widget.render('mydate', None),
-            self.widget.render('mydate', ''),
-        )
+        self.assertHTMLEqual(self.widget.render('mydate', None), self.widget.render('mydate', ''))
 
     def test_render_string(self):
-        self.check_html(self.widget, 'mydate', '2010-04-15', html=(
-            """
+        self.check_html(
+            self.widget,
+            'mydate',
+            '2010-04-15',
+            html=(
+                """
             <select name="mydate_month" id="id_mydate_month">
                 <option value="">---</option>
                 <option value="1">January</option>
@@ -161,20 +165,24 @@ class SelectDateWidgetTest(WidgetTest):
                 <option value="2016">2016</option>
             </select>
             """
-        ))
+            ),
+        )
 
     def test_render_datetime(self):
         self.assertHTMLEqual(
-            self.widget.render('mydate', date(2010, 4, 15)),
-            self.widget.render('mydate', '2010-04-15'),
+            self.widget.render('mydate', date(2010, 4, 15)), self.widget.render('mydate', '2010-04-15')
         )
 
     def test_render_invalid_date(self):
         """
         Invalid dates should still render the failed date.
         """
-        self.check_html(self.widget, 'mydate', '2010-02-31', html=(
-            """
+        self.check_html(
+            self.widget,
+            'mydate',
+            '2010-02-31',
+            html=(
+                """
             <select name="mydate_month" id="id_mydate_month">
                 <option value="">---</option>
                 <option value="1">January</option>
@@ -240,12 +248,17 @@ class SelectDateWidgetTest(WidgetTest):
                 <option value="2016">2016</option>
             </select>
             """
-        ))
+            ),
+        )
 
     def test_custom_months(self):
         widget = SelectDateWidget(months=MONTHS_AP, years=('2013',))
-        self.check_html(widget, 'mydate', '', html=(
-            """
+        self.check_html(
+            widget,
+            'mydate',
+            '',
+            html=(
+                """
             <select name="mydate_month" id="id_mydate_month">
                 <option selected value="">---</option>
                 <option value="1">Jan.</option>
@@ -302,7 +315,8 @@ class SelectDateWidgetTest(WidgetTest):
                 <option value="2013">2013</option>
             </select>
             """
-        ))
+            ),
+        )
 
     def test_selectdate_required(self):
         class GetNotRequiredDate(Form):
@@ -390,12 +404,9 @@ class SelectDateWidgetTest(WidgetTest):
     @override_settings(USE_L10N=True)
     @translation.override('nl')
     def test_l10n(self):
-        w = SelectDateWidget(
-            years=('2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016')
-        )
+        w = SelectDateWidget(years=('2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'))
         self.assertEqual(
-            w.value_from_datadict({'date_year': '2010', 'date_month': '8', 'date_day': '13'}, {}, 'date'),
-            '13-08-2010',
+            w.value_from_datadict({'date_year': '2010', 'date_month': '8', 'date_day': '13'}, {}, 'date'), '13-08-2010'
         )
 
         self.assertHTMLEqual(
@@ -474,31 +485,33 @@ class SelectDateWidgetTest(WidgetTest):
         # Years before 1900 should work.
         w = SelectDateWidget(years=('1899',))
         self.assertEqual(
-            w.value_from_datadict({'date_year': '1899', 'date_month': '8', 'date_day': '13'}, {}, 'date'),
-            '13-08-1899',
+            w.value_from_datadict({'date_year': '1899', 'date_month': '8', 'date_day': '13'}, {}, 'date'), '13-08-1899'
         )
         # And years before 1000 (demonstrating the need for datetime_safe).
         w = SelectDateWidget(years=('0001',))
         self.assertEqual(
-            w.value_from_datadict({'date_year': '0001', 'date_month': '8', 'date_day': '13'}, {}, 'date'),
-            '13-08-0001',
+            w.value_from_datadict({'date_year': '0001', 'date_month': '8', 'date_day': '13'}, {}, 'date'), '13-08-0001'
         )
 
     def test_format_value(self):
         valid_formats = [
-            '2000-1-1', '2000-10-15', '2000-01-01',
-            '2000-01-0', '2000-0-01', '2000-0-0',
-            '0-01-01', '0-01-0', '0-0-01', '0-0-0',
+            '2000-1-1',
+            '2000-10-15',
+            '2000-01-01',
+            '2000-01-0',
+            '2000-0-01',
+            '2000-0-0',
+            '0-01-01',
+            '0-01-0',
+            '0-0-01',
+            '0-0-0',
         ]
         for value in valid_formats:
             year, month, day = (int(x) or '' for x in value.split('-'))
             with self.subTest(value=value):
                 self.assertEqual(self.widget.format_value(value), {'day': day, 'month': month, 'year': year})
 
-        invalid_formats = [
-            '2000-01-001', '2000-001-01', '2-01-01', '20-01-01', '200-01-01',
-            '20000-01-01',
-        ]
+        invalid_formats = ['2000-01-001', '2000-001-01', '2-01-01', '20-01-01', '200-01-01', '20000-01-01']
         for value in invalid_formats:
             with self.subTest(value=value):
                 self.assertEqual(self.widget.format_value(value), {'day': None, 'month': None, 'year': None})
@@ -533,8 +546,12 @@ class SelectDateWidgetTest(WidgetTest):
     @override_settings(USE_THOUSAND_SEPARATOR=True, USE_L10N=True)
     def test_years_rendered_without_separator(self):
         widget = SelectDateWidget(years=(2007,))
-        self.check_html(widget, 'mydate', '', html=(
-            """
+        self.check_html(
+            widget,
+            'mydate',
+            '',
+            html=(
+                """
             <select name="mydate_month" id="id_mydate_month">
                 <option selected value="">---</option>
                 <option value="1">January</option>
@@ -589,4 +606,5 @@ class SelectDateWidgetTest(WidgetTest):
                 <option value="2007">2007</option>
             </select>
             """
-        ))
+            ),
+        )

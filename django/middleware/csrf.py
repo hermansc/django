@@ -96,10 +96,7 @@ def rotate_token(request):
     Change the CSRF token in use for a request - should be done on login
     for security purposes.
     """
-    request.META.update({
-        "CSRF_COOKIE_USED": True,
-        "CSRF_COOKIE": _get_new_csrf_token(),
-    })
+    request.META.update({"CSRF_COOKIE_USED": True, "CSRF_COOKIE": _get_new_csrf_token()})
     request.csrf_cookie_needs_reset = True
 
 
@@ -123,10 +120,7 @@ def _sanitize_token(token):
 def _compare_salted_tokens(request_csrf_token, csrf_token):
     # Assume both arguments are sanitized -- that is, strings of
     # length CSRF_TOKEN_LENGTH, all CSRF_ALLOWED_CHARS.
-    return constant_time_compare(
-        _unsalt_cipher_token(request_csrf_token),
-        _unsalt_cipher_token(csrf_token),
-    )
+    return constant_time_compare(_unsalt_cipher_token(request_csrf_token), _unsalt_cipher_token(csrf_token))
 
 
 class CsrfViewMiddleware(MiddlewareMixin):
@@ -137,6 +131,7 @@ class CsrfViewMiddleware(MiddlewareMixin):
     This middleware should be used in conjunction with the {% csrf_token %}
     template tag.
     """
+
     # The _accept and _reject methods currently only exist for the sake of the
     # requires_csrf_token decorator.
     def _accept(self, request):
@@ -148,12 +143,7 @@ class CsrfViewMiddleware(MiddlewareMixin):
 
     def _reject(self, request, reason):
         response = _get_failure_view()(request, reason=reason)
-        log_response(
-            'Forbidden (%s): %s', reason, request.path,
-            response=response,
-            request=request,
-            logger=logger,
-        )
+        log_response('Forbidden (%s): %s', reason, request.path, response=response, request=request, logger=logger)
         return response
 
     def _get_token(self, request):
@@ -256,9 +246,7 @@ class CsrfViewMiddleware(MiddlewareMixin):
                 # match on host:port. If not, obey the cookie rules (or those
                 # for the session cookie, if CSRF_USE_SESSIONS).
                 good_referer = (
-                    settings.SESSION_COOKIE_DOMAIN
-                    if settings.CSRF_USE_SESSIONS
-                    else settings.CSRF_COOKIE_DOMAIN
+                    settings.SESSION_COOKIE_DOMAIN if settings.CSRF_USE_SESSIONS else settings.CSRF_COOKIE_DOMAIN
                 )
                 if good_referer is not None:
                     server_port = request.get_port()

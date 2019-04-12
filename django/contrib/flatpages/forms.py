@@ -12,9 +12,8 @@ class FlatpageForm(forms.ModelForm):
         help_text=_("Example: '/about/contact/'. Make sure to have leading and trailing slashes."),
         error_messages={
             "invalid": _(
-                "This value must contain only letters, numbers, dots, "
-                "underscores, dashes, slashes or tildes."
-            ),
+                "This value must contain only letters, numbers, dots, " "underscores, dashes, slashes or tildes."
+            )
         },
     )
 
@@ -25,28 +24,17 @@ class FlatpageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self._trailing_slash_required():
-            self.fields['url'].help_text = _(
-                "Example: '/about/contact'. Make sure to have a leading slash."
-            )
+            self.fields['url'].help_text = _("Example: '/about/contact'. Make sure to have a leading slash.")
 
     def _trailing_slash_required(self):
-        return (
-            settings.APPEND_SLASH and
-            'django.middleware.common.CommonMiddleware' in settings.MIDDLEWARE
-        )
+        return settings.APPEND_SLASH and 'django.middleware.common.CommonMiddleware' in settings.MIDDLEWARE
 
     def clean_url(self):
         url = self.cleaned_data['url']
         if not url.startswith('/'):
-            raise forms.ValidationError(
-                gettext("URL is missing a leading slash."),
-                code='missing_leading_slash',
-            )
+            raise forms.ValidationError(gettext("URL is missing a leading slash."), code='missing_leading_slash')
         if self._trailing_slash_required() and not url.endswith('/'):
-            raise forms.ValidationError(
-                gettext("URL is missing a trailing slash."),
-                code='missing_trailing_slash',
-            )
+            raise forms.ValidationError(gettext("URL is missing a trailing slash."), code='missing_trailing_slash')
         return url
 
     def clean(self):

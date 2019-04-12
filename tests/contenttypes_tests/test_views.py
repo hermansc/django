@@ -9,15 +9,20 @@ from django.http import Http404, HttpRequest
 from django.test import TestCase, override_settings
 
 from .models import (
-    Article, Author, FooWithBrokenAbsoluteUrl, FooWithoutUrl, FooWithUrl,
-    ModelWithM2MToSite, ModelWithNullFKToSite, SchemeIncludedURL,
+    Article,
+    Author,
+    FooWithBrokenAbsoluteUrl,
+    FooWithoutUrl,
+    FooWithUrl,
+    ModelWithM2MToSite,
+    ModelWithNullFKToSite,
+    SchemeIncludedURL,
     Site as MockSite,
 )
 
 
 @override_settings(ROOT_URLCONF='contenttypes_tests.urls')
 class ContentTypesViewsTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         # Don't use the manager to ensure the site exists with pk=1, regardless
@@ -26,15 +31,21 @@ class ContentTypesViewsTests(TestCase):
         cls.site1.save()
         cls.author1 = Author.objects.create(name='Boris')
         cls.article1 = Article.objects.create(
-            title='Old Article', slug='old_article', author=cls.author1,
+            title='Old Article',
+            slug='old_article',
+            author=cls.author1,
             date_created=datetime.datetime(2001, 1, 1, 21, 22, 23),
         )
         cls.article2 = Article.objects.create(
-            title='Current Article', slug='current_article', author=cls.author1,
+            title='Current Article',
+            slug='current_article',
+            author=cls.author1,
             date_created=datetime.datetime(2007, 9, 17, 21, 22, 23),
         )
         cls.article3 = Article.objects.create(
-            title='Future Article', slug='future_article', author=cls.author1,
+            title='Future Article',
+            slug='future_article',
+            author=cls.author1,
             date_created=datetime.datetime(3000, 1, 1, 21, 22, 23),
         )
         cls.scheme1 = SchemeIncludedURL.objects.create(url='http://test_scheme_included_http/')
@@ -99,7 +110,6 @@ class ContentTypesViewsTests(TestCase):
 
 @override_settings(ROOT_URLCONF='contenttypes_tests.urls')
 class ContentTypesViewsSiteRelTests(TestCase):
-
     def setUp(self):
         Site.objects.clear_cache()
 
@@ -132,11 +142,13 @@ class ContentTypesViewsSiteRelTests(TestCase):
 
         # get_current_site() will lookup a Site object, so these must match the
         # domains in the MockSite model.
-        MockSite.objects.bulk_create([
-            MockSite(pk=1, domain='example.com'),
-            MockSite(pk=self.site_2.pk, domain=self.site_2.domain),
-            MockSite(pk=self.site_3.pk, domain=self.site_3.domain),
-        ])
+        MockSite.objects.bulk_create(
+            [
+                MockSite(pk=1, domain='example.com'),
+                MockSite(pk=self.site_2.pk, domain=self.site_2.domain),
+                MockSite(pk=self.site_3.pk, domain=self.site_3.domain),
+            ]
+        )
         ct = ContentType.objects.get_for_model(ModelWithM2MToSite)
         site_3_obj = ModelWithM2MToSite.objects.create(title='Not Linked to Current Site')
         site_3_obj.sites.add(MockSite.objects.get(pk=self.site_3.pk))
@@ -167,7 +179,6 @@ class ContentTypesViewsSiteRelTests(TestCase):
 
 
 class ShortcutViewTests(TestCase):
-
     def setUp(self):
         self.request = HttpRequest()
         self.request.META = {'SERVER_NAME': 'Example.com', 'SERVER_PORT': '80'}
@@ -183,8 +194,7 @@ class ShortcutViewTests(TestCase):
         with self.modify_settings(INSTALLED_APPS={'append': 'django.contrib.sites'}):
             response = shortcut(self.request, user_ct.id, obj.id)
             self.assertEqual(
-                'http://%s/users/john/' % get_current_site(self.request).domain,
-                response._headers.get('location')[1]
+                'http://%s/users/john/' % get_current_site(self.request).domain, response._headers.get('location')[1]
             )
         with self.modify_settings(INSTALLED_APPS={'remove': 'django.contrib.sites'}):
             response = shortcut(self.request, user_ct.id, obj.id)

@@ -5,14 +5,8 @@ from unittest import mock
 from multiple_database.routers import TestRouter
 
 from django.core.exceptions import FieldError
-from django.db import (
-    DatabaseError, NotSupportedError, connection, connections, router,
-    transaction,
-)
-from django.test import (
-    TransactionTestCase, override_settings, skipIfDBFeature,
-    skipUnlessDBFeature,
-)
+from django.db import DatabaseError, NotSupportedError, connection, connections, router, transaction
+from django.test import TransactionTestCase, override_settings, skipIfDBFeature, skipUnlessDBFeature
 from django.test.utils import CaptureQueriesContext
 
 from .models import City, Country, Person, PersonProfile
@@ -104,13 +98,11 @@ class SelectForUpdateTests(TransactionTestCase):
         select_for_update() is invoked.
         """
         with transaction.atomic(), CaptureQueriesContext(connection) as ctx:
-            list(Person.objects.select_related(
-                'born__country',
-            ).select_for_update(
-                of=('born__country',),
-            ).select_for_update(
-                of=('self', 'born__country')
-            ))
+            list(
+                Person.objects.select_related('born__country')
+                .select_for_update(of=('born__country',))
+                .select_for_update(of=('self', 'born__country'))
+            )
         features = connections['default'].features
         if features.select_for_update_of_column:
             expected = ['select_for_update_person"."id', 'select_for_update_country"."id']
@@ -150,11 +142,7 @@ class SelectForUpdateTests(TransactionTestCase):
         self.start_blocking_transaction()
         status = []
 
-        thread = threading.Thread(
-            target=self.run_select_for_update,
-            args=(status,),
-            kwargs={'nowait': True},
-        )
+        thread = threading.Thread(target=self.run_select_for_update, args=(status,), kwargs={'nowait': True})
 
         thread.start()
         time.sleep(1)
@@ -170,11 +158,7 @@ class SelectForUpdateTests(TransactionTestCase):
         """
         self.start_blocking_transaction()
         status = []
-        thread = threading.Thread(
-            target=self.run_select_for_update,
-            args=(status,),
-            kwargs={'skip_locked': True},
-        )
+        thread = threading.Thread(target=self.run_select_for_update, args=(status,), kwargs={'skip_locked': True})
         thread.start()
         time.sleep(1)
         thread.join()
@@ -253,9 +237,9 @@ class SelectForUpdateTests(TransactionTestCase):
             with self.subTest(name=name):
                 with self.assertRaisesMessage(FieldError, msg % name):
                     with transaction.atomic():
-                        Person.objects.select_related(
-                            'born', 'profile',
-                        ).exclude(profile=None).select_for_update(of=(name,)).get()
+                        Person.objects.select_related('born', 'profile').exclude(profile=None).select_for_update(
+                            of=(name,)
+                        ).get()
 
     @skipUnlessDBFeature('has_select_for_update', 'has_select_for_update_of')
     def test_reverse_one_to_one_of_arguments(self):
@@ -264,9 +248,9 @@ class SelectForUpdateTests(TransactionTestCase):
         are excluded because LEFT JOIN isn't allowed in SELECT FOR UPDATE.
         """
         with transaction.atomic():
-            person = Person.objects.select_related(
-                'profile',
-            ).exclude(profile=None).select_for_update(of=('profile',)).get()
+            person = (
+                Person.objects.select_related('profile').exclude(profile=None).select_for_update(of=('profile',)).get()
+            )
             self.assertEqual(person.profile, self.person_profile)
 
     @skipUnlessDBFeature('has_select_for_update')
@@ -349,9 +333,7 @@ class SelectForUpdateTests(TransactionTestCase):
         # Now, try it again using the ORM's select_for_update
         # facility. Do this in a separate thread.
         status = []
-        thread = threading.Thread(
-            target=self.run_select_for_update, args=(status,)
-        )
+        thread = threading.Thread(target=self.run_select_for_update, args=(status,))
 
         # The thread should immediately block, but we'll sleep
         # for a bit to make sure.
@@ -396,10 +378,7 @@ class SelectForUpdateTests(TransactionTestCase):
             try:
                 list(
                     Person.objects.raw(
-                        'SELECT * FROM %s %s' % (
-                            Person._meta.db_table,
-                            connection.ops.for_update_sql(nowait=True)
-                        )
+                        'SELECT * FROM %s %s' % (Person._meta.db_table, connection.ops.for_update_sql(nowait=True))
                     )
                 )
             except DatabaseError as e:

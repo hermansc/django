@@ -7,6 +7,7 @@ class MigrateTests(TransactionTestCase):
     """
     Tests running the migrate command in Geodjango.
     """
+
     available_apps = ["gis_tests.gis_migrations"]
 
     def get_table_description(self, table):

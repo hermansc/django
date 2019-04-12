@@ -1,6 +1,4 @@
-from django.db.backends.ddl_references import (
-    Columns, ForeignKeyName, IndexName, Statement, Table,
-)
+from django.db.backends.ddl_references import Columns, ForeignKeyName, IndexName, Statement, Table
 from django.test import SimpleTestCase
 
 
@@ -29,9 +27,7 @@ class TableTests(SimpleTestCase):
 
 class ColumnsTests(TableTests):
     def setUp(self):
-        self.reference = Columns(
-            'table', ['first_column', 'second_column'], lambda column: column.upper()
-        )
+        self.reference = Columns('table', ['first_column', 'second_column'], lambda column: column.upper())
 
     def test_references_column(self):
         self.assertIs(self.reference.references_column('other', 'first_column'), False)
@@ -61,9 +57,8 @@ class IndexNameTests(ColumnsTests):
     def setUp(self):
         def create_index_name(table_name, column_names, suffix):
             return ', '.join("%s_%s_%s" % (table_name, column_name, suffix) for column_name in column_names)
-        self.reference = IndexName(
-            'table', ['first_column', 'second_column'], 'suffix', create_index_name
-        )
+
+        self.reference = IndexName('table', ['first_column', 'second_column'], 'suffix', create_index_name)
 
     def test_repr(self):
         self.assertEqual(repr(self.reference), "<IndexName 'table_first_column_suffix, table_second_column_suffix'>")
@@ -76,9 +71,12 @@ class ForeignKeyNameTests(IndexNameTests):
     def setUp(self):
         def create_foreign_key_name(table_name, column_names, suffix):
             return ', '.join("%s_%s_%s" % (table_name, column_name, suffix) for column_name in column_names)
+
         self.reference = ForeignKeyName(
-            'table', ['first_column', 'second_column'],
-            'to_table', ['to_first_column', 'to_second_column'],
+            'table',
+            ['first_column', 'second_column'],
+            'to_table',
+            ['to_first_column', 'to_second_column'],
             '%(to_table)s_%(to_column)s_fk',
             create_foreign_key_name,
         )
@@ -111,14 +109,13 @@ class ForeignKeyNameTests(IndexNameTests):
         self.assertEqual(
             repr(self.reference),
             "<ForeignKeyName 'table_first_column_to_table_to_first_column_fk, "
-            "table_second_column_to_table_to_first_column_fk'>"
+            "table_second_column_to_table_to_first_column_fk'>",
         )
 
     def test_str(self):
         self.assertEqual(
             str(self.reference),
-            'table_first_column_to_table_to_first_column_fk, '
-            'table_second_column_to_table_to_first_column_fk'
+            'table_first_column_to_table_to_first_column_fk, ' 'table_second_column_to_table_to_first_column_fk',
         )
 
 

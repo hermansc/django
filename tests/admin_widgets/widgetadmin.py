@@ -1,9 +1,6 @@
 from django.contrib import admin
 
-from .models import (
-    Advisor, Album, Band, Bee, Car, CarTire, Event, Inventory, Member, Profile,
-    School, User,
-)
+from .models import Advisor, Album, Band, Bee, Car, CarTire, Event, Inventory, Member, Profile, School, User
 
 
 class WidgetAdmin(admin.AdminSite):
@@ -28,7 +25,7 @@ class EventAdmin(admin.ModelAdmin):
 
 
 class AlbumAdmin(admin.ModelAdmin):
-    fields = ('name', 'cover_art',)
+    fields = ('name', 'cover_art')
     readonly_fields = ('cover_art',)
 
 

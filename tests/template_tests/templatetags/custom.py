@@ -110,9 +110,7 @@ simple_one_default.anything = "Expected simple_one_default __dict__"
 @register.simple_tag
 def simple_unlimited_args(one, two='hi', *args):
     """Expected simple_unlimited_args __doc__"""
-    return "simple_unlimited_args - Expected result: %s" % (
-        ', '.join(str(arg) for arg in [one, two, *args])
-    )
+    return "simple_unlimited_args - Expected result: %s" % (', '.join(str(arg) for arg in [one, two, *args]))
 
 
 simple_unlimited_args.anything = "Expected simple_unlimited_args __dict__"
@@ -134,7 +132,7 @@ def simple_unlimited_args_kwargs(one, two='hi', *args, **kwargs):
     sorted_kwarg = sorted(kwargs.items(), key=operator.itemgetter(0))
     return "simple_unlimited_args_kwargs - Expected result: %s / %s" % (
         ', '.join(str(arg) for arg in [one, two, *args]),
-        ', '.join('%s=%s' % (k, v) for (k, v) in sorted_kwarg)
+        ', '.join('%s=%s' % (k, v) for (k, v) in sorted_kwarg),
     )
 
 

@@ -7,7 +7,6 @@ from django.test import TestCase
 
 @skipUnless(connection.vendor == 'mysql', 'MySQL tests')
 class TestFeatures(TestCase):
-
     def test_supports_transactions(self):
         """
         All storage engines except MyISAM support transactions.

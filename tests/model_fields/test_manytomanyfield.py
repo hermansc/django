@@ -7,7 +7,6 @@ from .models import ManyToMany
 
 
 class ManyToManyFieldTests(SimpleTestCase):
-
     def test_abstract_model_pending_operations(self):
         """
         Many-to-many fields declared on abstract models should not add lazy
@@ -25,7 +24,7 @@ class ManyToManyFieldTests(SimpleTestCase):
         self.assertEqual(
             pending_ops_before,
             list(apps._pending_operations.items()),
-            'Pending lookup added for a many-to-many field on an abstract model'
+            'Pending lookup added for a many-to-many field on an abstract model',
         )
 
     @isolate_apps('model_fields', 'model_fields.tests')
@@ -61,7 +60,6 @@ class ManyToManyFieldTests(SimpleTestCase):
 
 
 class ManyToManyFieldDBTests(TestCase):
-
     def test_value_from_object_instance_without_pk(self):
         obj = ManyToMany()
         self.assertEqual(obj._meta.get_field('m2m').value_from_object(obj), [])

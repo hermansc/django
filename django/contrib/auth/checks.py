@@ -27,13 +27,7 @@ def check_user_model(app_configs=None, **kwargs):
 
     # Check that REQUIRED_FIELDS is a list
     if not isinstance(cls.REQUIRED_FIELDS, (list, tuple)):
-        errors.append(
-            checks.Error(
-                "'REQUIRED_FIELDS' must be a list or tuple.",
-                obj=cls,
-                id='auth.E001',
-            )
-        )
+        errors.append(checks.Error("'REQUIRED_FIELDS' must be a list or tuple.", obj=cls, id='auth.E001'))
 
     # Check that the USERNAME FIELD isn't included in REQUIRED_FIELDS.
     if cls.USERNAME_FIELD in cls.REQUIRED_FIELDS:
@@ -48,13 +42,11 @@ def check_user_model(app_configs=None, **kwargs):
 
     # Check that the username field is unique
     if not cls._meta.get_field(cls.USERNAME_FIELD).unique:
-        if (settings.AUTHENTICATION_BACKENDS ==
-                ['django.contrib.auth.backends.ModelBackend']):
+        if settings.AUTHENTICATION_BACKENDS == ['django.contrib.auth.backends.ModelBackend']:
             errors.append(
                 checks.Error(
-                    "'%s.%s' must be unique because it is named as the 'USERNAME_FIELD'." % (
-                        cls._meta.object_name, cls.USERNAME_FIELD
-                    ),
+                    "'%s.%s' must be unique because it is named as the 'USERNAME_FIELD'."
+                    % (cls._meta.object_name, cls.USERNAME_FIELD),
                     obj=cls,
                     id='auth.E003',
                 )
@@ -62,9 +54,8 @@ def check_user_model(app_configs=None, **kwargs):
         else:
             errors.append(
                 checks.Warning(
-                    "'%s.%s' is named as the 'USERNAME_FIELD', but it is not unique." % (
-                        cls._meta.object_name, cls.USERNAME_FIELD
-                    ),
+                    "'%s.%s' is named as the 'USERNAME_FIELD', but it is not unique."
+                    % (cls._meta.object_name, cls.USERNAME_FIELD),
                     hint='Ensure that your authentication backend(s) can handle non-unique usernames.',
                     obj=cls,
                     id='auth.W004',
@@ -109,19 +100,17 @@ def check_models_permissions(app_configs=None, **kwargs):
         builtin_permissions = dict(_get_builtin_permissions(opts))
         # Check builtin permission name length.
         max_builtin_permission_name_length = (
-            max(len(name) for name in builtin_permissions.values())
-            if builtin_permissions else 0
+            max(len(name) for name in builtin_permissions.values()) if builtin_permissions else 0
         )
         if max_builtin_permission_name_length > permission_name_max_length:
-            verbose_name_max_length = (
-                permission_name_max_length - (max_builtin_permission_name_length - len(opts.verbose_name_raw))
+            verbose_name_max_length = permission_name_max_length - (
+                max_builtin_permission_name_length - len(opts.verbose_name_raw)
             )
             errors.append(
                 checks.Error(
                     "The verbose_name of model '%s.%s' must be at most %d characters "
-                    "for its builtin permission names to be at most %d characters." % (
-                        opts.app_label, opts.object_name, verbose_name_max_length, permission_name_max_length
-                    ),
+                    "for its builtin permission names to be at most %d characters."
+                    % (opts.app_label, opts.object_name, verbose_name_max_length, permission_name_max_length),
                     obj=model,
                     id='auth.E007',
                 )
@@ -132,9 +121,8 @@ def check_models_permissions(app_configs=None, **kwargs):
             if len(name) > permission_name_max_length:
                 errors.append(
                     checks.Error(
-                        "The permission named '%s' of model '%s.%s' is longer than %d characters." % (
-                            name, opts.app_label, opts.object_name, permission_name_max_length
-                        ),
+                        "The permission named '%s' of model '%s.%s' is longer than %d characters."
+                        % (name, opts.app_label, opts.object_name, permission_name_max_length),
                         obj=model,
                         id='auth.E008',
                     )
@@ -144,9 +132,7 @@ def check_models_permissions(app_configs=None, **kwargs):
                 errors.append(
                     checks.Error(
                         "The permission codenamed '%s' clashes with a builtin permission "
-                        "for model '%s.%s'." % (
-                            codename, opts.app_label, opts.object_name
-                        ),
+                        "for model '%s.%s'." % (codename, opts.app_label, opts.object_name),
                         obj=model,
                         id='auth.E005',
                     )
@@ -154,9 +140,8 @@ def check_models_permissions(app_configs=None, **kwargs):
             elif codename in codenames:
                 errors.append(
                     checks.Error(
-                        "The permission codenamed '%s' is duplicated for model '%s.%s'." % (
-                            codename, opts.app_label, opts.object_name
-                        ),
+                        "The permission codenamed '%s' is duplicated for model '%s.%s'."
+                        % (codename, opts.app_label, opts.object_name),
                         obj=model,
                         id='auth.E006',
                     )

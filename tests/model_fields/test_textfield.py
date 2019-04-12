@@ -8,7 +8,6 @@ from .models import Post
 
 
 class TextFieldTests(TestCase):
-
     def test_max_length_passed_to_formfield(self):
         """
         TextField passes its max_length attribute to form fields created using

@@ -4,9 +4,7 @@
 
 import unittest
 
-from django.contrib.gis.geos import (
-    LinearRing, LineString, MultiPoint, Point, Polygon, fromstr,
-)
+from django.contrib.gis.geos import LinearRing, LineString, MultiPoint, Point, Polygon, fromstr
 
 
 def api_get_distance(x):
@@ -65,10 +63,7 @@ def api_get_length(x):
     return x.length
 
 
-geos_function_tests = [
-    val for name, val in vars().items()
-    if hasattr(val, '__call__') and name.startswith('api_get_')
-]
+geos_function_tests = [val for name, val in vars().items() if hasattr(val, '__call__') and name.startswith('api_get_')]
 
 
 class GEOSMutationTest(unittest.TestCase):
@@ -117,8 +112,7 @@ class GEOSMutationTest(unittest.TestCase):
 
     def test04_LineStringMutations(self):
         'Testing LineString mutations'
-        for ls in (LineString((1, 0), (4, 1), (6, -1)),
-                   fromstr('LINESTRING (1 0,4 1,6 -1)')):
+        for ls in (LineString((1, 0), (4, 1), (6, -1)), fromstr('LINESTRING (1 0,4 1,6 -1)')):
             self.assertEqual(ls._get_single_external(1), (4.0, 1.0), 'LineString _get_single_external')
 
             # _set_single
@@ -135,23 +129,31 @@ class GEOSMutationTest(unittest.TestCase):
 
     def test05_Polygon(self):
         'Testing Polygon mutations'
-        for pg in (Polygon(((1, 0), (4, 1), (6, -1), (8, 10), (1, 0)),
-                           ((5, 4), (6, 4), (6, 3), (5, 4))),
-                   fromstr('POLYGON ((1 0,4 1,6 -1,8 10,1 0),(5 4,6 4,6 3,5 4))')):
-            self.assertEqual(pg._get_single_external(0),
-                             LinearRing((1, 0), (4, 1), (6, -1), (8, 10), (1, 0)),
-                             'Polygon _get_single_external(0)')
-            self.assertEqual(pg._get_single_external(1),
-                             LinearRing((5, 4), (6, 4), (6, 3), (5, 4)),
-                             'Polygon _get_single_external(1)')
+        for pg in (
+            Polygon(((1, 0), (4, 1), (6, -1), (8, 10), (1, 0)), ((5, 4), (6, 4), (6, 3), (5, 4))),
+            fromstr('POLYGON ((1 0,4 1,6 -1,8 10,1 0),(5 4,6 4,6 3,5 4))'),
+        ):
+            self.assertEqual(
+                pg._get_single_external(0),
+                LinearRing((1, 0), (4, 1), (6, -1), (8, 10), (1, 0)),
+                'Polygon _get_single_external(0)',
+            )
+            self.assertEqual(
+                pg._get_single_external(1),
+                LinearRing((5, 4), (6, 4), (6, 3), (5, 4)),
+                'Polygon _get_single_external(1)',
+            )
 
             # _set_list
             pg._set_list(2, (((1, 2), (10, 0), (12, 9), (-1, 15), (1, 2)), ((4, 2), (5, 2), (5, 3), (4, 2))))
             self.assertEqual(
                 pg.coords,
-                (((1.0, 2.0), (10.0, 0.0), (12.0, 9.0), (-1.0, 15.0), (1.0, 2.0)),
-                 ((4.0, 2.0), (5.0, 2.0), (5.0, 3.0), (4.0, 2.0))),
-                'Polygon _set_list')
+                (
+                    ((1.0, 2.0), (10.0, 0.0), (12.0, 9.0), (-1.0, 15.0), (1.0, 2.0)),
+                    ((4.0, 2.0), (5.0, 2.0), (5.0, 3.0), (4.0, 2.0)),
+                ),
+                'Polygon _set_list',
+            )
 
             lsa = Polygon(*pg.coords)
             for f in geos_function_tests:

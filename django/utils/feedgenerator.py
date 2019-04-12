@@ -58,11 +58,27 @@ def get_tag_uri(url, date):
 
 class SyndicationFeed:
     "Base class for all syndication feeds. Subclasses should provide write()"
-    def __init__(self, title, link, description, language=None, author_email=None,
-                 author_name=None, author_link=None, subtitle=None, categories=None,
-                 feed_url=None, feed_copyright=None, feed_guid=None, ttl=None, **kwargs):
+
+    def __init__(
+        self,
+        title,
+        link,
+        description,
+        language=None,
+        author_email=None,
+        author_name=None,
+        author_link=None,
+        subtitle=None,
+        categories=None,
+        feed_url=None,
+        feed_copyright=None,
+        feed_guid=None,
+        ttl=None,
+        **kwargs
+    ):
         def to_str(s):
             return str(s) if s is not None else s
+
         categories = categories and [str(c) for c in categories]
         self.feed = {
             'title': to_str(title),
@@ -82,36 +98,55 @@ class SyndicationFeed:
         }
         self.items = []
 
-    def add_item(self, title, link, description, author_email=None,
-                 author_name=None, author_link=None, pubdate=None, comments=None,
-                 unique_id=None, unique_id_is_permalink=None, categories=(),
-                 item_copyright=None, ttl=None, updateddate=None, enclosures=None, **kwargs):
+    def add_item(
+        self,
+        title,
+        link,
+        description,
+        author_email=None,
+        author_name=None,
+        author_link=None,
+        pubdate=None,
+        comments=None,
+        unique_id=None,
+        unique_id_is_permalink=None,
+        categories=(),
+        item_copyright=None,
+        ttl=None,
+        updateddate=None,
+        enclosures=None,
+        **kwargs
+    ):
         """
         Add an item to the feed. All args are expected to be strings except
         pubdate and updateddate, which are datetime.datetime objects, and
         enclosures, which is an iterable of instances of the Enclosure class.
         """
+
         def to_str(s):
             return str(s) if s is not None else s
+
         categories = categories and [to_str(c) for c in categories]
-        self.items.append({
-            'title': to_str(title),
-            'link': iri_to_uri(link),
-            'description': to_str(description),
-            'author_email': to_str(author_email),
-            'author_name': to_str(author_name),
-            'author_link': iri_to_uri(author_link),
-            'pubdate': pubdate,
-            'updateddate': updateddate,
-            'comments': to_str(comments),
-            'unique_id': to_str(unique_id),
-            'unique_id_is_permalink': unique_id_is_permalink,
-            'enclosures': enclosures or (),
-            'categories': categories or (),
-            'item_copyright': to_str(item_copyright),
-            'ttl': to_str(ttl),
-            **kwargs,
-        })
+        self.items.append(
+            {
+                'title': to_str(title),
+                'link': iri_to_uri(link),
+                'description': to_str(description),
+                'author_email': to_str(author_email),
+                'author_name': to_str(author_name),
+                'author_link': iri_to_uri(author_link),
+                'pubdate': pubdate,
+                'updateddate': updateddate,
+                'comments': to_str(comments),
+                'unique_id': to_str(unique_id),
+                'unique_id_is_permalink': unique_id_is_permalink,
+                'enclosures': enclosures or (),
+                'categories': categories or (),
+                'item_copyright': to_str(item_copyright),
+                'ttl': to_str(ttl),
+                **kwargs,
+            }
+        )
 
     def num_items(self):
         return len(self.items)
@@ -178,6 +213,7 @@ class SyndicationFeed:
 
 class Enclosure:
     """An RSS enclosure"""
+
     def __init__(self, url, length, mime_type):
         "All args are expected to be strings"
         self.length, self.mime_type = length, mime_type
@@ -198,10 +234,7 @@ class RssFeed(SyndicationFeed):
         handler.endElement("rss")
 
     def rss_attributes(self):
-        return {
-            'version': self._version,
-            'xmlns:atom': 'http://www.w3.org/2005/Atom',
-        }
+        return {'version': self._version, 'xmlns:atom': 'http://www.w3.org/2005/Atom'}
 
     def write_items(self, handler):
         for item in self.items:
@@ -280,11 +313,9 @@ class Rss201rev2Feed(RssFeed):
                     "http://www.rssboard.org/rss-profile#element-channel-item-enclosure"
                 )
             enclosure = enclosures[0]
-            handler.addQuickElement('enclosure', '', {
-                'url': enclosure.url,
-                'length': enclosure.length,
-                'type': enclosure.mime_type,
-            })
+            handler.addQuickElement(
+                'enclosure', '', {'url': enclosure.url, 'length': enclosure.length, 'type': enclosure.mime_type}
+            )
 
         # Categories.
         for cat in item['categories']:
@@ -371,12 +402,11 @@ class Atom1Feed(SyndicationFeed):
 
         # Enclosures.
         for enclosure in item['enclosures']:
-            handler.addQuickElement('link', '', {
-                'rel': 'enclosure',
-                'href': enclosure.url,
-                'length': enclosure.length,
-                'type': enclosure.mime_type,
-            })
+            handler.addQuickElement(
+                'link',
+                '',
+                {'rel': 'enclosure', 'href': enclosure.url, 'length': enclosure.length, 'type': enclosure.mime_type},
+            )
 
         # Categories.
         for cat in item['categories']:

@@ -11,13 +11,14 @@ from decimal import Decimal, InvalidOperation as DecimalInvalidOperation
 
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.gdal import (
-    CoordTransform, DataSource, GDALException, OGRGeometry, OGRGeomType,
+    CoordTransform,
+    DataSource,
+    GDALException,
+    OGRGeometry,
+    OGRGeomType,
     SpatialReference,
 )
-from django.contrib.gis.gdal.field import (
-    OFTDate, OFTDateTime, OFTInteger, OFTInteger64, OFTReal, OFTString,
-    OFTTime,
-)
+from django.contrib.gis.gdal.field import OFTDate, OFTDateTime, OFTInteger, OFTInteger64, OFTReal, OFTString, OFTTime
 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db import connections, models, router, transaction
 from django.utils.encoding import force_str
@@ -80,10 +81,19 @@ class LayerMapping:
         models.PositiveSmallIntegerField: (OFTInteger, OFTReal, OFTString),
     }
 
-    def __init__(self, model, data, mapping, layer=0,
-                 source_srs=None, encoding='utf-8',
-                 transaction_mode='commit_on_success',
-                 transform=True, unique=None, using=None):
+    def __init__(
+        self,
+        model,
+        data,
+        mapping,
+        layer=0,
+        source_srs=None,
+        encoding='utf-8',
+        transaction_mode='commit_on_success',
+        transform=True,
+        unique=None,
+        using=None,
+    ):
         """
         A LayerMapping object is initialized using the given Model (not an instance),
         a DataSource (or string path to an OGR-supported data file), and a mapping
@@ -129,6 +139,7 @@ class LayerMapping:
             # Making sure the encoding exists, if not a LookupError
             # exception will be thrown.
             from codecs import lookup
+
             lookup(encoding)
             self.encoding = encoding
         else:
@@ -220,9 +231,10 @@ class LayerMapping:
                 # Making sure that the OGR Layer's Geometry is compatible.
                 ltype = self.layer.geom_type
                 if not (ltype.name.startswith(gtype.name) or self.make_multi(ltype, model_field)):
-                    raise LayerMapError('Invalid mapping geometry; model has %s%s, '
-                                        'layer geometry type is %s.' %
-                                        (fld_name, '(dim=3)' if coord_dim == 3 else '', ltype))
+                    raise LayerMapError(
+                        'Invalid mapping geometry; model has %s%s, '
+                        'layer geometry type is %s.' % (fld_name, '(dim=3)' if coord_dim == 3 else '', ltype)
+                    )
 
                 # Setting the `geom_field` attribute w/the name of the model field
                 # that is a Geometry.  Also setting the coordinate dimension
@@ -239,8 +251,10 @@ class LayerMapping:
                         try:
                             rel_model._meta.get_field(rel_name)
                         except FieldDoesNotExist:
-                            raise LayerMapError('ForeignKey mapping field "%s" not in %s fields.' %
-                                                (rel_name, rel_model.__class__.__name__))
+                            raise LayerMapError(
+                                'ForeignKey mapping field "%s" not in %s fields.'
+                                % (rel_name, rel_model.__class__.__name__)
+                            )
                     fields_val = rel_model
                 else:
                     raise TypeError('ForeignKey mapping must be of dictionary type.')
@@ -255,8 +269,10 @@ class LayerMapping:
 
                 # Can the OGR field type be mapped to the Django field type?
                 if not issubclass(ogr_field, self.FIELD_TYPES[model_field.__class__]):
-                    raise LayerMapError('OGR field "%s" (of type %s) cannot be mapped to Django %s.' %
-                                        (ogr_field, ogr_field.__name__, fld_name))
+                    raise LayerMapError(
+                        'OGR field "%s" (of type %s) cannot be mapped to Django %s.'
+                        % (ogr_field, ogr_field.__name__, fld_name)
+                    )
                 fields_val = model_field
 
             self.fields[field_name] = fields_val
@@ -344,8 +360,7 @@ class LayerMapping:
         Verify if the OGR Field contents are acceptable to the model field. If
         they are, return the verified value, otherwise raise an exception.
         """
-        if (isinstance(ogr_field, OFTString) and
-                isinstance(model_field, (models.CharField, models.TextField))):
+        if isinstance(ogr_field, OFTString) and isinstance(model_field, (models.CharField, models.TextField)):
             if self.encoding and ogr_field.value is not None:
                 # The encoding for OGR data sources may be specified here
                 # (e.g., 'cp437' for Census Bureau boundary files).
@@ -353,8 +368,10 @@ class LayerMapping:
             else:
                 val = ogr_field.value
             if model_field.max_length and val is not None and len(val) > model_field.max_length:
-                raise InvalidString('%s model field maximum string length is %s, given %s characters.' %
-                                    (model_field.name, model_field.max_length, len(val)))
+                raise InvalidString(
+                    '%s model field maximum string length is %s, given %s characters.'
+                    % (model_field.name, model_field.max_length, len(val))
+                )
         elif isinstance(ogr_field, OFTReal) and isinstance(model_field, models.DecimalField):
             try:
                 # Creating an instance of the Decimal value to use.
@@ -382,8 +399,8 @@ class LayerMapping:
             if n_prec > max_prec:
                 raise InvalidDecimal(
                     'A DecimalField with max_digits %d, decimal_places %d must '
-                    'round to an absolute value less than 10^%d.' %
-                    (model_field.max_digits, model_field.decimal_places, max_prec)
+                    'round to an absolute value less than 10^%d.'
+                    % (model_field.max_digits, model_field.decimal_places, max_prec)
                 )
             val = d
         elif isinstance(ogr_field, (OFTReal, OFTString)) and isinstance(model_field, models.IntegerField):
@@ -415,8 +432,7 @@ class LayerMapping:
             return rel_model.objects.using(self.using).get(**fk_kwargs)
         except ObjectDoesNotExist:
             raise MissingForeignKey(
-                'No ForeignKey %s model found with keyword arguments: %s' %
-                (rel_model.__name__, fk_kwargs)
+                'No ForeignKey %s model found with keyword arguments: %s' % (rel_model.__name__, fk_kwargs)
             )
 
     def verify_geom(self, geom, model_field):
@@ -457,9 +473,7 @@ class LayerMapping:
             # Creating the CoordTransform object
             return CoordTransform(self.source_srs, target_srs)
         except Exception as exc:
-            raise LayerMapError(
-                'Could not translate between the data source and model geometry.'
-            ) from exc
+            raise LayerMapError('Could not translate between the data source and model geometry.') from exc
 
     def geometry_field(self):
         "Return the GeometryField instance associated with the geographic column."
@@ -473,11 +487,11 @@ class LayerMapping:
         Given the OGRGeomType for a geometry and its associated GeometryField,
         determine whether the geometry should be turned into a GeometryCollection.
         """
-        return (geom_type.num in self.MULTI_TYPES and
-                model_field.__class__.__name__ == 'Multi%s' % geom_type.django)
+        return geom_type.num in self.MULTI_TYPES and model_field.__class__.__name__ == 'Multi%s' % geom_type.django
 
-    def save(self, verbose=False, fid_range=False, step=False,
-             progress=False, silent=False, stream=sys.stdout, strict=False):
+    def save(
+        self, verbose=False, fid_range=False, step=False, progress=False, silent=False, stream=sys.stdout, strict=False
+    ):
         """
         Save the contents from the OGR DataSource Layer into the database
         according to the mapping dictionary given at initialization.

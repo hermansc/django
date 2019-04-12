@@ -75,6 +75,7 @@ class FieldFile(File):
         else:
             self.file.open(mode)
         return self
+
     # open() doesn't alter the file's contents, but it does reset the pointer
     open.alters_data = True
 
@@ -91,6 +92,7 @@ class FieldFile(File):
         # Save the object because it has changed, unless save is False
         if save:
             self.instance.save()
+
     save.alters_data = True
 
     def delete(self, save=True):
@@ -110,6 +112,7 @@ class FieldFile(File):
 
         if save:
             self.instance.save()
+
     delete.alters_data = True
 
     @property
@@ -144,6 +147,7 @@ class FileDescriptor:
         >>> with open('/path/to/hello.world') as f:
         ...     instance.file = File(f)
     """
+
     def __init__(self, field):
         self.field = field
 
@@ -230,11 +234,7 @@ class FileField(Field):
         super().__init__(verbose_name, name, **kwargs)
 
     def check(self, **kwargs):
-        return [
-            *super().check(**kwargs),
-            *self._check_primary_key(),
-            *self._check_upload_to(),
-        ]
+        return [*super().check(**kwargs), *self._check_primary_key(), *self._check_upload_to()]
 
     def _check_primary_key(self):
         if self._primary_key_set_explicitly:
@@ -317,11 +317,7 @@ class FileField(Field):
             setattr(instance, self.name, data or '')
 
     def formfield(self, **kwargs):
-        return super().formfield(**{
-            'form_class': forms.FileField,
-            'max_length': self.max_length,
-            **kwargs,
-        })
+        return super().formfield(**{'form_class': forms.FileField, 'max_length': self.max_length, **kwargs})
 
 
 class ImageFileDescriptor(FileDescriptor):
@@ -329,6 +325,7 @@ class ImageFileDescriptor(FileDescriptor):
     Just like the FileDescriptor, but for ImageFields. The only difference is
     assigning the width/height to the width_field/height_field, if appropriate.
     """
+
     def __set__(self, instance, value):
         previous_file = instance.__dict__.get(self.field.name)
         super().__set__(instance, value)
@@ -364,10 +361,7 @@ class ImageField(FileField):
         super().__init__(verbose_name, name, **kwargs)
 
     def check(self, **kwargs):
-        return [
-            *super().check(**kwargs),
-            *self._check_image_library_installed(),
-        ]
+        return [*super().check(**kwargs), *self._check_image_library_installed()]
 
     def _check_image_library_installed(self):
         try:
@@ -376,8 +370,7 @@ class ImageField(FileField):
             return [
                 checks.Error(
                     'Cannot use ImageField because Pillow is not installed.',
-                    hint=('Get Pillow at https://pypi.org/project/Pillow/ '
-                          'or run command "pip install Pillow".'),
+                    hint=('Get Pillow at https://pypi.org/project/Pillow/ ' 'or run command "pip install Pillow".'),
                     obj=self,
                     id='fields.E210',
                 )
@@ -430,9 +423,9 @@ class ImageField(FileField):
         if not file and not force:
             return
 
-        dimension_fields_filled = not(
-            (self.width_field and not getattr(instance, self.width_field)) or
-            (self.height_field and not getattr(instance, self.height_field))
+        dimension_fields_filled = not (
+            (self.width_field and not getattr(instance, self.width_field))
+            or (self.height_field and not getattr(instance, self.height_field))
         )
         # When both dimension fields have values, we are most likely loading
         # data from the database or updating an image field that already had
@@ -460,7 +453,4 @@ class ImageField(FileField):
             setattr(instance, self.height_field, height)
 
     def formfield(self, **kwargs):
-        return super().formfield(**{
-            'form_class': forms.ImageField,
-            **kwargs,
-        })
+        return super().formfield(**{'form_class': forms.ImageField, **kwargs})

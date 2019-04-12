@@ -58,6 +58,7 @@ from django.utils.encoding import force_bytes
 # The OGR_G_* routines are relevant here.
 class OGRGeometry(GDALBase):
     """Encapsulate an OGR geometry."""
+
     destructor = capi.destroy_geom
 
     def __init__(self, geom_input, srs=None):
@@ -145,8 +146,7 @@ class OGRGeometry(GDALBase):
     def from_bbox(cls, bbox):
         "Construct a Polygon from a bounding box (4-tuple)."
         x0, y0, x1, y1 = bbox
-        return OGRGeometry('POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))' % (
-            x0, y0, x0, y1, x1, y1, x1, y0, x0, y0))
+        return OGRGeometry('POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))' % (x0, y0, x0, y1, x1, y1, x1, y0, x0, y0))
 
     @staticmethod
     def from_json(geom_input):
@@ -301,12 +301,14 @@ class OGRGeometry(GDALBase):
     # #### Output Methods ####
     def _geos_ptr(self):
         from django.contrib.gis.geos import GEOSGeometry
+
         return GEOSGeometry._from_wkb(self.wkb)
 
     @property
     def geos(self):
         "Return a GEOSGeometry object from this OGRGeometry."
         from django.contrib.gis.geos import GEOSGeometry
+
         return GEOSGeometry(self._geos_ptr(), self.srid)
 
     @property
@@ -325,6 +327,7 @@ class OGRGeometry(GDALBase):
         Return the GeoJSON representation of this Geometry.
         """
         return capi.to_json(self.ptr)
+
     geojson = json
 
     @property
@@ -402,8 +405,7 @@ class OGRGeometry(GDALBase):
             sr = SpatialReference(coord_trans)
             capi.geom_transform_to(self.ptr, sr.ptr)
         else:
-            raise TypeError('Transform only accepts CoordTransform, '
-                            'SpatialReference, string, and integer objects.')
+            raise TypeError('Transform only accepts CoordTransform, ' 'SpatialReference, string, and integer objects.')
 
     # #### Topology Methods ####
     def _topology(self, func, other):
@@ -500,9 +502,9 @@ class OGRGeometry(GDALBase):
 
 # The subclasses for OGR Geometry.
 class Point(OGRGeometry):
-
     def _geos_ptr(self):
         from django.contrib.gis import geos
+
         return geos.Point._create_empty() if self.empty else super()._geos_ptr()
 
     @classmethod
@@ -532,11 +534,11 @@ class Point(OGRGeometry):
             return (self.x, self.y)
         elif self.coord_dim == 3:
             return (self.x, self.y, self.z)
+
     coords = tuple
 
 
 class LineString(OGRGeometry):
-
     def __getitem__(self, index):
         "Return the Point at the given index."
         if 0 <= index < self.point_count:
@@ -560,6 +562,7 @@ class LineString(OGRGeometry):
     def tuple(self):
         "Return the tuple representation of this LineString."
         return tuple(self[i] for i in range(len(self)))
+
     coords = tuple
 
     def _listarr(self, func):
@@ -592,7 +595,6 @@ class LinearRing(LineString):
 
 
 class Polygon(OGRGeometry):
-
     def __len__(self):
         "Return the number of interior rings in this Polygon."
         return self.geom_count
@@ -609,12 +611,14 @@ class Polygon(OGRGeometry):
     def shell(self):
         "Return the shell of this Polygon."
         return self[0]  # First ring is the shell
+
     exterior_ring = shell
 
     @property
     def tuple(self):
         "Return a tuple of LinearRing coordinate tuples."
         return tuple(self[i].tuple for i in range(self.geom_count))
+
     coords = tuple
 
     @property
@@ -671,6 +675,7 @@ class GeometryCollection(OGRGeometry):
     def tuple(self):
         "Return a tuple representation of this Geometry Collection."
         return tuple(self[i].tuple for i in range(self.geom_count))
+
     coords = tuple
 
 

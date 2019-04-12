@@ -7,7 +7,6 @@ from django.test import TestCase
 
 
 class TokenGeneratorTest(TestCase):
-
     def test_make_token(self):
         user = User.objects.create_user('tokentestuser', 'test2@example.com', 'testpw')
         p0 = PasswordResetTokenGenerator()

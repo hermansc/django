@@ -9,6 +9,7 @@ class AccessMixin:
     Abstract CBV mixin that gives access mixins the same customizable
     functionality.
     """
+
     login_url = None
     permission_denied_message = ''
     raise_exception = False
@@ -46,6 +47,7 @@ class AccessMixin:
 
 class LoginRequiredMixin(AccessMixin):
     """Verify that the current user is authenticated."""
+
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
@@ -54,6 +56,7 @@ class LoginRequiredMixin(AccessMixin):
 
 class PermissionRequiredMixin(AccessMixin):
     """Verify that the current user has all specified permissions."""
+
     permission_required = None
 
     def get_permission_required(self):

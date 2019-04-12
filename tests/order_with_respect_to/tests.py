@@ -15,7 +15,6 @@ class OrderWithRespectToBaseTests(BaseOrderWithRespectToTests, TestCase):
 
 
 class OrderWithRespectToTests(SimpleTestCase):
-
     @isolate_apps('order_with_respect_to')
     def test_duplicate_order_field(self):
         class Bar(models.Model):

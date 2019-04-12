@@ -5,7 +5,6 @@ from .models import Car, PossessedCar
 
 
 class TestTestCase(TestCase):
-
     @skipUnlessDBFeature('can_defer_constraint_checks')
     @skipUnlessDBFeature('supports_foreign_keys')
     def test_fixture_teardown_checks_constraints(self):

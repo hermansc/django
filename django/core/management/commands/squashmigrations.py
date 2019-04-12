@@ -13,32 +13,28 @@ class Command(BaseCommand):
     help = "Squashes an existing set of migrations (from first until specified) into a single new one."
 
     def add_arguments(self, parser):
+        parser.add_argument('app_label', help='App label of the application to squash migrations for.')
         parser.add_argument(
-            'app_label',
-            help='App label of the application to squash migrations for.',
-        )
-        parser.add_argument(
-            'start_migration_name', nargs='?',
+            'start_migration_name',
+            nargs='?',
             help='Migrations will be squashed starting from and including this migration.',
         )
+        parser.add_argument('migration_name', help='Migrations will be squashed until and including this migration.')
         parser.add_argument(
-            'migration_name',
-            help='Migrations will be squashed until and including this migration.',
+            '--no-optimize', action='store_true', help='Do not try to optimize the squashed operations.'
         )
         parser.add_argument(
-            '--no-optimize', action='store_true',
-            help='Do not try to optimize the squashed operations.',
-        )
-        parser.add_argument(
-            '--noinput', '--no-input', action='store_false', dest='interactive',
+            '--noinput',
+            '--no-input',
+            action='store_false',
+            dest='interactive',
             help='Tells Django to NOT prompt the user for input of any kind.',
         )
+        parser.add_argument('--squashed-name', help='Sets the name of the new squashed migration.')
         parser.add_argument(
-            '--squashed-name',
-            help='Sets the name of the new squashed migration.',
-        )
-        parser.add_argument(
-            '--no-header', action='store_false', dest='include_header',
+            '--no-header',
+            action='store_false',
+            dest='include_header',
             help='Do not add a header comment to the new squashed migration.',
         )
 
@@ -61,8 +57,7 @@ class Command(BaseCommand):
         loader = MigrationLoader(connections[DEFAULT_DB_ALIAS])
         if app_label not in loader.migrated_apps:
             raise CommandError(
-                "App '%s' does not have migrations (so squashmigrations on "
-                "it makes no sense)" % app_label
+                "App '%s' does not have migrations (so squashmigrations on " "it makes no sense)" % app_label
             )
 
         migration = self.find_migration(loader, app_label, migration_name)
@@ -149,8 +144,7 @@ class Command(BaseCommand):
                     self.stdout.write("  No optimizations possible.")
                 else:
                     self.stdout.write(
-                        "  Optimized from %s operations to %s operations." %
-                        (len(operations), len(new_operations))
+                        "  Optimized from %s operations to %s operations." % (len(operations), len(new_operations))
                     )
 
         # Work out the value of replaces (any squashed ones we're re-squashing)
@@ -163,11 +157,11 @@ class Command(BaseCommand):
                 replaces.append((migration.app_label, migration.name))
 
         # Make a new migration with those operations
-        subclass = type("Migration", (migrations.Migration,), {
-            "dependencies": dependencies,
-            "operations": new_operations,
-            "replaces": replaces,
-        })
+        subclass = type(
+            "Migration",
+            (migrations.Migration,),
+            {"dependencies": dependencies, "operations": new_operations, "replaces": replaces},
+        )
         if start_migration_name:
             if squashed_name:
                 # Use the name from --squashed-name.
@@ -204,11 +198,7 @@ class Command(BaseCommand):
             return loader.get_migration_by_prefix(app_label, name)
         except AmbiguityError:
             raise CommandError(
-                "More than one migration matches '%s' in app '%s'. Please be "
-                "more specific." % (name, app_label)
+                "More than one migration matches '%s' in app '%s'. Please be " "more specific." % (name, app_label)
             )
         except KeyError:
-            raise CommandError(
-                "Cannot find a migration matching '%s' from app '%s'." %
-                (name, app_label)
-            )
+            raise CommandError("Cannot find a migration matching '%s' from app '%s'." % (name, app_label))

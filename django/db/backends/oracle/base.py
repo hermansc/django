@@ -24,9 +24,11 @@ def _setup_environment(environ):
         try:
             import ctypes
         except ImportError as e:
-            raise ImproperlyConfigured("Error loading ctypes: %s; "
-                                       "the Oracle backend requires ctypes to "
-                                       "operate correctly under Cygwin." % e)
+            raise ImproperlyConfigured(
+                "Error loading ctypes: %s; "
+                "the Oracle backend requires ctypes to "
+                "operate correctly under Cygwin." % e
+            )
         kernel32 = ctypes.CDLL('kernel32')
         for name, value in environ:
             kernel32.SetEnvironmentVariableA(name, value)
@@ -34,13 +36,15 @@ def _setup_environment(environ):
         os.environ.update(environ)
 
 
-_setup_environment([
-    # Oracle takes client-side character set encoding from the environment.
-    ('NLS_LANG', '.AL32UTF8'),
-    # This prevents unicode from getting mangled by getting encoded into the
-    # potentially non-unicode database character set.
-    ('ORA_NCHAR_LITERAL_REPLACE', 'TRUE'),
-])
+_setup_environment(
+    [
+        # Oracle takes client-side character set encoding from the environment.
+        ('NLS_LANG', '.AL32UTF8'),
+        # This prevents unicode from getting mangled by getting encoded into the
+        # potentially non-unicode database character set.
+        ('ORA_NCHAR_LITERAL_REPLACE', 'TRUE'),
+    ]
+)
 
 
 try:
@@ -49,14 +53,14 @@ except ImportError as e:
     raise ImproperlyConfigured("Error loading cx_Oracle module: %s" % e)
 
 # Some of these import cx_Oracle, so import them after checking if it's installed.
-from .client import DatabaseClient                          # NOQA isort:skip
-from .creation import DatabaseCreation                      # NOQA isort:skip
-from .features import DatabaseFeatures                      # NOQA isort:skip
-from .introspection import DatabaseIntrospection            # NOQA isort:skip
-from .operations import DatabaseOperations                  # NOQA isort:skip
-from .schema import DatabaseSchemaEditor                    # NOQA isort:skip
-from .utils import Oracle_datetime                          # NOQA isort:skip
-from .validation import DatabaseValidation                  # NOQA isort:skip
+from .client import DatabaseClient  # NOQA isort:skip
+from .creation import DatabaseCreation  # NOQA isort:skip
+from .features import DatabaseFeatures  # NOQA isort:skip
+from .introspection import DatabaseIntrospection  # NOQA isort:skip
+from .operations import DatabaseOperations  # NOQA isort:skip
+from .schema import DatabaseSchemaEditor  # NOQA isort:skip
+from .utils import Oracle_datetime  # NOQA isort:skip
+from .validation import DatabaseValidation  # NOQA isort:skip
 
 
 @contextmanager
@@ -78,7 +82,6 @@ def wrap_oracle_errors():
 
 
 class _UninitializedOperatorsDescriptor:
-
     def __get__(self, instance, cls=None):
         # If connection.operators is looked up before a connection has been
         # created, transparently initialize connection.operators to avert an
@@ -183,11 +186,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'iendswith': "'%%' || UPPER({})",
     }
 
-    _standard_pattern_ops = {k: "LIKE TRANSLATE( " + v + " USING NCHAR_CS)"
-                                " ESCAPE TRANSLATE('\\' USING NCHAR_CS)"
-                             for k, v in _pattern_ops.items()}
-    _likec_pattern_ops = {k: "LIKEC " + v + " ESCAPE '\\'"
-                          for k, v in _pattern_ops.items()}
+    _standard_pattern_ops = {
+        k: "LIKE TRANSLATE( " + v + " USING NCHAR_CS)" " ESCAPE TRANSLATE('\\' USING NCHAR_CS)"
+        for k, v in _pattern_ops.items()
+    }
+    _likec_pattern_ops = {k: "LIKEC " + v + " ESCAPE '\\'" for k, v in _pattern_ops.items()}
 
     Database = Database
     SchemaEditorClass = DatabaseSchemaEditor
@@ -223,10 +226,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def get_new_connection(self, conn_params):
         return Database.connect(
-            user=self.settings_dict['USER'],
-            password=self.settings_dict['PASSWORD'],
-            dsn=self._dsn(),
-            **conn_params,
+            user=self.settings_dict['USER'], password=self.settings_dict['PASSWORD'], dsn=self._dsn(), **conn_params
         )
 
     def init_connection_state(self):
@@ -242,8 +242,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         # TO_CHAR().
         cursor.execute(
             "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'"
-            " NLS_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS.FF'" +
-            (" TIME_ZONE = 'UTC'" if settings.USE_TZ else '')
+            " NLS_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS.FF'" + (" TIME_ZONE = 'UTC'" if settings.USE_TZ else '')
         )
         cursor.close()
         if 'operators' not in self.__dict__:
@@ -254,9 +253,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             # the same settings.
             cursor = self.create_cursor()
             try:
-                cursor.execute("SELECT 1 FROM DUAL WHERE DUMMY %s"
-                               % self._standard_operators['contains'],
-                               ['X'])
+                cursor.execute("SELECT 1 FROM DUAL WHERE DUMMY %s" % self._standard_operators['contains'], ['X'])
             except Database.DatabaseError:
                 self.operators = self._likec_operators
                 self.pattern_ops = self._likec_pattern_ops
@@ -281,10 +278,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # logging is enabled to keep query counts consistent with other backends.
     def _savepoint_commit(self, sid):
         if self.queries_logged:
-            self.queries_log.append({
-                'sql': '-- RELEASE SAVEPOINT %s (faked)' % self.ops.quote_name(sid),
-                'time': '0.000',
-            })
+            self.queries_log.append(
+                {'sql': '-- RELEASE SAVEPOINT %s (faked)' % self.ops.quote_name(sid), 'time': '0.000'}
+            )
 
     def _set_autocommit(self, autocommit):
         with self.wrap_database_errors:
@@ -325,8 +321,7 @@ class OracleParam:
     def __init__(self, param, cursor, strings_only=False):
         # With raw SQL queries, datetimes can reach this function
         # without being converted by DateTimeField.get_db_prep_value.
-        if settings.USE_TZ and (isinstance(param, datetime.datetime) and
-                                not isinstance(param, Oracle_datetime)):
+        if settings.USE_TZ and (isinstance(param, datetime.datetime) and not isinstance(param, Oracle_datetime)):
             param = Oracle_datetime.from_datetime(param)
 
         string_size = 0
@@ -388,6 +383,7 @@ class FormatStylePlaceholderCursor:
     style. This fixes it -- but note that if you want to use a literal "%s" in
     a query, you'll need to use "%%s".
     """
+
     charset = 'utf-8'
 
     def __init__(self, connection):
@@ -432,12 +428,7 @@ class FormatStylePlaceholderCursor:
                 # mathematical expression in the SELECT list. Guess int
                 # or Decimal based on whether it has a decimal point.
                 outconverter = FormatStylePlaceholderCursor._output_number_converter
-            return cursor.var(
-                Database.STRING,
-                size=255,
-                arraysize=cursor.arraysize,
-                outconverter=outconverter,
-            )
+            return cursor.var(Database.STRING, size=255, arraysize=cursor.arraysize, outconverter=outconverter)
 
     def _format_params(self, params):
         try:

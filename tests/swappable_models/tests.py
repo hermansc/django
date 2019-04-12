@@ -11,11 +11,7 @@ from .models import Article
 class SwappableModelTests(TestCase):
 
     # Limit memory usage when calling 'migrate'.
-    available_apps = [
-        'swappable_models',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-    ]
+    available_apps = ['swappable_models', 'django.contrib.auth', 'django.contrib.contenttypes']
 
     @override_settings(TEST_ARTICLE_MODEL='swappable_models.AlternateArticle')
     def test_generated_data(self):
@@ -31,13 +27,11 @@ class SwappableModelTests(TestCase):
 
         # Content types and permissions exist for the swapped model,
         # but not for the swappable model.
-        apps_models = [(p.content_type.app_label, p.content_type.model)
-                       for p in Permission.objects.all()]
+        apps_models = [(p.content_type.app_label, p.content_type.model) for p in Permission.objects.all()]
         self.assertIn(('swappable_models', 'alternatearticle'), apps_models)
         self.assertNotIn(('swappable_models', 'article'), apps_models)
 
-        apps_models = [(ct.app_label, ct.model)
-                       for ct in ContentType.objects.all()]
+        apps_models = [(ct.app_label, ct.model) for ct in ContentType.objects.all()]
         self.assertIn(('swappable_models', 'alternatearticle'), apps_models)
         self.assertNotIn(('swappable_models', 'article'), apps_models)
 

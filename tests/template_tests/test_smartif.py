@@ -4,7 +4,6 @@ from django.template.smartif import IfParser
 
 
 class SmartIfTests(unittest.TestCase):
-
     def assertCalcEqual(self, expected, tokens):
         self.assertEqual(expected, IfParser(tokens).parse().eval({}))
 
@@ -51,5 +50,7 @@ class SmartIfTests(unittest.TestCase):
 
         self.assertCalcEqual(True, [True, '==', True, 'or', True, '==', False])
 
-        self.assertEqual("(or (and (== (literal 1) (literal 2)) (literal 3)) (literal 4))",
-                         repr(IfParser([1, '==', 2, 'and', 3, 'or', 4]).parse()))
+        self.assertEqual(
+            "(or (and (== (literal 1) (literal 2)) (literal 3)) (literal 4))",
+            repr(IfParser([1, '==', 2, 'and', 3, 'or', 4]).parse()),
+        )

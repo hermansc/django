@@ -25,6 +25,7 @@ class WhereNode(tree.Node):
     relabeled_clone() method or relabel_aliases() and clone() methods and
     contains_aggregate attribute.
     """
+
     default = AND
     resolved = False
     conditional = True
@@ -40,9 +41,7 @@ class WhereNode(tree.Node):
         in_negated = negated ^ self.negated
         # If the effective connector is OR and this node contains an aggregate,
         # then we need to push the whole branch to HAVING clause.
-        may_need_split = (
-            (in_negated and self.connector == AND) or
-            (not in_negated and self.connector == OR))
+        may_need_split = (in_negated and self.connector == AND) or (not in_negated and self.connector == OR)
         if may_need_split and self.contains_aggregate:
             return None, self
         where_parts = []
@@ -145,8 +144,7 @@ class WhereNode(tree.Node):
         with empty subtree_parents). Childs must be either (Constraint, lookup,
         value) tuples, or objects supporting .clone().
         """
-        clone = self.__class__._new_instance(
-            children=[], connector=self.connector, negated=self.negated)
+        clone = self.__class__._new_instance(children=[], connector=self.connector, negated=self.negated)
         for child in self.children:
             if hasattr(child, 'clone'):
                 clone.children.append(child.clone())
@@ -206,6 +204,7 @@ class WhereNode(tree.Node):
 
 class NothingNode:
     """A node that matches nothing."""
+
     contains_aggregate = False
 
     def as_sql(self, compiler=None, connection=None):

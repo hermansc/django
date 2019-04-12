@@ -3,9 +3,7 @@ import decimal
 from django.db import NotSupportedError, connection
 from django.db.backends.base.operations import BaseDatabaseOperations
 from django.db.models import DurationField
-from django.test import (
-    SimpleTestCase, TestCase, override_settings, skipIfDBFeature,
-)
+from django.test import SimpleTestCase, TestCase, override_settings, skipIfDBFeature
 from django.utils import timezone
 
 
@@ -52,10 +50,7 @@ class SimpleDatabaseOperationTests(SimpleTestCase):
 
     def test_adapt_unknown_value_decimal(self):
         value = decimal.Decimal('3.14')
-        self.assertEqual(
-            self.ops.adapt_unknown_value(value),
-            self.ops.adapt_decimalfield_value(value)
-        )
+        self.assertEqual(self.ops.adapt_unknown_value(value), self.ops.adapt_decimalfield_value(value))
 
     def test_adapt_unknown_value_date(self):
         value = timezone.now().date()
@@ -138,9 +133,6 @@ class DatabaseOperationTests(TestCase):
     def test_subtract_temporals(self):
         duration_field = DurationField()
         duration_field_internal_type = duration_field.get_internal_type()
-        msg = (
-            'This backend does not support %s subtraction.' %
-            duration_field_internal_type
-        )
+        msg = 'This backend does not support %s subtraction.' % duration_field_internal_type
         with self.assertRaisesMessage(NotSupportedError, msg):
             self.ops.subtract_temporals(duration_field_internal_type, None, None)

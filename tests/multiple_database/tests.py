@@ -62,8 +62,7 @@ class QueryTestCase(TestCase):
     def test_other_creation(self):
         "Objects created on another database don't leak onto the default database"
         # Create a book on the second database
-        Book.objects.using('other').create(title="Pro Django",
-                                           published=datetime.date(2008, 12, 16))
+        Book.objects.using('other').create(title="Pro Django", published=datetime.date(2008, 12, 16))
 
         # Create a book on the default database using a save
         dive = Book()
@@ -150,8 +149,7 @@ class QueryTestCase(TestCase):
     def test_m2m_separation(self):
         "M2M fields are constrained to a single database"
         # Create a book and author on the default database
-        pro = Book.objects.create(title="Pro Django",
-                                  published=datetime.date(2008, 12, 16))
+        pro = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
 
         marty = Person.objects.create(name="Marty Alchin")
 
@@ -172,20 +170,19 @@ class QueryTestCase(TestCase):
         # Queries work across m2m joins
         self.assertEqual(
             list(Book.objects.using('default').filter(authors__name='Marty Alchin').values_list('title', flat=True)),
-            ['Pro Django']
+            ['Pro Django'],
         )
         self.assertEqual(
-            list(Book.objects.using('other').filter(authors__name='Marty Alchin').values_list('title', flat=True)),
-            []
+            list(Book.objects.using('other').filter(authors__name='Marty Alchin').values_list('title', flat=True)), []
         )
 
         self.assertEqual(
             list(Book.objects.using('default').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)),
-            []
+            [],
         )
         self.assertEqual(
             list(Book.objects.using('other').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)),
-            ['Dive into Python']
+            ['Dive into Python'],
         )
 
         # Reget the objects to clear caches
@@ -209,51 +206,46 @@ class QueryTestCase(TestCase):
         # Add a second author
         john = Person.objects.using('other').create(name="John Smith")
         self.assertEqual(
-            list(Book.objects.using('other').filter(authors__name='John Smith').values_list('title', flat=True)),
-            []
+            list(Book.objects.using('other').filter(authors__name='John Smith').values_list('title', flat=True)), []
         )
 
         dive.authors.add(john)
         self.assertEqual(
             list(Book.objects.using('other').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)),
-            ['Dive into Python']
+            ['Dive into Python'],
         )
         self.assertEqual(
             list(Book.objects.using('other').filter(authors__name='John Smith').values_list('title', flat=True)),
-            ['Dive into Python']
+            ['Dive into Python'],
         )
 
         # Remove the second author
         dive.authors.remove(john)
         self.assertEqual(
             list(Book.objects.using('other').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)),
-            ['Dive into Python']
+            ['Dive into Python'],
         )
         self.assertEqual(
-            list(Book.objects.using('other').filter(authors__name='John Smith').values_list('title', flat=True)),
-            []
+            list(Book.objects.using('other').filter(authors__name='John Smith').values_list('title', flat=True)), []
         )
 
         # Clear all authors
         dive.authors.clear()
         self.assertEqual(
-            list(Book.objects.using('other').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)),
-            []
+            list(Book.objects.using('other').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)), []
         )
         self.assertEqual(
-            list(Book.objects.using('other').filter(authors__name='John Smith').values_list('title', flat=True)),
-            []
+            list(Book.objects.using('other').filter(authors__name='John Smith').values_list('title', flat=True)), []
         )
 
         # Create an author through the m2m interface
         dive.authors.create(name='Jane Brown')
         self.assertEqual(
-            list(Book.objects.using('other').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)),
-            []
+            list(Book.objects.using('other').filter(authors__name='Mark Pilgrim').values_list('title', flat=True)), []
         )
         self.assertEqual(
             list(Book.objects.using('other').filter(authors__name='Jane Brown').values_list('title', flat=True)),
-            ['Dive into Python']
+            ['Dive into Python'],
         )
 
     def test_m2m_reverse_operations(self):
@@ -272,50 +264,50 @@ class QueryTestCase(TestCase):
         mark.book_set.add(grease)
         self.assertEqual(
             list(Person.objects.using('other').filter(book__title='Dive into Python').values_list('name', flat=True)),
-            ['Mark Pilgrim']
+            ['Mark Pilgrim'],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(book__title='Greasemonkey Hacks').values_list('name', flat=True)
             ),
-            ['Mark Pilgrim']
+            ['Mark Pilgrim'],
         )
 
         # Remove a book from the m2m
         mark.book_set.remove(grease)
         self.assertEqual(
             list(Person.objects.using('other').filter(book__title='Dive into Python').values_list('name', flat=True)),
-            ['Mark Pilgrim']
+            ['Mark Pilgrim'],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(book__title='Greasemonkey Hacks').values_list('name', flat=True)
             ),
-            []
+            [],
         )
 
         # Clear the books associated with mark
         mark.book_set.clear()
         self.assertEqual(
             list(Person.objects.using('other').filter(book__title='Dive into Python').values_list('name', flat=True)),
-            []
+            [],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(book__title='Greasemonkey Hacks').values_list('name', flat=True)
             ),
-            []
+            [],
         )
 
         # Create a book through the m2m interface
         mark.book_set.create(title="Dive into HTML5", published=datetime.date(2020, 1, 1))
         self.assertEqual(
             list(Person.objects.using('other').filter(book__title='Dive into Python').values_list('name', flat=True)),
-            []
+            [],
         )
         self.assertEqual(
             list(Person.objects.using('other').filter(book__title='Dive into HTML5').values_list('name', flat=True)),
-            ['Mark Pilgrim']
+            ['Mark Pilgrim'],
         )
 
     def test_m2m_cross_database_protection(self):
@@ -330,18 +322,14 @@ class QueryTestCase(TestCase):
 
         mark = Person.objects.using('other').create(name="Mark Pilgrim")
         # Set a foreign key set with an object from a different database
-        msg = (
-            'Cannot assign "<Person: Marty Alchin>": the current database '
-            'router prevents this relation.'
-        )
+        msg = 'Cannot assign "<Person: Marty Alchin>": the current database ' 'router prevents this relation.'
         with self.assertRaisesMessage(ValueError, msg):
             with transaction.atomic(using='default'):
                 marty.edited.set([pro, dive])
 
         # Add to an m2m with an object from a different database
         msg = (
-            'Cannot add "<Book: Dive into Python>": instance is on '
-            'database "default", value is on database "other"'
+            'Cannot add "<Book: Dive into Python>": instance is on ' 'database "default", value is on database "other"'
         )
         with self.assertRaisesMessage(ValueError, msg):
             with transaction.atomic(using='default'):
@@ -353,10 +341,7 @@ class QueryTestCase(TestCase):
                 marty.book_set.set([pro, dive])
 
         # Add to a reverse m2m with an object from a different database
-        msg = (
-            'Cannot add "<Person: Marty Alchin>": instance is on '
-            'database "other", value is on database "default"'
-        )
+        msg = 'Cannot add "<Person: Marty Alchin>": instance is on ' 'database "other", value is on database "default"'
         with self.assertRaisesMessage(ValueError, msg):
             with transaction.atomic(using='other'):
                 dive.authors.add(marty)
@@ -450,24 +435,23 @@ class QueryTestCase(TestCase):
         # Queries work across foreign key joins
         self.assertEqual(
             list(Person.objects.using('default').filter(edited__title='Pro Django').values_list('name', flat=True)),
-            ['George Vilches']
+            ['George Vilches'],
         )
         self.assertEqual(
-            list(Person.objects.using('other').filter(edited__title='Pro Django').values_list('name', flat=True)),
-            []
+            list(Person.objects.using('other').filter(edited__title='Pro Django').values_list('name', flat=True)), []
         )
 
         self.assertEqual(
             list(
                 Person.objects.using('default').filter(edited__title='Dive into Python').values_list('name', flat=True)
             ),
-            []
+            [],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(edited__title='Dive into Python').values_list('name', flat=True)
             ),
-            ['Chris Mills']
+            ['Chris Mills'],
         )
 
         # Reget the objects to clear caches
@@ -490,62 +474,62 @@ class QueryTestCase(TestCase):
         html5 = Book.objects.using('other').create(title="Dive into HTML5", published=datetime.date(2010, 3, 15))
         self.assertEqual(
             list(Person.objects.using('other').filter(edited__title='Dive into HTML5').values_list('name', flat=True)),
-            []
+            [],
         )
 
         chris.edited.add(html5)
         self.assertEqual(
             list(Person.objects.using('other').filter(edited__title='Dive into HTML5').values_list('name', flat=True)),
-            ['Chris Mills']
+            ['Chris Mills'],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(edited__title='Dive into Python').values_list('name', flat=True)
             ),
-            ['Chris Mills']
+            ['Chris Mills'],
         )
 
         # Remove the second editor
         chris.edited.remove(html5)
         self.assertEqual(
             list(Person.objects.using('other').filter(edited__title='Dive into HTML5').values_list('name', flat=True)),
-            []
+            [],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(edited__title='Dive into Python').values_list('name', flat=True)
             ),
-            ['Chris Mills']
+            ['Chris Mills'],
         )
 
         # Clear all edited books
         chris.edited.clear()
         self.assertEqual(
             list(Person.objects.using('other').filter(edited__title='Dive into HTML5').values_list('name', flat=True)),
-            []
+            [],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(edited__title='Dive into Python').values_list('name', flat=True)
             ),
-            []
+            [],
         )
 
         # Create an author through the m2m interface
         chris.edited.create(title='Dive into Water', published=datetime.date(2010, 3, 15))
         self.assertEqual(
             list(Person.objects.using('other').filter(edited__title='Dive into HTML5').values_list('name', flat=True)),
-            []
+            [],
         )
         self.assertEqual(
             list(Person.objects.using('other').filter(edited__title='Dive into Water').values_list('name', flat=True)),
-            ['Chris Mills']
+            ['Chris Mills'],
         )
         self.assertEqual(
             list(
                 Person.objects.using('other').filter(edited__title='Dive into Python').values_list('name', flat=True)
             ),
-            []
+            [],
         )
 
     def test_foreign_key_cross_database_protection(self):
@@ -558,10 +542,7 @@ class QueryTestCase(TestCase):
         dive = Book.objects.using('other').create(title="Dive into Python", published=datetime.date(2009, 5, 4))
 
         # Set a foreign key with an object from a different database
-        msg = (
-            'Cannot assign "<Person: Marty Alchin>": the current database '
-            'router prevents this relation.'
-        )
+        msg = 'Cannot assign "<Person: Marty Alchin>": the current database ' 'router prevents this relation.'
         with self.assertRaisesMessage(ValueError, msg):
             dive.editor = marty
 
@@ -635,31 +616,33 @@ class QueryTestCase(TestCase):
         self.assertEqual(
             list(
                 User.objects.using('default')
-                .filter(userprofile__flavor='chocolate').values_list('username', flat=True)
+                .filter(userprofile__flavor='chocolate')
+                .values_list('username', flat=True)
             ),
-            ['alice']
+            ['alice'],
         )
         self.assertEqual(
             list(
-                User.objects.using('other')
-                .filter(userprofile__flavor='chocolate').values_list('username', flat=True)
+                User.objects.using('other').filter(userprofile__flavor='chocolate').values_list('username', flat=True)
             ),
-            []
+            [],
         )
 
         self.assertEqual(
             list(
                 User.objects.using('default')
-                .filter(userprofile__flavor='crunchy frog').values_list('username', flat=True)
+                .filter(userprofile__flavor='crunchy frog')
+                .values_list('username', flat=True)
             ),
-            []
+            [],
         )
         self.assertEqual(
             list(
                 User.objects.using('other')
-                .filter(userprofile__flavor='crunchy frog').values_list('username', flat=True)
+                .filter(userprofile__flavor='crunchy frog')
+                .values_list('username', flat=True)
             ),
-            ['bob']
+            ['bob'],
         )
 
         # Reget the objects to clear caches
@@ -680,10 +663,7 @@ class QueryTestCase(TestCase):
 
         # Set a one-to-one relation with an object from a different database
         alice_profile = UserProfile.objects.using('default').create(user=alice, flavor='chocolate')
-        msg = (
-            'Cannot assign "%r": the current database router prevents this '
-            'relation.' % alice_profile
-        )
+        msg = 'Cannot assign "%r": the current database router prevents this ' 'relation.' % alice_profile
         with self.assertRaisesMessage(ValueError, msg):
             bob.userprofile = alice_profile
 
@@ -721,7 +701,7 @@ class QueryTestCase(TestCase):
         self.assertEqual(list(UserProfile.objects.using('default').values_list('flavor', flat=True)), ['chocolate'])
         self.assertEqual(
             list(UserProfile.objects.using('other').values_list('flavor', flat=True)),
-            ['crunchy frog', 'spring surprise']
+            ['crunchy frog', 'spring surprise'],
         )
 
         # This also works if you assign the O2O relation in the constructor
@@ -733,7 +713,7 @@ class QueryTestCase(TestCase):
         self.assertEqual(list(UserProfile.objects.using('default').values_list('flavor', flat=True)), ['chocolate'])
         self.assertEqual(
             list(UserProfile.objects.using('other').values_list('flavor', flat=True)),
-            ['crunchy frog', 'spring surprise']
+            ['crunchy frog', 'spring surprise'],
         )
 
         # When saved, the new profile goes to 'other'
@@ -741,7 +721,7 @@ class QueryTestCase(TestCase):
         self.assertEqual(list(UserProfile.objects.using('default').values_list('flavor', flat=True)), ['chocolate'])
         self.assertEqual(
             list(UserProfile.objects.using('other').values_list('flavor', flat=True)),
-            ['crunchy frog', 'spring surprise', 'tofu']
+            ['crunchy frog', 'spring surprise', 'tofu'],
         )
 
     def test_generic_key_separation(self):
@@ -775,56 +755,50 @@ class QueryTestCase(TestCase):
         review2 = Review.objects.using('other').create(source="Python Monthly", content_object=temp)
 
         self.assertEqual(
-            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)),
-            []
+            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)), []
         )
         self.assertEqual(
             list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)),
-            ['Python Weekly']
+            ['Python Weekly'],
         )
 
         # Add a second review
         dive.reviews.add(review2)
         self.assertEqual(
-            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)),
-            []
+            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)), []
         )
         self.assertEqual(
             list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)),
-            ['Python Monthly', 'Python Weekly']
+            ['Python Monthly', 'Python Weekly'],
         )
 
         # Remove the second author
         dive.reviews.remove(review1)
         self.assertEqual(
-            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)),
-            []
+            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)), []
         )
         self.assertEqual(
             list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)),
-            ['Python Monthly']
+            ['Python Monthly'],
         )
 
         # Clear all reviews
         dive.reviews.clear()
         self.assertEqual(
-            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)),
-            []
+            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)), []
         )
         self.assertEqual(
-            list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)),
-            []
+            list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)), []
         )
 
         # Create an author through the generic interface
         dive.reviews.create(source='Python Daily')
         self.assertEqual(
-            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)),
-            []
+            list(Review.objects.using('default').filter(object_id=dive.pk).values_list('source', flat=True)), []
         )
         self.assertEqual(
             list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)),
-            ['Python Daily']
+            ['Python Daily'],
         )
 
     def test_generic_key_cross_database_protection(self):
@@ -847,10 +821,7 @@ class QueryTestCase(TestCase):
             review1.content_object = dive
 
         # Add to a foreign key set with an object from a different database
-        msg = (
-            "<Review: Python Monthly> instance isn't saved. "
-            "Use bulk=False or save the object first."
-        )
+        msg = "<Review: Python Monthly> instance isn't saved. " "Use bulk=False or save the object first."
         with self.assertRaisesMessage(ValueError, msg):
             with transaction.atomic(using='other'):
                 dive.reviews.add(review1)
@@ -868,22 +839,22 @@ class QueryTestCase(TestCase):
         # ... but it isn't saved yet
         self.assertEqual(
             list(Review.objects.using('default').filter(object_id=pro.pk).values_list('source', flat=True)),
-            ['Python Monthly']
+            ['Python Monthly'],
         )
         self.assertEqual(
             list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)),
-            ['Python Weekly']
+            ['Python Weekly'],
         )
 
         # When saved, John goes to 'other'
         review3.save()
         self.assertEqual(
             list(Review.objects.using('default').filter(object_id=pro.pk).values_list('source', flat=True)),
-            ['Python Monthly']
+            ['Python Monthly'],
         )
         self.assertEqual(
             list(Review.objects.using('other').filter(object_id=dive.pk).values_list('source', flat=True)),
-            ['Python Daily', 'Python Weekly']
+            ['Python Daily', 'Python Weekly'],
         )
 
     def test_generic_key_deletion(self):
@@ -930,11 +901,7 @@ class QueryTestCase(TestCase):
         "Database assignment is retained if an object is retrieved with select_related()"
         # Create a book and author on the other database
         mark = Person.objects.using('other').create(name="Mark Pilgrim")
-        Book.objects.using('other').create(
-            title="Dive into Python",
-            published=datetime.date(2009, 5, 4),
-            editor=mark,
-        )
+        Book.objects.using('other').create(title="Dive into Python", published=datetime.date(2009, 5, 4), editor=mark)
 
         # Retrieve the Person using select_related()
         book = Book.objects.using('other').select_related('editor').get(title="Dive into Python")
@@ -976,18 +943,15 @@ class QueryTestCase(TestCase):
 
 
 class ConnectionRouterTestCase(SimpleTestCase):
-    @override_settings(DATABASE_ROUTERS=[
-        'multiple_database.tests.TestRouter',
-        'multiple_database.tests.WriteRouter'])
+    @override_settings(DATABASE_ROUTERS=['multiple_database.tests.TestRouter', 'multiple_database.tests.WriteRouter'])
     def test_router_init_default(self):
         connection_router = ConnectionRouter()
         self.assertEqual([r.__class__.__name__ for r in connection_router.routers], ['TestRouter', 'WriteRouter'])
 
     def test_router_init_arg(self):
-        connection_router = ConnectionRouter([
-            'multiple_database.tests.TestRouter',
-            'multiple_database.tests.WriteRouter'
-        ])
+        connection_router = ConnectionRouter(
+            ['multiple_database.tests.TestRouter', 'multiple_database.tests.WriteRouter']
+        )
         self.assertEqual([r.__class__.__name__ for r in connection_router.routers], ['TestRouter', 'WriteRouter'])
 
         # Init with instances instead of strings
@@ -1038,8 +1002,7 @@ class RouterTestCase(TestCase):
 
     def test_partial_router(self):
         "A router can choose to implement a subset of methods"
-        dive = Book.objects.using('other').create(title="Dive into Python",
-                                                  published=datetime.date(2009, 5, 4))
+        dive = Book.objects.using('other').create(title="Dive into Python", published=datetime.date(2009, 5, 4))
 
         # First check the baseline behavior.
 
@@ -1069,9 +1032,7 @@ class RouterTestCase(TestCase):
     def test_database_routing(self):
         marty = Person.objects.using('default').create(name="Marty Alchin")
         pro = Book.objects.using('default').create(
-            title='Pro Django',
-            published=datetime.date(2008, 12, 16),
-            editor=marty,
+            title='Pro Django', published=datetime.date(2008, 12, 16), editor=marty
         )
         pro.authors.set([marty])
 
@@ -1107,8 +1068,9 @@ class RouterTestCase(TestCase):
         book, created = Book.objects.get_or_create(title="Pro Django")
         self.assertFalse(created)
 
-        book, created = Book.objects.get_or_create(title="Dive Into Python",
-                                                   defaults={'published': datetime.date(2009, 5, 4)})
+        book, created = Book.objects.get_or_create(
+            title="Dive Into Python", defaults={'published': datetime.date(2009, 5, 4)}
+        )
         self.assertTrue(created)
 
         # Check the head count of objects
@@ -1126,10 +1088,7 @@ class RouterTestCase(TestCase):
 
     def test_invalid_set_foreign_key_assignment(self):
         marty = Person.objects.using('default').create(name="Marty Alchin")
-        dive = Book.objects.using('other').create(
-            title="Dive into Python",
-            published=datetime.date(2009, 5, 4),
-        )
+        dive = Book.objects.using('other').create(title="Dive into Python", published=datetime.date(2009, 5, 4))
         # Set a foreign key set with an object from a different database
         msg = "<Book: Dive into Python> instance isn't saved. Use bulk=False or save the object first."
         with self.assertRaisesMessage(ValueError, msg):
@@ -1138,14 +1097,12 @@ class RouterTestCase(TestCase):
     def test_foreign_key_cross_database_protection(self):
         "Foreign keys can cross databases if they two databases have a common source"
         # Create a book and author on the default database
-        pro = Book.objects.using('default').create(title="Pro Django",
-                                                   published=datetime.date(2008, 12, 16))
+        pro = Book.objects.using('default').create(title="Pro Django", published=datetime.date(2008, 12, 16))
 
         marty = Person.objects.using('default').create(name="Marty Alchin")
 
         # Create a book and author on the other database
-        dive = Book.objects.using('other').create(title="Dive into Python",
-                                                  published=datetime.date(2009, 5, 4))
+        dive = Book.objects.using('other').create(title="Dive into Python", published=datetime.date(2009, 5, 4))
 
         mark = Person.objects.using('other').create(name="Mark Pilgrim")
 
@@ -1242,8 +1199,7 @@ class RouterTestCase(TestCase):
 
         # Same goes for get_or_create, regardless of whether getting or creating
         cheesecake, created = mark.edited.get_or_create(
-            title='Dive into Cheesecake',
-            published=datetime.date(2010, 3, 15),
+            title='Dive into Cheesecake', published=datetime.date(2010, 3, 15)
         )
         self.assertEqual(cheesecake._state.db, 'default')
 
@@ -1253,13 +1209,13 @@ class RouterTestCase(TestCase):
     def test_m2m_cross_database_protection(self):
         "M2M relations can cross databases if the database share a source"
         # Create books and authors on the inverse to the usual database
-        pro = Book.objects.using('other').create(pk=1, title="Pro Django",
-                                                 published=datetime.date(2008, 12, 16))
+        pro = Book.objects.using('other').create(pk=1, title="Pro Django", published=datetime.date(2008, 12, 16))
 
         marty = Person.objects.using('other').create(pk=1, name="Marty Alchin")
 
-        dive = Book.objects.using('default').create(pk=2, title="Dive into Python",
-                                                    published=datetime.date(2009, 5, 4))
+        dive = Book.objects.using('default').create(
+            pk=2, title="Dive into Python", published=datetime.date(2009, 5, 4)
+        )
 
         mark = Person.objects.using('default').create(pk=2, name="Mark Pilgrim")
 
@@ -1378,18 +1334,14 @@ class RouterTestCase(TestCase):
     def test_generic_key_cross_database_protection(self):
         "Generic Key operations can span databases if they share a source"
         # Create a book and author on the default database
-        pro = Book.objects.using(
-            'default').create(title="Pro Django", published=datetime.date(2008, 12, 16))
+        pro = Book.objects.using('default').create(title="Pro Django", published=datetime.date(2008, 12, 16))
 
-        review1 = Review.objects.using(
-            'default').create(source="Python Monthly", content_object=pro)
+        review1 = Review.objects.using('default').create(source="Python Monthly", content_object=pro)
 
         # Create a book and author on the other database
-        dive = Book.objects.using(
-            'other').create(title="Dive into Python", published=datetime.date(2009, 5, 4))
+        dive = Book.objects.using('other').create(title="Dive into Python", published=datetime.date(2009, 5, 4))
 
-        review2 = Review.objects.using(
-            'other').create(source="Python Weekly", content_object=dive)
+        review2 = Review.objects.using('other').create(source="Python Weekly", content_object=dive)
 
         # Set a generic foreign key with an object from a different database
         review1.content_object = dive
@@ -1448,8 +1400,7 @@ class RouterTestCase(TestCase):
 
     def test_m2m_managers(self):
         "M2M relations are represented by managers, and can be controlled like managers"
-        pro = Book.objects.using('other').create(pk=1, title="Pro Django",
-                                                 published=datetime.date(2008, 12, 16))
+        pro = Book.objects.using('other').create(pk=1, title="Pro Django", published=datetime.date(2008, 12, 16))
 
         marty = Person.objects.using('other').create(pk=1, name="Marty Alchin")
 
@@ -1465,10 +1416,7 @@ class RouterTestCase(TestCase):
         "FK reverse relations are represented by managers, and can be controlled like managers"
         marty = Person.objects.using('other').create(pk=1, name="Marty Alchin")
         Book.objects.using('other').create(
-            pk=1,
-            title='Pro Django',
-            published=datetime.date(2008, 12, 16),
-            editor=marty,
+            pk=1, title='Pro Django', published=datetime.date(2008, 12, 16), editor=marty
         )
         self.assertEqual(marty.edited.db, 'other')
         self.assertEqual(marty.edited.db_manager('default').db, 'default')
@@ -1476,8 +1424,7 @@ class RouterTestCase(TestCase):
 
     def test_generic_key_managers(self):
         "Generic key relations are represented by managers, and can be controlled like managers"
-        pro = Book.objects.using('other').create(title="Pro Django",
-                                                 published=datetime.date(2008, 12, 16))
+        pro = Book.objects.using('other').create(title="Pro Django", published=datetime.date(2008, 12, 16))
 
         Review.objects.using('other').create(source='Python Monthly', content_object=pro)
 
@@ -1490,11 +1437,7 @@ class RouterTestCase(TestCase):
         # Create a book and author on the other database
 
         mark = Person.objects.using('other').create(name="Mark Pilgrim")
-        Book.objects.using('other').create(
-            title='Dive into Python',
-            published=datetime.date(2009, 5, 4),
-            editor=mark,
-        )
+        Book.objects.using('other').create(title='Dive into Python', published=datetime.date(2009, 5, 4), editor=mark)
 
         sub = Person.objects.filter(name='Mark Pilgrim')
         qs = Book.objects.filter(editor__in=sub)
@@ -1511,17 +1454,14 @@ class RouterTestCase(TestCase):
         mark_def = Person.objects.using('default').create(name="Mark Pilgrim")
         mark_other = Person.objects.using('other').create(name="Mark Pilgrim")
         orig_b = Book.objects.using('other').create(
-            title='Dive into Python',
-            published=datetime.date(2009, 5, 4),
-            editor=mark_other,
+            title='Dive into Python', published=datetime.date(2009, 5, 4), editor=mark_other
         )
         b = Book.objects.using('other').only('title').get(pk=orig_b.pk)
         self.assertEqual(b.published, datetime.date(2009, 5, 4))
         b = Book.objects.using('other').only('title').get(pk=orig_b.pk)
         b.editor = mark_def
         b.save(using='default')
-        self.assertEqual(Book.objects.using('default').get(pk=b.pk).published,
-                         datetime.date(2009, 5, 4))
+        self.assertEqual(Book.objects.using('default').get(pk=b.pk).published, datetime.date(2009, 5, 4))
 
 
 @override_settings(DATABASE_ROUTERS=[AuthRouter()])
@@ -1642,6 +1582,7 @@ class DatabaseReceiver:
     """
     Used in the tests for the database argument in signals (#13552)
     """
+
     def __call__(self, signal, sender, **kwargs):
         self._database = kwargs['using']
 
@@ -1650,6 +1591,7 @@ class WriteToOtherRouter:
     """
     A router that sends all writes to the other database.
     """
+
     def db_for_write(self, model, **hints):
         return "other"
 
@@ -1707,8 +1649,7 @@ class SignalTests(TestCase):
         signals.m2m_changed.connect(receiver=receiver)
 
         # Create the models that will be used for the tests
-        b = Book.objects.create(title="Pro Django",
-                                published=datetime.date(2008, 12, 16))
+        b = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         p = Person.objects.create(name="Marty Alchin")
 
         # Create a copy of the models on the 'other' database to prevent
@@ -1747,6 +1688,7 @@ class SignalTests(TestCase):
 
 class AttributeErrorRouter:
     "A router to test the exception handling of ConnectionRouter"
+
     def db_for_read(self, model, **hints):
         raise AttributeError
 
@@ -1762,8 +1704,7 @@ class RouterAttributeErrorTestCase(TestCase):
 
     def test_attribute_error_read(self):
         "The AttributeError from AttributeErrorRouter bubbles up"
-        b = Book.objects.create(title="Pro Django",
-                                published=datetime.date(2008, 12, 16))
+        b = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         with self.override_router():
             with self.assertRaises(AttributeError):
                 Book.objects.get(pk=b.pk)
@@ -1779,8 +1720,7 @@ class RouterAttributeErrorTestCase(TestCase):
 
     def test_attribute_error_delete(self):
         "The AttributeError from AttributeErrorRouter bubbles up"
-        b = Book.objects.create(title="Pro Django",
-                                published=datetime.date(2008, 12, 16))
+        b = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         p = Person.objects.create(name="Marty Alchin")
         b.authors.set([p])
         b.editor = p
@@ -1790,8 +1730,7 @@ class RouterAttributeErrorTestCase(TestCase):
 
     def test_attribute_error_m2m(self):
         "The AttributeError from AttributeErrorRouter bubbles up"
-        b = Book.objects.create(title="Pro Django",
-                                published=datetime.date(2008, 12, 16))
+        b = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         p = Person.objects.create(name="Marty Alchin")
         with self.override_router():
             with self.assertRaises(AttributeError):
@@ -1800,6 +1739,7 @@ class RouterAttributeErrorTestCase(TestCase):
 
 class ModelMetaRouter:
     "A router to ensure model arguments are real model classes"
+
     def db_for_write(self, model, **hints):
         if not hasattr(model, '_meta'):
             raise ValueError
@@ -1810,8 +1750,7 @@ class RouterModelArgumentTestCase(TestCase):
     databases = {'default', 'other'}
 
     def test_m2m_collection(self):
-        b = Book.objects.create(title="Pro Django",
-                                published=datetime.date(2008, 12, 16))
+        b = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
 
         p = Person.objects.create(name="Marty Alchin")
         # test add
@@ -1840,11 +1779,7 @@ class SyncOnlyDefaultDatabaseRouter:
 class MigrateTestCase(TestCase):
 
     # Limit memory usage when calling 'migrate'.
-    available_apps = [
-        'multiple_database',
-        'django.contrib.auth',
-        'django.contrib.contenttypes'
-    ]
+    available_apps = ['multiple_database', 'django.contrib.auth', 'django.contrib.contenttypes']
     databases = {'default', 'other'}
 
     def test_migrate_to_other_database(self):
@@ -1933,8 +1868,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_m2m_add(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
                 book.authors.add(auth)
@@ -1945,8 +1879,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_m2m_clear(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -1958,8 +1891,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_m2m_delete(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -1971,8 +1903,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_m2m_get_or_create(self):
         Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
                 book.authors.get_or_create(name='Someone else')
@@ -1983,8 +1914,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_m2m_remove(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -1996,8 +1926,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_m2m_update(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -2009,8 +1938,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_reverse_m2m_add(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
                 auth.book_set.add(book)
@@ -2021,8 +1949,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_reverse_m2m_clear(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -2034,8 +1961,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_reverse_m2m_delete(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -2047,8 +1973,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_reverse_m2m_get_or_create(self):
         auth = Person.objects.create(name='Someone')
-        Book.objects.create(title="Pro Django",
-                            published=datetime.date(2008, 12, 16))
+        Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
                 auth.book_set.get_or_create(title="New Book", published=datetime.datetime.now())
@@ -2059,8 +1984,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_reverse_m2m_remove(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -2072,8 +1996,7 @@ class RouteForWriteTestCase(TestCase):
 
     def test_reverse_m2m_update(self):
         auth = Person.objects.create(name='Someone')
-        book = Book.objects.create(title="Pro Django",
-                                   published=datetime.date(2008, 12, 16))
+        book = Book.objects.create(title="Pro Django", published=datetime.date(2008, 12, 16))
         book.authors.add(auth)
         with self.assertRaises(RouterUsed) as cm:
             with self.override_router():
@@ -2086,6 +2009,7 @@ class RouteForWriteTestCase(TestCase):
 
 class NoRelationRouter:
     """Disallow all relations."""
+
     def allow_relation(self, obj1, obj2, **hints):
         return False
 
@@ -2093,6 +2017,7 @@ class NoRelationRouter:
 @override_settings(DATABASE_ROUTERS=[NoRelationRouter()])
 class RelationAssignmentTests(SimpleTestCase):
     """allow_relation() is called with unsaved model instances."""
+
     databases = {'default', 'other'}
     router_prevents_msg = 'the current database router prevents this relation'
 

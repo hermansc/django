@@ -1,12 +1,8 @@
 import unicodedata
 
 from django import forms
-from django.contrib.auth import (
-    authenticate, get_user_model, password_validation,
-)
-from django.contrib.auth.hashers import (
-    UNUSABLE_PASSWORD_PREFIX, identify_hasher,
-)
+from django.contrib.auth import authenticate, get_user_model, password_validation
+from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX, identify_hasher
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
@@ -72,9 +68,8 @@ class UserCreationForm(forms.ModelForm):
     A form that creates a user, with no privileges, from the given username and
     password.
     """
-    error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
-    }
+
+    error_messages = {'password_mismatch': _("The two password fields didn't match.")}
     password1 = forms.CharField(
         label=_("Password"),
         strip=False,
@@ -102,10 +97,7 @@ class UserCreationForm(forms.ModelForm):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError(
-                self.error_messages['password_mismatch'],
-                code='password_mismatch',
-            )
+            raise forms.ValidationError(self.error_messages['password_mismatch'], code='password_mismatch')
         return password2
 
     def _post_clean(self):
@@ -163,17 +155,13 @@ class AuthenticationForm(forms.Form):
     Base class for authenticating users. Extend this to get a form that accepts
     username/password logins.
     """
+
     username = UsernameField(widget=forms.TextInput(attrs={'autofocus': True}))
-    password = forms.CharField(
-        label=_("Password"),
-        strip=False,
-        widget=forms.PasswordInput,
-    )
+    password = forms.CharField(label=_("Password"), strip=False, widget=forms.PasswordInput)
 
     error_messages = {
         'invalid_login': _(
-            "Please enter a correct %(username)s and password. Note that both "
-            "fields may be case-sensitive."
+            "Please enter a correct %(username)s and password. Note that both " "fields may be case-sensitive."
         ),
         'inactive': _("This account is inactive."),
     }
@@ -218,10 +206,7 @@ class AuthenticationForm(forms.Form):
         If the given user may log in, this method should return None.
         """
         if not user.is_active:
-            raise forms.ValidationError(
-                self.error_messages['inactive'],
-                code='inactive',
-            )
+            raise forms.ValidationError(self.error_messages['inactive'], code='inactive')
 
     def get_user(self):
         return self.user_cache
@@ -237,8 +222,9 @@ class AuthenticationForm(forms.Form):
 class PasswordResetForm(forms.Form):
     email = forms.EmailField(label=_("Email"), max_length=254)
 
-    def send_mail(self, subject_template_name, email_template_name,
-                  context, from_email, to_email, html_email_template_name=None):
+    def send_mail(
+        self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None
+    ):
         """
         Send a django.core.mail.EmailMultiAlternatives to `to_email`.
         """
@@ -261,18 +247,23 @@ class PasswordResetForm(forms.Form):
         that prevent inactive users and users with unusable passwords from
         resetting their password.
         """
-        active_users = UserModel._default_manager.filter(**{
-            '%s__iexact' % UserModel.get_email_field_name(): email,
-            'is_active': True,
-        })
+        active_users = UserModel._default_manager.filter(
+            **{'%s__iexact' % UserModel.get_email_field_name(): email, 'is_active': True}
+        )
         return (u for u in active_users if u.has_usable_password())
 
-    def save(self, domain_override=None,
-             subject_template_name='registration/password_reset_subject.txt',
-             email_template_name='registration/password_reset_email.html',
-             use_https=False, token_generator=default_token_generator,
-             from_email=None, request=None, html_email_template_name=None,
-             extra_email_context=None):
+    def save(
+        self,
+        domain_override=None,
+        subject_template_name='registration/password_reset_subject.txt',
+        email_template_name='registration/password_reset_email.html',
+        use_https=False,
+        token_generator=default_token_generator,
+        from_email=None,
+        request=None,
+        html_email_template_name=None,
+        extra_email_context=None,
+    ):
         """
         Generate a one-use only link for resetting password and send it to the
         user.
@@ -296,8 +287,12 @@ class PasswordResetForm(forms.Form):
                 **(extra_email_context or {}),
             }
             self.send_mail(
-                subject_template_name, email_template_name, context, from_email,
-                email, html_email_template_name=html_email_template_name,
+                subject_template_name,
+                email_template_name,
+                context,
+                from_email,
+                email,
+                html_email_template_name=html_email_template_name,
             )
 
 
@@ -306,20 +301,15 @@ class SetPasswordForm(forms.Form):
     A form that lets a user change set their password without entering the old
     password
     """
-    error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
-    }
+
+    error_messages = {'password_mismatch': _("The two password fields didn't match.")}
     new_password1 = forms.CharField(
         label=_("New password"),
         widget=forms.PasswordInput,
         strip=False,
         help_text=password_validation.password_validators_help_text_html(),
     )
-    new_password2 = forms.CharField(
-        label=_("New password confirmation"),
-        strip=False,
-        widget=forms.PasswordInput,
-    )
+    new_password2 = forms.CharField(label=_("New password confirmation"), strip=False, widget=forms.PasswordInput)
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -330,10 +320,7 @@ class SetPasswordForm(forms.Form):
         password2 = self.cleaned_data.get('new_password2')
         if password1 and password2:
             if password1 != password2:
-                raise forms.ValidationError(
-                    self.error_messages['password_mismatch'],
-                    code='password_mismatch',
-                )
+                raise forms.ValidationError(self.error_messages['password_mismatch'], code='password_mismatch')
         password_validation.validate_password(password2, self.user)
         return password2
 
@@ -350,14 +337,13 @@ class PasswordChangeForm(SetPasswordForm):
     A form that lets a user change their password by entering their old
     password.
     """
+
     error_messages = {
         **SetPasswordForm.error_messages,
         'password_incorrect': _("Your old password was entered incorrectly. Please enter it again."),
     }
     old_password = forms.CharField(
-        label=_("Old password"),
-        strip=False,
-        widget=forms.PasswordInput(attrs={'autofocus': True}),
+        label=_("Old password"), strip=False, widget=forms.PasswordInput(attrs={'autofocus': True})
     )
 
     field_order = ['old_password', 'new_password1', 'new_password2']
@@ -368,10 +354,7 @@ class PasswordChangeForm(SetPasswordForm):
         """
         old_password = self.cleaned_data["old_password"]
         if not self.user.check_password(old_password):
-            raise forms.ValidationError(
-                self.error_messages['password_incorrect'],
-                code='password_incorrect',
-            )
+            raise forms.ValidationError(self.error_messages['password_incorrect'], code='password_incorrect')
         return old_password
 
 
@@ -379,9 +362,8 @@ class AdminPasswordChangeForm(forms.Form):
     """
     A form used to change the password of a user in the admin interface.
     """
-    error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
-    }
+
+    error_messages = {'password_mismatch': _("The two password fields didn't match.")}
     required_css_class = 'required'
     password1 = forms.CharField(
         label=_("Password"),
@@ -405,10 +387,7 @@ class AdminPasswordChangeForm(forms.Form):
         password2 = self.cleaned_data.get('password2')
         if password1 and password2:
             if password1 != password2:
-                raise forms.ValidationError(
-                    self.error_messages['password_mismatch'],
-                    code='password_mismatch',
-                )
+                raise forms.ValidationError(self.error_messages['password_mismatch'], code='password_mismatch')
         password_validation.validate_password(password2, self.user)
         return password2
 

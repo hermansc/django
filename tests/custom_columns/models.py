@@ -36,11 +36,7 @@ class Article(models.Model):
     headline = models.CharField(max_length=100)
     authors = models.ManyToManyField(Author, db_table='my_m2m_table')
     primary_author = models.ForeignKey(
-        Author,
-        models.SET_NULL,
-        db_column='Author ID',
-        related_name='primary_set',
-        null=True,
+        Author, models.SET_NULL, db_column='Author ID', related_name='primary_set', null=True
     )
 
     class Meta:

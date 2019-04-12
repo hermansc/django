@@ -8,8 +8,11 @@ from django.forms import fields
 from django.forms.forms import Form, ValidationError
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.http import (
-    HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed,
-    HttpResponseNotFound, HttpResponseRedirect,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseNotAllowed,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
 )
 from django.shortcuts import render
 from django.template import Context, Template
@@ -38,25 +41,15 @@ def trace_view(request):
         return HttpResponseBadRequest("TRACE requests MUST NOT include an entity")
     else:
         protocol = request.META["SERVER_PROTOCOL"]
-        t = Template(
-            '{{ method }} {{ uri }} {{ version }}',
-            name="TRACE Template",
-        )
-        c = Context({
-            'method': request.method,
-            'uri': request.path,
-            'version': protocol,
-        })
+        t = Template('{{ method }} {{ uri }} {{ version }}', name="TRACE Template")
+        c = Context({'method': request.method, 'uri': request.path, 'version': protocol})
         return HttpResponse(t.render(c))
 
 
 def put_view(request):
     if request.method == 'PUT':
         t = Template('Data received: {{ data }} is the body.', name='PUT Template')
-        c = Context({
-            'Content-Length': request.META['CONTENT_LENGTH'],
-            'data': request.body.decode(),
-        })
+        c = Context({'Content-Length': request.META['CONTENT_LENGTH'], 'data': request.body.decode()})
     else:
         t = Template('Viewing GET page.', name='Empty GET Template')
         c = Context()
@@ -163,7 +156,7 @@ TestChoices = (
     ('b', 'Second Choice'),
     ('c', 'Third Choice'),
     ('d', 'Fourth Choice'),
-    ('e', 'Fifth Choice')
+    ('e', 'Fifth Choice'),
 )
 
 
@@ -210,10 +203,7 @@ def form_view_with_template(request):
     else:
         form = TestForm()
         message = 'GET form page'
-    return render(request, 'form_view.html', {
-        'form': form,
-        'message': message,
-    })
+    return render(request, 'form_view.html', {'form': form, 'message': message})
 
 
 class BaseTestFormSet(BaseFormSet):
@@ -228,9 +218,7 @@ class BaseTestFormSet(BaseFormSet):
             form = self.forms[i]
             email = form.cleaned_data['email']
             if email in emails:
-                raise ValidationError(
-                    "Forms in a set must have distinct email addresses."
-                )
+                raise ValidationError("Forms in a set must have distinct email addresses.")
             emails.append(email)
 
 
@@ -245,13 +233,11 @@ def formset_view(request):
             t = Template('Valid POST data.', name='Valid POST Template')
             c = Context()
         else:
-            t = Template('Invalid POST data. {{ my_formset.errors }}',
-                         name='Invalid POST Template')
+            t = Template('Invalid POST data. {{ my_formset.errors }}', name='Invalid POST Template')
             c = Context({'my_formset': formset})
     else:
         formset = TestForm(request.GET)
-        t = Template('Viewing base formset. {{ my_formset }}.',
-                     name='Formset GET Template')
+        t = Template('Viewing base formset. {{ my_formset }}.', name='Formset GET Template')
         c = Context({'my_formset': formset})
     return HttpResponse(t.render(c))
 
@@ -275,35 +261,40 @@ def login_protected_view_changed_redirect(request):
 
 def _permission_protected_view(request):
     "A simple view that is permission protected."
-    t = Template('This is a permission protected test. '
-                 'Username is {{ user.username }}. '
-                 'Permissions are {{ user.get_all_permissions }}.',
-                 name='Permissions Template')
+    t = Template(
+        'This is a permission protected test. '
+        'Username is {{ user.username }}. '
+        'Permissions are {{ user.get_all_permissions }}.',
+        name='Permissions Template',
+    )
     c = Context({'user': request.user})
     return HttpResponse(t.render(c))
 
 
 permission_protected_view = permission_required('permission_not_granted')(_permission_protected_view)
-permission_protected_view_exception = (
-    permission_required('permission_not_granted', raise_exception=True)(_permission_protected_view)
+permission_protected_view_exception = permission_required('permission_not_granted', raise_exception=True)(
+    _permission_protected_view
 )
 
 
 class _ViewManager:
     @method_decorator(login_required)
     def login_protected_view(self, request):
-        t = Template('This is a login protected test using a method. '
-                     'Username is {{ user.username }}.',
-                     name='Login Method Template')
+        t = Template(
+            'This is a login protected test using a method. ' 'Username is {{ user.username }}.',
+            name='Login Method Template',
+        )
         c = Context({'user': request.user})
         return HttpResponse(t.render(c))
 
     @method_decorator(permission_required('permission_not_granted'))
     def permission_protected_view(self, request):
-        t = Template('This is a permission protected test using a method. '
-                     'Username is {{ user.username }}. '
-                     'Permissions are {{ user.get_all_permissions }}.',
-                     name='Permissions Template')
+        t = Template(
+            'This is a permission protected test using a method. '
+            'Username is {{ user.username }}. '
+            'Permissions are {{ user.get_all_permissions }}.',
+            name='Permissions Template',
+        )
         c = Context({'user': request.user})
         return HttpResponse(t.render(c))
 
@@ -317,8 +308,7 @@ def session_view(request):
     "A view that modifies the session"
     request.session['tobacconist'] = 'hovercraft'
 
-    t = Template('This is a view that modifies the session.',
-                 name='Session Modifying View Template')
+    t = Template('This is a view that modifies the session.', name='Session Modifying View Template')
     c = Context()
     return HttpResponse(t.render(c))
 
@@ -330,10 +320,8 @@ def broken_view(request):
 
 def mail_sending_view(request):
     mail.EmailMessage(
-        "Test message",
-        "This is a test email",
-        "from@example.com",
-        ['first@example.com', 'second@example.com']).send()
+        "Test message", "This is a test email", "from@example.com", ['first@example.com', 'second@example.com']
+    ).send()
     return HttpResponse("Mail sent")
 
 
@@ -342,12 +330,14 @@ def mass_mail_sending_view(request):
         'First Test message',
         'This is the first test email',
         'from@example.com',
-        ['first@example.com', 'second@example.com'])
+        ['first@example.com', 'second@example.com'],
+    )
     m2 = mail.EmailMessage(
         'Second Test message',
         'This is the second test email',
         'from@example.com',
-        ['second@example.com', 'third@example.com'])
+        ['second@example.com', 'third@example.com'],
+    )
 
     c = mail.get_connection()
     c.send_messages([m1, m2])

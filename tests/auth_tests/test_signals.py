@@ -10,7 +10,6 @@ from .models import MinimalUser, UserWithDisabledLastLoginField
 
 @override_settings(ROOT_URLCONF='auth_tests.urls')
 class SignalTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.u1 = User.objects.create_user(username='testclient', password='password')

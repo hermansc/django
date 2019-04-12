@@ -44,9 +44,7 @@ class BaseHandler:
                 continue
 
             if mw_instance is None:
-                raise ImproperlyConfigured(
-                    'Middleware factory %s returned None.' % middleware_path
-                )
+                raise ImproperlyConfigured('Middleware factory %s returned None.' % middleware_path)
 
             if hasattr(mw_instance, 'process_view'):
                 self._view_middleware.insert(0, mw_instance.process_view)
@@ -75,11 +73,7 @@ class BaseHandler:
         response = self._middleware_chain(request)
         response._closable_objects.append(request)
         if response.status_code >= 400:
-            log_response(
-                '%s: %s', response.reason_phrase, request.path,
-                response=response,
-                request=request,
-            )
+            log_response('%s: %s', response.reason_phrase, request.path, response=response, request=request)
         return response
 
     def _get_response(self, request):
@@ -116,9 +110,9 @@ class BaseHandler:
 
         # Complain if the view returned None (a common error).
         if response is None:
-            if isinstance(callback, types.FunctionType):    # FBV
+            if isinstance(callback, types.FunctionType):  # FBV
                 view_name = callback.__name__
-            else:                                           # CBV
+            else:  # CBV
                 view_name = callback.__class__.__name__ + '.__call__'
 
             raise ValueError(

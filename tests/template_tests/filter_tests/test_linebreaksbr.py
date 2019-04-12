@@ -23,7 +23,6 @@ class LinebreaksbrTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_newline(self):
         self.assertEqual(linebreaksbr('line 1\nline 2'), 'line 1<br>line 2')
 
@@ -37,13 +36,7 @@ class FunctionTests(SimpleTestCase):
         self.assertEqual(linebreaksbr(123), '123')
 
     def test_autoescape(self):
-        self.assertEqual(
-            linebreaksbr('foo\n<a>bar</a>\nbuz'),
-            'foo<br>&lt;a&gt;bar&lt;/a&gt;<br>buz',
-        )
+        self.assertEqual(linebreaksbr('foo\n<a>bar</a>\nbuz'), 'foo<br>&lt;a&gt;bar&lt;/a&gt;<br>buz')
 
     def test_autoescape_off(self):
-        self.assertEqual(
-            linebreaksbr('foo\n<a>bar</a>\nbuz', autoescape=False),
-            'foo<br><a>bar</a><br>buz',
-        )
+        self.assertEqual(linebreaksbr('foo\n<a>bar</a>\nbuz', autoescape=False), 'foo<br><a>bar</a><br>buz')

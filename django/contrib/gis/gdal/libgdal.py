@@ -12,6 +12,7 @@ logger = logging.getLogger('django.contrib.gis')
 # Custom library path set?
 try:
     from django.conf import settings
+
     lib_path = settings.GDAL_LIBRARY_PATH
 except (AttributeError, ImportError, ImproperlyConfigured, OSError):
     lib_path = None
@@ -38,8 +39,7 @@ if lib_names:
 if lib_path is None:
     raise ImproperlyConfigured(
         'Could not find the GDAL library (tried "%s"). Is GDAL installed? '
-        'If it is, try setting GDAL_LIBRARY_PATH in your settings.'
-        % '", "'.join(lib_names)
+        'If it is, try setting GDAL_LIBRARY_PATH in your settings.' % '", "'.join(lib_names)
     )
 
 # This loads the GDAL/OGR C library
@@ -51,6 +51,7 @@ lgdal = CDLL(lib_path)
 # different calling convention.
 if os.name == 'nt':
     from ctypes import WinDLL
+
     lwingdal = WinDLL(lib_path)
 
 

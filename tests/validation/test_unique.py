@@ -7,8 +7,14 @@ from django.db import models
 from django.test import TestCase
 
 from .models import (
-    CustomPKModel, FlexibleDatePost, ModelToValidate, Post, UniqueErrorsModel,
-    UniqueFieldsModel, UniqueForDateModel, UniqueTogetherModel,
+    CustomPKModel,
+    FlexibleDatePost,
+    ModelToValidate,
+    Post,
+    UniqueErrorsModel,
+    UniqueFieldsModel,
+    UniqueForDateModel,
+    UniqueTogetherModel,
 )
 
 
@@ -16,21 +22,29 @@ class GetUniqueCheckTests(unittest.TestCase):
     def test_unique_fields_get_collected(self):
         m = UniqueFieldsModel()
         self.assertEqual(
-            ([(UniqueFieldsModel, ('id',)),
-              (UniqueFieldsModel, ('unique_charfield',)),
-              (UniqueFieldsModel, ('unique_integerfield',))],
-             []),
-            m._get_unique_checks()
+            (
+                [
+                    (UniqueFieldsModel, ('id',)),
+                    (UniqueFieldsModel, ('unique_charfield',)),
+                    (UniqueFieldsModel, ('unique_integerfield',)),
+                ],
+                [],
+            ),
+            m._get_unique_checks(),
         )
 
     def test_unique_together_gets_picked_up_and_converted_to_tuple(self):
         m = UniqueTogetherModel()
         self.assertEqual(
-            ([(UniqueTogetherModel, ('ifield', 'cfield')),
-              (UniqueTogetherModel, ('ifield', 'efield')),
-              (UniqueTogetherModel, ('id',))],
-             []),
-            m._get_unique_checks()
+            (
+                [
+                    (UniqueTogetherModel, ('ifield', 'cfield')),
+                    (UniqueTogetherModel, ('ifield', 'efield')),
+                    (UniqueTogetherModel, ('id',)),
+                ],
+                [],
+            ),
+            m._get_unique_checks(),
         )
 
     def test_unique_together_normalization(self):
@@ -41,22 +55,18 @@ class GetUniqueCheckTests(unittest.TestCase):
         data = {
             '2-tuple': (('foo', 'bar'), (('foo', 'bar'),)),
             'list': (['foo', 'bar'], (('foo', 'bar'),)),
-            'already normalized': ((('foo', 'bar'), ('bar', 'baz')),
-                                   (('foo', 'bar'), ('bar', 'baz'))),
-            'set': ({('foo', 'bar'), ('bar', 'baz')},  # Ref #21469
-                    (('foo', 'bar'), ('bar', 'baz'))),
+            'already normalized': ((('foo', 'bar'), ('bar', 'baz')), (('foo', 'bar'), ('bar', 'baz'))),
+            'set': ({('foo', 'bar'), ('bar', 'baz')}, (('foo', 'bar'), ('bar', 'baz'))),  # Ref #21469
         }
 
         for unique_together, normalized in data.values():
+
             class M(models.Model):
                 foo = models.IntegerField()
                 bar = models.IntegerField()
                 baz = models.IntegerField()
 
-                Meta = type('Meta', (), {
-                    'unique_together': unique_together,
-                    'apps': Apps()
-                })
+                Meta = type('Meta', (), {'unique_together': unique_together, 'apps': Apps()})
 
             checks, _ = M()._get_unique_checks()
             for t in normalized:
@@ -69,21 +79,29 @@ class GetUniqueCheckTests(unittest.TestCase):
 
     def test_unique_for_date_gets_picked_up(self):
         m = UniqueForDateModel()
-        self.assertEqual((
-            [(UniqueForDateModel, ('id',))],
-            [(UniqueForDateModel, 'date', 'count', 'start_date'),
-             (UniqueForDateModel, 'year', 'count', 'end_date'),
-             (UniqueForDateModel, 'month', 'order', 'end_date')]
-        ), m._get_unique_checks()
+        self.assertEqual(
+            (
+                [(UniqueForDateModel, ('id',))],
+                [
+                    (UniqueForDateModel, 'date', 'count', 'start_date'),
+                    (UniqueForDateModel, 'year', 'count', 'end_date'),
+                    (UniqueForDateModel, 'month', 'order', 'end_date'),
+                ],
+            ),
+            m._get_unique_checks(),
         )
 
     def test_unique_for_date_exclusion(self):
         m = UniqueForDateModel()
-        self.assertEqual((
-            [(UniqueForDateModel, ('id',))],
-            [(UniqueForDateModel, 'year', 'count', 'end_date'),
-             (UniqueForDateModel, 'month', 'order', 'end_date')]
-        ), m._get_unique_checks(exclude='start_date')
+        self.assertEqual(
+            (
+                [(UniqueForDateModel, ('id',))],
+                [
+                    (UniqueForDateModel, 'year', 'count', 'end_date'),
+                    (UniqueForDateModel, 'month', 'order', 'end_date'),
+                ],
+            ),
+            m._get_unique_checks(exclude='start_date'),
         )
 
 
@@ -110,8 +128,7 @@ class PerformUniqueChecksTest(TestCase):
 
     def test_unique_for_date(self):
         Post.objects.create(
-            title="Django 1.0 is released", slug="Django 1.0",
-            subtitle="Finally", posted=datetime.date(2008, 9, 3),
+            title="Django 1.0 is released", slug="Django 1.0", subtitle="Finally", posted=datetime.date(2008, 9, 3)
         )
         p = Post(title="Django 1.0 is released", posted=datetime.date(2008, 9, 3))
         with self.assertRaises(ValidationError) as cm:
@@ -147,8 +164,7 @@ class PerformUniqueChecksTest(TestCase):
         associated DateField is None.
         """
         FlexibleDatePost.objects.create(
-            title="Django 1.0 is released", slug="Django 1.0",
-            subtitle="Finally", posted=datetime.date(2008, 9, 3),
+            title="Django 1.0 is released", slug="Django 1.0", subtitle="Finally", posted=datetime.date(2008, 9, 3)
         )
         p = FlexibleDatePost(title="Django 1.0 is released")
         p.full_clean()

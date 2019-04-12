@@ -2,9 +2,7 @@ import json
 
 from django.contrib.messages import constants
 from django.contrib.messages.storage.base import Message
-from django.contrib.messages.storage.cookie import (
-    CookieStorage, MessageDecoder, MessageEncoder,
-)
+from django.contrib.messages.storage.cookie import CookieStorage, MessageDecoder, MessageEncoder
 from django.test import SimpleTestCase, override_settings
 from django.utils.safestring import SafeData, mark_safe
 
@@ -128,9 +126,8 @@ class CookieTests(BaseTests, SimpleTestCase):
         messages = [
             {
                 'message': Message(constants.INFO, 'Test message'),
-                'message_list': [
-                    Message(constants.INFO, 'message %s') for x in range(5)
-                ] + [{'another-message': Message(constants.ERROR, 'error')}],
+                'message_list': [Message(constants.INFO, 'message %s') for x in range(5)]
+                + [{'another-message': Message(constants.ERROR, 'error')}],
             },
             Message(constants.INFO, 'message %s'),
         ]
@@ -144,6 +141,7 @@ class CookieTests(BaseTests, SimpleTestCase):
         A message containing SafeData is keeping its safe status when
         retrieved from the message storage.
         """
+
         def encode_decode(data):
             message = Message(constants.DEBUG, data)
             encoded = storage._encode(message)

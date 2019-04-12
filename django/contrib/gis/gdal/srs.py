@@ -40,6 +40,7 @@ class SpatialReference(GDALBase):
     the SpatialReference object "provide[s] services to represent coordinate
     systems (projections and datums) and to transform between them."
     """
+
     destructor = capi.release_srs
 
     def __init__(self, srs_input='', srs_type='user'):

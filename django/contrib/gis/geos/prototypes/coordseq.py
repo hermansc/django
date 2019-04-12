@@ -1,9 +1,7 @@
 from ctypes import POINTER, c_double, c_int, c_uint
 
 from django.contrib.gis.geos.libgeos import CS_PTR, GEOM_PTR, GEOSFuncFactory
-from django.contrib.gis.geos.prototypes.errcheck import (
-    GEOSException, last_arg_byref,
-)
+from django.contrib.gis.geos.prototypes.errcheck import GEOSException, last_arg_byref
 
 
 # ## Error-checking routines specific to coordinate sequences. ##
@@ -59,8 +57,7 @@ class CsOutput(GEOSFuncFactory):
     def errcheck(result, func, cargs):
         if not result:
             raise GEOSException(
-                'Error encountered checking Coordinate Sequence returned from GEOS '
-                'C function "%s".' % func.__name__
+                'Error encountered checking Coordinate Sequence returned from GEOS ' 'C function "%s".' % func.__name__
             )
         return result
 

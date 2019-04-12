@@ -25,10 +25,7 @@ def _get_builtin_permissions(opts):
     """
     perms = []
     for action in opts.default_permissions:
-        perms.append((
-            get_permission_codename(action, opts),
-            'Can %s %s' % (action, opts.verbose_name_raw)
-        ))
+        perms.append((get_permission_codename(action, opts), 'Can %s %s' % (action, opts.verbose_name_raw)))
     return perms
 
 
@@ -69,11 +66,9 @@ def create_permissions(app_config, verbosity=2, interactive=True, using=DEFAULT_
     # Find all the Permissions that have a content_type for a model we're
     # looking for.  We don't need to check for codenames since we already have
     # a list of the ones we're going to create.
-    all_perms = set(Permission.objects.using(using).filter(
-        content_type__in=ctypes,
-    ).values_list(
-        "content_type", "codename"
-    ))
+    all_perms = set(
+        Permission.objects.using(using).filter(content_type__in=ctypes).values_list("content_type", "codename")
+    )
 
     perms = [
         Permission(codename=codename, name=name, content_type=ct)
@@ -122,8 +117,10 @@ def get_default_username(check_db=True):
     try:
         default_username = (
             unicodedata.normalize('NFKD', default_username)
-            .encode('ascii', 'ignore').decode('ascii')
-            .replace(' ', '').lower()
+            .encode('ascii', 'ignore')
+            .decode('ascii')
+            .replace(' ', '')
+            .lower()
         )
     except UnicodeDecodeError:
         return ''

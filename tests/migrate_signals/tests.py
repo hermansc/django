@@ -70,8 +70,11 @@ class MigrateSignalTests(TransactionTestCase):
         pre_migrate_receiver = Receiver(signals.pre_migrate)
         post_migrate_receiver = Receiver(signals.post_migrate)
         management.call_command(
-            'migrate', database=MIGRATE_DATABASE, verbosity=MIGRATE_VERBOSITY,
-            interactive=MIGRATE_INTERACTIVE, stdout=StringIO(),
+            'migrate',
+            database=MIGRATE_DATABASE,
+            verbosity=MIGRATE_VERBOSITY,
+            interactive=MIGRATE_INTERACTIVE,
+            stdout=StringIO(),
         )
 
         for receiver in [pre_migrate_receiver, post_migrate_receiver]:
@@ -94,8 +97,11 @@ class MigrateSignalTests(TransactionTestCase):
         post_migrate_receiver = Receiver(signals.post_migrate)
         stdout = StringIO()
         management.call_command(
-            'migrate', database=MIGRATE_DATABASE, verbosity=MIGRATE_VERBOSITY,
-            interactive=MIGRATE_INTERACTIVE, stdout=stdout,
+            'migrate',
+            database=MIGRATE_DATABASE,
+            verbosity=MIGRATE_VERBOSITY,
+            interactive=MIGRATE_INTERACTIVE,
+            stdout=stdout,
         )
         for receiver in [pre_migrate_receiver, post_migrate_receiver]:
             args = receiver.call_args
@@ -112,20 +118,23 @@ class MigrateSignalTests(TransactionTestCase):
         self.assertEqual(pre_migrate_receiver.call_args['apps'].get_models(), [])
         self.assertEqual(
             [model._meta.label for model in post_migrate_receiver.call_args['apps'].get_models()],
-            ['migrate_signals.Signal']
+            ['migrate_signals.Signal'],
         )
         # Migrating with an empty plan.
         pre_migrate_receiver = Receiver(signals.pre_migrate)
         post_migrate_receiver = Receiver(signals.post_migrate)
         management.call_command(
-            'migrate', database=MIGRATE_DATABASE, verbosity=MIGRATE_VERBOSITY,
-            interactive=MIGRATE_INTERACTIVE, stdout=stdout,
+            'migrate',
+            database=MIGRATE_DATABASE,
+            verbosity=MIGRATE_VERBOSITY,
+            interactive=MIGRATE_INTERACTIVE,
+            stdout=stdout,
         )
         self.assertEqual(
             [model._meta.label for model in pre_migrate_receiver.call_args['apps'].get_models()],
-            ['migrate_signals.Signal']
+            ['migrate_signals.Signal'],
         )
         self.assertEqual(
             [model._meta.label for model in post_migrate_receiver.call_args['apps'].get_models()],
-            ['migrate_signals.Signal']
+            ['migrate_signals.Signal'],
         )

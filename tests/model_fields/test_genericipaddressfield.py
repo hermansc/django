@@ -6,7 +6,6 @@ from .models import GenericIPAddress
 
 
 class GenericIPAddressFieldTests(TestCase):
-
     def test_genericipaddressfield_formfield_protocol(self):
         """
         GenericIPAddressField with a specified protocol does not generate a

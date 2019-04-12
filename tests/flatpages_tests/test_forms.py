@@ -9,7 +9,6 @@ from django.utils import translation
 @modify_settings(INSTALLED_APPS={'append': ['django.contrib.flatpages']})
 @override_settings(SITE_ID=1)
 class FlatpageAdminFormTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         # don't use the manager because we want to ensure the site exists
@@ -21,11 +20,7 @@ class FlatpageAdminFormTests(TestCase):
         # Site fields cache needs to be cleared after flatpages is added to
         # INSTALLED_APPS
         Site._meta._expire_cache()
-        self.form_data = {
-            'title': "A test page",
-            'content': "This is a test",
-            'sites': [settings.SITE_ID],
-        }
+        self.form_data = {'title': "A test page", 'content': "This is a test", 'sites': [settings.SITE_ID]}
 
     def test_flatpage_admin_form_url_validation(self):
         "The flatpage admin form correctly validates urls"
@@ -51,8 +46,7 @@ class FlatpageAdminFormTests(TestCase):
         with translation.override('en'):
             self.assertEqual(
                 form.fields['url'].help_text,
-                "Example: '/about/contact/'. Make sure to have leading and "
-                "trailing slashes."
+                "Example: '/about/contact/'. Make sure to have leading and " "trailing slashes.",
             )
             self.assertFalse(form.is_valid())
             self.assertEqual(form.errors['url'], ["URL is missing a trailing slash."])
@@ -63,8 +57,7 @@ class FlatpageAdminFormTests(TestCase):
         self.assertTrue(form.is_valid())
         with translation.override('en'):
             self.assertEqual(
-                form.fields['url'].help_text,
-                "Example: '/about/contact'. Make sure to have a leading slash."
+                form.fields['url'].help_text, "Example: '/about/contact'. Make sure to have a leading slash."
             )
 
     def test_flatpage_admin_form_url_uniqueness_validation(self):
@@ -79,16 +72,15 @@ class FlatpageAdminFormTests(TestCase):
             self.assertFalse(f.is_valid())
 
             self.assertEqual(
-                f.errors,
-                {'__all__': ['Flatpage with url /myflatpage1/ already exists for site example.com']})
+                f.errors, {'__all__': ['Flatpage with url /myflatpage1/ already exists for site example.com']}
+            )
 
     def test_flatpage_admin_form_edit(self):
         """
         Existing flatpages can be edited in the admin form without triggering
         the url-uniqueness validation.
         """
-        existing = FlatPage.objects.create(
-            url="/myflatpage1/", title="Some page", content="The content")
+        existing = FlatPage.objects.create(url="/myflatpage1/", title="Some page", content="The content")
         existing.sites.add(settings.SITE_ID)
 
         data = dict(url='/myflatpage1/', **self.form_data)

@@ -5,7 +5,6 @@ from .models import A01, A02, B01, B02, C01, C02, Managed1, Unmanaged2
 
 
 class SimpleTests(TestCase):
-
     def test_simple(self):
         """
         The main test here is that the all the models can be created without
@@ -41,7 +40,6 @@ class SimpleTests(TestCase):
 
 
 class ManyToManyUnmanagedTests(TestCase):
-
     def test_many_to_many_between_unmanaged(self):
         """
         The intermediary table between two unmanaged models should not be created.

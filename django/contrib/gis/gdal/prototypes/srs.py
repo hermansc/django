@@ -2,7 +2,11 @@ from ctypes import POINTER, c_char_p, c_int, c_void_p
 
 from django.contrib.gis.gdal.libgdal import lgdal, std_call
 from django.contrib.gis.gdal.prototypes.generation import (
-    const_string_output, double_output, int_output, srs_output, string_output,
+    const_string_output,
+    double_output,
+    int_output,
+    srs_output,
+    string_output,
     void_output,
 )
 
@@ -58,8 +62,7 @@ angular_units = units_func(lgdal.OSRGetAngularUnits)
 to_wkt = string_output(std_call('OSRExportToWkt'), [c_void_p, POINTER(c_char_p)], decoding='utf-8')
 to_proj = string_output(std_call('OSRExportToProj4'), [c_void_p, POINTER(c_char_p)], decoding='ascii')
 to_pretty_wkt = string_output(
-    std_call('OSRExportToPrettyWkt'),
-    [c_void_p, POINTER(c_char_p), c_int], offset=-2, decoding='utf-8'
+    std_call('OSRExportToPrettyWkt'), [c_void_p, POINTER(c_char_p), c_int], offset=-2, decoding='utf-8'
 )
 
 # Memory leak fixed in GDAL 1.5; still exists in 1.4.

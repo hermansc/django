@@ -7,7 +7,6 @@ from ..utils import setup
 
 
 class UnorderedListTests(SimpleTestCase):
-
     @setup({'unordered_list01': '{{ a|unordered_list }}'})
     def test_unordered_list01(self):
         output = self.engine.render_to_string('unordered_list01', {'a': ['x>', ['<y']]})
@@ -35,20 +34,15 @@ class UnorderedListTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_list(self):
         self.assertEqual(unordered_list(['item 1', 'item 2']), '\t<li>item 1</li>\n\t<li>item 2</li>')
 
     def test_list_gettext(self):
-        self.assertEqual(
-            unordered_list(['item 1', gettext_lazy('item 2')]),
-            '\t<li>item 1</li>\n\t<li>item 2</li>'
-        )
+        self.assertEqual(unordered_list(['item 1', gettext_lazy('item 2')]), '\t<li>item 1</li>\n\t<li>item 2</li>')
 
     def test_nested(self):
         self.assertEqual(
-            unordered_list(['item 1', ['item 1.1']]),
-            '\t<li>item 1\n\t<ul>\n\t\t<li>item 1.1</li>\n\t</ul>\n\t</li>',
+            unordered_list(['item 1', ['item 1.1']]), '\t<li>item 1\n\t<ul>\n\t\t<li>item 1.1</li>\n\t</ul>\n\t</li>'
         )
 
     def test_nested2(self):
@@ -61,8 +55,7 @@ class FunctionTests(SimpleTestCase):
     def test_nested3(self):
         self.assertEqual(
             unordered_list(['item 1', 'item 2', ['item 2.1']]),
-            '\t<li>item 1</li>\n\t<li>item 2\n\t<ul>\n\t\t<li>item 2.1'
-            '</li>\n\t</ul>\n\t</li>',
+            '\t<li>item 1</li>\n\t<li>item 2\n\t<ul>\n\t\t<li>item 2.1' '</li>\n\t</ul>\n\t</li>',
         )
 
     def test_nested_multiple(self):
@@ -83,8 +76,7 @@ class FunctionTests(SimpleTestCase):
 
     def test_autoescape(self):
         self.assertEqual(
-            unordered_list(['<a>item 1</a>', 'item 2']),
-            '\t<li>&lt;a&gt;item 1&lt;/a&gt;</li>\n\t<li>item 2</li>',
+            unordered_list(['<a>item 1</a>', 'item 2']), '\t<li>&lt;a&gt;item 1&lt;/a&gt;</li>\n\t<li>item 2</li>'
         )
 
     def test_autoescape_off(self):

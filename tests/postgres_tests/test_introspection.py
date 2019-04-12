@@ -10,19 +10,14 @@ from . import PostgreSQLTestCase
 class InspectDBTests(PostgreSQLTestCase):
     def assertFieldsInModel(self, model, field_outputs):
         out = StringIO()
-        call_command(
-            'inspectdb',
-            table_name_filter=lambda tn: tn.startswith(model),
-            stdout=out,
-        )
+        call_command('inspectdb', table_name_filter=lambda tn: tn.startswith(model), stdout=out)
         output = out.getvalue()
         for field_output in field_outputs:
             self.assertIn(field_output, output)
 
     def test_json_field(self):
         self.assertFieldsInModel(
-            'postgres_tests_jsonmodel',
-            ['field = django.contrib.postgres.fields.JSONField(blank=True, null=True)'],
+            'postgres_tests_jsonmodel', ['field = django.contrib.postgres.fields.JSONField(blank=True, null=True)']
         )
 
     def test_range_fields(self):

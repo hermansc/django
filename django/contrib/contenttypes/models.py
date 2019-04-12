@@ -52,10 +52,7 @@ class ContentTypeManager(models.Manager):
         except self.model.DoesNotExist:
             # Not found in the database; we proceed to create it. This time
             # use get_or_create to take care of any race conditions.
-            ct, created = self.get_or_create(
-                app_label=opts.app_label,
-                model=opts.model_name,
-            )
+            ct, created = self.get_or_create(app_label=opts.app_label, model=opts.model_name)
         self._add_to_cache(self.db, ct)
         return ct
 
@@ -81,10 +78,7 @@ class ContentTypeManager(models.Manager):
                 results[model] = ct
         if needed_opts:
             # Lookup required content types from the DB.
-            cts = self.filter(
-                app_label__in=needed_app_labels,
-                model__in=needed_models
-            )
+            cts = self.filter(app_label__in=needed_app_labels, model__in=needed_models)
             for ct in cts:
                 opts_models = needed_opts.pop(ct.model_class()._meta, [])
                 for model in opts_models:
@@ -92,10 +86,7 @@ class ContentTypeManager(models.Manager):
                 self._add_to_cache(self.db, ct)
         # Create content types that weren't in the cache or DB.
         for opts, opts_models in needed_opts.items():
-            ct = self.create(
-                app_label=opts.app_label,
-                model=opts.model_name,
-            )
+            ct = self.create(app_label=opts.app_label, model=opts.model_name)
             self._add_to_cache(self.db, ct)
             for model in opts_models:
                 results[model] = ct

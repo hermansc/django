@@ -10,6 +10,7 @@ class FunctionalTests(SimpleTestCase):
 
     def test_lazy_base_class(self):
         """lazy also finds base class methods in the proxy object"""
+
         class Base:
             def base_method(self):
                 pass
@@ -22,6 +23,7 @@ class FunctionalTests(SimpleTestCase):
 
     def test_lazy_base_class_override(self):
         """lazy finds the correct (overridden) method implementation"""
+
         class Base:
             def method(self):
                 return 'Base'
@@ -34,7 +36,6 @@ class FunctionalTests(SimpleTestCase):
         self.assertEqual(t.method(), 'Klazz')
 
     def test_lazy_object_to_string(self):
-
         class Klazz:
             def __str__(self):
                 return "Î am ā Ǩlâzz."
@@ -48,6 +49,7 @@ class FunctionalTests(SimpleTestCase):
 
     def assertCachedPropertyWorks(self, attr, Class):
         with self.subTest(attr=attr):
+
             def get(source):
                 return getattr(source, attr)
 
@@ -80,6 +82,7 @@ class FunctionalTests(SimpleTestCase):
 
     def test_cached_property(self):
         """cached_property caches its value and behaves like a property."""
+
         class Class:
             @cached_property
             def value(self):
@@ -106,6 +109,7 @@ class FunctionalTests(SimpleTestCase):
         cached_property caches its value and behaves like a property
         on mangled methods or when the name kwarg isn't set.
         """
+
         class Class:
             @cached_property
             def __value(self):
@@ -131,6 +135,7 @@ class FunctionalTests(SimpleTestCase):
     def test_cached_property_reuse_different_names(self):
         """Disallow this case because the decorated function wouldn't be cached."""
         with self.assertRaises(RuntimeError) as ctx:
+
             class ReusedCachedProperty:
                 @cached_property
                 def a(self):
@@ -140,10 +145,7 @@ class FunctionalTests(SimpleTestCase):
 
         self.assertEqual(
             str(ctx.exception.__context__),
-            str(TypeError(
-                "Cannot assign the same cached_property to two different "
-                "names ('a' and 'b')."
-            ))
+            str(TypeError("Cannot assign the same cached_property to two different " "names ('a' and 'b').")),
         )
 
     def test_cached_property_reuse_same_name(self):

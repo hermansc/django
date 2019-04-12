@@ -32,16 +32,14 @@ class TimeuntilTests(TimezoneTestCase):
     @setup({'timeuntil04': '{{ a|timeuntil:b }}'})
     def test_timeuntil04(self):
         output = self.engine.render_to_string(
-            'timeuntil04',
-            {'a': self.now - timedelta(days=1), 'b': self.now - timedelta(days=2)},
+            'timeuntil04', {'a': self.now - timedelta(days=1), 'b': self.now - timedelta(days=2)}
         )
         self.assertEqual(output, '1\xa0day')
 
     @setup({'timeuntil05': '{{ a|timeuntil:b }}'})
     def test_timeuntil05(self):
         output = self.engine.render_to_string(
-            'timeuntil05',
-            {'a': self.now - timedelta(days=2), 'b': self.now - timedelta(days=2, minutes=1)},
+            'timeuntil05', {'a': self.now - timedelta(days=2), 'b': self.now - timedelta(days=2, minutes=1)}
         )
         self.assertEqual(output, '1\xa0minute')
 
@@ -109,7 +107,6 @@ class TimeuntilTests(TimezoneTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_until_now(self):
         self.assertEqual(timeuntil_filter(datetime.now() + timedelta(1, 1)), '1\xa0day')
 

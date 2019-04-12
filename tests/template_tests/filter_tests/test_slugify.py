@@ -24,7 +24,6 @@ class SlugifyTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_slugify(self):
         self.assertEqual(
             slugify(' Jack & Jill like numbers 1,2,3 and 4 and silly characters ?%.$!/'),
@@ -32,10 +31,7 @@ class FunctionTests(SimpleTestCase):
         )
 
     def test_unicode(self):
-        self.assertEqual(
-            slugify("Un \xe9l\xe9phant \xe0 l'or\xe9e du bois"),
-            'un-elephant-a-loree-du-bois',
-        )
+        self.assertEqual(slugify("Un \xe9l\xe9phant \xe0 l'or\xe9e du bois"), 'un-elephant-a-loree-du-bois')
 
     def test_non_string_input(self):
         self.assertEqual(slugify(123), '123')

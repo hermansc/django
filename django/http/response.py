@@ -89,12 +89,12 @@ class HttpResponseBase:
 
     def serialize_headers(self):
         """HTTP headers as a bytestring."""
+
         def to_bytes(val, encoding):
             return val if isinstance(val, bytes) else val.encode(encoding)
 
         headers = [
-            (to_bytes(key, 'ascii') + b': ' + to_bytes(value, 'latin-1'))
-            for key, value in self._headers.values()
+            (to_bytes(key, 'ascii') + b': ' + to_bytes(value, 'latin-1')) for key, value in self._headers.values()
         ]
         return b'\r\n'.join(headers)
 
@@ -113,8 +113,11 @@ class HttpResponseBase:
         """
         if not isinstance(value, (bytes, str)):
             value = str(value)
-        if ((isinstance(value, bytes) and (b'\n' in value or b'\r' in value)) or
-                isinstance(value, str) and ('\n' in value or '\r' in value)):
+        if (
+            (isinstance(value, bytes) and (b'\n' in value or b'\r' in value))
+            or isinstance(value, str)
+            and ('\n' in value or '\r' in value)
+        ):
             raise BadHeaderError("Header values can't contain newlines (got %r)" % value)
         try:
             if isinstance(value, str):
@@ -154,8 +157,18 @@ class HttpResponseBase:
     def get(self, header, alternate=None):
         return self._headers.get(header.lower(), (None, alternate))[1]
 
-    def set_cookie(self, key, value='', max_age=None, expires=None, path='/',
-                   domain=None, secure=False, httponly=False, samesite=None):
+    def set_cookie(
+        self,
+        key,
+        value='',
+        max_age=None,
+        expires=None,
+        path='/',
+        domain=None,
+        secure=False,
+        httponly=False,
+        samesite=None,
+    ):
         """
         Set a cookie.
 
@@ -214,8 +227,7 @@ class HttpResponseBase:
         # with __Host- or __Secure- and the cookie doesn't use the secure flag.
         secure = key.startswith(('__Secure-', '__Host-'))
         self.set_cookie(
-            key, max_age=0, path=path, domain=domain, secure=secure,
-            expires='Thu, 01 Jan 1970 00:00:00 GMT',
+            key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT'
         )
 
     # Common methods used by subclasses
@@ -390,6 +402,7 @@ class FileResponse(StreamingHttpResponse):
     """
     A streaming HTTP response class optimized for files.
     """
+
     block_size = 4096
 
     def __init__(self, *args, as_attachment=False, filename='', **kwargs):
@@ -414,11 +427,7 @@ class FileResponse(StreamingHttpResponse):
         Set some common response headers (Content-Length, Content-Type, and
         Content-Disposition) based on the `filelike` response content.
         """
-        encoding_map = {
-            'bzip2': 'application/x-bzip',
-            'gzip': 'application/gzip',
-            'xz': 'application/x-xz',
-        }
+        encoding_map = {'bzip2': 'application/x-bzip', 'gzip': 'application/gzip', 'xz': 'application/x-xz'}
         filename = getattr(filelike, 'name', None)
         filename = filename if (isinstance(filename, str) and filename) else self.filename
         if os.path.isabs(filename):
@@ -544,13 +553,9 @@ class JsonResponse(HttpResponse):
     :param json_dumps_params: A dictionary of kwargs passed to json.dumps().
     """
 
-    def __init__(self, data, encoder=DjangoJSONEncoder, safe=True,
-                 json_dumps_params=None, **kwargs):
+    def __init__(self, data, encoder=DjangoJSONEncoder, safe=True, json_dumps_params=None, **kwargs):
         if safe and not isinstance(data, dict):
-            raise TypeError(
-                'In order to allow non-dict objects to be serialized set the '
-                'safe parameter to False.'
-            )
+            raise TypeError('In order to allow non-dict objects to be serialized set the ' 'safe parameter to False.')
         if json_dumps_params is None:
             json_dumps_params = {}
         kwargs.setdefault('content_type', 'application/json')

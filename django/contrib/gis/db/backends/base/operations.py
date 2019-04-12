@@ -1,8 +1,6 @@
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.measure import (
-    Area as AreaMeasure, Distance as DistanceMeasure,
-)
+from django.contrib.gis.measure import Area as AreaMeasure, Distance as DistanceMeasure
 from django.db.utils import NotSupportedError
 from django.utils.functional import cached_property
 
@@ -38,12 +36,36 @@ class BaseSpatialOperations:
 
     # Blacklist/set of known unsupported functions of the backend
     unsupported_functions = {
-        'Area', 'AsGeoJSON', 'AsGML', 'AsKML', 'AsSVG', 'Azimuth',
-        'BoundingCircle', 'Centroid', 'Difference', 'Distance', 'Envelope',
-        'GeoHash', 'GeometryDistance', 'Intersection', 'IsValid', 'Length',
-        'LineLocatePoint', 'MakeValid', 'MemSize', 'NumGeometries',
-        'NumPoints', 'Perimeter', 'PointOnSurface', 'Reverse', 'Scale',
-        'SnapToGrid', 'SymDifference', 'Transform', 'Translate', 'Union',
+        'Area',
+        'AsGeoJSON',
+        'AsGML',
+        'AsKML',
+        'AsSVG',
+        'Azimuth',
+        'BoundingCircle',
+        'Centroid',
+        'Difference',
+        'Distance',
+        'Envelope',
+        'GeoHash',
+        'GeometryDistance',
+        'Intersection',
+        'IsValid',
+        'Length',
+        'LineLocatePoint',
+        'MakeValid',
+        'MemSize',
+        'NumGeometries',
+        'NumPoints',
+        'Perimeter',
+        'PointOnSurface',
+        'Reverse',
+        'Scale',
+        'SnapToGrid',
+        'SymDifference',
+        'Transform',
+        'Translate',
+        'Union',
     }
 
     # Constructors
@@ -83,6 +105,7 @@ class BaseSpatialOperations:
         stored procedure call to the transformation function of the spatial
         backend.
         """
+
         def transform_value(value, field):
             return value is not None and value.srid != field.srid
 
@@ -94,10 +117,7 @@ class BaseSpatialOperations:
             )
         if transform_value(value, f):
             # Add Transform() to the SQL placeholder.
-            return '%s(%s(%%s,%s), %s)' % (
-                self.spatial_function_name('Transform'),
-                self.from_text, value.srid, f.srid,
-            )
+            return '%s(%s(%%s,%s), %s)' % (self.spatial_function_name('Transform'), self.from_text, value.srid, f.srid)
         elif self.connection.features.has_spatialrefsys_table:
             return '%s(%%s,%s)' % (self.from_text, f.srid)
         else:
@@ -136,8 +156,7 @@ class BaseSpatialOperations:
 
     def get_geometry_converter(self, expression):
         raise NotImplementedError(
-            'Subclasses of BaseSpatialOperations must provide a '
-            'get_geometry_converter() method.'
+            'Subclasses of BaseSpatialOperations must provide a ' 'get_geometry_converter() method.'
         )
 
     def get_area_att_for_field(self, field):

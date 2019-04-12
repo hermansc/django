@@ -52,6 +52,7 @@ class DecoratorFromMiddlewareTests(SimpleTestCase):
     Tests for view decorators created using
     ``django.utils.decorators.decorator_from_middleware``.
     """
+
     rf = RequestFactory()
 
     def test_process_view_middleware(self):
@@ -70,6 +71,7 @@ class DecoratorFromMiddlewareTests(SimpleTestCase):
         """
         All methods of middleware are called for normal HttpResponses
         """
+
         @full_dec
         def normal_view(request):
             template = engines['django'].from_string("Hello world")
@@ -88,6 +90,7 @@ class DecoratorFromMiddlewareTests(SimpleTestCase):
         All methods of middleware are called for TemplateResponses in
         the right sequence.
         """
+
         @full_dec
         def template_response_view(request):
             template = engines['django'].from_string("Hello world")

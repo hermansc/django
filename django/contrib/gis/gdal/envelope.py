@@ -20,11 +20,7 @@ from django.contrib.gis.gdal.error import GDALException
 #   https://www.gdal.org/ogr__core_8h_source.html
 class OGREnvelope(Structure):
     "Represent the OGREnvelope C Structure."
-    _fields_ = [("MinX", c_double),
-                ("MaxX", c_double),
-                ("MinY", c_double),
-                ("MaxY", c_double),
-                ]
+    _fields_ = [("MinX", c_double), ("MaxX", c_double), ("MinY", c_double), ("MaxY", c_double)]
 
 
 class Envelope:
@@ -71,11 +67,19 @@ class Envelope:
         other Envelopes and 4-tuples.
         """
         if isinstance(other, Envelope):
-            return (self.min_x == other.min_x) and (self.min_y == other.min_y) and \
-                   (self.max_x == other.max_x) and (self.max_y == other.max_y)
+            return (
+                (self.min_x == other.min_x)
+                and (self.min_y == other.min_y)
+                and (self.max_x == other.max_x)
+                and (self.max_y == other.max_y)
+            )
         elif isinstance(other, tuple) and len(other) == 4:
-            return (self.min_x == other[0]) and (self.min_y == other[1]) and \
-                   (self.max_x == other[2]) and (self.max_y == other[3])
+            return (
+                (self.min_x == other[0])
+                and (self.min_y == other[1])
+                and (self.max_x == other[2])
+                and (self.max_y == other[3])
+            )
         else:
             raise GDALException('Equivalence testing only works with other Envelopes.')
 
@@ -172,7 +176,15 @@ class Envelope:
     def wkt(self):
         "Return WKT representing a Polygon for this envelope."
         # TODO: Fix significant figures.
-        return 'POLYGON((%s %s,%s %s,%s %s,%s %s,%s %s))' % \
-               (self.min_x, self.min_y, self.min_x, self.max_y,
-                self.max_x, self.max_y, self.max_x, self.min_y,
-                self.min_x, self.min_y)
+        return 'POLYGON((%s %s,%s %s,%s %s,%s %s,%s %s))' % (
+            self.min_x,
+            self.min_y,
+            self.min_x,
+            self.max_y,
+            self.max_x,
+            self.max_y,
+            self.max_x,
+            self.min_y,
+            self.min_x,
+            self.min_y,
+        )

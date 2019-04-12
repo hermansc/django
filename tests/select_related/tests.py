@@ -2,13 +2,22 @@ from django.core.exceptions import FieldError
 from django.test import SimpleTestCase, TestCase
 
 from .models import (
-    Bookmark, Domain, Family, Genus, HybridSpecies, Kingdom, Klass, Order,
-    Phylum, Pizza, Species, TaggedItem,
+    Bookmark,
+    Domain,
+    Family,
+    Genus,
+    HybridSpecies,
+    Kingdom,
+    Klass,
+    Order,
+    Phylum,
+    Pizza,
+    Species,
+    TaggedItem,
 )
 
 
 class SelectRelatedTests(TestCase):
-
     @classmethod
     def create_tree(cls, stringtree):
         """
@@ -51,10 +60,8 @@ class SelectRelatedTests(TestCase):
         extra queries
         """
         with self.assertNumQueries(1):
-            person = (
-                Species.objects
-                .select_related('genus__family__order__klass__phylum__kingdom__domain')
-                .get(name="sapiens")
+            person = Species.objects.select_related('genus__family__order__klass__phylum__kingdom__domain').get(
+                name="sapiens"
             )
             domain = person.genus.family.order.klass.phylum.kingdom.domain
             self.assertEqual(domain.name, 'Eukaryota')
@@ -67,12 +74,7 @@ class SelectRelatedTests(TestCase):
         with self.assertNumQueries(9):
             world = Species.objects.all()
             families = [o.genus.family.name for o in world]
-            self.assertEqual(sorted(families), [
-                'Amanitacae',
-                'Drosophilidae',
-                'Fabaceae',
-                'Hominidae',
-            ])
+            self.assertEqual(sorted(families), ['Amanitacae', 'Drosophilidae', 'Fabaceae', 'Hominidae'])
 
     def test_list_with_select_related(self):
         """
@@ -82,12 +84,7 @@ class SelectRelatedTests(TestCase):
         with self.assertNumQueries(1):
             world = Species.objects.all().select_related()
             families = [o.genus.family.name for o in world]
-            self.assertEqual(sorted(families), [
-                'Amanitacae',
-                'Drosophilidae',
-                'Fabaceae',
-                'Hominidae',
-            ])
+            self.assertEqual(sorted(families), ['Amanitacae', 'Drosophilidae', 'Fabaceae', 'Hominidae'])
 
     def test_list_with_depth(self):
         """
@@ -101,9 +98,7 @@ class SelectRelatedTests(TestCase):
             self.assertEqual(sorted(orders), ['Agaricales', 'Diptera', 'Fabales', 'Primates'])
 
     def test_select_related_with_extra(self):
-        s = (Species.objects.all()
-             .select_related()
-             .extra(select={'a': 'select_related_species.id + 10'})[0])
+        s = Species.objects.all().select_related().extra(select={'a': 'select_related_species.id + 10'})[0]
         self.assertEqual(s.id + 10, s.a)
 
     def test_certain_fields(self):
@@ -125,16 +120,19 @@ class SelectRelatedTests(TestCase):
         'genus.family' models, leading to the same number of queries as before.
         """
         with self.assertNumQueries(2):
-            world = Species.objects.filter(genus__name='Amanita')\
-                .select_related('genus__family')
+            world = Species.objects.filter(genus__name='Amanita').select_related('genus__family')
             orders = [o.genus.family.order.name for o in world]
             self.assertEqual(orders, ['Agaricales'])
 
     def test_field_traversal(self):
         with self.assertNumQueries(1):
-            s = (Species.objects.all()
-                 .select_related('genus__family__order')
-                 .order_by('id')[0:1].get().genus.family.order.name)
+            s = (
+                Species.objects.all()
+                .select_related('genus__family__order')
+                .order_by('id')[0:1]
+                .get()
+                .genus.family.order.name
+            )
             self.assertEqual(s, 'Diptera')
 
     def test_none_clears_list(self):
@@ -181,6 +179,7 @@ class SelectRelatedValidationTests(SimpleTestCase):
     select_related() should thrown an error on fields that do not exist and
     non-relational fields.
     """
+
     non_relational_error = "Non-relational field given in select_related: '%s'. Choices are: %s"
     invalid_error = "Invalid field name(s) given in select_related: '%s'. Choices are: %s"
 

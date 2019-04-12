@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class LnTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_ln=Ln('normal')).first()
@@ -34,11 +33,7 @@ class LnTests(TestCase):
 
     def test_integer(self):
         IntegerModel.objects.create(small=20, normal=15, big=1)
-        obj = IntegerModel.objects.annotate(
-            small_ln=Ln('small'),
-            normal_ln=Ln('normal'),
-            big_ln=Ln('big'),
-        ).first()
+        obj = IntegerModel.objects.annotate(small_ln=Ln('small'), normal_ln=Ln('normal'), big_ln=Ln('big')).first()
         self.assertIsInstance(obj.small_ln, float)
         self.assertIsInstance(obj.normal_ln, float)
         self.assertIsInstance(obj.big_ln, float)

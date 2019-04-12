@@ -5,34 +5,19 @@ from .models import Choice, Poll, User
 
 
 class ReverseLookupTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         john = User.objects.create(name="John Doe")
         jim = User.objects.create(name="Jim Bo")
-        first_poll = Poll.objects.create(
-            question="What's the first question?",
-            creator=john
-        )
-        second_poll = Poll.objects.create(
-            question="What's the second question?",
-            creator=jim
-        )
-        Choice.objects.create(
-            poll=first_poll,
-            related_poll=second_poll,
-            name="This is the answer."
-        )
+        first_poll = Poll.objects.create(question="What's the first question?", creator=john)
+        second_poll = Poll.objects.create(question="What's the second question?", creator=jim)
+        Choice.objects.create(poll=first_poll, related_poll=second_poll, name="This is the answer.")
 
     def test_reverse_by_field(self):
-        u1 = User.objects.get(
-            poll__question__exact="What's the first question?"
-        )
+        u1 = User.objects.get(poll__question__exact="What's the first question?")
         self.assertEqual(u1.name, "John Doe")
 
-        u2 = User.objects.get(
-            poll__question__exact="What's the second question?"
-        )
+        u2 = User.objects.get(poll__question__exact="What's the second question?")
         self.assertEqual(u2.name, "Jim Bo")
 
     def test_reverse_by_related_name(self):

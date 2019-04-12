@@ -1,6 +1,4 @@
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
@@ -87,6 +85,7 @@ class Location(models.Model):
 class Item(models.Model):
     version = models.ForeignKey(Version, models.CASCADE)
     location = models.ForeignKey(Location, models.SET_NULL, blank=True, null=True)
+
 
 # Models for #16128
 

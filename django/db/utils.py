@@ -69,15 +69,15 @@ class DatabaseErrorWrapper:
         if exc_type is None:
             return
         for dj_exc_type in (
-                DataError,
-                OperationalError,
-                IntegrityError,
-                InternalError,
-                ProgrammingError,
-                NotSupportedError,
-                DatabaseError,
-                InterfaceError,
-                Error,
+            DataError,
+            OperationalError,
+            IntegrityError,
+            InternalError,
+            ProgrammingError,
+            NotSupportedError,
+            DatabaseError,
+            InterfaceError,
+            Error,
         ):
             db_exc_type = getattr(self.wrapper.Database, dj_exc_type.__name__)
             if issubclass(exc_type, db_exc_type):
@@ -94,6 +94,7 @@ class DatabaseErrorWrapper:
         def inner(*args, **kwargs):
             with self:
                 return func(*args, **kwargs)
+
         return inner
 
 
@@ -113,7 +114,8 @@ def load_backend(backend_name):
         # listing all built-in database backends.
         backend_dir = str(Path(__file__).parent / 'backends')
         builtin_backends = [
-            name for _, name, ispkg in pkgutil.iter_modules([backend_dir])
+            name
+            for _, name, ispkg in pkgutil.iter_modules([backend_dir])
             if ispkg and name not in {'base', 'dummy', 'postgresql_psycopg2'}
         ]
         if backend_name not in ['django.db.backends.%s' % b for b in builtin_backends]:
@@ -146,11 +148,7 @@ class ConnectionHandler:
         if self._databases is None:
             self._databases = settings.DATABASES
         if self._databases == {}:
-            self._databases = {
-                DEFAULT_DB_ALIAS: {
-                    'ENGINE': 'django.db.backends.dummy',
-                },
-            }
+            self._databases = {DEFAULT_DB_ALIAS: {'ENGINE': 'django.db.backends.dummy'}}
         if DEFAULT_DB_ALIAS not in self._databases:
             raise ImproperlyConfigured("You must define a '%s' database." % DEFAULT_DB_ALIAS)
         if self._databases[DEFAULT_DB_ALIAS] == {}:
@@ -261,6 +259,7 @@ class ConnectionRouter:
             if instance is not None and instance._state.db:
                 return instance._state.db
             return DEFAULT_DB_ALIAS
+
         return _route_db
 
     db_for_read = _router_func('db_for_read')
@@ -294,12 +293,7 @@ class ConnectionRouter:
         return True
 
     def allow_migrate_model(self, db, model):
-        return self.allow_migrate(
-            db,
-            model._meta.app_label,
-            model_name=model._meta.model_name,
-            model=model,
-        )
+        return self.allow_migrate(db, model._meta.app_label, model_name=model._meta.model_name, model=model)
 
     def get_migratable_models(self, app_config, db, include_auto_created=False):
         """Return app models allowed to be migrated on provided db."""

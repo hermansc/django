@@ -3,9 +3,7 @@
 import json
 import re
 from html.parser import HTMLParser
-from urllib.parse import (
-    parse_qsl, quote, unquote, urlencode, urlsplit, urlunsplit,
-)
+from urllib.parse import parse_qsl, quote, unquote, urlencode, urlsplit, urlunsplit
 
 from django.utils.functional import Promise, keep_lazy, keep_lazy_text
 from django.utils.http import RFC3986_GENDELIMS, RFC3986_SUBDELIMS
@@ -24,13 +22,7 @@ word_split_re = re.compile(r'''([\s<>"']+)''')
 simple_url_re = re.compile(r'^https?://\[?\w', re.IGNORECASE)
 simple_url_2_re = re.compile(r'^www\.|^(?!http)\w[^@]+\.(com|edu|gov|int|mil|net|org)($|/.*)$', re.IGNORECASE)
 
-_html_escapes = {
-    ord('&'): '&amp;',
-    ord('<'): '&lt;',
-    ord('>'): '&gt;',
-    ord('"'): '&quot;',
-    ord("'"): '&#39;',
-}
+_html_escapes = {ord('&'): '&amp;', ord('<'): '&lt;', ord('>'): '&gt;', ord('"'): '&quot;', ord("'"): '&#39;'}
 
 
 @keep_lazy(str, SafeString)
@@ -58,7 +50,7 @@ _js_escapes = {
     ord(';'): '\\u003B',
     ord('`'): '\\u0060',
     ord('\u2028'): '\\u2028',
-    ord('\u2029'): '\\u2029'
+    ord('\u2029'): '\\u2029',
 }
 
 # Escape every ASCII character with a value less than 32.
@@ -71,11 +63,7 @@ def escapejs(value):
     return mark_safe(str(value).translate(_js_escapes))
 
 
-_json_script_escapes = {
-    ord('>'): '\\u003E',
-    ord('<'): '\\u003C',
-    ord('&'): '\\u0026',
-}
+_json_script_escapes = {ord('>'): '\\u003E', ord('<'): '\\u003C', ord('&'): '\\u0026'}
 
 
 def json_script(value, element_id):
@@ -85,11 +73,9 @@ def json_script(value, element_id):
     the escaped JSON in a script tag.
     """
     from django.core.serializers.json import DjangoJSONEncoder
+
     json_str = json.dumps(value, cls=DjangoJSONEncoder).translate(_json_script_escapes)
-    return format_html(
-        '<script id="{}" type="application/json">{}</script>',
-        element_id, mark_safe(json_str)
-    )
+    return format_html('<script id="{}" type="application/json">{}</script>', element_id, mark_safe(json_str))
 
 
 def conditional_escape(text):
@@ -132,10 +118,7 @@ def format_html_join(sep, format_string, args_generator):
       format_html_join('\n', "<li>{} {}</li>", ((u.first_name, u.last_name)
                                                   for u in users))
     """
-    return mark_safe(conditional_escape(sep).join(
-        format_html(format_string, *args)
-        for args in args_generator
-    ))
+    return mark_safe(conditional_escape(sep).join(format_html(format_string, *args) for args in args_generator))
 
 
 @keep_lazy_text
@@ -202,6 +185,7 @@ def strip_spaces_between_tags(value):
 
 def smart_urlquote(url):
     """Quote a URL if it isn't already quoted."""
+
     def unquote_quote(segment):
         segment = unquote(segment)
         # Tilde is part of RFC3986 Unreserved Characters
@@ -224,8 +208,7 @@ def smart_urlquote(url):
     if query:
         # Separately unquoting key/value, so as to not mix querystring separators
         # included in query values. See #22267.
-        query_parts = [(unquote(q[0]), unquote(q[1]))
-                       for q in parse_qsl(query, keep_blank_values=True)]
+        query_parts = [(unquote(q[0]), unquote(q[1])) for q in parse_qsl(query, keep_blank_values=True)]
         # urlencode will take care of quoting
         query = urlencode(query_parts)
 
@@ -257,7 +240,7 @@ def urlize(text, trim_url_limit=None, nofollow=False, autoescape=False):
     def trim_url(x, limit=trim_url_limit):
         if limit is None or len(x) <= limit:
             return x
-        return '%s…' % x[:max(0, limit - 1)]
+        return '%s…' % x[: max(0, limit - 1)]
 
     def unescape(text):
         """
@@ -265,8 +248,13 @@ def urlize(text, trim_url_limit=None, nofollow=False, autoescape=False):
         to smart_urlquote. For example:
         http://example.com?x=1&amp;y=&lt;2&gt; => http://example.com?x=1&y=<2>
         """
-        return text.replace('&amp;', '&').replace('&lt;', '<').replace(
-            '&gt;', '>').replace('&quot;', '"').replace('&#39;', "'")
+        return (
+            text.replace('&amp;', '&')
+            .replace('&lt;', '<')
+            .replace('&gt;', '>')
+            .replace('&quot;', '"')
+            .replace('&#39;', "'")
+        )
 
     def trim_punctuation(lead, middle, trail):
         """
@@ -280,13 +268,12 @@ def urlize(text, trim_url_limit=None, nofollow=False, autoescape=False):
             # Trim wrapping punctuation.
             for opening, closing in WRAPPING_PUNCTUATION:
                 if middle.startswith(opening):
-                    middle = middle[len(opening):]
+                    middle = middle[len(opening) :]
                     lead += opening
                     trimmed_something = True
                 # Keep parentheses at the end only if they're balanced.
-                if (middle.endswith(closing) and
-                        middle.count(closing) == middle.count(opening) + 1):
-                    middle = middle[:-len(closing)]
+                if middle.endswith(closing) and middle.count(closing) == middle.count(opening) + 1:
+                    middle = middle[: -len(closing)]
                     trail = closing + trail
                     trimmed_something = True
             # Trim trailing punctuation (after trimming wrapping punctuation,
@@ -295,8 +282,8 @@ def urlize(text, trim_url_limit=None, nofollow=False, autoescape=False):
             middle_unescaped = unescape(middle)
             stripped = middle_unescaped.rstrip(TRAILING_PUNCTUATION_CHARS)
             if middle_unescaped != stripped:
-                trail = middle[len(stripped):] + trail
-                middle = middle[:len(stripped) - len(middle_unescaped)]
+                trail = middle[len(stripped) :] + trail
+                middle = middle[: len(stripped) - len(middle_unescaped)]
                 trimmed_something = True
         return lead, middle, trail
 
@@ -375,15 +362,9 @@ def html_safe(klass):
     templates to detect classes whose __str__ methods return SafeString.
     """
     if '__html__' in klass.__dict__:
-        raise ValueError(
-            "can't apply @html_safe to %s because it defines "
-            "__html__()." % klass.__name__
-        )
+        raise ValueError("can't apply @html_safe to %s because it defines " "__html__()." % klass.__name__)
     if '__str__' not in klass.__dict__:
-        raise ValueError(
-            "can't apply @html_safe to %s because it doesn't "
-            "define __str__()." % klass.__name__
-        )
+        raise ValueError("can't apply @html_safe to %s because it doesn't " "define __str__()." % klass.__name__)
     klass_str = klass.__str__
     klass.__str__ = lambda self: mark_safe(klass_str(self))
     klass.__html__ = lambda self: str(self)

@@ -5,7 +5,6 @@ from ..utils import setup
 
 
 class VerbatimTagTests(SimpleTestCase):
-
     @setup({'verbatim-tag01': '{% verbatim %}{{bare   }}{% endverbatim %}'})
     def test_verbatim_tag01(self):
         output = self.engine.render_to_string('verbatim-tag01')
@@ -31,8 +30,7 @@ class VerbatimTagTests(SimpleTestCase):
         output = self.engine.render_to_string('verbatim-tag05')
         self.assertEqual(output, '')
 
-    @setup({'verbatim-tag06': '{% verbatim special %}'
-                              'Don\'t {% endverbatim %} just yet{% endverbatim special %}'})
+    @setup({'verbatim-tag06': '{% verbatim special %}' 'Don\'t {% endverbatim %} just yet{% endverbatim special %}'})
     def test_verbatim_tag06(self):
         output = self.engine.render_to_string('verbatim-tag06')
         self.assertEqual(output, 'Don\'t {% endverbatim %} just yet')

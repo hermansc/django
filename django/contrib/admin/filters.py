@@ -8,9 +8,7 @@ certain test -- e.g. being a DateField or ForeignKey.
 import datetime
 
 from django.contrib.admin.options import IncorrectLookupParameters
-from django.contrib.admin.utils import (
-    get_model_from_relation, prepare_lookup_value, reverse_field_path,
-)
+from django.contrib.admin.utils import get_model_from_relation, prepare_lookup_value, reverse_field_path
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models
 from django.utils import timezone
@@ -26,10 +24,7 @@ class ListFilter:
         # parameters actually used by this filter.
         self.used_parameters = {}
         if self.title is None:
-            raise ImproperlyConfigured(
-                "The list filter '%s' does not specify a 'title'."
-                % self.__class__.__name__
-            )
+            raise ImproperlyConfigured("The list filter '%s' does not specify a 'title'." % self.__class__.__name__)
 
     def has_output(self):
         """
@@ -67,8 +62,7 @@ class SimpleListFilter(ListFilter):
         super().__init__(request, params, model, model_admin)
         if self.parameter_name is None:
             raise ImproperlyConfigured(
-                "The list filter '%s' does not specify a 'parameter_name'."
-                % self.__class__.__name__
+                "The list filter '%s' does not specify a 'parameter_name'." % self.__class__.__name__
             )
         if self.parameter_name in params:
             value = params.pop(self.parameter_name)
@@ -146,8 +140,7 @@ class FieldListFilter(ListFilter):
             # This is to allow overriding the default filters for certain types
             # of fields with some custom filters. The first found in the list
             # is used in priority.
-            cls._field_list_filters.insert(
-                cls._take_priority_index, (test, list_filter_class))
+            cls._field_list_filters.insert(cls._take_priority_index, (test, list_filter_class))
             cls._take_priority_index += 1
         else:
             cls._field_list_filters.append((test, list_filter_class))
@@ -230,18 +223,18 @@ class BooleanFieldListFilter(FieldListFilter):
         self.lookup_val = params.get(self.lookup_kwarg)
         self.lookup_val2 = params.get(self.lookup_kwarg2)
         super().__init__(field, request, params, model, model_admin, field_path)
-        if (self.used_parameters and self.lookup_kwarg in self.used_parameters and
-                self.used_parameters[self.lookup_kwarg] in ('1', '0')):
+        if (
+            self.used_parameters
+            and self.lookup_kwarg in self.used_parameters
+            and self.used_parameters[self.lookup_kwarg] in ('1', '0')
+        ):
             self.used_parameters[self.lookup_kwarg] = bool(int(self.used_parameters[self.lookup_kwarg]))
 
     def expected_parameters(self):
         return [self.lookup_kwarg, self.lookup_kwarg2]
 
     def choices(self, changelist):
-        for lookup, title in (
-                (None, _('All')),
-                ('1', _('Yes')),
-                ('0', _('No'))):
+        for lookup, title in ((None, _('All')), ('1', _('Yes')), ('0', _('No'))):
             yield {
                 'selected': self.lookup_val == lookup and not self.lookup_val2,
                 'query_string': changelist.get_query_string({self.lookup_kwarg: lookup}, [self.lookup_kwarg2]),
@@ -273,7 +266,7 @@ class ChoicesFieldListFilter(FieldListFilter):
         yield {
             'selected': self.lookup_val is None,
             'query_string': changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull]),
-            'display': _('All')
+            'display': _('All'),
         }
         none_title = ''
         for lookup, title in self.field.flatchoices:
@@ -309,7 +302,7 @@ class DateFieldListFilter(FieldListFilter):
 
         if isinstance(field, models.DateTimeField):
             today = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        else:       # field is a models.DateField
+        else:  # field is a models.DateField
             today = now.date()
         tomorrow = today + datetime.timedelta(days=1)
         if today.month == 12:
@@ -322,22 +315,22 @@ class DateFieldListFilter(FieldListFilter):
         self.lookup_kwarg_until = '%s__lt' % field_path
         self.links = (
             (_('Any date'), {}),
-            (_('Today'), {
-                self.lookup_kwarg_since: str(today),
-                self.lookup_kwarg_until: str(tomorrow),
-            }),
-            (_('Past 7 days'), {
-                self.lookup_kwarg_since: str(today - datetime.timedelta(days=7)),
-                self.lookup_kwarg_until: str(tomorrow),
-            }),
-            (_('This month'), {
-                self.lookup_kwarg_since: str(today.replace(day=1)),
-                self.lookup_kwarg_until: str(next_month),
-            }),
-            (_('This year'), {
-                self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
-                self.lookup_kwarg_until: str(next_year),
-            }),
+            (_('Today'), {self.lookup_kwarg_since: str(today), self.lookup_kwarg_until: str(tomorrow)}),
+            (
+                _('Past 7 days'),
+                {
+                    self.lookup_kwarg_since: str(today - datetime.timedelta(days=7)),
+                    self.lookup_kwarg_until: str(tomorrow),
+                },
+            ),
+            (
+                _('This month'),
+                {self.lookup_kwarg_since: str(today.replace(day=1)), self.lookup_kwarg_until: str(next_month)},
+            ),
+            (
+                _('This year'),
+                {self.lookup_kwarg_since: str(today.replace(month=1, day=1)), self.lookup_kwarg_until: str(next_year)},
+            ),
         )
         if field.null:
             self.lookup_kwarg_isnull = '%s__isnull' % field_path
@@ -362,8 +355,7 @@ class DateFieldListFilter(FieldListFilter):
             }
 
 
-FieldListFilter.register(
-    lambda f: isinstance(f, models.DateField), DateFieldListFilter)
+FieldListFilter.register(lambda f: isinstance(f, models.DateField), DateFieldListFilter)
 
 
 # This should be registered last, because it's a last resort. For example,

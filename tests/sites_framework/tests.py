@@ -29,15 +29,13 @@ class SitesFrameworkTestCase(TestCase):
 
     def test_custom_named_field(self):
         article = CustomArticle.objects.create(
-            title="Tantalizing News!",
-            places_this_article_should_appear_id=settings.SITE_ID,
+            title="Tantalizing News!", places_this_article_should_appear_id=settings.SITE_ID
         )
         self.assertEqual(CustomArticle.on_site.all().get(), article)
 
 
 @isolate_apps('sites_framework')
 class CurrentSiteManagerChecksTests(SimpleTestCase):
-
     def test_invalid_name(self):
         class InvalidArticle(models.Model):
             on_site = CurrentSiteManager("places_this_article_should_appear")
@@ -45,8 +43,7 @@ class CurrentSiteManagerChecksTests(SimpleTestCase):
         errors = InvalidArticle.check()
         expected = [
             checks.Error(
-                "CurrentSiteManager could not find a field named "
-                "'places_this_article_should_appear'.",
+                "CurrentSiteManager could not find a field named " "'places_this_article_should_appear'.",
                 obj=InvalidArticle.on_site,
                 id='sites.E001',
             )
@@ -54,7 +51,6 @@ class CurrentSiteManagerChecksTests(SimpleTestCase):
         self.assertEqual(errors, expected)
 
     def test_invalid_field_type(self):
-
         class ConfusedArticle(models.Model):
             site = models.IntegerField()
             on_site = CurrentSiteManager()

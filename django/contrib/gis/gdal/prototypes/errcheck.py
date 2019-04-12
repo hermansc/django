@@ -4,9 +4,7 @@
 """
 from ctypes import c_void_p, string_at
 
-from django.contrib.gis.gdal.error import (
-    GDALException, SRSException, check_err,
-)
+from django.contrib.gis.gdal.error import GDALException, SRSException, check_err
 from django.contrib.gis.gdal.libgdal import lgdal
 
 
@@ -62,6 +60,7 @@ def check_string(result, func, cargs, offset=-1, str_result=False):
     if ptr:
         lgdal.VSIFree(ptr)
     return s
+
 
 # ### DataSource, Layer error-checking ###
 

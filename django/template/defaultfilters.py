@@ -12,13 +12,17 @@ from django.utils import formats
 from django.utils.dateformat import format, time_format
 from django.utils.encoding import iri_to_uri
 from django.utils.html import (
-    avoid_wrapping, conditional_escape, escape, escapejs,
-    json_script as _json_script, linebreaks, strip_tags, urlize as _urlize,
+    avoid_wrapping,
+    conditional_escape,
+    escape,
+    escapejs,
+    json_script as _json_script,
+    linebreaks,
+    strip_tags,
+    urlize as _urlize,
 )
 from django.utils.safestring import SafeData, mark_safe
-from django.utils.text import (
-    Truncator, normalize_newlines, phone2numeric, slugify as _slugify, wrap,
-)
+from django.utils.text import Truncator, normalize_newlines, phone2numeric, slugify as _slugify, wrap
 from django.utils.timesince import timesince, timeuntil
 from django.utils.translation import gettext, ngettext
 
@@ -32,16 +36,17 @@ register = Library()
 # STRING DECORATOR    #
 #######################
 
+
 def stringfilter(func):
     """
     Decorator for filters which should only receive strings. The object
     passed as the first positional argument will be converted to a string.
     """
+
     def _dec(*args, **kwargs):
         args = list(args)
         args[0] = str(args[0])
-        if (isinstance(args[0], SafeData) and
-                getattr(_dec._decorated_function, 'is_safe', False)):
+        if isinstance(args[0], SafeData) and getattr(_dec._decorated_function, 'is_safe', False):
             return mark_safe(func(*args, **kwargs))
         return func(*args, **kwargs)
 
@@ -56,6 +61,7 @@ def stringfilter(func):
 ###################
 # STRINGS         #
 ###################
+
 
 @register.filter(is_safe=True)
 @stringfilter
@@ -390,6 +396,7 @@ def cut(value, arg):
 # HTML STRINGS    #
 ###################
 
+
 @register.filter("escape", is_safe=True)
 @stringfilter
 def escape_filter(value):
@@ -461,6 +468,7 @@ def striptags(value):
 ###################
 # LISTS           #
 ###################
+
 
 def _property_resolver(arg):
     """
@@ -609,6 +617,7 @@ def unordered_list(value, autoescape=True):
     if autoescape:
         escaper = conditional_escape
     else:
+
         def escaper(x):
             return x
 
@@ -642,10 +651,8 @@ def unordered_list(value, autoescape=True):
         for item, children in walk_items(item_list):
             sublist = ''
             if children:
-                sublist = '\n%s<ul>\n%s\n%s</ul>\n%s' % (
-                    indent, list_formatter(children, tabs + 1), indent, indent)
-            output.append('%s<li>%s%s</li>' % (
-                indent, escaper(item), sublist))
+                sublist = '\n%s<ul>\n%s\n%s</ul>\n%s' % (indent, list_formatter(children, tabs + 1), indent, indent)
+            output.append('%s<li>%s%s</li>' % (indent, escaper(item), sublist))
         return '\n'.join(output)
 
     return mark_safe(list_formatter(value))
@@ -654,6 +661,7 @@ def unordered_list(value, autoescape=True):
 ###################
 # INTEGERS        #
 ###################
+
 
 @register.filter(is_safe=False)
 def add(value, arg):
@@ -691,6 +699,7 @@ def get_digit(value, arg):
 ###################
 # DATES           #
 ###################
+
 
 @register.filter(expects_localtime=True, is_safe=False)
 def date(value, arg=None):
@@ -748,6 +757,7 @@ def timeuntil_filter(value, arg=None):
 # LOGIC           #
 ###################
 
+
 @register.filter(is_safe=False)
 def default(value, arg):
     """If value is unavailable, use given default."""
@@ -804,6 +814,7 @@ def yesno(value, arg=None):
 ###################
 # MISC            #
 ###################
+
 
 @register.filter(is_safe=True)
 def filesizeformat(bytes_):

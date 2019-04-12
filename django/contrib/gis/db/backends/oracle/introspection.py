@@ -17,7 +17,7 @@ class OracleIntrospection(DatabaseIntrospection):
                 cursor.execute(
                     'SELECT "DIMINFO", "SRID" FROM "USER_SDO_GEOM_METADATA" '
                     'WHERE "TABLE_NAME"=%s AND "COLUMN_NAME"=%s',
-                    (table_name.upper(), description.name.upper())
+                    (table_name.upper(), description.name.upper()),
                 )
                 row = cursor.fetchone()
             except Exception as exc:

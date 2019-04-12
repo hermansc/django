@@ -5,20 +5,23 @@ from io import StringIO
 from django.contrib.gis import gdal
 from django.contrib.gis.db.models import Extent, MakeLine, Union, functions
 from django.contrib.gis.geos import (
-    GeometryCollection, GEOSGeometry, LinearRing, LineString, MultiLineString,
-    MultiPoint, MultiPolygon, Point, Polygon, fromstr,
+    GeometryCollection,
+    GEOSGeometry,
+    LinearRing,
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+    fromstr,
 )
 from django.core.management import call_command
 from django.db import NotSupportedError, connection
 from django.test import TestCase, skipUnlessDBFeature
 
-from ..utils import (
-    mysql, no_oracle, oracle, postgis, skipUnlessGISLookup, spatialite,
-)
-from .models import (
-    City, Country, Feature, MinusOneSRID, NonConcreteModel, PennsylvaniaCity,
-    State, Track,
-)
+from ..utils import mysql, no_oracle, oracle, postgis, skipUnlessGISLookup, spatialite
+from .models import City, Country, Feature, MinusOneSRID, NonConcreteModel, PennsylvaniaCity, State, Track
 
 
 class GeoModelTest(TestCase):
@@ -135,9 +138,12 @@ class GeoModelTest(TestCase):
         Feature(name='Point', geom=Point(1, 1)).save()
         Feature(name='LineString', geom=LineString((0, 0), (1, 1), (5, 5))).save()
         Feature(name='Polygon', geom=Polygon(LinearRing((0, 0), (0, 5), (5, 5), (5, 0), (0, 0)))).save()
-        Feature(name='GeometryCollection',
-                geom=GeometryCollection(Point(2, 2), LineString((0, 0), (2, 2)),
-                                        Polygon(LinearRing((0, 0), (0, 5), (5, 5), (5, 0), (0, 0))))).save()
+        Feature(
+            name='GeometryCollection',
+            geom=GeometryCollection(
+                Point(2, 2), LineString((0, 0), (2, 2)), Polygon(LinearRing((0, 0), (0, 5), (5, 5), (5, 0), (0, 0)))
+            ),
+        ).save()
 
         f_1 = Feature.objects.get(name='Point')
         self.assertIsInstance(f_1.geom, Point)
@@ -173,9 +179,7 @@ class GeoModelTest(TestCase):
         "Testing raw SQL query."
         cities1 = City.objects.all()
         point_select = connection.ops.select % 'point'
-        cities2 = list(City.objects.raw(
-            'select id, name, %s as point from geoapp_city' % point_select
-        ))
+        cities2 = list(City.objects.raw('select id, name, %s as point from geoapp_city' % point_select))
         self.assertEqual(len(cities1), len(cities2))
         with self.assertNumQueries(0):  # Ensure point isn't deferred.
             self.assertIsInstance(cities2[0].point, Point)
@@ -227,8 +231,7 @@ class GeoLookupTest(TestCase):
 
     def test_disjoint_lookup(self):
         "Testing the `disjoint` lookup type."
-        if (connection.vendor == 'mysql' and not connection.mysql_is_mariadb and
-                connection.mysql_version < (8, 0, 0)):
+        if connection.vendor == 'mysql' and not connection.mysql_is_mariadb and connection.mysql_version < (8, 0, 0):
             raise unittest.SkipTest('MySQL < 8 gives different results.')
         ptown = City.objects.get(name='Pueblo')
         qs1 = City.objects.filter(point__disjoint=ptown.point)
@@ -283,18 +286,9 @@ class GeoLookupTest(TestCase):
 
     @skipUnlessDBFeature("supports_crosses_lookup")
     def test_crosses_lookup(self):
-        Track.objects.create(
-            name='Line1',
-            line=LineString([(-95, 29), (-60, 0)])
-        )
-        self.assertEqual(
-            Track.objects.filter(line__crosses=LineString([(-95, 0), (-60, 29)])).count(),
-            1
-        )
-        self.assertEqual(
-            Track.objects.filter(line__crosses=LineString([(-95, 30), (0, 30)])).count(),
-            0
-        )
+        Track.objects.create(name='Line1', line=LineString([(-95, 29), (-60, 0)]))
+        self.assertEqual(Track.objects.filter(line__crosses=LineString([(-95, 0), (-60, 29)])).count(), 1)
+        self.assertEqual(Track.objects.filter(line__crosses=LineString([(-95, 30), (0, 30)])).count(), 0)
 
     @skipUnlessDBFeature("supports_isvalid_lookup")
     def test_isvalid_lookup(self):
@@ -325,8 +319,7 @@ class GeoLookupTest(TestCase):
         # to the left of CO.
 
         # These cities should be strictly to the right of the CO border.
-        cities = ['Houston', 'Dallas', 'Oklahoma City',
-                  'Lawrence', 'Chicago', 'Wellington']
+        cities = ['Houston', 'Dallas', 'Oklahoma City', 'Lawrence', 'Chicago', 'Wellington']
         qs = City.objects.filter(point__right=co_border)
         self.assertEqual(6, len(qs))
         for c in qs:
@@ -356,12 +349,12 @@ class GeoLookupTest(TestCase):
         self.assertQuerysetEqual(
             City.objects.filter(point__strictly_above=dallas.point).order_by('name'),
             ['Chicago', 'Lawrence', 'Oklahoma City', 'Pueblo', 'Victoria'],
-            lambda b: b.name
+            lambda b: b.name,
         )
         self.assertQuerysetEqual(
             City.objects.filter(point__strictly_below=dallas.point).order_by('name'),
             ['Houston', 'Wellington'],
-            lambda b: b.name
+            lambda b: b.name,
         )
 
     def test_equals_lookups(self):
@@ -533,15 +526,12 @@ class GeoQuerySetTest(TestCase):
             'LINESTRING(-95.363151 29.763374,-96.801611 32.782057,'
             '-97.521157 34.464642,174.783117 -41.315268,-104.609252 38.255001,'
             '-95.23506 38.971823,-87.650175 41.850385,-123.305196 48.462611)',
-            srid=4326
+            srid=4326,
         )
         # We check for equality with a tolerance of 10e-5 which is a lower bound
         # of the precisions of ref_line coordinates
         line = City.objects.aggregate(MakeLine('point'))['point__makeline']
-        self.assertTrue(
-            ref_line.equals_exact(line, tolerance=10e-5),
-            "%s != %s" % (ref_line, line)
-        )
+        self.assertTrue(ref_line.equals_exact(line, tolerance=10e-5), "%s != %s" % (ref_line, line))
 
     @skipUnlessDBFeature('supports_union_aggr')
     def test_unionagg(self):
@@ -569,8 +559,9 @@ class GeoQuerySetTest(TestCase):
         Using a queryset inside a geo lookup is working (using a subquery)
         (#14483).
         """
-        tex_cities = City.objects.filter(
-            point__within=Country.objects.filter(name='Texas').values('mpoly')).order_by('name')
+        tex_cities = City.objects.filter(point__within=Country.objects.filter(name='Texas').values('mpoly')).order_by(
+            'name'
+        )
         self.assertEqual(list(tex_cities.values_list('name', flat=True)), ['Dallas', 'Houston'])
 
     def test_non_concrete_field(self):

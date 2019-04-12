@@ -21,13 +21,11 @@ class SearchVectorExact(Lookup):
 
 
 class SearchVectorField(Field):
-
     def db_type(self, connection):
         return 'tsvector'
 
 
 class SearchQueryField(Field):
-
     def db_type(self, connection):
         return 'tsquery'
 
@@ -95,10 +93,7 @@ class SearchQueryCombinable:
 
     def _combine(self, other, connector, reversed):
         if not isinstance(other, SearchQueryCombinable):
-            raise TypeError(
-                'SearchQuery can only be combined with other SearchQuerys, '
-                'got {}.'.format(type(other))
-            )
+            raise TypeError('SearchQuery can only be combined with other SearchQuerys, ' 'got {}.'.format(type(other)))
         if reversed:
             return CombinedSearchQuery(other, connector, self, self.config)
         return CombinedSearchQuery(self, connector, other, self.config)
@@ -121,11 +116,7 @@ class SearchQueryCombinable:
 
 class SearchQuery(SearchQueryCombinable, Value):
     output_field = SearchQueryField()
-    SEARCH_TYPES = {
-        'plain': 'plainto_tsquery',
-        'phrase': 'phraseto_tsquery',
-        'raw': 'to_tsquery',
-    }
+    SEARCH_TYPES = {'plain': 'plainto_tsquery', 'phrase': 'phraseto_tsquery', 'raw': 'to_tsquery'}
 
     def __init__(self, value, output_field=None, *, config=None, invert=False, search_type='plain'):
         self.config = config
@@ -202,10 +193,7 @@ class SearchRank(Func):
                 template = '%(function)s(%(weights)s, %(expressions)s)'
                 weight_sql, extra_params = compiler.compile(self.weights)
                 extra_context['weights'] = weight_sql
-        sql, params = super().as_sql(
-            compiler, connection,
-            function=function, template=template, **extra_context
-        )
+        sql, params = super().as_sql(compiler, connection, function=function, template=template, **extra_context)
         return sql, extra_params + params
 
 

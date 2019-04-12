@@ -4,10 +4,7 @@ from django.core.management import call_command
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import extend_sys_path
 
-from .models import (
-    ConcreteModel, ConcreteModelSubclass, ConcreteModelSubclassProxy,
-    ProxyModel,
-)
+from .models import ConcreteModel, ConcreteModelSubclass, ConcreteModelSubclassProxy, ProxyModel
 
 
 class ProxyModelInheritanceTests(TransactionTestCase):
@@ -16,6 +13,7 @@ class ProxyModelInheritanceTests(TransactionTestCase):
     for the proxied model (as described in #12286).  This test creates two dummy
     apps and calls migrate, then verifies that the table has been created.
     """
+
     available_apps = []
 
     def test_table_exists(self):
@@ -24,12 +22,12 @@ class ProxyModelInheritanceTests(TransactionTestCase):
                 call_command('migrate', verbosity=0, run_syncdb=True)
                 from app1.models import ProxyModel
                 from app2.models import NiceModel
+
                 self.assertEqual(NiceModel.objects.all().count(), 0)
                 self.assertEqual(ProxyModel.objects.all().count(), 0)
 
 
 class MultiTableInheritanceProxyTest(TestCase):
-
     def test_model_subclass_proxy(self):
         """
         Deleting an instance of a model proxying a multi-table inherited

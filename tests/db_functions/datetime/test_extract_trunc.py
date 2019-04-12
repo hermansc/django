@@ -3,18 +3,32 @@ from datetime import datetime, timedelta
 import pytz
 
 from django.conf import settings
-from django.db.models import (
-    DateField, DateTimeField, IntegerField, Max, OuterRef, Subquery, TimeField,
-)
+from django.db.models import DateField, DateTimeField, IntegerField, Max, OuterRef, Subquery, TimeField
 from django.db.models.functions import (
-    Extract, ExtractDay, ExtractHour, ExtractIsoYear, ExtractMinute,
-    ExtractMonth, ExtractQuarter, ExtractSecond, ExtractWeek, ExtractWeekDay,
-    ExtractYear, Trunc, TruncDate, TruncDay, TruncHour, TruncMinute,
-    TruncMonth, TruncQuarter, TruncSecond, TruncTime, TruncWeek, TruncYear,
+    Extract,
+    ExtractDay,
+    ExtractHour,
+    ExtractIsoYear,
+    ExtractMinute,
+    ExtractMonth,
+    ExtractQuarter,
+    ExtractSecond,
+    ExtractWeek,
+    ExtractWeekDay,
+    ExtractYear,
+    Trunc,
+    TruncDate,
+    TruncDay,
+    TruncHour,
+    TruncMinute,
+    TruncMonth,
+    TruncQuarter,
+    TruncSecond,
+    TruncTime,
+    TruncWeek,
+    TruncYear,
 )
-from django.test import (
-    TestCase, override_settings, skipIfDBFeature, skipUnlessDBFeature,
-)
+from django.test import TestCase, override_settings, skipIfDBFeature, skipUnlessDBFeature
 from django.utils import timezone
 
 from ..models import Author, DTModel, Fan
@@ -63,7 +77,6 @@ def truncate_to(value, kind, tzinfo=None):
 
 @override_settings(USE_TZ=False)
 class DateFunctionTests(TestCase):
-
     def create_model(self, start_datetime, end_datetime):
         return DTModel.objects.create(
             name=start_datetime.isoformat() if start_datetime else 'None',
@@ -162,56 +175,57 @@ class DateFunctionTests(TestCase):
             list(DTModel.objects.annotate(extracted=Extract('name', 'hour')))
 
         with self.assertRaisesMessage(
-                ValueError, "Cannot extract time component 'second' from DateField 'start_date'."):
+            ValueError, "Cannot extract time component 'second' from DateField 'start_date'."
+        ):
             list(DTModel.objects.annotate(extracted=Extract('start_date', 'second')))
 
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'year')).order_by('start_datetime'),
             [(start_datetime, start_datetime.year), (end_datetime, end_datetime.year)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'quarter')).order_by('start_datetime'),
             [(start_datetime, 2), (end_datetime, 2)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'month')).order_by('start_datetime'),
             [(start_datetime, start_datetime.month), (end_datetime, end_datetime.month)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'day')).order_by('start_datetime'),
             [(start_datetime, start_datetime.day), (end_datetime, end_datetime.day)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'week')).order_by('start_datetime'),
             [(start_datetime, 25), (end_datetime, 24)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'week_day')).order_by('start_datetime'),
             [
                 (start_datetime, (start_datetime.isoweekday() % 7) + 1),
-                (end_datetime, (end_datetime.isoweekday() % 7) + 1)
+                (end_datetime, (end_datetime.isoweekday() % 7) + 1),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'hour')).order_by('start_datetime'),
             [(start_datetime, start_datetime.hour), (end_datetime, end_datetime.hour)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'minute')).order_by('start_datetime'),
             [(start_datetime, start_datetime.minute), (end_datetime, end_datetime.minute)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=Extract('start_datetime', 'second')).order_by('start_datetime'),
             [(start_datetime, start_datetime.second), (end_datetime, end_datetime.second)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__year=Extract('start_datetime', 'year')).count(), 2)
         self.assertEqual(DTModel.objects.filter(start_datetime__hour=Extract('start_datetime', 'hour')).count(), 2)
@@ -237,15 +251,12 @@ class DateFunctionTests(TestCase):
             DTModel.objects.annotate(extracted=Extract('duration', 'second')).order_by('start_datetime'),
             [
                 (start_datetime, (end_datetime - start_datetime).seconds % 60),
-                (end_datetime, (start_datetime - end_datetime).seconds % 60)
+                (end_datetime, (start_datetime - end_datetime).seconds % 60),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(
-            DTModel.objects.annotate(
-                duration_days=Extract('duration', 'day'),
-            ).filter(duration_days__gt=200).count(),
-            1
+            DTModel.objects.annotate(duration_days=Extract('duration', 'day')).filter(duration_days__gt=200).count(), 1
         )
 
     @skipIfDBFeature('has_native_duration_field')
@@ -265,12 +276,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractYear('start_datetime')).order_by('start_datetime'),
             [(start_datetime, start_datetime.year), (end_datetime, end_datetime.year)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractYear('start_date')).order_by('start_datetime'),
             [(start_datetime, start_datetime.year), (end_datetime, end_datetime.year)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__year=ExtractYear('start_datetime')).count(), 2)
 
@@ -285,12 +296,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractIsoYear('start_datetime')).order_by('start_datetime'),
             [(start_datetime, start_datetime.year), (end_datetime, end_datetime.year)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractIsoYear('start_date')).order_by('start_datetime'),
             [(start_datetime, start_datetime.year), (end_datetime, end_datetime.year)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         # Both dates are from the same week year.
         self.assertEqual(DTModel.objects.filter(start_datetime__iso_year=ExtractIsoYear('start_datetime')).count(), 2)
@@ -310,14 +321,16 @@ class DateFunctionTests(TestCase):
         self.create_model(week_53_day_2015, end_datetime)
         self.create_model(week_52_day_2014, end_datetime)
         self.create_model(week_1_day_2014_2015, end_datetime)
-        qs = DTModel.objects.filter(start_datetime__in=days).annotate(
-            extracted=ExtractIsoYear('start_datetime'),
-        ).order_by('start_datetime')
-        self.assertQuerysetEqual(qs, [
-            (week_52_day_2014, 2014),
-            (week_1_day_2014_2015, 2015),
-            (week_53_day_2015, 2015),
-        ], lambda m: (m.start_datetime, m.extracted))
+        qs = (
+            DTModel.objects.filter(start_datetime__in=days)
+            .annotate(extracted=ExtractIsoYear('start_datetime'))
+            .order_by('start_datetime')
+        )
+        self.assertQuerysetEqual(
+            qs,
+            [(week_52_day_2014, 2014), (week_1_day_2014_2015, 2015), (week_53_day_2015, 2015)],
+            lambda m: (m.start_datetime, m.extracted),
+        )
 
     def test_extract_month_func(self):
         start_datetime = datetime(2015, 6, 15, 14, 30, 50, 321)
@@ -330,12 +343,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractMonth('start_datetime')).order_by('start_datetime'),
             [(start_datetime, start_datetime.month), (end_datetime, end_datetime.month)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractMonth('start_date')).order_by('start_datetime'),
             [(start_datetime, start_datetime.month), (end_datetime, end_datetime.month)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__month=ExtractMonth('start_datetime')).count(), 2)
 
@@ -350,12 +363,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractDay('start_datetime')).order_by('start_datetime'),
             [(start_datetime, start_datetime.day), (end_datetime, end_datetime.day)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractDay('start_date')).order_by('start_datetime'),
             [(start_datetime, start_datetime.day), (end_datetime, end_datetime.day)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__day=ExtractDay('start_datetime')).count(), 2)
 
@@ -370,12 +383,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractWeek('start_datetime')).order_by('start_datetime'),
             [(start_datetime, 25), (end_datetime, 24)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractWeek('start_date')).order_by('start_datetime'),
             [(start_datetime, 25), (end_datetime, 24)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         # both dates are from the same week.
         self.assertEqual(DTModel.objects.filter(start_datetime__week=ExtractWeek('start_datetime')).count(), 2)
@@ -391,12 +404,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractQuarter('start_datetime')).order_by('start_datetime'),
             [(start_datetime, 2), (end_datetime, 3)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractQuarter('start_date')).order_by('start_datetime'),
             [(start_datetime, 2), (end_datetime, 3)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__quarter=ExtractQuarter('start_datetime')).count(), 2)
 
@@ -413,13 +426,14 @@ class DateFunctionTests(TestCase):
         dates = [last_quarter_2014, first_quarter_2015]
         self.create_model(last_quarter_2014, end_datetime)
         self.create_model(first_quarter_2015, end_datetime)
-        qs = DTModel.objects.filter(start_datetime__in=dates).annotate(
-            extracted=ExtractQuarter('start_datetime'),
-        ).order_by('start_datetime')
-        self.assertQuerysetEqual(qs, [
-            (last_quarter_2014, 4),
-            (first_quarter_2015, 1),
-        ], lambda m: (m.start_datetime, m.extracted))
+        qs = (
+            DTModel.objects.filter(start_datetime__in=dates)
+            .annotate(extracted=ExtractQuarter('start_datetime'))
+            .order_by('start_datetime')
+        )
+        self.assertQuerysetEqual(
+            qs, [(last_quarter_2014, 4), (first_quarter_2015, 1)], lambda m: (m.start_datetime, m.extracted)
+        )
 
     def test_extract_week_func_boundaries(self):
         end_datetime = datetime(2016, 6, 15, 14, 10, 50, 123)
@@ -438,14 +452,16 @@ class DateFunctionTests(TestCase):
         self.create_model(week_53_day_2015, end_datetime)
         self.create_model(week_52_day_2014, end_datetime)
         self.create_model(week_1_day_2014_2015, end_datetime)
-        qs = DTModel.objects.filter(start_datetime__in=days).annotate(
-            extracted=ExtractWeek('start_datetime'),
-        ).order_by('start_datetime')
-        self.assertQuerysetEqual(qs, [
-            (week_52_day_2014, 52),
-            (week_1_day_2014_2015, 1),
-            (week_53_day_2015, 53),
-        ], lambda m: (m.start_datetime, m.extracted))
+        qs = (
+            DTModel.objects.filter(start_datetime__in=days)
+            .annotate(extracted=ExtractWeek('start_datetime'))
+            .order_by('start_datetime')
+        )
+        self.assertQuerysetEqual(
+            qs,
+            [(week_52_day_2014, 52), (week_1_day_2014_2015, 1), (week_53_day_2015, 53)],
+            lambda m: (m.start_datetime, m.extracted),
+        )
 
     def test_extract_weekday_func(self):
         start_datetime = datetime(2015, 6, 15, 14, 30, 50, 321)
@@ -461,7 +477,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, (start_datetime.isoweekday() % 7) + 1),
                 (end_datetime, (end_datetime.isoweekday() % 7) + 1),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractWeekDay('start_date')).order_by('start_datetime'),
@@ -469,7 +485,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, (start_datetime.isoweekday() % 7) + 1),
                 (end_datetime, (end_datetime.isoweekday() % 7) + 1),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__week_day=ExtractWeekDay('start_datetime')).count(), 2)
 
@@ -484,12 +500,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractHour('start_datetime')).order_by('start_datetime'),
             [(start_datetime, start_datetime.hour), (end_datetime, end_datetime.hour)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractHour('start_time')).order_by('start_datetime'),
             [(start_datetime, start_datetime.hour), (end_datetime, end_datetime.hour)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__hour=ExtractHour('start_datetime')).count(), 2)
 
@@ -504,12 +520,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractMinute('start_datetime')).order_by('start_datetime'),
             [(start_datetime, start_datetime.minute), (end_datetime, end_datetime.minute)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractMinute('start_time')).order_by('start_datetime'),
             [(start_datetime, start_datetime.minute), (end_datetime, end_datetime.minute)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__minute=ExtractMinute('start_datetime')).count(), 2)
 
@@ -524,12 +540,12 @@ class DateFunctionTests(TestCase):
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractSecond('start_datetime')).order_by('start_datetime'),
             [(start_datetime, start_datetime.second), (end_datetime, end_datetime.second)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=ExtractSecond('start_time')).order_by('start_datetime'),
             [(start_datetime, start_datetime.second), (end_datetime, end_datetime.second)],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__second=ExtractSecond('start_datetime')).count(), 2)
 
@@ -566,35 +582,32 @@ class DateFunctionTests(TestCase):
                 DTModel.objects.annotate(
                     truncated=Trunc('start_datetime', kind, output_field=DateTimeField())
                 ).order_by('start_datetime'),
-                [
-                    (start_datetime, truncate_to(start_datetime, kind)),
-                    (end_datetime, truncate_to(end_datetime, kind))
-                ],
-                lambda m: (m.start_datetime, m.truncated)
+                [(start_datetime, truncate_to(start_datetime, kind)), (end_datetime, truncate_to(end_datetime, kind))],
+                lambda m: (m.start_datetime, m.truncated),
             )
 
         def test_date_kind(kind):
             self.assertQuerysetEqual(
-                DTModel.objects.annotate(
-                    truncated=Trunc('start_date', kind, output_field=DateField())
-                ).order_by('start_datetime'),
+                DTModel.objects.annotate(truncated=Trunc('start_date', kind, output_field=DateField())).order_by(
+                    'start_datetime'
+                ),
                 [
                     (start_datetime, truncate_to(start_datetime.date(), kind)),
-                    (end_datetime, truncate_to(end_datetime.date(), kind))
+                    (end_datetime, truncate_to(end_datetime.date(), kind)),
                 ],
-                lambda m: (m.start_datetime, m.truncated)
+                lambda m: (m.start_datetime, m.truncated),
             )
 
         def test_time_kind(kind):
             self.assertQuerysetEqual(
-                DTModel.objects.annotate(
-                    truncated=Trunc('start_time', kind, output_field=TimeField())
-                ).order_by('start_datetime'),
+                DTModel.objects.annotate(truncated=Trunc('start_time', kind, output_field=TimeField())).order_by(
+                    'start_datetime'
+                ),
                 [
                     (start_datetime, truncate_to(start_datetime.time(), kind)),
-                    (end_datetime, truncate_to(end_datetime.time(), kind))
+                    (end_datetime, truncate_to(end_datetime.time(), kind)),
                 ],
-                lambda m: (m.start_datetime, m.truncated)
+                lambda m: (m.start_datetime, m.truncated),
             )
 
         test_date_kind('year')
@@ -633,11 +646,8 @@ class DateFunctionTests(TestCase):
         self.create_model(end_datetime, start_datetime)
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncYear('start_datetime')).order_by('start_datetime'),
-            [
-                (start_datetime, truncate_to(start_datetime, 'year')),
-                (end_datetime, truncate_to(end_datetime, 'year')),
-            ],
-            lambda m: (m.start_datetime, m.extracted)
+            [(start_datetime, truncate_to(start_datetime, 'year')), (end_datetime, truncate_to(end_datetime, 'year'))],
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncYear('start_date')).order_by('start_datetime'),
@@ -645,7 +655,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, truncate_to(start_datetime.date(), 'year')),
                 (end_datetime, truncate_to(end_datetime.date(), 'year')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime=TruncYear('start_datetime')).count(), 1)
 
@@ -677,7 +687,7 @@ class DateFunctionTests(TestCase):
                 (first_quarter_2016, truncate_to(first_quarter_2016.date(), 'quarter')),
                 (end_datetime, truncate_to(end_datetime.date(), 'quarter')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncQuarter('start_datetime')).order_by('start_datetime'),
@@ -687,7 +697,7 @@ class DateFunctionTests(TestCase):
                 (first_quarter_2016, truncate_to(first_quarter_2016, 'quarter')),
                 (end_datetime, truncate_to(end_datetime, 'quarter')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
 
         with self.assertRaisesMessage(ValueError, "Cannot truncate TimeField 'start_time' to DateTimeField"):
@@ -710,7 +720,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, truncate_to(start_datetime, 'month')),
                 (end_datetime, truncate_to(end_datetime, 'month')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncMonth('start_date')).order_by('start_datetime'),
@@ -718,7 +728,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, truncate_to(start_datetime.date(), 'month')),
                 (end_datetime, truncate_to(end_datetime.date(), 'month')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime=TruncMonth('start_datetime')).count(), 1)
 
@@ -738,11 +748,8 @@ class DateFunctionTests(TestCase):
         self.create_model(end_datetime, start_datetime)
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncWeek('start_datetime')).order_by('start_datetime'),
-            [
-                (start_datetime, truncate_to(start_datetime, 'week')),
-                (end_datetime, truncate_to(end_datetime, 'week')),
-            ],
-            lambda m: (m.start_datetime, m.extracted)
+            [(start_datetime, truncate_to(start_datetime, 'week')), (end_datetime, truncate_to(end_datetime, 'week'))],
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime=TruncWeek('start_datetime')).count(), 1)
 
@@ -762,11 +769,8 @@ class DateFunctionTests(TestCase):
         self.create_model(end_datetime, start_datetime)
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncDate('start_datetime')).order_by('start_datetime'),
-            [
-                (start_datetime, start_datetime.date()),
-                (end_datetime, end_datetime.date()),
-            ],
-            lambda m: (m.start_datetime, m.extracted)
+            [(start_datetime, start_datetime.date()), (end_datetime, end_datetime.date())],
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__date=TruncDate('start_datetime')).count(), 2)
 
@@ -790,11 +794,8 @@ class DateFunctionTests(TestCase):
         self.create_model(end_datetime, start_datetime)
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncTime('start_datetime')).order_by('start_datetime'),
-            [
-                (start_datetime, start_datetime.time()),
-                (end_datetime, end_datetime.time()),
-            ],
-            lambda m: (m.start_datetime, m.extracted)
+            [(start_datetime, start_datetime.time()), (end_datetime, end_datetime.time())],
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime__time=TruncTime('start_datetime')).count(), 2)
 
@@ -818,11 +819,8 @@ class DateFunctionTests(TestCase):
         self.create_model(end_datetime, start_datetime)
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncDay('start_datetime')).order_by('start_datetime'),
-            [
-                (start_datetime, truncate_to(start_datetime, 'day')),
-                (end_datetime, truncate_to(end_datetime, 'day')),
-            ],
-            lambda m: (m.start_datetime, m.extracted)
+            [(start_datetime, truncate_to(start_datetime, 'day')), (end_datetime, truncate_to(end_datetime, 'day'))],
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime=TruncDay('start_datetime')).count(), 1)
 
@@ -842,11 +840,8 @@ class DateFunctionTests(TestCase):
         self.create_model(end_datetime, start_datetime)
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncHour('start_datetime')).order_by('start_datetime'),
-            [
-                (start_datetime, truncate_to(start_datetime, 'hour')),
-                (end_datetime, truncate_to(end_datetime, 'hour')),
-            ],
-            lambda m: (m.start_datetime, m.extracted)
+            [(start_datetime, truncate_to(start_datetime, 'hour')), (end_datetime, truncate_to(end_datetime, 'hour'))],
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncHour('start_time')).order_by('start_datetime'),
@@ -854,7 +849,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, truncate_to(start_datetime.time(), 'hour')),
                 (end_datetime, truncate_to(end_datetime.time(), 'hour')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime=TruncHour('start_datetime')).count(), 1)
 
@@ -878,7 +873,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, truncate_to(start_datetime, 'minute')),
                 (end_datetime, truncate_to(end_datetime, 'minute')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncMinute('start_time')).order_by('start_datetime'),
@@ -886,7 +881,7 @@ class DateFunctionTests(TestCase):
                 (start_datetime, truncate_to(start_datetime.time(), 'minute')),
                 (end_datetime, truncate_to(end_datetime.time(), 'minute')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime=TruncMinute('start_datetime')).count(), 1)
 
@@ -908,17 +903,17 @@ class DateFunctionTests(TestCase):
             DTModel.objects.annotate(extracted=TruncSecond('start_datetime')).order_by('start_datetime'),
             [
                 (start_datetime, truncate_to(start_datetime, 'second')),
-                (end_datetime, truncate_to(end_datetime, 'second'))
+                (end_datetime, truncate_to(end_datetime, 'second')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertQuerysetEqual(
             DTModel.objects.annotate(extracted=TruncSecond('start_time')).order_by('start_datetime'),
             [
                 (start_datetime, truncate_to(start_datetime.time(), 'second')),
-                (end_datetime, truncate_to(end_datetime.time(), 'second'))
+                (end_datetime, truncate_to(end_datetime.time(), 'second')),
             ],
-            lambda m: (m.start_datetime, m.extracted)
+            lambda m: (m.start_datetime, m.extracted),
         )
         self.assertEqual(DTModel.objects.filter(start_datetime=TruncSecond('start_datetime')).count(), 1)
 
@@ -942,26 +937,25 @@ class DateFunctionTests(TestCase):
         Fan.objects.create(author=author_1, name='Emma', fan_since=fan_since_2)
         Fan.objects.create(author=author_2, name='Isabella', fan_since=fan_since_3)
 
-        inner = Fan.objects.filter(
-            author=OuterRef('pk'),
-            name__in=('Emma', 'Isabella', 'Tom')
-        ).values('author').annotate(newest_fan=Max('fan_since')).values('newest_fan')
-        outer = Author.objects.annotate(
-            newest_fan_year=TruncYear(Subquery(inner, output_field=DateTimeField()))
+        inner = (
+            Fan.objects.filter(author=OuterRef('pk'), name__in=('Emma', 'Isabella', 'Tom'))
+            .values('author')
+            .annotate(newest_fan=Max('fan_since'))
+            .values('newest_fan')
         )
+        outer = Author.objects.annotate(newest_fan_year=TruncYear(Subquery(inner, output_field=DateTimeField())))
         tz = pytz.UTC if settings.USE_TZ else None
         self.assertSequenceEqual(
             outer.order_by('name').values('name', 'newest_fan_year'),
             [
                 {'name': 'G. R. R. Martin', 'newest_fan_year': datetime(2017, 1, 1, 0, 0, tzinfo=tz)},
                 {'name': 'J. R. R. Tolkien', 'newest_fan_year': datetime(2016, 1, 1, 0, 0, tzinfo=tz)},
-            ]
+            ],
         )
 
 
 @override_settings(USE_TZ=True, TIME_ZONE='UTC')
 class DateFunctionWithTimeZoneTests(DateFunctionTests):
-
     def test_extract_func_with_timezone(self):
         start_datetime = datetime(2015, 6, 15, 23, 30, 1, 321)
         end_datetime = datetime(2015, 6, 16, 13, 11, 27, 123)
@@ -1015,10 +1009,14 @@ class DateFunctionWithTimeZoneTests(DateFunctionTests):
         melb = pytz.timezone('Australia/Melbourne')
 
         with timezone.override(melb):
-            model = DTModel.objects.annotate(
-                day_melb=Extract('start_datetime', 'day'),
-                day_utc=Extract('start_datetime', 'day', tzinfo=timezone.utc),
-            ).order_by('start_datetime').get()
+            model = (
+                DTModel.objects.annotate(
+                    day_melb=Extract('start_datetime', 'day'),
+                    day_utc=Extract('start_datetime', 'day', tzinfo=timezone.utc),
+                )
+                .order_by('start_datetime')
+                .get()
+            )
             self.assertEqual(model.day_melb, 16)
             self.assertEqual(model.day_utc, 15)
 
@@ -1032,10 +1030,14 @@ class DateFunctionWithTimeZoneTests(DateFunctionTests):
         melb = pytz.timezone('Australia/Melbourne')
         pacific = pytz.timezone('US/Pacific')
 
-        model = DTModel.objects.annotate(
-            melb_year=TruncYear('start_datetime', tzinfo=melb),
-            pacific_year=TruncYear('start_datetime', tzinfo=pacific),
-        ).order_by('start_datetime').get()
+        model = (
+            DTModel.objects.annotate(
+                melb_year=TruncYear('start_datetime', tzinfo=melb),
+                pacific_year=TruncYear('start_datetime', tzinfo=pacific),
+            )
+            .order_by('start_datetime')
+            .get()
+        )
 
         self.assertEqual(model.start_datetime, start_datetime)
         self.assertEqual(model.melb_year, truncate_to(start_datetime, 'year', melb))
@@ -1089,9 +1091,9 @@ class DateFunctionWithTimeZoneTests(DateFunctionTests):
                 ).order_by('start_datetime'),
                 [
                     (start_datetime, truncate_to(start_datetime.astimezone(melb), kind, melb)),
-                    (end_datetime, truncate_to(end_datetime.astimezone(melb), kind, melb))
+                    (end_datetime, truncate_to(end_datetime.astimezone(melb), kind, melb)),
                 ],
-                lambda m: (m.start_datetime, m.truncated)
+                lambda m: (m.start_datetime, m.truncated),
             )
 
         def test_date_kind(kind):
@@ -1101,9 +1103,9 @@ class DateFunctionWithTimeZoneTests(DateFunctionTests):
                 ).order_by('start_datetime'),
                 [
                     (start_datetime, truncate_to(start_datetime.date(), kind)),
-                    (end_datetime, truncate_to(end_datetime.date(), kind))
+                    (end_datetime, truncate_to(end_datetime.date(), kind)),
                 ],
-                lambda m: (m.start_datetime, m.truncated)
+                lambda m: (m.start_datetime, m.truncated),
             )
 
         def test_time_kind(kind):
@@ -1113,9 +1115,9 @@ class DateFunctionWithTimeZoneTests(DateFunctionTests):
                 ).order_by('start_datetime'),
                 [
                     (start_datetime, truncate_to(start_datetime.time(), kind)),
-                    (end_datetime, truncate_to(end_datetime.time(), kind))
+                    (end_datetime, truncate_to(end_datetime.time(), kind)),
                 ],
-                lambda m: (m.start_datetime, m.truncated)
+                lambda m: (m.start_datetime, m.truncated),
             )
 
         test_date_kind('year')

@@ -10,15 +10,14 @@ class CheckTemplateSettingsAppDirsTest(SimpleTestCase):
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
             'APP_DIRS': True,
-            'OPTIONS': {
-                'loaders': ['django.template.loaders.filesystem.Loader'],
-            },
-        },
+            'OPTIONS': {'loaders': ['django.template.loaders.filesystem.Loader']},
+        }
     ]
 
     @property
     def func(self):
         from django.core.checks.templates import check_setting_app_dirs_loaders
+
         return check_setting_app_dirs_loaders
 
     @override_settings(TEMPLATES=TEMPLATES_APP_DIRS_AND_LOADERS)
@@ -43,18 +42,8 @@ class CheckTemplateSettingsAppDirsTest(SimpleTestCase):
 
 class CheckTemplateStringIfInvalidTest(SimpleTestCase):
     TEMPLATES_STRING_IF_INVALID = [
-        {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'OPTIONS': {
-                'string_if_invalid': False,
-            },
-        },
-        {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'OPTIONS': {
-                'string_if_invalid': 42,
-            },
-        },
+        {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'OPTIONS': {'string_if_invalid': False}},
+        {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'OPTIONS': {'string_if_invalid': 42}},
     ]
 
     @classmethod
@@ -70,6 +59,7 @@ class CheckTemplateStringIfInvalidTest(SimpleTestCase):
     @property
     def func(self):
         from django.core.checks.templates import check_string_if_invalid_is_string
+
         return check_string_if_invalid_is_string
 
     @override_settings(TEMPLATES=TEMPLATES_STRING_IF_INVALID)

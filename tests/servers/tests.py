@@ -25,12 +25,7 @@ TEST_SETTINGS = {
 @override_settings(ROOT_URLCONF='servers.urls', **TEST_SETTINGS)
 class LiveServerBase(LiveServerTestCase):
 
-    available_apps = [
-        'servers',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-    ]
+    available_apps = ['servers', 'django.contrib.auth', 'django.contrib.contenttypes', 'django.contrib.sessions']
     fixtures = ['testdata.json']
 
     def urlopen(self, url):
@@ -38,7 +33,6 @@ class LiveServerBase(LiveServerTestCase):
 
 
 class LiveServerAddress(LiveServerBase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -163,7 +157,6 @@ class LiveServerViews(LiveServerBase):
 
 
 class LiveServerDatabase(LiveServerBase):
-
     def test_fixtures_loaded(self):
         """
         Fixtures are properly loaded and visible to the live server thread.
@@ -177,15 +170,10 @@ class LiveServerDatabase(LiveServerBase):
         """
         with self.urlopen('/create_model_instance/'):
             pass
-        self.assertQuerysetEqual(
-            Person.objects.all().order_by('pk'),
-            ['jane', 'robert', 'emily'],
-            lambda b: b.name
-        )
+        self.assertQuerysetEqual(Person.objects.all().order_by('pk'), ['jane', 'robert', 'emily'], lambda b: b.name)
 
 
 class LiveServerPort(LiveServerBase):
-
     def test_port_bind(self):
         """
         Each LiveServerTestCase binds to a unique port or fails to start a
@@ -205,8 +193,9 @@ class LiveServerPort(LiveServerBase):
             # We've acquired a port, ensure our server threads acquired
             # different addresses.
             self.assertNotEqual(
-                self.live_server_url, TestCase.live_server_url,
-                "Acquired duplicate server addresses for server threads: %s" % self.live_server_url
+                self.live_server_url,
+                TestCase.live_server_url,
+                "Acquired duplicate server addresses for server threads: %s" % self.live_server_url,
             )
         finally:
             TestCase.tearDownClass()
@@ -222,8 +211,9 @@ class LiveServerPort(LiveServerBase):
         TestCase.setUpClass()
         try:
             self.assertEqual(
-                TestCase.port, TestCase.server_thread.port,
-                'Did not use specified port for LiveServerTestCase thread: %s' % TestCase.port
+                TestCase.port,
+                TestCase.server_thread.port,
+                'Did not use specified port for LiveServerTestCase thread: %s' % TestCase.port,
             )
         finally:
             TestCase.tearDownClass()
@@ -238,8 +228,6 @@ class LiverServerThreadedTests(LiveServerBase):
             self.assertEqual(f.read(), b'subview calling view: subview')
 
     def test_check_model_instance_from_subview(self):
-        url = '/check_model_instance_from_subview/?%s' % urlencode({
-            'url': self.live_server_url,
-        })
+        url = '/check_model_instance_from_subview/?%s' % urlencode({'url': self.live_server_url})
         with self.urlopen(url) as f:
             self.assertIn(b'emily', f.read())

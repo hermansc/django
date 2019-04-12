@@ -34,22 +34,24 @@ def wrap(text, width):
     Don't wrap long words, thus the output text may have lines longer than
     ``width``.
     """
+
     def _generator():
         for line in text.splitlines(True):  # True keeps trailing linebreaks
             max_width = min((line.endswith('\n') and width + 1 or width), width)
             while len(line) > max_width:
-                space = line[:max_width + 1].rfind(' ') + 1
+                space = line[: max_width + 1].rfind(' ') + 1
                 if space == 0:
                     space = line.find(' ') + 1
                     if space == 0:
                         yield line
                         line = ''
                         break
-                yield '%s\n' % line[:space - 1]
+                yield '%s\n' % line[: space - 1]
                 line = line[space:]
                 max_width = min((line.endswith('\n') and width + 1 or width), width)
             if line:
                 yield line
+
     return ''.join(_generator())
 
 
@@ -57,14 +59,13 @@ class Truncator(SimpleLazyObject):
     """
     An object used to truncate text, either by characters or words.
     """
+
     def __init__(self, text):
         super().__init__(lambda: str(text))
 
     def add_truncation_text(self, text, truncate=None):
         if truncate is None:
-            truncate = pgettext(
-                'String to return when truncating text',
-                '%(truncated_text)s…')
+            truncate = pgettext('String to return when truncating text', '%(truncated_text)s…')
         if '%(truncated_text)s' in truncate:
             return truncate % {'truncated_text': text}
         # The truncation text didn't contain the %(truncated_text)s string
@@ -112,8 +113,7 @@ class Truncator(SimpleLazyObject):
                 end_index = i
             if s_len > length:
                 # Return the truncated string
-                return self.add_truncation_text(text[:end_index or 0],
-                                                truncate)
+                return self.add_truncation_text(text[: end_index or 0], truncate)
 
         # Return the original string since no truncation was necessary
         return text
@@ -153,10 +153,7 @@ class Truncator(SimpleLazyObject):
         if words and length <= 0:
             return ''
 
-        html4_singlets = (
-            'br', 'col', 'link', 'base', 'img',
-            'param', 'area', 'hr', 'input'
-        )
+        html4_singlets = ('br', 'col', 'link', 'base', 'img', 'param', 'area', 'hr', 'input')
 
         # Count non-HTML chars/words and keep note of open tags
         pos = 0
@@ -197,7 +194,7 @@ class Truncator(SimpleLazyObject):
                 else:
                     # SGML: An end tag closes, back to the matching start tag,
                     # all unclosed intervening start tags with omitted end tags
-                    open_tags = open_tags[i + 1:]
+                    open_tags = open_tags[i + 1 :]
             else:
                 # Add it to the start of the open tags list
                 open_tags.insert(0, tagname)
@@ -249,7 +246,9 @@ def get_text_list(list_, last_word=gettext_lazy('or')):
         return str(list_[0])
     return '%s %s %s' % (
         # Translators: This string is used as a separator between list elements
-        _(', ').join(str(i) for i in list_[:-1]), str(last_word), str(list_[-1])
+        _(', ').join(str(i) for i in list_[:-1]),
+        str(last_word),
+        str(list_[-1]),
     )
 
 
@@ -263,10 +262,32 @@ def normalize_newlines(text):
 def phone2numeric(phone):
     """Convert a phone number with letters into its numeric equivalent."""
     char2number = {
-        'a': '2', 'b': '2', 'c': '2', 'd': '3', 'e': '3', 'f': '3', 'g': '4',
-        'h': '4', 'i': '4', 'j': '5', 'k': '5', 'l': '5', 'm': '6', 'n': '6',
-        'o': '6', 'p': '7', 'q': '7', 'r': '7', 's': '7', 't': '8', 'u': '8',
-        'v': '8', 'w': '9', 'x': '9', 'y': '9', 'z': '9',
+        'a': '2',
+        'b': '2',
+        'c': '2',
+        'd': '3',
+        'e': '3',
+        'f': '3',
+        'g': '4',
+        'h': '4',
+        'i': '4',
+        'j': '5',
+        'k': '5',
+        'l': '5',
+        'm': '6',
+        'n': '6',
+        'o': '6',
+        'p': '7',
+        'q': '7',
+        'r': '7',
+        's': '7',
+        't': '8',
+        'u': '8',
+        'v': '8',
+        'w': '9',
+        'x': '9',
+        'y': '9',
+        'z': '9',
     }
     return ''.join(char2number.get(c, c) for c in phone.lower())
 
@@ -304,7 +325,8 @@ def compress_sequence(sequence):
 
 # Expression to match some_token and some_token="with spaces" (and similarly
 # for single-quoted strings).
-smart_split_re = re.compile(r"""
+smart_split_re = re.compile(
+    r"""
     ((?:
         [^\s'"]*
         (?:
@@ -312,7 +334,9 @@ smart_split_re = re.compile(r"""
             [^\s'"]*
         )+
     ) | \S+)
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
 
 def smart_split(text):

@@ -22,7 +22,7 @@ class ServerHandler(simple_server.ServerHandler):
 
         elif not self.headers_sent:
             # Before the first output, send the stored headers
-            self.bytes_sent = len(data)    # make sure we know content-length
+            self.bytes_sent = len(data)  # make sure we know content-length
             self.send_headers()
         else:
             self.bytes_sent += len(data)

@@ -9,14 +9,12 @@ from django.test.utils import captured_stdin, captured_stdout
 
 
 class ShellCommandTestCase(SimpleTestCase):
-
     def test_command_option(self):
         with self.assertLogs('test', 'INFO') as cm:
             call_command(
                 'shell',
                 command=(
-                    'import django; from logging import getLogger; '
-                    'getLogger("test").info(django.__version__)'
+                    'import django; from logging import getLogger; ' 'getLogger("test").info(django.__version__)'
                 ),
             )
         self.assertEqual(cm.records[0].getMessage(), __version__)

@@ -103,6 +103,7 @@ class PickleabilityTestCase(TestCase):
     def test_model_pickle_dynamic(self):
         class Meta:
             proxy = True
+
         dynclass = type("DynamicEventSubclass", (Event,), {'Meta': Meta, '__module__': Event.__module__})
         original = dynclass(pk=1)
         dumped = pickle.dumps(original)
@@ -143,17 +144,13 @@ class PickleabilityTestCase(TestCase):
 
     def test_pickle_prefetch_queryset_still_usable(self):
         g = Group.objects.create(name='foo')
-        groups = Group.objects.prefetch_related(
-            models.Prefetch('event_set', queryset=Event.objects.order_by('id'))
-        )
+        groups = Group.objects.prefetch_related(models.Prefetch('event_set', queryset=Event.objects.order_by('id')))
         groups2 = pickle.loads(pickle.dumps(groups))
         self.assertSequenceEqual(groups2.filter(id__gte=0), [g])
 
     def test_pickle_prefetch_queryset_not_evaluated(self):
         Group.objects.create(name='foo')
-        groups = Group.objects.prefetch_related(
-            models.Prefetch('event_set', queryset=Event.objects.order_by('id'))
-        )
+        groups = Group.objects.prefetch_related(models.Prefetch('event_set', queryset=Event.objects.order_by('id')))
         list(groups)  # evaluate QuerySet
         with self.assertNumQueries(0):
             pickle.loads(pickle.dumps(groups))
@@ -199,7 +196,6 @@ class PickleabilityTestCase(TestCase):
 
 
 class InLookupTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         for i in range(1, 3):

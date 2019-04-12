@@ -2,9 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.handlers.wsgi import WSGIHandler, WSGIRequest, get_script_name
 from django.core.signals import request_finished, request_started
 from django.db import close_old_connections, connection
-from django.test import (
-    RequestFactory, SimpleTestCase, TransactionTestCase, override_settings,
-)
+from django.test import RequestFactory, SimpleTestCase, TransactionTestCase, override_settings
 from django.utils.version import PY37
 
 
@@ -118,7 +116,6 @@ class TransactionsPerRequestTests(TransactionTestCase):
 
 @override_settings(ROOT_URLCONF='handlers.urls')
 class SignalsTests(SimpleTestCase):
-
     def setUp(self):
         self.signals = []
         self.signaled_environ = None
@@ -219,8 +216,7 @@ class ScriptNameTests(SimpleTestCase):
         WSGI squashes multiple successive slashes in PATH_INFO, get_script_name
         should take that into account when forming SCRIPT_NAME (#17133).
         """
-        script_name = get_script_name({
-            'SCRIPT_URL': '/mst/milestones//accounts/login//help',
-            'PATH_INFO': '/milestones/accounts/login/help',
-        })
+        script_name = get_script_name(
+            {'SCRIPT_URL': '/mst/milestones//accounts/login//help', 'PATH_INFO': '/milestones/accounts/login/help'}
+        )
         self.assertEqual(script_name, '/mst')

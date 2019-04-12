@@ -41,6 +41,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # security hardening).
         try:
             import sqlite3
+
             value = sqlite3.adapt(value)
         except ImportError:
             pass
@@ -77,20 +78,25 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 constraints = self.connection.introspection._get_foreign_key_constraints(cursor, other_table.name)
                 for constraint in constraints.values():
                     constraint_table, constraint_column = constraint['foreign_key']
-                    if (constraint_table == table_name and
-                            (column_name is None or constraint_column == column_name)):
+                    if constraint_table == table_name and (column_name is None or constraint_column == column_name):
                         return True
         return False
 
     def alter_db_table(self, model, old_db_table, new_db_table, disable_constraints=True):
-        if (not self.connection.features.supports_atomic_references_rename and
-                disable_constraints and self._is_referenced_by_fk_constraint(old_db_table)):
+        if (
+            not self.connection.features.supports_atomic_references_rename
+            and disable_constraints
+            and self._is_referenced_by_fk_constraint(old_db_table)
+        ):
             if self.connection.in_atomic_block:
-                raise NotSupportedError((
-                    'Renaming the %r table while in a transaction is not '
-                    'supported on SQLite < 3.26 because it would break referential '
-                    'integrity. Try adding `atomic = False` to the Migration class.'
-                ) % old_db_table)
+                raise NotSupportedError(
+                    (
+                        'Renaming the %r table while in a transaction is not '
+                        'supported on SQLite < 3.26 because it would break referential '
+                        'integrity. Try adding `atomic = False` to the Migration class.'
+                    )
+                    % old_db_table
+                )
             self.connection.enable_constraint_checking()
             super().alter_db_table(model, old_db_table, new_db_table)
             self.connection.disable_constraint_checking()
@@ -101,15 +107,20 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         old_field_name = old_field.name
         table_name = model._meta.db_table
         _, old_column_name = old_field.get_attname_column()
-        if (new_field.name != old_field_name and
-                not self.connection.features.supports_atomic_references_rename and
-                self._is_referenced_by_fk_constraint(table_name, old_column_name, ignore_self=True)):
+        if (
+            new_field.name != old_field_name
+            and not self.connection.features.supports_atomic_references_rename
+            and self._is_referenced_by_fk_constraint(table_name, old_column_name, ignore_self=True)
+        ):
             if self.connection.in_atomic_block:
-                raise NotSupportedError((
-                    'Renaming the %r.%r column while in a transaction is not '
-                    'supported on SQLite < 3.26 because it would break referential '
-                    'integrity. Try adding `atomic = False` to the Migration class.'
-                ) % (model._meta.db_table, old_field_name))
+                raise NotSupportedError(
+                    (
+                        'Renaming the %r.%r column while in a transaction is not '
+                        'supported on SQLite < 3.26 because it would break referential '
+                        'integrity. Try adding `atomic = False` to the Migration class.'
+                    )
+                    % (model._meta.db_table, old_field_name)
+                )
             with atomic(self.connection.alias):
                 super().alter_field(model, old_field, new_field, strict=strict)
                 # Follow SQLite's documented procedure for performing changes
@@ -157,11 +168,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # to an altered field.
         def is_self_referential(f):
             return f.is_relation and f.remote_field.model is model
+
         # Work out the new fields dict / mapping
-        body = {
-            f.name: f.clone() if is_self_referential(f) else f
-            for f in model._meta.local_concrete_fields
-        }
+        body = {f.name: f.clone() if is_self_referential(f) else f for f in model._meta.local_concrete_fields}
         # Since mapping might mix column names and default values,
         # its values must be already quoted.
         mapping = {f.column: self.quote_name(f.column) for f in model._meta.local_concrete_fields}
@@ -171,7 +180,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # remove the old one
         restore_pk_field = None
         if getattr(create_field, 'primary_key', False) or (
-                alter_field and getattr(alter_field[1], 'primary_key', False)):
+            alter_field and getattr(alter_field[1], 'primary_key', False)
+        ):
             for name, field in list(body.items()):
                 if field.primary_key:
                     field.primary_key = False
@@ -184,9 +194,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             body[create_field.name] = create_field
             # Choose a default and insert it into the copy map
             if not create_field.many_to_many and create_field.concrete:
-                mapping[create_field.column] = self.quote_value(
-                    self.effective_default(create_field)
-                )
+                mapping[create_field.column] = self.quote_value(self.effective_default(create_field))
         # Add in any altered fields
         if alter_field:
             old_field, new_field = alter_field
@@ -196,7 +204,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             if old_field.null and not new_field.null:
                 case_sql = "coalesce(%(col)s, %(default)s)" % {
                     'col': self.quote_name(old_field.column),
-                    'default': self.quote_value(self.effective_default(new_field))
+                    'default': self.quote_value(self.effective_default(new_field)),
                 }
                 mapping[new_field.column] = case_sql
             else:
@@ -214,24 +222,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
         # Work out the new value of unique_together, taking renames into
         # account
-        unique_together = [
-            [rename_mapping.get(n, n) for n in unique]
-            for unique in model._meta.unique_together
-        ]
+        unique_together = [[rename_mapping.get(n, n) for n in unique] for unique in model._meta.unique_together]
 
         # Work out the new value for index_together, taking renames into
         # account
-        index_together = [
-            [rename_mapping.get(n, n) for n in index]
-            for index in model._meta.index_together
-        ]
+        index_together = [[rename_mapping.get(n, n) for n in index] for index in model._meta.index_together]
 
         indexes = model._meta.indexes
         if delete_field:
-            indexes = [
-                index for index in indexes
-                if delete_field.name not in index.fields
-            ]
+            indexes = [index for index in indexes if delete_field.name not in index.fields]
 
         constraints = list(model._meta.constraints)
 
@@ -279,21 +278,21 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         self.create_model(new_model)
 
         # Copy data from the old table into the new table
-        self.execute("INSERT INTO %s (%s) SELECT %s FROM %s" % (
-            self.quote_name(new_model._meta.db_table),
-            ', '.join(self.quote_name(x) for x in mapping),
-            ', '.join(mapping.values()),
-            self.quote_name(model._meta.db_table),
-        ))
+        self.execute(
+            "INSERT INTO %s (%s) SELECT %s FROM %s"
+            % (
+                self.quote_name(new_model._meta.db_table),
+                ', '.join(self.quote_name(x) for x in mapping),
+                ', '.join(mapping.values()),
+                self.quote_name(model._meta.db_table),
+            )
+        )
 
         # Delete the old table to make way for the new
         self.delete_model(model, handle_autom2m=False)
 
         # Rename the new table to take way for the old
-        self.alter_db_table(
-            new_model, new_model._meta.db_table, model._meta.db_table,
-            disable_constraints=False,
-        )
+        self.alter_db_table(new_model, new_model._meta.db_table, model._meta.db_table, disable_constraints=False)
 
         # Run deferred SQL on correct table
         for sql in self.deferred_sql:
@@ -308,9 +307,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             super().delete_model(model)
         else:
             # Delete the table (and only that)
-            self.execute(self.sql_delete_table % {
-                "table": self.quote_name(model._meta.db_table),
-            })
+            self.execute(self.sql_delete_table % {"table": self.quote_name(model._meta.db_table)})
             # Remove all deferred statements referencing the deleted table.
             for sql in list(self.deferred_sql):
                 if isinstance(sql, Statement) and sql.references_table(model._meta.db_table):
@@ -344,16 +341,23 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 return
             self._remake_table(model, delete_field=field)
 
-    def _alter_field(self, model, old_field, new_field, old_type, new_type,
-                     old_db_params, new_db_params, strict=False):
+    def _alter_field(
+        self, model, old_field, new_field, old_type, new_type, old_db_params, new_db_params, strict=False
+    ):
         """Perform a "physical" (non-ManyToMany) field update."""
         # Use "ALTER TABLE ... RENAME COLUMN" if only the column name
         # changed and there aren't any constraints.
-        if (self.connection.features.can_alter_table_rename_column and
-            old_field.column != new_field.column and
-            self.column_sql(model, old_field) == self.column_sql(model, new_field) and
-            not (old_field.remote_field and old_field.db_constraint or
-                 new_field.remote_field and new_field.db_constraint)):
+        if (
+            self.connection.features.can_alter_table_rename_column
+            and old_field.column != new_field.column
+            and self.column_sql(model, old_field) == self.column_sql(model, new_field)
+            and not (
+                old_field.remote_field
+                and old_field.db_constraint
+                or new_field.remote_field
+                and new_field.db_constraint
+            )
+        ):
             return self.execute(self._rename_field_sql(model._meta.db_table, old_field, new_field, new_type))
         # Alter by remaking table
         self._remake_table(model, alter_field=(old_field, new_field))
@@ -381,20 +385,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Make a new through table
         self.create_model(new_field.remote_field.through)
         # Copy the data across
-        self.execute("INSERT INTO %s (%s) SELECT %s FROM %s" % (
-            self.quote_name(new_field.remote_field.through._meta.db_table),
-            ', '.join([
-                "id",
-                new_field.m2m_column_name(),
-                new_field.m2m_reverse_name(),
-            ]),
-            ', '.join([
-                "id",
-                old_field.m2m_column_name(),
-                old_field.m2m_reverse_name(),
-            ]),
-            self.quote_name(old_field.remote_field.through._meta.db_table),
-        ))
+        self.execute(
+            "INSERT INTO %s (%s) SELECT %s FROM %s"
+            % (
+                self.quote_name(new_field.remote_field.through._meta.db_table),
+                ', '.join(["id", new_field.m2m_column_name(), new_field.m2m_reverse_name()]),
+                ', '.join(["id", old_field.m2m_column_name(), old_field.m2m_reverse_name()]),
+                self.quote_name(old_field.remote_field.through._meta.db_table),
+            )
+        )
         # Delete the old through table
         self.delete_model(old_field.remote_field.through)
 

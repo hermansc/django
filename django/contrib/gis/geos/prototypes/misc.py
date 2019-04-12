@@ -16,6 +16,7 @@ class DblFromGeom(GEOSFuncFactory):
     Argument is a Geometry, return type is double that is passed
     in by reference as the last argument.
     """
+
     restype = c_int  # Status code returned
     errcheck = staticmethod(check_dbl)
 

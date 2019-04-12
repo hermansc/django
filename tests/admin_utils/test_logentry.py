@@ -18,15 +18,10 @@ class LogEntryTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_superuser(username='super', password='secret', email='super@example.com')
         self.site = Site.objects.create(domain='example.org')
-        self.a1 = Article.objects.create(
-            site=self.site,
-            title="Title",
-            created=datetime(2008, 3, 12, 11, 54),
-        )
+        self.a1 = Article.objects.create(site=self.site, title="Title", created=datetime(2008, 3, 12, 11, 54))
         content_type_pk = ContentType.objects.get_for_model(Article).pk
         LogEntry.objects.log_action(
-            self.user.pk, content_type_pk, self.a1.pk, repr(self.a1), CHANGE,
-            change_message='Changed something'
+            self.user.pk, content_type_pk, self.a1.pk, repr(self.a1), CHANGE, change_message='Changed something'
         )
         self.client.force_login(self.user)
 
@@ -46,8 +41,11 @@ class LogEntryTests(TestCase):
         to get the message dynamically translated at display time.
         """
         post_data = {
-            'site': self.site.pk, 'title': 'Changed', 'hist': 'Some content',
-            'created_0': '2008-03-12', 'created_1': '11:54',
+            'site': self.site.pk,
+            'title': 'Changed',
+            'hist': 'Some content',
+            'created_0': '2008-03-12',
+            'created_1': '11:54',
         }
         change_url = reverse('admin:admin_utils_article_change', args=[quote(self.a1.pk)])
         response = self.client.post(change_url, post_data)
@@ -77,8 +75,11 @@ class LogEntryTests(TestCase):
         Localized date/time inputs shouldn't affect changed form data detection.
         """
         post_data = {
-            'site': self.site.pk, 'title': 'Changed', 'hist': 'Some content',
-            'created_0': '12/03/2008', 'created_1': '11:54',
+            'site': self.site.pk,
+            'title': 'Changed',
+            'hist': 'Some content',
+            'created_0': '12/03/2008',
+            'created_1': '11:54',
         }
         with translation.override('fr'):
             change_url = reverse('admin:admin_utils_article_change', args=[quote(self.a1.pk)])
@@ -92,9 +93,7 @@ class LogEntryTests(TestCase):
         All messages for changed formsets are logged in a change message.
         """
         a2 = Article.objects.create(
-            site=self.site,
-            title="Title second article",
-            created=datetime(2012, 3, 18, 11, 54),
+            site=self.site, title="Title second article", created=datetime(2012, 3, 18, 11, 54)
         )
         post_data = {
             'domain': 'example.com',  # domain changed
@@ -127,12 +126,12 @@ class LogEntryTests(TestCase):
                 {"added": {"object": "Added article", "name": "article"}},
                 {"changed": {"fields": ["title"], "object": "Changed Title", "name": "article"}},
                 {"deleted": {"object": "Title second article", "name": "article"}},
-            ]
+            ],
         )
         self.assertEqual(
             logentry.get_change_message(),
             'Changed domain. Added article "Added article". '
-            'Changed title for article "Changed Title". Deleted article "Title second article".'
+            'Changed title for article "Changed Title". Deleted article "Title second article".',
         )
 
         with translation.override('fr'):
@@ -140,7 +139,7 @@ class LogEntryTests(TestCase):
                 logentry.get_change_message(),
                 "Modification de domain. Ajout de article « Added article ». "
                 "Modification de title pour l'objet article « Changed Title ». "
-                "Suppression de article « Title second article »."
+                "Suppression de article « Title second article ».",
             )
 
     def test_logentry_get_edited_object(self):
@@ -188,8 +187,7 @@ class LogEntryTests(TestCase):
     def test_log_action(self):
         content_type_pk = ContentType.objects.get_for_model(Article).pk
         log_entry = LogEntry.objects.log_action(
-            self.user.pk, content_type_pk, self.a1.pk, repr(self.a1), CHANGE,
-            change_message='Changed something else',
+            self.user.pk, content_type_pk, self.a1.pk, repr(self.a1), CHANGE, change_message='Changed something else'
         )
         self.assertEqual(log_entry, LogEntry.objects.latest('id'))
 
@@ -223,8 +221,11 @@ class LogEntryTests(TestCase):
         """
         proxy_content_type = ContentType.objects.get_for_model(ArticleProxy, for_concrete_model=False)
         post_data = {
-            'site': self.site.pk, 'title': "Foo", 'hist': "Bar",
-            'created_0': '2015-12-25', 'created_1': '00:00',
+            'site': self.site.pk,
+            'title': "Foo",
+            'hist': "Bar",
+            'created_0': '2015-12-25',
+            'created_1': '00:00',
         }
         changelist_url = reverse('admin:admin_utils_articleproxy_changelist')
 

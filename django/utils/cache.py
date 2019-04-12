@@ -24,9 +24,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.http import HttpResponse, HttpResponseNotModified
 from django.utils.encoding import iri_to_uri
-from django.utils.http import (
-    http_date, parse_etags, parse_http_date_safe, quote_etag,
-)
+from django.utils.http import http_date, parse_etags, parse_http_date_safe, quote_etag
 from django.utils.log import log_response
 from django.utils.timezone import get_current_timezone_name
 from django.utils.translation import get_language
@@ -46,6 +44,7 @@ def patch_cache_control(response, **kwargs):
     * All other parameters are added with their value, after applying
       str() to it.
     """
+
     def dictitem(s):
         t = s.split('=', 1)
         if len(t) > 1:
@@ -105,11 +104,7 @@ def set_response_etag(response):
 
 def _precondition_failed(request):
     response = HttpResponse(status=412)
-    log_response(
-        'Precondition Failed: %s', request.path,
-        response=response,
-        request=request,
-    )
+    log_response('Precondition Failed: %s', request.path, response=response, request=request)
     return response
 
 
@@ -149,8 +144,11 @@ def get_conditional_response(request, etag=None, last_modified=None, response=No
         return _precondition_failed(request)
 
     # Step 2: Test the If-Unmodified-Since precondition.
-    if (not if_match_etags and if_unmodified_since and
-            not _if_unmodified_since_passes(last_modified, if_unmodified_since)):
+    if (
+        not if_match_etags
+        and if_unmodified_since
+        and not _if_unmodified_since_passes(last_modified, if_unmodified_since)
+    ):
         return _precondition_failed(request)
 
     # Step 3: Test the If-None-Match precondition.
@@ -161,8 +159,11 @@ def get_conditional_response(request, etag=None, last_modified=None, response=No
             return _precondition_failed(request)
 
     # Step 4: Test the If-Modified-Since precondition.
-    if (not if_none_match_etags and if_modified_since and
-            not _if_modified_since_passes(last_modified, if_modified_since)):
+    if (
+        not if_none_match_etags
+        and if_modified_since
+        and not _if_modified_since_passes(last_modified, if_modified_since)
+    ):
         if request.method in ('GET', 'HEAD'):
             return _not_modified(request, response)
 
@@ -268,8 +269,7 @@ def patch_vary_headers(response, newheaders):
         vary_headers = []
     # Use .lower() here so we treat headers as case-insensitive.
     existing_headers = {header.lower() for header in vary_headers}
-    additional_headers = [newheader for newheader in newheaders
-                          if newheader.lower() not in existing_headers]
+    additional_headers = [newheader for newheader in newheaders if newheader.lower() not in existing_headers]
     response['Vary'] = ', '.join(vary_headers + additional_headers)
 
 
@@ -305,15 +305,18 @@ def _generate_cache_key(request, method, headerlist, key_prefix):
             ctx.update(value.encode())
     url = hashlib.md5(iri_to_uri(request.build_absolute_uri()).encode('ascii'))
     cache_key = 'views.decorators.cache.cache_page.%s.%s.%s.%s' % (
-        key_prefix, method, url.hexdigest(), ctx.hexdigest())
+        key_prefix,
+        method,
+        url.hexdigest(),
+        ctx.hexdigest(),
+    )
     return _i18n_cache_key_suffix(request, cache_key)
 
 
 def _generate_cache_header_key(key_prefix, request):
     """Return a cache key for the header cache."""
     url = hashlib.md5(iri_to_uri(request.build_absolute_uri()).encode('ascii'))
-    cache_key = 'views.decorators.cache.cache_header.%s.%s' % (
-        key_prefix, url.hexdigest())
+    cache_key = 'views.decorators.cache.cache_header.%s.%s' % (key_prefix, url.hexdigest())
     return _i18n_cache_key_suffix(request, cache_key)
 
 

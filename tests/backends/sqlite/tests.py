@@ -10,9 +10,7 @@ from django.db.models import Avg, StdDev, Sum, Variance
 from django.db.models.aggregates import Aggregate
 from django.db.models.fields import CharField
 from django.db.utils import NotSupportedError
-from django.test import (
-    TestCase, TransactionTestCase, override_settings, skipIfDBFeature,
-)
+from django.test import TestCase, TransactionTestCase, override_settings, skipIfDBFeature
 from django.test.utils import isolate_apps
 
 from ..models import Author, Item, Object, Square
@@ -30,9 +28,9 @@ class Tests(TestCase):
 
     def test_check_sqlite_version(self):
         msg = 'SQLite 3.8.3 or later is required (found 3.8.2).'
-        with mock.patch.object(dbapi2, 'sqlite_version_info', (3, 8, 2)), \
-                mock.patch.object(dbapi2, 'sqlite_version', '3.8.2'), \
-                self.assertRaisesMessage(ImproperlyConfigured, msg):
+        with mock.patch.object(dbapi2, 'sqlite_version_info', (3, 8, 2)), mock.patch.object(
+            dbapi2, 'sqlite_version', '3.8.2'
+        ), self.assertRaisesMessage(ImproperlyConfigured, msg):
             check_sqlite_version()
 
     def test_aggregation(self):
@@ -47,29 +45,22 @@ class Tests(TestCase):
             with self.assertRaises(NotSupportedError):
                 Item.objects.all().aggregate(aggregate('last_modified'))
             with self.assertRaises(NotSupportedError):
-                Item.objects.all().aggregate(
-                    **{'complex': aggregate('last_modified') + aggregate('last_modified')}
-                )
+                Item.objects.all().aggregate(**{'complex': aggregate('last_modified') + aggregate('last_modified')})
 
     def test_distinct_aggregation(self):
         class DistinctAggregate(Aggregate):
             allow_distinct = True
+
         aggregate = DistinctAggregate('first', 'second', distinct=True)
-        msg = (
-            "SQLite doesn't support DISTINCT on aggregate functions accepting "
-            "multiple arguments."
-        )
+        msg = "SQLite doesn't support DISTINCT on aggregate functions accepting " "multiple arguments."
         with self.assertRaisesMessage(NotSupportedError, msg):
             connection.ops.check_expression_support(aggregate)
 
     def test_memory_db_test_name(self):
         """A named in-memory db should be allowed where supported."""
         from django.db.backends.sqlite3.base import DatabaseWrapper
-        settings_dict = {
-            'TEST': {
-                'NAME': 'file:memorydb_test?mode=memory&cache=shared',
-            }
-        }
+
+        settings_dict = {'TEST': {'NAME': 'file:memorydb_test?mode=memory&cache=shared'}}
         creation = DatabaseWrapper(settings_dict).creation
         self.assertEqual(creation._get_test_db_name(), creation.connection.settings_dict['TEST']['NAME'])
 
@@ -109,7 +100,7 @@ class SchemaTests(TransactionTestCase):
         self.assertEqual(
             'integer NOT NULL PRIMARY KEY AUTOINCREMENT',
             match.group(1),
-            'Wrong SQL used to create an auto-increment column on SQLite'
+            'Wrong SQL used to create an auto-increment column on SQLite',
         )
 
     def test_disable_constraint_checking_failure_disallowed(self):
@@ -133,9 +124,11 @@ class SchemaTests(TransactionTestCase):
         SQLite schema editor is usable within an outer transaction as long as
         foreign key constraints checks are disabled beforehand.
         """
+
         def constraint_checks_enabled():
             with connection.cursor() as cursor:
                 return bool(cursor.execute('PRAGMA foreign_keys').fetchone()[0])
+
         with connection.constraint_checks_disabled(), transaction.atomic():
             with connection.schema_editor(atomic=True):
                 self.assertFalse(constraint_checks_enabled())
@@ -179,7 +172,6 @@ class SchemaTests(TransactionTestCase):
 @unittest.skipUnless(connection.vendor == 'sqlite', 'Test only for SQLite')
 @override_settings(DEBUG=True)
 class LastExecutedQueryTest(TestCase):
-
     def test_no_interpolation(self):
         # This shouldn't raise an exception (#17158)
         query = "SELECT strftime('%Y', 'now');"
@@ -213,6 +205,7 @@ class EscapingChecks(TestCase):
     All tests in this test case are also run with settings.DEBUG=True in
     EscapingChecksDebug test case, to also test CursorDebugWrapper.
     """
+
     def test_parameter_escaping(self):
         # '%s' escaping support for sqlite3 (#13648).
         with connection.cursor() as cursor:
@@ -235,6 +228,7 @@ class ThreadSharing(TransactionTestCase):
     def test_database_sharing_in_threads(self):
         def create_object():
             Object.objects.create()
+
         create_object()
         thread = threading.Thread(target=create_object)
         thread.start()

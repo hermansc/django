@@ -9,7 +9,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class AbsTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_abs=Abs('normal')).first()
@@ -34,9 +33,7 @@ class AbsTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=12, normal=0, big=-45)
         obj = IntegerModel.objects.annotate(
-            small_abs=Abs('small'),
-            normal_abs=Abs('normal'),
-            big_abs=Abs('big'),
+            small_abs=Abs('small'), normal_abs=Abs('normal'), big_abs=Abs('big')
         ).first()
         self.assertIsInstance(obj.small_abs, int)
         self.assertIsInstance(obj.normal_abs, int)

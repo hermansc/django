@@ -7,8 +7,12 @@ from functools import partial
 
 from django.contrib.gis.gdal.libgdal import GDAL_VERSION, std_call
 from django.contrib.gis.gdal.prototypes.generation import (
-    chararray_output, const_string_output, double_output, int_output,
-    void_output, voidptr_output,
+    chararray_output,
+    const_string_output,
+    double_output,
+    int_output,
+    void_output,
+    voidptr_output,
 )
 
 # For more detail about c function names and definitions see
@@ -34,8 +38,7 @@ open_ds = voidptr_output(std_call('GDALOpen'), [c_char_p, c_int])
 close_ds = void_output(std_call('GDALClose'), [c_void_p], errcheck=False)
 flush_ds = int_output(std_call('GDALFlushCache'), [c_void_p])
 copy_ds = voidptr_output(
-    std_call('GDALCreateCopy'),
-    [c_void_p, c_char_p, c_void_p, c_int, POINTER(c_char_p), c_void_p, c_void_p]
+    std_call('GDALCreateCopy'), [c_void_p, c_char_p, c_void_p, c_int, POINTER(c_char_p), c_void_p, c_void_p]
 )
 add_band_ds = void_output(std_call('GDALAddBand'), [c_void_p, c_int])
 get_ds_description = const_string_output(std_call('GDALGetDescription'), [c_void_p])
@@ -64,7 +67,7 @@ else:
 # Raster Band Routines
 band_io = void_output(
     std_call('GDALRasterIO'),
-    [c_void_p, c_int, c_int, c_int, c_int, c_int, c_void_p, c_int, c_int, c_int, c_int, c_int]
+    [c_void_p, c_int, c_int, c_int, c_int, c_int, c_void_p, c_int, c_int, c_int, c_int, c_int],
 )
 get_band_xsize = int_output(std_call('GDALGetRasterBandXSize'), [c_void_p])
 get_band_ysize = int_output(std_call('GDALGetRasterBandYSize'), [c_void_p])
@@ -82,8 +85,15 @@ else:
 get_band_statistics = void_output(
     std_call('GDALGetRasterStatistics'),
     [
-        c_void_p, c_int, c_int, POINTER(c_double), POINTER(c_double),
-        POINTER(c_double), POINTER(c_double), c_void_p, c_void_p,
+        c_void_p,
+        c_int,
+        c_int,
+        POINTER(c_double),
+        POINTER(c_double),
+        POINTER(c_double),
+        POINTER(c_double),
+        c_void_p,
+        c_void_p,
     ],
 )
 compute_band_statistics = void_output(
@@ -94,11 +104,10 @@ compute_band_statistics = void_output(
 # Reprojection routine
 reproject_image = void_output(
     std_call('GDALReprojectImage'),
-    [c_void_p, c_char_p, c_void_p, c_char_p, c_int, c_double, c_double, c_void_p, c_void_p, c_void_p]
+    [c_void_p, c_char_p, c_void_p, c_char_p, c_int, c_double, c_double, c_void_p, c_void_p, c_void_p],
 )
 auto_create_warped_vrt = voidptr_output(
-    std_call('GDALAutoCreateWarpedVRT'),
-    [c_void_p, c_char_p, c_char_p, c_int, c_double, c_void_p]
+    std_call('GDALAutoCreateWarpedVRT'), [c_void_p, c_char_p, c_char_p, c_int, c_double, c_void_p]
 )
 
 # Create VSI gdal raster files from in-memory buffers.

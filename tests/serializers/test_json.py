@@ -82,9 +82,7 @@ class JsonSerializerTestCase(SerializersTestBase, TestCase):
                 return super().default(o)
 
         s = serializers.json.Serializer()
-        json_data = s.serialize(
-            [ScoreDecimal(score=decimal.Decimal(1.0))], cls=CustomJSONEncoder
-        )
+        json_data = s.serialize([ScoreDecimal(score=decimal.Decimal(1.0))], cls=CustomJSONEncoder)
         self.assertIn('"fields": {"score": "1"}', json_data)
 
     def test_json_deserializer_exception(self):
@@ -284,24 +282,14 @@ class JsonSerializerTransactionTestCase(SerializersTransactionTestBase, Transact
 
 class DjangoJSONEncoderTests(SimpleTestCase):
     def test_lazy_string_encoding(self):
-        self.assertEqual(
-            json.dumps({'lang': gettext_lazy("French")}, cls=DjangoJSONEncoder),
-            '{"lang": "French"}'
-        )
+        self.assertEqual(json.dumps({'lang': gettext_lazy("French")}, cls=DjangoJSONEncoder), '{"lang": "French"}')
         with override('fr'):
             self.assertEqual(
-                json.dumps({'lang': gettext_lazy("French")}, cls=DjangoJSONEncoder),
-                '{"lang": "Fran\\u00e7ais"}'
+                json.dumps({'lang': gettext_lazy("French")}, cls=DjangoJSONEncoder), '{"lang": "Fran\\u00e7ais"}'
             )
 
     def test_timedelta(self):
         duration = datetime.timedelta(days=1, hours=2, seconds=3)
-        self.assertEqual(
-            json.dumps({'duration': duration}, cls=DjangoJSONEncoder),
-            '{"duration": "P1DT02H00M03S"}'
-        )
+        self.assertEqual(json.dumps({'duration': duration}, cls=DjangoJSONEncoder), '{"duration": "P1DT02H00M03S"}')
         duration = datetime.timedelta(0)
-        self.assertEqual(
-            json.dumps({'duration': duration}, cls=DjangoJSONEncoder),
-            '{"duration": "P0DT00H00M00S"}'
-        )
+        self.assertEqual(json.dumps({'duration': duration}, cls=DjangoJSONEncoder), '{"duration": "P0DT00H00M00S"}')

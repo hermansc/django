@@ -26,9 +26,7 @@ class EmptyPage(InvalidPage):
 
 
 class Paginator:
-
-    def __init__(self, object_list, per_page, orphans=0,
-                 allow_empty_first_page=True):
+    def __init__(self, object_list, per_page, orphans=0, allow_empty_first_page=True):
         self.object_list = object_list
         self._check_object_list_is_ordered()
         self.per_page = int(per_page)
@@ -122,22 +120,19 @@ class Paginator:
                 'Pagination may yield inconsistent results with an unordered '
                 'object_list: {}.'.format(obj_list_repr),
                 UnorderedObjectListWarning,
-                stacklevel=3
+                stacklevel=3,
             )
 
 
 class QuerySetPaginator(Paginator):
-
     def __init__(self, *args, **kwargs):
         warnings.warn(
-            'The QuerySetPaginator alias of Paginator is deprecated.',
-            RemovedInDjango31Warning, stacklevel=2,
+            'The QuerySetPaginator alias of Paginator is deprecated.', RemovedInDjango31Warning, stacklevel=2
         )
         super().__init__(*args, **kwargs)
 
 
 class Page(collections.abc.Sequence):
-
     def __init__(self, object_list, number, paginator):
         self.object_list = object_list
         self.number = number

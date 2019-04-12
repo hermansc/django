@@ -183,11 +183,13 @@ class UpdateOnlyFieldsTests(TestCase):
 
         def pre_save_receiver(**kwargs):
             pre_save_data.append(kwargs['update_fields'])
+
         pre_save.connect(pre_save_receiver)
         post_save_data = []
 
         def post_save_receiver(**kwargs):
             post_save_data.append(kwargs['update_fields'])
+
         post_save.connect(post_save_receiver)
         p.save(update_fields=['name'])
         self.assertEqual(len(pre_save_data), 1)
@@ -217,11 +219,13 @@ class UpdateOnlyFieldsTests(TestCase):
 
         def pre_save_receiver(**kwargs):
             pre_save_data.append(kwargs['update_fields'])
+
         pre_save.connect(pre_save_receiver)
         post_save_data = []
 
         def post_save_receiver(**kwargs):
             post_save_data.append(kwargs['update_fields'])
+
         post_save.connect(post_save_receiver)
         # Save is skipped.
         with self.assertNumQueries(0):

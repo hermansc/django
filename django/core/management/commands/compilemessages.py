@@ -4,9 +4,7 @@ import glob
 import os
 
 from django.core.management.base import BaseCommand, CommandError
-from django.core.management.utils import (
-    find_command, is_ignored_path, popen_wrapper,
-)
+from django.core.management.utils import find_command, is_ignored_path, popen_wrapper
 
 
 def has_bom(fn):
@@ -36,23 +34,28 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--locale', '-l', action='append', default=[],
-            help='Locale(s) to process (e.g. de_AT). Default is to process all. '
-                 'Can be used multiple times.',
+            '--locale',
+            '-l',
+            action='append',
+            default=[],
+            help='Locale(s) to process (e.g. de_AT). Default is to process all. ' 'Can be used multiple times.',
         )
         parser.add_argument(
-            '--exclude', '-x', action='append', default=[],
+            '--exclude',
+            '-x',
+            action='append',
+            default=[],
             help='Locales to exclude. Default is none. Can be used multiple times.',
         )
+        parser.add_argument('--use-fuzzy', '-f', dest='fuzzy', action='store_true', help='Use fuzzy translations.')
         parser.add_argument(
-            '--use-fuzzy', '-f', dest='fuzzy', action='store_true',
-            help='Use fuzzy translations.',
-        )
-        parser.add_argument(
-            '--ignore', '-i', action='append', dest='ignore_patterns',
-            default=[], metavar='PATTERN',
-            help='Ignore directories matching this glob-style pattern. '
-                 'Use multiple times to ignore more.',
+            '--ignore',
+            '-i',
+            action='append',
+            dest='ignore_patterns',
+            default=[],
+            metavar='PATTERN',
+            help='Ignore directories matching this glob-style pattern. ' 'Use multiple times to ignore more.',
         )
 
     def handle(self, **options):
@@ -64,12 +67,14 @@ class Command(BaseCommand):
             self.program_options = self.program_options + ['-f']
 
         if find_command(self.program) is None:
-            raise CommandError("Can't find %s. Make sure you have GNU gettext "
-                               "tools 0.15 or newer installed." % self.program)
+            raise CommandError(
+                "Can't find %s. Make sure you have GNU gettext " "tools 0.15 or newer installed." % self.program
+            )
 
         basedirs = [os.path.join('conf', 'locale'), 'locale']
         if os.environ.get('DJANGO_SETTINGS_MODULE'):
             from django.conf import settings
+
             basedirs.extend(settings.LOCALE_PATHS)
 
         # Walk entire tree, looking for locale directories
@@ -84,9 +89,11 @@ class Command(BaseCommand):
         basedirs = set(map(os.path.abspath, filter(os.path.isdir, basedirs)))
 
         if not basedirs:
-            raise CommandError("This script should be run from the Django Git "
-                               "checkout or your project or app tree, or with "
-                               "the settings module specified.")
+            raise CommandError(
+                "This script should be run from the Django Git "
+                "checkout or your project or app tree, or with "
+                "the settings module specified."
+            )
 
         # Build locale list
         all_locales = []
@@ -142,9 +149,7 @@ class Command(BaseCommand):
                     self.has_errors = True
                     return
 
-                args = [self.program] + self.program_options + [
-                    '-o', base_path + '.mo', base_path + '.po'
-                ]
+                args = [self.program] + self.program_options + ['-o', base_path + '.mo', base_path + '.po']
                 futures.append(executor.submit(popen_wrapper, args))
 
             for future in concurrent.futures.as_completed(futures):

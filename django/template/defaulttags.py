@@ -13,11 +13,24 @@ from django.utils.lorem_ipsum import paragraphs, words
 from django.utils.safestring import mark_safe
 
 from .base import (
-    BLOCK_TAG_END, BLOCK_TAG_START, COMMENT_TAG_END, COMMENT_TAG_START,
-    FILTER_SEPARATOR, SINGLE_BRACE_END, SINGLE_BRACE_START,
-    VARIABLE_ATTRIBUTE_SEPARATOR, VARIABLE_TAG_END, VARIABLE_TAG_START,
-    Context, Node, NodeList, TemplateSyntaxError, VariableDoesNotExist,
-    kwarg_re, render_value_in_context, token_kwargs,
+    BLOCK_TAG_END,
+    BLOCK_TAG_START,
+    COMMENT_TAG_END,
+    COMMENT_TAG_START,
+    FILTER_SEPARATOR,
+    SINGLE_BRACE_END,
+    SINGLE_BRACE_START,
+    VARIABLE_ATTRIBUTE_SEPARATOR,
+    VARIABLE_TAG_END,
+    VARIABLE_TAG_START,
+    Context,
+    Node,
+    NodeList,
+    TemplateSyntaxError,
+    VariableDoesNotExist,
+    kwarg_re,
+    render_value_in_context,
+    token_kwargs,
 )
 from .defaultfilters import date
 from .library import Library
@@ -28,6 +41,7 @@ register = Library()
 
 class AutoEscapeControlNode(Node):
     """Implement the actions of the autoescape tag."""
+
     def __init__(self, setting, nodelist):
         self.setting, self.nodelist = setting, nodelist
 
@@ -95,6 +109,7 @@ class CycleNode(Node):
 class DebugNode(Node):
     def render(self, context):
         from pprint import pformat
+
         output = [pformat(val) for val in context]
         output.append('\n\n')
         output.append(pformat(sys.modules))
@@ -182,8 +197,8 @@ class ForNode(Node):
                 loop_dict['revcounter'] = len_values - i
                 loop_dict['revcounter0'] = len_values - i - 1
                 # Boolean values designating first and last times through loop.
-                loop_dict['first'] = (i == 0)
-                loop_dict['last'] = (i == len_values - 1)
+                loop_dict['first'] = i == 0
+                loop_dict['last'] = i == len_values - 1
 
                 pop_context = False
                 if unpack:
@@ -196,8 +211,7 @@ class ForNode(Node):
                     # Check loop variable count before unpacking
                     if num_loopvars != len_item:
                         raise ValueError(
-                            "Need {} values to unpack in for loop; got {}. "
-                            .format(num_loopvars, len_item),
+                            "Need {} values to unpack in for loop; got {}. ".format(num_loopvars, len_item)
                         )
                     unpacked_vars = dict(zip(self.loopvars, item))
                     pop_context = True
@@ -279,7 +293,6 @@ class IfEqualNode(Node):
 
 
 class IfNode(Node):
-
     def __init__(self, conditions_nodelists):
         self.conditions_nodelists = conditions_nodelists
 
@@ -297,12 +310,12 @@ class IfNode(Node):
     def render(self, context):
         for condition, nodelist in self.conditions_nodelists:
 
-            if condition is not None:           # if / elif clause
+            if condition is not None:  # if / elif clause
                 try:
                     match = condition.eval(context)
                 except VariableDoesNotExist:
                     match = None
-            else:                               # else clause
+            else:  # else clause
                 match = True
 
             if match:
@@ -353,8 +366,7 @@ class RegroupNode(Node):
         # {'grouper': 'key', 'list': [list of contents]}.
         context[self.var_name] = [
             GroupedResult(grouper=key, list=list(val))
-            for key, val in
-            groupby(obj_list, lambda obj: self.resolve_expression(obj, context))
+            for key, val in groupby(obj_list, lambda obj: self.resolve_expression(obj, context))
         ]
         return ''
 
@@ -395,6 +407,7 @@ class SpacelessNode(Node):
 
     def render(self, context):
         from django.utils.html import strip_spaces_between_tags
+
         return strip_spaces_between_tags(self.nodelist.render(context).strip())
 
 
@@ -426,6 +439,7 @@ class URLNode(Node):
 
     def render(self, context):
         from django.urls import reverse, NoReverseMatch
+
         args = [arg.resolve(context) for arg in self.args]
         kwargs = {k: v.resolve(context) for k, v in self.kwargs.items()}
         view_name = self.view_name.resolve(context)
@@ -791,24 +805,21 @@ def do_for(parser, token):
     """
     bits = token.split_contents()
     if len(bits) < 4:
-        raise TemplateSyntaxError("'for' statements should have at least four"
-                                  " words: %s" % token.contents)
+        raise TemplateSyntaxError("'for' statements should have at least four" " words: %s" % token.contents)
 
     is_reversed = bits[-1] == 'reversed'
     in_index = -3 if is_reversed else -2
     if bits[in_index] != 'in':
-        raise TemplateSyntaxError("'for' statements should use the format"
-                                  " 'for x in y': %s" % token.contents)
+        raise TemplateSyntaxError("'for' statements should use the format" " 'for x in y': %s" % token.contents)
 
     invalid_chars = frozenset((' ', '"', "'", FILTER_SEPARATOR))
     loopvars = re.split(r' *, *', ' '.join(bits[1:in_index]))
     for var in loopvars:
         if not var or not invalid_chars.isdisjoint(var):
-            raise TemplateSyntaxError("'for' tag received an invalid argument:"
-                                      " %s" % token.contents)
+            raise TemplateSyntaxError("'for' tag received an invalid argument:" " %s" % token.contents)
 
     sequence = parser.compile_filter(bits[in_index + 1])
-    nodelist_loop = parser.parse(('empty', 'endfor',))
+    nodelist_loop = parser.parse(('empty', 'endfor'))
     token = parser.next_token()
     if token.contents == 'empty':
         nodelist_empty = parser.parse(('endfor',))
@@ -1021,9 +1032,7 @@ def find_library(parser, name):
         return parser.libraries[name]
     except KeyError:
         raise TemplateSyntaxError(
-            "'%s' is not a registered tag library. Must be one of:\n%s" % (
-                name, "\n".join(sorted(parser.libraries)),
-            ),
+            "'%s' is not a registered tag library. Must be one of:\n%s" % (name, "\n".join(sorted(parser.libraries)))
         )
 
 
@@ -1041,11 +1050,7 @@ def load_from_library(library, label, names):
             found = True
             subset.filters[name] = library.filters[name]
         if found is False:
-            raise TemplateSyntaxError(
-                "'%s' is not a valid tag or filter in tag library '%s'" % (
-                    name, label,
-                ),
-            )
+            raise TemplateSyntaxError("'%s' is not a valid tag or filter in tag library '%s'" % (name, label))
     return subset
 
 
@@ -1204,8 +1209,7 @@ def regroup(parser, token):
     if bits[2] != 'by':
         raise TemplateSyntaxError("second argument to 'regroup' tag must be 'by'")
     if bits[4] != 'as':
-        raise TemplateSyntaxError("next-to-last argument to 'regroup' tag must"
-                                  " be 'as'")
+        raise TemplateSyntaxError("next-to-last argument to 'regroup' tag must" " be 'as'")
     var_name = bits[5]
     # RegroupNode will take each item in 'target', put it in the context under
     # 'var_name', evaluate 'var_name'.'expression' in the current context, and
@@ -1213,9 +1217,7 @@ def regroup(parser, token):
     # save the final result in the context under 'var_name', thus clearing the
     # temporary values. This hack is necessary because the template engine
     # doesn't provide a context-aware equivalent of Python's getattr.
-    expression = parser.compile_filter(var_name +
-                                       VARIABLE_ATTRIBUTE_SEPARATOR +
-                                       bits[3])
+    expression = parser.compile_filter(var_name + VARIABLE_ATTRIBUTE_SEPARATOR + bits[3])
     return RegroupNode(target, expression, var_name)
 
 
@@ -1305,9 +1307,9 @@ def templatetag(parser, token):
         raise TemplateSyntaxError("'templatetag' statement takes one argument")
     tag = bits[1]
     if tag not in TemplateTagNode.mapping:
-        raise TemplateSyntaxError("Invalid templatetag argument: '%s'."
-                                  " Must be one of: %s" %
-                                  (tag, list(TemplateTagNode.mapping)))
+        raise TemplateSyntaxError(
+            "Invalid templatetag argument: '%s'." " Must be one of: %s" % (tag, list(TemplateTagNode.mapping))
+        )
     return TemplateTagNode(tag)
 
 
@@ -1433,10 +1435,12 @@ def widthratio(parser, token):
     else:
         raise TemplateSyntaxError("widthratio takes at least three arguments")
 
-    return WidthRatioNode(parser.compile_filter(this_value_expr),
-                          parser.compile_filter(max_value_expr),
-                          parser.compile_filter(max_width),
-                          asvar=asvar)
+    return WidthRatioNode(
+        parser.compile_filter(this_value_expr),
+        parser.compile_filter(max_value_expr),
+        parser.compile_filter(max_width),
+        asvar=asvar,
+    )
 
 
 @register.tag('with')
@@ -1464,11 +1468,9 @@ def do_with(parser, token):
     remaining_bits = bits[1:]
     extra_context = token_kwargs(remaining_bits, parser, support_legacy=True)
     if not extra_context:
-        raise TemplateSyntaxError("%r expected at least one variable "
-                                  "assignment" % bits[0])
+        raise TemplateSyntaxError("%r expected at least one variable " "assignment" % bits[0])
     if remaining_bits:
-        raise TemplateSyntaxError("%r received an invalid token: %r" %
-                                  (bits[0], remaining_bits[0]))
+        raise TemplateSyntaxError("%r received an invalid token: %r" % (bits[0], remaining_bits[0]))
     nodelist = parser.parse(('endwith',))
     parser.delete_first_token()
     return WithNode(None, None, nodelist, extra_context=extra_context)

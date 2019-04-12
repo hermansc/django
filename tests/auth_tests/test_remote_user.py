@@ -23,8 +23,7 @@ class RemoteUserTest(TestCase):
 
     def setUp(self):
         self.patched_settings = modify_settings(
-            AUTHENTICATION_BACKENDS={'append': self.backend},
-            MIDDLEWARE={'append': self.middleware},
+            AUTHENTICATION_BACKENDS={'append': self.backend}, MIDDLEWARE={'append': self.middleware}
         )
         self.patched_settings.enable()
 
@@ -72,14 +71,12 @@ class RemoteUserTest(TestCase):
         User.objects.create(username='knownuser')
         User.objects.create(username='knownuser2')
         num_users = User.objects.count()
-        response = self.client.get('/remote_user/',
-                                   **{self.header: self.known_user})
+        response = self.client.get('/remote_user/', **{self.header: self.known_user})
         self.assertEqual(response.context['user'].username, 'knownuser')
         self.assertEqual(User.objects.count(), num_users)
         # A different user passed in the headers causes the new user
         # to be logged in.
-        response = self.client.get('/remote_user/',
-                                   **{self.header: self.known_user2})
+        response = self.client.get('/remote_user/', **{self.header: self.known_user2})
         self.assertEqual(response.context['user'].username, 'knownuser2')
         self.assertEqual(User.objects.count(), num_users)
 
@@ -96,15 +93,13 @@ class RemoteUserTest(TestCase):
         user.last_login = default_login
         user.save()
 
-        response = self.client.get('/remote_user/',
-                                   **{self.header: self.known_user})
+        response = self.client.get('/remote_user/', **{self.header: self.known_user})
         self.assertNotEqual(default_login, response.context['user'].last_login)
 
         user = User.objects.get(username='knownuser')
         user.last_login = default_login
         user.save()
-        response = self.client.get('/remote_user/',
-                                   **{self.header: self.known_user})
+        response = self.client.get('/remote_user/', **{self.header: self.known_user})
         self.assertEqual(default_login, response.context['user'].last_login)
 
     def test_header_disappears(self):
@@ -114,8 +109,7 @@ class RemoteUserTest(TestCase):
         """
         User.objects.create(username='knownuser')
         # Known user authenticates
-        response = self.client.get('/remote_user/',
-                                   **{self.header: self.known_user})
+        response = self.client.get('/remote_user/', **{self.header: self.known_user})
         self.assertEqual(response.context['user'].username, 'knownuser')
         # During the session, the REMOTE_USER header disappears. Should trigger logout.
         response = self.client.get('/remote_user/')
@@ -135,12 +129,10 @@ class RemoteUserTest(TestCase):
         """
         User.objects.create(username='knownuser')
         # Known user authenticates
-        response = self.client.get('/remote_user/',
-                                   **{self.header: self.known_user})
+        response = self.client.get('/remote_user/', **{self.header: self.known_user})
         self.assertEqual(response.context['user'].username, 'knownuser')
         # During the session, the REMOTE_USER changes to a different user.
-        response = self.client.get('/remote_user/',
-                                   **{self.header: "newnewuser"})
+        response = self.client.get('/remote_user/', **{self.header: "newnewuser"})
         # The current user is not the prior remote_user.
         # In backends that create a new user, username is "newnewuser"
         # In backends that do not create new users, it is '' (anonymous user)
@@ -154,6 +146,7 @@ class RemoteUserTest(TestCase):
 
 class RemoteUserNoCreateBackend(RemoteUserBackend):
     """Backend that doesn't create unknown users."""
+
     create_unknown_user = False
 
 
@@ -174,6 +167,7 @@ class RemoteUserNoCreateTest(RemoteUserTest):
 
 class AllowAllUsersRemoteUserBackendTest(RemoteUserTest):
     """Backend that allows inactive users."""
+
     backend = 'django.contrib.auth.backends.AllowAllUsersRemoteUserBackend'
 
     def test_inactive_user(self):
@@ -229,10 +223,7 @@ class RemoteUserCustomTest(RemoteUserTest):
         provided in the request header.
         """
         num_users = User.objects.count()
-        response = self.client.get('/remote_user/', **{
-            self.header: 'newuser',
-            self.email_header: 'user@example.com',
-        })
+        response = self.client.get('/remote_user/', **{self.header: 'newuser', self.email_header: 'user@example.com'})
         self.assertEqual(response.context['user'].username, 'newuser')
         self.assertEqual(response.context['user'].email, 'user@example.com')
         self.assertEqual(User.objects.count(), num_users + 1)
@@ -244,6 +235,7 @@ class CustomHeaderMiddleware(RemoteUserMiddleware):
     """
     Middleware that overrides custom HTTP auth user header.
     """
+
     header = 'HTTP_AUTHUSER'
 
 
@@ -252,9 +244,8 @@ class CustomHeaderRemoteUserTest(RemoteUserTest):
     Tests a custom RemoteUserMiddleware subclass with custom HTTP auth user
     header.
     """
-    middleware = (
-        'auth_tests.test_remote_user.CustomHeaderMiddleware'
-    )
+
+    middleware = 'auth_tests.test_remote_user.CustomHeaderMiddleware'
     header = 'HTTP_AUTHUSER'
 
 
@@ -263,6 +254,7 @@ class PersistentRemoteUserTest(RemoteUserTest):
     PersistentRemoteUserMiddleware keeps the user logged in even if the
     subsequent calls do not contain the header value.
     """
+
     middleware = 'django.contrib.auth.middleware.PersistentRemoteUserMiddleware'
     require_header = False
 

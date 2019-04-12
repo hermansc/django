@@ -21,11 +21,7 @@ def popen_wrapper(args, stdout_encoding='utf-8'):
     except OSError as err:
         raise CommandError('Error executing %s' % args[0]) from err
     output, errors = p.communicate()
-    return (
-        output.decode(stdout_encoding),
-        errors.decode(DEFAULT_LOCALE_ENCODING, errors='replace'),
-        p.returncode
-    )
+    return (output.decode(stdout_encoding), errors.decode(DEFAULT_LOCALE_ENCODING, errors='replace'), p.returncode)
 
 
 def handle_extensions(extensions):
@@ -134,7 +130,7 @@ def normalize_path_patterns(patterns):
     for pattern in patterns:
         for dir_suffix in dir_suffixes:
             if pattern.endswith(dir_suffix):
-                norm_patterns.append(pattern[:-len(dir_suffix)])
+                norm_patterns.append(pattern[: -len(dir_suffix)])
                 break
         else:
             norm_patterns.append(pattern)

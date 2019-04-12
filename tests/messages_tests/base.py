@@ -48,17 +48,19 @@ class BaseTests:
 
     def setUp(self):
         self.settings_override = override_settings_tags(
-            TEMPLATES=[{
-                'BACKEND': 'django.template.backends.django.DjangoTemplates',
-                'DIRS': [],
-                'APP_DIRS': True,
-                'OPTIONS': {
-                    'context_processors': (
-                        'django.contrib.auth.context_processors.auth',
-                        'django.contrib.messages.context_processors.messages',
-                    ),
-                },
-            }],
+            TEMPLATES=[
+                {
+                    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                    'DIRS': [],
+                    'APP_DIRS': True,
+                    'OPTIONS': {
+                        'context_processors': (
+                            'django.contrib.auth.context_processors.auth',
+                            'django.contrib.messages.context_processors.messages',
+                        )
+                    },
+                }
+            ],
             ROOT_URLCONF='messages_tests.urls',
             MESSAGE_TAGS={},
             MESSAGE_STORAGE='%s.%s' % (self.storage_class.__module__, self.storage_class.__name__),
@@ -129,7 +131,7 @@ class BaseTests:
         response = self.get_response()
 
         storage.add(constants.INFO, 'Test message 3')
-        list(storage)   # Simulates a read
+        list(storage)  # Simulates a read
         storage.update(response)
 
         storing = self.stored_messages_count(storage, response)
@@ -139,7 +141,7 @@ class BaseTests:
         storage = self.get_existing_storage()
         response = self.get_response()
 
-        list(storage)   # Simulates a read
+        list(storage)  # Simulates a read
         storage.add(constants.INFO, 'Test message 3')
         storage.update(response)
 
@@ -152,9 +154,7 @@ class BaseTests:
         With the message middleware enabled, messages are properly stored and
         retrieved across the full request/redirect/response cycle.
         """
-        data = {
-            'messages': ['Test message %d' % x for x in range(5)],
-        }
+        data = {'messages': ['Test message %d' % x for x in range(5)]}
         show_url = reverse('show_message')
         for level in ('debug', 'info', 'success', 'warning', 'error'):
             add_url = reverse('add_message', args=(level,))
@@ -168,9 +168,7 @@ class BaseTests:
 
     @override_settings(MESSAGE_LEVEL=constants.DEBUG)
     def test_with_template_response(self):
-        data = {
-            'messages': ['Test message %d' % x for x in range(5)],
-        }
+        data = {'messages': ['Test message %d' % x for x in range(5)]}
         show_url = reverse('show_template_response')
         for level in self.levels:
             add_url = reverse('add_template_response', args=(level,))
@@ -197,9 +195,7 @@ class BaseTests:
         """
         Messages persist properly when multiple POSTs are made before a GET.
         """
-        data = {
-            'messages': ['Test message %d' % x for x in range(5)],
-        }
+        data = {'messages': ['Test message %d' % x for x in range(5)]}
         show_url = reverse('show_message')
         messages = []
         for level in ('debug', 'info', 'success', 'warning', 'error'):
@@ -218,20 +214,14 @@ class BaseTests:
     )
     @override_settings(
         MESSAGE_LEVEL=constants.DEBUG,
-        TEMPLATES=[{
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
-            'APP_DIRS': True,
-        }],
+        TEMPLATES=[{'BACKEND': 'django.template.backends.django.DjangoTemplates', 'DIRS': [], 'APP_DIRS': True}],
     )
     def test_middleware_disabled(self):
         """
         When the middleware is disabled, an exception is raised when one
         attempts to store a message.
         """
-        data = {
-            'messages': ['Test message %d' % x for x in range(5)],
-        }
+        data = {'messages': ['Test message %d' % x for x in range(5)]}
         reverse('show_message')
         for level in ('debug', 'info', 'success', 'warning', 'error'):
             add_url = reverse('add_message', args=(level,))
@@ -243,21 +233,14 @@ class BaseTests:
         MIDDLEWARE={'remove': 'django.contrib.messages.middleware.MessageMiddleware'},
     )
     @override_settings(
-        TEMPLATES=[{
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
-            'APP_DIRS': True,
-        }],
+        TEMPLATES=[{'BACKEND': 'django.template.backends.django.DjangoTemplates', 'DIRS': [], 'APP_DIRS': True}]
     )
     def test_middleware_disabled_fail_silently(self):
         """
         When the middleware is disabled, an exception is not raised
         if 'fail_silently' is True.
         """
-        data = {
-            'messages': ['Test message %d' % x for x in range(5)],
-            'fail_silently': True,
-        }
+        data = {'messages': ['Test message %d' % x for x in range(5)], 'fail_silently': True}
         show_url = reverse('show_message')
         for level in ('debug', 'info', 'success', 'warning', 'error'):
             add_url = reverse('add_message', args=(level,))
@@ -276,10 +259,9 @@ class BaseTests:
         raise NotImplementedError('This method must be set by a subclass.')
 
     def get_existing_storage(self):
-        return self.get_storage([
-            Message(constants.INFO, 'Test message 1'),
-            Message(constants.INFO, 'Test message 2', extra_tags='tag'),
-        ])
+        return self.get_storage(
+            [Message(constants.INFO, 'Test message 1'), Message(constants.INFO, 'Test message 2', extra_tags='tag')]
+        )
 
     def test_existing_read(self):
         """
@@ -360,13 +342,15 @@ class BaseTests:
         tags = [msg.level_tag for msg in storage]
         self.assertEqual(tags, ['info', '', 'debug', 'warning', 'error', 'success'])
 
-    @override_settings_tags(MESSAGE_TAGS={
-        constants.INFO: 'info',
-        constants.DEBUG: '',
-        constants.WARNING: '',
-        constants.ERROR: 'bad',
-        29: 'custom',
-    })
+    @override_settings_tags(
+        MESSAGE_TAGS={
+            constants.INFO: 'info',
+            constants.DEBUG: '',
+            constants.WARNING: '',
+            constants.ERROR: 'bad',
+            29: 'custom',
+        }
+    )
     def test_custom_tags(self):
         storage = self.get_storage()
         storage.level = 0

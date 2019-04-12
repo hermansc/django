@@ -43,10 +43,7 @@ class Article(models.Model):
 
     class Meta:
         ordering = ('headline',)
-        index_together = [
-            ["headline", "pub_date"],
-            ['headline', 'response_to', 'pub_date', 'reporter'],
-        ]
+        index_together = [["headline", "pub_date"], ['headline', 'response_to', 'pub_date', 'reporter']]
 
     def __str__(self):
         return self.headline
@@ -73,6 +70,4 @@ class Comment(models.Model):
             models.CheckConstraint(name='up_votes_gte_0_check', check=models.Q(up_votes__gte=0)),
             models.UniqueConstraint(fields=['article', 'email', 'pub_date'], name='article_email_pub_date_uniq'),
         ]
-        indexes = [
-            models.Index(fields=['email', 'pub_date'], name='email_pub_date_idx'),
-        ]
+        indexes = [models.Index(fields=['email', 'pub_date'], name='email_pub_date_idx')]

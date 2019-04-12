@@ -21,12 +21,7 @@ class BaseOrderWithRespectToTests:
 
     def test_default_to_insertion_order(self):
         # Answers will always be ordered in the order they were inserted.
-        self.assertQuerysetEqual(
-            self.q1.answer_set.all(), [
-                "John", "Paul", "George", "Ringo",
-            ],
-            attrgetter("text"),
-        )
+        self.assertQuerysetEqual(self.q1.answer_set.all(), ["John", "Paul", "George", "Ringo"], attrgetter("text"))
 
     def test_previous_and_next_in_order(self):
         # We can retrieve the answers related to a particular object, in the
@@ -73,10 +68,7 @@ class BaseOrderWithRespectToTests:
         # this changes the ordering of the queryset.
         a.question.set_answer_order(id_list)
         self.assertQuerysetEqual(
-            self.q1.answer_set.all(), [
-                "John", "Paul", "George", "Number five", "Ringo"
-            ],
-            attrgetter("text")
+            self.q1.answer_set.all(), ["John", "Paul", "George", "Number five", "Ringo"], attrgetter("text")
         )
 
     def test_recursive_ordering(self):

@@ -27,10 +27,7 @@ W011 = Warning(
     id='security.W011',
 )
 
-W012 = Warning(
-    add_session_cookie_message("SESSION_COOKIE_SECURE is not set to True."),
-    id='security.W012',
-)
+W012 = Warning(add_session_cookie_message("SESSION_COOKIE_SECURE is not set to True."), id='security.W012')
 
 
 def add_httponly_message(message):
@@ -43,7 +40,7 @@ def add_httponly_message(message):
 W013 = Warning(
     add_httponly_message(
         "You have 'django.contrib.sessions' in your INSTALLED_APPS, "
-        "but you have not set SESSION_COOKIE_HTTPONLY to True.",
+        "but you have not set SESSION_COOKIE_HTTPONLY to True."
     ),
     id='security.W013',
 )
@@ -57,10 +54,7 @@ W014 = Warning(
     id='security.W014',
 )
 
-W015 = Warning(
-    add_httponly_message("SESSION_COOKIE_HTTPONLY is not set to True."),
-    id='security.W015',
-)
+W015 = Warning(add_httponly_message("SESSION_COOKIE_HTTPONLY is not set to True."), id='security.W015')
 
 
 @register(Tags.security, deploy=True)

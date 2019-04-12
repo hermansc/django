@@ -8,8 +8,11 @@ from django.apps import apps
 from django.core import management
 from django.core.management import BaseCommand, CommandError, find_commands
 from django.core.management.utils import (
-    find_command, get_random_secret_key, is_ignored_path,
-    normalize_path_patterns, popen_wrapper,
+    find_command,
+    get_random_secret_key,
+    is_ignored_path,
+    normalize_path_patterns,
+    popen_wrapper,
 )
 from django.db import connection
 from django.test import SimpleTestCase, override_settings
@@ -20,13 +23,7 @@ from .management.commands import dance
 
 
 # A minimal set of apps to avoid system checks running on all apps.
-@override_settings(
-    INSTALLED_APPS=[
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'user_commands',
-    ],
-)
+@override_settings(INSTALLED_APPS=['django.contrib.auth', 'django.contrib.contenttypes', 'user_commands'])
 class CommandTests(SimpleTestCase):
     def test_command(self):
         out = StringIO()
@@ -234,11 +231,13 @@ class CommandRunTests(AdminScriptTestCase):
     """
     Tests that need to run by simulating the command line, not by call_command.
     """
+
     def test_script_prefix_set_in_commands(self):
-        self.write_settings('settings.py', apps=['user_commands'], sdict={
-            'ROOT_URLCONF': '"user_commands.urls"',
-            'FORCE_SCRIPT_NAME': '"/PREFIX/"',
-        })
+        self.write_settings(
+            'settings.py',
+            apps=['user_commands'],
+            sdict={'ROOT_URLCONF': '"user_commands.urls"', 'FORCE_SCRIPT_NAME': '"/PREFIX/"'},
+        )
         out, err = self.run_manage(['reverse_url'])
         self.assertNoOutput(err)
         self.assertEqual(out.strip(), '/PREFIX/some/url/')
@@ -255,7 +254,6 @@ class CommandRunTests(AdminScriptTestCase):
 
 
 class UtilsTests(SimpleTestCase):
-
     def test_no_existent_external_program(self):
         msg = 'Error executing a_42_command_that_doesnt_exist_42'
         with self.assertRaisesMessage(CommandError, msg):

@@ -18,11 +18,13 @@ class Person(models.Model):
 
 # Ticket #23555 - model with an intentionally broken QuerySet.__iter__ method.
 
+
 class IndexErrorQuerySet(models.QuerySet):
     """
     Emulates the case when some internal code raises an unexpected
     IndexError.
     """
+
     def __iter__(self):
         raise IndexError
 

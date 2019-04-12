@@ -3,14 +3,9 @@ import uuid
 
 from django.core import exceptions, serializers
 from django.db import IntegrityError, models
-from django.test import (
-    SimpleTestCase, TestCase, TransactionTestCase, skipUnlessDBFeature,
-)
+from django.test import SimpleTestCase, TestCase, TransactionTestCase, skipUnlessDBFeature
 
-from .models import (
-    NullableUUIDModel, PrimaryKeyUUIDModel, RelatedToUUIDModel, UUIDGrandchild,
-    UUIDModel,
-)
+from .models import NullableUUIDModel, PrimaryKeyUUIDModel, RelatedToUUIDModel, UUIDGrandchild, UUIDModel
 
 
 class TestSaveLoad(TestCase):
@@ -55,7 +50,6 @@ class TestSaveLoad(TestCase):
 
 
 class TestMethods(SimpleTestCase):
-
     def test_deconstruct(self):
         field = models.UUIDField()
         name, path, args, kwargs = field.deconstruct()
@@ -65,14 +59,10 @@ class TestMethods(SimpleTestCase):
         self.assertIsNone(models.UUIDField().to_python(None))
 
     def test_to_python_int_values(self):
-        self.assertEqual(
-            models.UUIDField().to_python(0),
-            uuid.UUID('00000000-0000-0000-0000-000000000000')
-        )
+        self.assertEqual(models.UUIDField().to_python(0), uuid.UUID('00000000-0000-0000-0000-000000000000'))
         # Works for integers less than 128 bits.
         self.assertEqual(
-            models.UUIDField().to_python((2 ** 128) - 1),
-            uuid.UUID('ffffffff-ffff-ffff-ffff-ffffffffffff')
+            models.UUIDField().to_python((2 ** 128) - 1), uuid.UUID('ffffffff-ffff-ffff-ffff-ffffffffffff')
         )
 
     def test_to_python_int_too_large(self):
@@ -92,15 +82,11 @@ class TestQuerying(TestCase):
 
     def test_exact(self):
         self.assertSequenceEqual(
-            NullableUUIDModel.objects.filter(field__exact='550e8400e29b41d4a716446655440000'),
-            [self.objs[1]]
+            NullableUUIDModel.objects.filter(field__exact='550e8400e29b41d4a716446655440000'), [self.objs[1]]
         )
 
     def test_isnull(self):
-        self.assertSequenceEqual(
-            NullableUUIDModel.objects.filter(field__isnull=True),
-            [self.objs[2]]
-        )
+        self.assertSequenceEqual(NullableUUIDModel.objects.filter(field__isnull=True), [self.objs[2]])
 
 
 class TestSerialization(SimpleTestCase):
@@ -108,10 +94,7 @@ class TestSerialization(SimpleTestCase):
         '[{"fields": {"field": "550e8400-e29b-41d4-a716-446655440000"}, '
         '"model": "model_fields.uuidmodel", "pk": null}]'
     )
-    nullable_test_data = (
-        '[{"fields": {"field": null}, '
-        '"model": "model_fields.nullableuuidmodel", "pk": null}]'
-    )
+    nullable_test_data = '[{"fields": {"field": null}, ' '"model": "model_fields.nullableuuidmodel", "pk": null}]'
 
     def test_dumping(self):
         instance = UUIDModel(field=uuid.UUID('550e8400e29b41d4a716446655440000'))

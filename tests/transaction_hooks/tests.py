@@ -15,6 +15,7 @@ class TestConnectionOnCommit(TransactionTestCase):
     Creation/checking of database objects in parallel with callback tracking is
     to verify that the behavior of the two match in all tested cases.
     """
+
     available_apps = ['transaction_hooks']
 
     def setUp(self):
@@ -191,9 +192,7 @@ class TestConnectionOnCommit(TransactionTestCase):
     def test_db_query_in_hook(self):
         with transaction.atomic():
             Thing.objects.create(num=1)
-            transaction.on_commit(
-                lambda: [self.notify(t.num) for t in Thing.objects.all()]
-            )
+            transaction.on_commit(lambda: [self.notify(t.num) for t in Thing.objects.all()])
 
         self.assertDone([1])
 

@@ -1,8 +1,6 @@
 import logging
 
-from django.contrib.sessions.backends.base import (
-    CreateError, SessionBase, UpdateError,
-)
+from django.contrib.sessions.backends.base import CreateError, SessionBase, UpdateError
 from django.core.exceptions import SuspiciousOperation
 from django.db import DatabaseError, IntegrityError, router, transaction
 from django.utils import timezone
@@ -13,6 +11,7 @@ class SessionStore(SessionBase):
     """
     Implement database session store.
     """
+
     def __init__(self, session_key=None):
         super().__init__(session_key)
 
@@ -21,6 +20,7 @@ class SessionStore(SessionBase):
         # Avoids a circular import and allows importing SessionStore when
         # django.contrib.sessions is not in INSTALLED_APPS.
         from django.contrib.sessions.models import Session
+
         return Session
 
     @cached_property
@@ -29,10 +29,7 @@ class SessionStore(SessionBase):
 
     def _get_session_from_db(self):
         try:
-            return self.model.objects.get(
-                session_key=self.session_key,
-                expire_date__gt=timezone.now()
-            )
+            return self.model.objects.get(session_key=self.session_key, expire_date__gt=timezone.now())
         except (self.model.DoesNotExist, SuspiciousOperation) as e:
             if isinstance(e, SuspiciousOperation):
                 logger = logging.getLogger('django.security.%s' % e.__class__.__name__)

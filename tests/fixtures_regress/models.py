@@ -66,7 +66,6 @@ class SpecialArticle(Article):
 
 # Models to regression test #22421
 class CommonFeature(Article):
-
     class Meta:
         abstract = True
 
@@ -128,6 +127,7 @@ class Person(models.Model):
     # one to test the behavior of the dependency resolution algorithm.
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.store']
 
 
@@ -143,7 +143,7 @@ class Book(models.Model):
         return '%s by %s (available at %s)' % (
             self.name,
             self.author.name,
-            ', '.join(s.name for s in self.stores.all())
+            ', '.join(s.name for s in self.stores.all()),
         )
 
 
@@ -169,11 +169,7 @@ class RefToNKChild(models.Model):
     nk_m2m = models.ManyToManyField(NKChild, related_name='ref_m2ms')
 
     def __str__(self):
-        return '%s: Reference to %s [%s]' % (
-            self.text,
-            self.nk_fk,
-            ', '.join(str(o) for o in self.nk_m2m.all())
-        )
+        return '%s: Reference to %s [%s]' % (self.text, self.nk_fk, ', '.join(str(o) for o in self.nk_m2m.all()))
 
 
 # ome models with pathological circular dependencies
@@ -182,6 +178,7 @@ class Circle1(models.Model):
 
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.circle2']
 
 
@@ -190,6 +187,7 @@ class Circle2(models.Model):
 
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.circle1']
 
 
@@ -198,6 +196,7 @@ class Circle3(models.Model):
 
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.circle3']
 
 
@@ -206,6 +205,7 @@ class Circle4(models.Model):
 
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.circle5']
 
 
@@ -214,6 +214,7 @@ class Circle5(models.Model):
 
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.circle6']
 
 
@@ -222,6 +223,7 @@ class Circle6(models.Model):
 
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.circle4']
 
 
@@ -230,6 +232,7 @@ class ExternalDependency(models.Model):
 
     def natural_key(self):
         return (self.name,)
+
     natural_key.dependencies = ['fixtures_regress.book']
 
 
@@ -246,6 +249,7 @@ class BaseNKModel(models.Model):
     """
     Base model with a natural_key and a manager with `get_by_natural_key`
     """
+
     data = models.CharField(max_length=20, unique=True)
 
     objects = NKManager()
@@ -290,18 +294,15 @@ class M2MThroughAB(BaseNKModel):
 
 
 class M2MComplexCircular1A(BaseNKModel):
-    b_set = models.ManyToManyField("M2MComplexCircular1B",
-                                   through="M2MCircular1ThroughAB")
+    b_set = models.ManyToManyField("M2MComplexCircular1B", through="M2MCircular1ThroughAB")
 
 
 class M2MComplexCircular1B(BaseNKModel):
-    c_set = models.ManyToManyField("M2MComplexCircular1C",
-                                   through="M2MCircular1ThroughBC")
+    c_set = models.ManyToManyField("M2MComplexCircular1C", through="M2MCircular1ThroughBC")
 
 
 class M2MComplexCircular1C(BaseNKModel):
-    a_set = models.ManyToManyField("M2MComplexCircular1A",
-                                   through="M2MCircular1ThroughCA")
+    a_set = models.ManyToManyField("M2MComplexCircular1A", through="M2MCircular1ThroughCA")
 
 
 class M2MCircular1ThroughAB(BaseNKModel):
@@ -320,13 +321,13 @@ class M2MCircular1ThroughCA(BaseNKModel):
 
 
 class M2MComplexCircular2A(BaseNKModel):
-    b_set = models.ManyToManyField("M2MComplexCircular2B",
-                                   through="M2MCircular2ThroughAB")
+    b_set = models.ManyToManyField("M2MComplexCircular2B", through="M2MCircular2ThroughAB")
 
 
 class M2MComplexCircular2B(BaseNKModel):
     def natural_key(self):
         return (self.data,)
+
     # Fake the dependency for a circularity
     natural_key.dependencies = ["fixtures_regress.M2MComplexCircular2A"]
 

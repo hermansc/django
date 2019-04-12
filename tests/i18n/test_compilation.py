@@ -7,12 +7,8 @@ from pathlib import Path
 from subprocess import Popen
 from unittest import mock
 
-from django.core.management import (
-    CommandError, call_command, execute_from_command_line,
-)
-from django.core.management.commands.makemessages import (
-    Command as MakeMessagesCommand,
-)
+from django.core.management import CommandError, call_command, execute_from_command_line
+from django.core.management.commands.makemessages import Command as MakeMessagesCommand
 from django.core.management.utils import find_command
 from django.test import SimpleTestCase, override_settings
 from django.test.utils import captured_stderr, captured_stdout
@@ -128,8 +124,7 @@ class ExcludedLocaleCompilationTests(MessageCompilationTests):
         self.assertFalse(os.path.exists(self.MO_FILE % 'it'))
 
     def test_multiple_locales_excluded_with_locale(self):
-        call_command('compilemessages', locale=['en', 'fr', 'it'], exclude=['fr', 'it'],
-                     stdout=StringIO())
+        call_command('compilemessages', locale=['en', 'fr', 'it'], exclude=['fr', 'it'], stdout=StringIO())
         self.assertTrue(os.path.exists(self.MO_FILE % 'en'))
         self.assertFalse(os.path.exists(self.MO_FILE % 'fr'))
         self.assertFalse(os.path.exists(self.MO_FILE % 'it'))
@@ -201,7 +196,6 @@ class ProjectAndAppTests(MessageCompilationTests):
 
 
 class FuzzyTranslationTest(ProjectAndAppTests):
-
     def setUp(self):
         super().setUp()
         gettext_module._translations = {}  # flush cache or test will be useless
@@ -222,7 +216,6 @@ class FuzzyTranslationTest(ProjectAndAppTests):
 
 
 class AppCompilationTest(ProjectAndAppTests):
-
     def test_app_locale_compiled(self):
         call_command('compilemessages', locale=[self.LOCALE], stdout=StringIO())
         self.assertTrue(os.path.exists(self.PROJECT_MO_FILE))

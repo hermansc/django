@@ -6,15 +6,11 @@ from django.db.models import Index
 from django.db.models.deletion import CASCADE
 from django.db.models.fields.related import ForeignKey
 from django.db.models.query_utils import Q
-from django.test import (
-    TestCase, TransactionTestCase, skipIfDBFeature, skipUnlessDBFeature,
-)
+from django.test import TestCase, TransactionTestCase, skipIfDBFeature, skipUnlessDBFeature
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from .models import (
-    Article, ArticleTranslation, IndexedArticle2, IndexTogetherSingleList,
-)
+from .models import Article, ArticleTranslation, IndexedArticle2, IndexTogetherSingleList
 
 
 class SchemaIndexesTests(TestCase):
@@ -27,11 +23,7 @@ class SchemaIndexesTests(TestCase):
         Index names should be deterministic.
         """
         editor = connection.schema_editor()
-        index_name = editor._create_index_name(
-            table_name=Article._meta.db_table,
-            column_names=("c1",),
-            suffix="123",
-        )
+        index_name = editor._create_index_name(table_name=Article._meta.db_table, column_names=("c1",), suffix="123")
         self.assertEqual(index_name, "indexes_article_c1_a52bd80b123")
 
     def test_index_name(self):
@@ -44,9 +36,7 @@ class SchemaIndexesTests(TestCase):
         long_name = 'l%sng' % ('o' * 100)
         editor = connection.schema_editor()
         index_name = editor._create_index_name(
-            table_name=Article._meta.db_table,
-            column_names=('c1', 'c2', long_name),
-            suffix='ix',
+            table_name=Article._meta.db_table, column_names=('c1', 'c2', long_name), suffix='ix'
         )
         expected = {
             'mysql': 'indexes_article_c1_c2_looooooooooooooooooo_255179b2ix',
@@ -67,7 +57,7 @@ class SchemaIndexesTests(TestCase):
             connection.ops.quote_name(
                 editor._create_index_name(Article._meta.db_table, ['headline', 'pub_date'], suffix='_idx')
             ),
-            index_sql[0]
+            index_sql[0],
         )
 
     def test_index_together_single_list(self):
@@ -81,11 +71,7 @@ class SchemaIndexesNotPostgreSQLTests(TransactionTestCase):
     available_apps = ['indexes']
 
     def test_create_index_ignores_opclasses(self):
-        index = Index(
-            name='test_ops_class',
-            fields=['headline'],
-            opclasses=['varchar_pattern_ops'],
-        )
+        index = Index(name='test_ops_class', fields=['headline'], opclasses=['varchar_pattern_ops'])
         with connection.schema_editor() as editor:
             # This would error if opclasses weren't ignored.
             editor.add_index(IndexedArticle2, index)
@@ -98,18 +84,14 @@ class PartialIndexConditionIgnoredTests(TransactionTestCase):
     available_apps = ['indexes']
 
     def test_condition_ignored(self):
-        index = Index(
-            name='test_condition_ignored',
-            fields=['published'],
-            condition=Q(published=True),
-        )
+        index = Index(name='test_condition_ignored', fields=['published'], condition=Q(published=True))
         with connection.schema_editor() as editor:
             # This would error if condition weren't ignored.
             editor.add_index(Article, index)
 
         self.assertNotIn(
             'WHERE %s.%s' % (editor.quote_name(Article._meta.db_table), 'published'),
-            str(index.create_sql(Article, editor))
+            str(index.create_sql(Article, editor)),
         )
 
 
@@ -126,6 +108,7 @@ class SchemaIndexesPostgreSQLTests(TransactionTestCase):
     def test_text_indexes(self):
         """Test creation of PostgreSQL-specific text indexes (#12234)"""
         from .models import IndexedArticle
+
         index_sql = [str(statement) for statement in connection.schema_editor()._model_indexes_sql(IndexedArticle)]
         self.assertEqual(len(index_sql), 5)
         self.assertIn('("headline" varchar_pattern_ops)', index_sql[1])
@@ -140,11 +123,7 @@ class SchemaIndexesPostgreSQLTests(TransactionTestCase):
         self.assertEqual(len(index_sql), 1)
 
     def test_ops_class(self):
-        index = Index(
-            name='test_ops_class',
-            fields=['headline'],
-            opclasses=['varchar_pattern_ops'],
-        )
+        index = Index(name='test_ops_class', fields=['headline'], opclasses=['varchar_pattern_ops'])
         with connection.schema_editor() as editor:
             editor.add_index(IndexedArticle2, index)
         with editor.connection.cursor() as cursor:
@@ -206,16 +185,17 @@ class SchemaIndexesMySQLTests(TransactionTestCase):
         MySQL on InnoDB already creates indexes automatically for foreign keys.
         (#14180). An index should be created if db_constraint=False (#26171).
         """
-        storage = connection.introspection.get_storage_engine(
-            connection.cursor(), ArticleTranslation._meta.db_table
-        )
+        storage = connection.introspection.get_storage_engine(connection.cursor(), ArticleTranslation._meta.db_table)
         if storage != "InnoDB":
             self.skip("This test only applies to the InnoDB storage engine")
         index_sql = [str(statement) for statement in connection.schema_editor()._model_indexes_sql(ArticleTranslation)]
-        self.assertEqual(index_sql, [
-            'CREATE INDEX `indexes_articletranslation_article_no_constraint_id_d6c0806b` '
-            'ON `indexes_articletranslation` (`article_no_constraint_id`)'
-        ])
+        self.assertEqual(
+            index_sql,
+            [
+                'CREATE INDEX `indexes_articletranslation_article_no_constraint_id_d6c0806b` '
+                'ON `indexes_articletranslation` (`article_no_constraint_id`)'
+            ],
+        )
 
         # The index also shouldn't be created if the ForeignKey is added after
         # the model was created.
@@ -249,56 +229,59 @@ class PartialIndexTests(TransactionTestCase):
                 fields=['pub_date'],
                 condition=Q(
                     pub_date__gt=datetime.datetime(
-                        year=2015, month=1, day=1,
+                        year=2015,
+                        month=1,
+                        day=1,
                         # PostgreSQL would otherwise complain about the lookup
                         # being converted to a mutable function (by removing
                         # the timezone in the cast) which is forbidden.
                         tzinfo=timezone.get_current_timezone(),
-                    ),
-                )
+                    )
+                ),
             )
             self.assertIn(
                 'WHERE %s.%s' % (editor.quote_name(Article._meta.db_table), editor.quote_name("pub_date")),
-                str(index.create_sql(Article, schema_editor=editor))
+                str(index.create_sql(Article, schema_editor=editor)),
             )
             editor.add_index(index=index, model=Article)
-            self.assertIn(index.name, connection.introspection.get_constraints(
-                cursor=connection.cursor(), table_name=Article._meta.db_table,
-            ))
+            self.assertIn(
+                index.name,
+                connection.introspection.get_constraints(
+                    cursor=connection.cursor(), table_name=Article._meta.db_table
+                ),
+            )
             editor.remove_index(index=index, model=Article)
 
     def test_integer_restriction_partial(self):
         with connection.schema_editor() as editor:
-            index = Index(
-                name='recent_article_idx',
-                fields=['id'],
-                condition=Q(pk__gt=1),
-            )
+            index = Index(name='recent_article_idx', fields=['id'], condition=Q(pk__gt=1))
             self.assertIn(
                 'WHERE %s.%s' % (editor.quote_name(Article._meta.db_table), editor.quote_name('id')),
-                str(index.create_sql(Article, schema_editor=editor))
+                str(index.create_sql(Article, schema_editor=editor)),
             )
             editor.add_index(index=index, model=Article)
-            self.assertIn(index.name, connection.introspection.get_constraints(
-                cursor=connection.cursor(), table_name=Article._meta.db_table,
-            ))
+            self.assertIn(
+                index.name,
+                connection.introspection.get_constraints(
+                    cursor=connection.cursor(), table_name=Article._meta.db_table
+                ),
+            )
             editor.remove_index(index=index, model=Article)
 
     def test_boolean_restriction_partial(self):
         with connection.schema_editor() as editor:
-            index = Index(
-                name='published_index',
-                fields=['published'],
-                condition=Q(published=True),
-            )
+            index = Index(name='published_index', fields=['published'], condition=Q(published=True))
             self.assertIn(
                 'WHERE %s.%s' % (editor.quote_name(Article._meta.db_table), editor.quote_name('published')),
-                str(index.create_sql(Article, schema_editor=editor))
+                str(index.create_sql(Article, schema_editor=editor)),
             )
             editor.add_index(index=index, model=Article)
-            self.assertIn(index.name, connection.introspection.get_constraints(
-                cursor=connection.cursor(), table_name=Article._meta.db_table,
-            ))
+            self.assertIn(
+                index.name,
+                connection.introspection.get_constraints(
+                    cursor=connection.cursor(), table_name=Article._meta.db_table
+                ),
+            )
             editor.remove_index(index=index, model=Article)
 
     @skipUnlessDBFeature('supports_functions_in_partial_indexes')
@@ -308,42 +291,43 @@ class PartialIndexTests(TransactionTestCase):
                 name='recent_article_idx',
                 fields=['pub_date', 'headline'],
                 condition=(
-                    Q(pub_date__gt=datetime.datetime(
-                        year=2015,
-                        month=1,
-                        day=1,
-                        tzinfo=timezone.get_current_timezone(),
-                    )) & Q(headline__contains='China')
+                    Q(
+                        pub_date__gt=datetime.datetime(
+                            year=2015, month=1, day=1, tzinfo=timezone.get_current_timezone()
+                        )
+                    )
+                    & Q(headline__contains='China')
                 ),
             )
             sql = str(index.create_sql(Article, schema_editor=editor))
             where = sql.find('WHERE')
             self.assertIn(
-                'WHERE (%s.%s' % (editor.quote_name(Article._meta.db_table), editor.quote_name("pub_date")),
-                sql
+                'WHERE (%s.%s' % (editor.quote_name(Article._meta.db_table), editor.quote_name("pub_date")), sql
             )
             # Because each backend has different syntax for the operators,
             # check ONLY the occurrence of headline in the SQL.
             self.assertGreater(sql.rfind('headline'), where)
             editor.add_index(index=index, model=Article)
-            self.assertIn(index.name, connection.introspection.get_constraints(
-                cursor=connection.cursor(), table_name=Article._meta.db_table,
-            ))
+            self.assertIn(
+                index.name,
+                connection.introspection.get_constraints(
+                    cursor=connection.cursor(), table_name=Article._meta.db_table
+                ),
+            )
             editor.remove_index(index=index, model=Article)
 
     def test_is_null_condition(self):
         with connection.schema_editor() as editor:
-            index = Index(
-                name='recent_article_idx',
-                fields=['pub_date'],
-                condition=Q(pub_date__isnull=False),
-            )
+            index = Index(name='recent_article_idx', fields=['pub_date'], condition=Q(pub_date__isnull=False))
             self.assertIn(
                 'WHERE %s.%s IS NOT NULL' % (editor.quote_name(Article._meta.db_table), editor.quote_name("pub_date")),
-                str(index.create_sql(Article, schema_editor=editor))
+                str(index.create_sql(Article, schema_editor=editor)),
             )
             editor.add_index(index=index, model=Article)
-            self.assertIn(index.name, connection.introspection.get_constraints(
-                cursor=connection.cursor(), table_name=Article._meta.db_table,
-            ))
+            self.assertIn(
+                index.name,
+                connection.introspection.get_constraints(
+                    cursor=connection.cursor(), table_name=Article._meta.db_table
+                ),
+            )
             editor.remove_index(index=index, model=Article)

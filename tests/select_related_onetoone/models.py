@@ -96,8 +96,4 @@ class Child4(Child1):
 
 class LinkedList(models.Model):
     name = models.CharField(max_length=50)
-    previous_item = models.OneToOneField(
-        'self', models.CASCADE,
-        related_name='next_item',
-        blank=True, null=True,
-    )
+    previous_item = models.OneToOneField('self', models.CASCADE, related_name='next_item', blank=True, null=True)

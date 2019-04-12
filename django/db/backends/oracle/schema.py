@@ -42,7 +42,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Run superclass action
         super().delete_model(model)
         # Clean up manually created sequence.
-        self.execute("""
+        self.execute(
+            """
             DECLARE
                 i INTEGER;
             BEGIN
@@ -52,7 +53,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     EXECUTE IMMEDIATE 'DROP SEQUENCE "%(sq_name)s"';
                 END IF;
             END;
-        /""" % {'sq_name': self.connection.ops._get_no_autofield_sequence_name(model._meta.db_table)})
+        /"""
+            % {'sq_name': self.connection.ops._get_no_autofield_sequence_name(model._meta.db_table)}
+        )
 
     def alter_field(self, model, old_field, new_field, strict=False):
         try:
@@ -90,7 +93,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Make a new field that's like the new one but with a temporary
         # column name.
         new_temp_field = copy.deepcopy(new_field)
-        new_temp_field.null = (new_field.get_internal_type() not in ('AutoField', 'BigAutoField'))
+        new_temp_field.null = new_field.get_internal_type() not in ('AutoField', 'BigAutoField')
         new_temp_field.column = self._generate_temp_name(new_field.column)
         # Add it
         self.add_field(model, new_temp_field)
@@ -112,11 +115,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 # TimeField are stored as TIMESTAMP with a 1900-01-01 date part.
                 new_value = "TO_TIMESTAMP(CONCAT('1900-01-01 ', %s), 'YYYY-MM-DD HH24:MI:SS.FF')" % new_value
         # Transfer values across
-        self.execute("UPDATE %s set %s=%s" % (
-            self.quote_name(model._meta.db_table),
-            self.quote_name(new_temp_field.column),
-            new_value,
-        ))
+        self.execute(
+            "UPDATE %s set %s=%s"
+            % (self.quote_name(model._meta.db_table), self.quote_name(new_temp_field.column), new_value)
+        )
         # Drop the old field
         self.remove_field(model, old_field)
         # Rename and possibly make the new field NOT NULL
@@ -148,25 +150,27 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return create_index
 
     def _unique_should_be_added(self, old_field, new_field):
-        return (
-            super()._unique_should_be_added(old_field, new_field) and
-            not self._field_became_primary_key(old_field, new_field)
+        return super()._unique_should_be_added(old_field, new_field) and not self._field_became_primary_key(
+            old_field, new_field
         )
 
     def _is_identity_column(self, table_name, column_name):
         with self.connection.cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     CASE WHEN identity_column = 'YES' THEN 1 ELSE 0 END
                 FROM user_tab_cols
                 WHERE table_name = %s AND
                       column_name = %s
-            """, [self.normalize_name(table_name), self.normalize_name(column_name)])
+            """,
+                [self.normalize_name(table_name), self.normalize_name(column_name)],
+            )
             row = cursor.fetchone()
             return row[0] if row else False
 
     def _drop_identity(self, table_name, column_name):
-        self.execute('ALTER TABLE %(table)s MODIFY %(column)s DROP IDENTITY' % {
-            'table': self.quote_name(table_name),
-            'column': self.quote_name(column_name),
-        })
+        self.execute(
+            'ALTER TABLE %(table)s MODIFY %(column)s DROP IDENTITY'
+            % {'table': self.quote_name(table_name), 'column': self.quote_name(column_name)}
+        )

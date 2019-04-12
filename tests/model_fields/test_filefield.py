@@ -12,7 +12,6 @@ from .models import Document
 
 
 class FileFieldTests(TestCase):
-
     def test_clearable(self):
         """
         FileField.save_form_data() will clear its instance attribute value if

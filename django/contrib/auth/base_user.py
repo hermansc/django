@@ -5,16 +5,13 @@ not in INSTALLED_APPS.
 import unicodedata
 
 from django.contrib.auth import password_validation
-from django.contrib.auth.hashers import (
-    check_password, is_password_usable, make_password,
-)
+from django.contrib.auth.hashers import check_password, is_password_usable, make_password
 from django.db import models
 from django.utils.crypto import get_random_string, salted_hmac
 from django.utils.translation import gettext_lazy as _
 
 
 class BaseUserManager(models.Manager):
-
     @classmethod
     def normalize_email(cls, email):
         """
@@ -29,10 +26,9 @@ class BaseUserManager(models.Manager):
             email = email_name + '@' + domain_part.lower()
         return email
 
-    def make_random_password(self, length=10,
-                             allowed_chars='abcdefghjkmnpqrstuvwxyz'
-                                           'ABCDEFGHJKLMNPQRSTUVWXYZ'
-                                           '23456789'):
+    def make_random_password(
+        self, length=10, allowed_chars='abcdefghjkmnpqrstuvwxyz' 'ABCDEFGHJKLMNPQRSTUVWXYZ' '23456789'
+    ):
         """
         Generate a random password with the given length and given
         allowed_chars. The default value of allowed_chars does not have "I" or
@@ -103,11 +99,13 @@ class AbstractBaseUser(models.Model):
         Return a boolean of whether the raw_password was correct. Handles
         hashing formats behind the scenes.
         """
+
         def setter(raw_password):
             self.set_password(raw_password)
             # Password hash upgrades shouldn't be considered password changes.
             self._password = None
             self.save(update_fields=["password"])
+
         return check_password(raw_password, self.password, setter)
 
     def set_unusable_password(self):

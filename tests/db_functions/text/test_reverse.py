@@ -22,11 +22,7 @@ class ReverseTests(TestCase):
         authors = Author.objects.annotate(backward=Reverse('name'))
         self.assertQuerysetEqual(
             authors,
-            [
-                ('John Smith', 'htimS nhoJ'),
-                ('Élena Jordan', 'nadroJ anelÉ'),
-                ('パイソン', 'ンソイパ'),
-            ],
+            [('John Smith', 'htimS nhoJ'), ('Élena Jordan', 'nadroJ anelÉ'), ('パイソン', 'ンソイパ')],
             lambda a: (a.name, a.backward),
             ordered=False,
         )

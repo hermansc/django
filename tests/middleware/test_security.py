@@ -7,6 +7,7 @@ class SecurityMiddlewareTest(SimpleTestCase):
     @property
     def middleware(self):
         from django.middleware.security import SecurityMiddleware
+
         return SecurityMiddleware()
 
     @property
@@ -29,8 +30,7 @@ class SecurityMiddlewareTest(SimpleTestCase):
         ret = self.middleware.process_request(request)
         if ret:
             return ret
-        return self.middleware.process_response(
-            request, self.response(*args, **kwargs))
+        return self.middleware.process_response(request, self.response(*args, **kwargs))
 
     request = RequestFactory()
 
@@ -46,10 +46,7 @@ class SecurityMiddlewareTest(SimpleTestCase):
         With SECURE_HSTS_SECONDS=3600, the middleware adds
         "Strict-Transport-Security: max-age=3600" to the response.
         """
-        self.assertEqual(
-            self.process_response(secure=True)["Strict-Transport-Security"],
-            'max-age=3600',
-        )
+        self.assertEqual(self.process_response(secure=True)["Strict-Transport-Security"], 'max-age=3600')
 
     @override_settings(SECURE_HSTS_SECONDS=3600)
     def test_sts_already_present(self):
@@ -57,9 +54,7 @@ class SecurityMiddlewareTest(SimpleTestCase):
         The middleware will not override a "Strict-Transport-Security" header
         already present in the response.
         """
-        response = self.process_response(
-            secure=True,
-            headers={"Strict-Transport-Security": "max-age=7200"})
+        response = self.process_response(secure=True, headers={"Strict-Transport-Security": "max-age=7200"})
         self.assertEqual(response["Strict-Transport-Security"], "max-age=7200")
 
     @override_settings(SECURE_HSTS_SECONDS=3600)

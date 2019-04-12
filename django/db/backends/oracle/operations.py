@@ -177,9 +177,7 @@ END;
         # the empty string instead of null.
         if expression.field.empty_strings_allowed:
             converters.append(
-                self.convert_empty_bytes
-                if internal_type == 'BinaryField' else
-                self.convert_empty_string
+                self.convert_empty_bytes if internal_type == 'BinaryField' else self.convert_empty_string
             )
         return converters
 
@@ -256,10 +254,14 @@ END;
 
     def limit_offset_sql(self, low_mark, high_mark):
         fetch, offset = self._get_limit_offset_params(low_mark, high_mark)
-        return ' '.join(sql for sql in (
-            ('OFFSET %d ROWS' % offset) if offset else None,
-            ('FETCH FIRST %d ROWS ONLY' % fetch) if fetch else None,
-        ) if sql)
+        return ' '.join(
+            sql
+            for sql in (
+                ('OFFSET %d ROWS' % offset) if offset else None,
+                ('FETCH FIRST %d ROWS ONLY' % fetch) if fetch else None,
+            )
+            if sql
+        )
 
     def last_executed_query(self, cursor, sql, params):
         # https://cx-oracle.readthedocs.io/en/latest/cursor.html#Cursor.statement
@@ -332,7 +334,8 @@ END;
     def __foreign_key_constraints(self, table_name, recursive):
         with self.connection.cursor() as cursor:
             if recursive:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT
                         user_tables.table_name, rcons.constraint_name
                     FROM
@@ -349,9 +352,12 @@ END;
                         user_tables.table_name, rcons.constraint_name
                     HAVING user_tables.table_name != UPPER(%s)
                     ORDER BY MAX(level) DESC
-                """, (table_name, table_name))
+                """,
+                    (table_name, table_name),
+                )
             else:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT
                         cons.table_name, cons.constraint_name
                     FROM
@@ -359,7 +365,9 @@ END;
                     WHERE
                         cons.constraint_type = 'R'
                         AND cons.table_name = UPPER(%s)
-                """, (table_name,))
+                """,
+                    (table_name,),
+                )
             return cursor.fetchall()
 
     @cached_property
@@ -382,33 +390,43 @@ END;
                     if allow_cascade:
                         truncated_tables.add(foreign_table)
                     constraints.add((foreign_table, constraint))
-            sql = [
-                "%s %s %s %s %s %s %s %s;" % (
-                    style.SQL_KEYWORD('ALTER'),
-                    style.SQL_KEYWORD('TABLE'),
-                    style.SQL_FIELD(self.quote_name(table)),
-                    style.SQL_KEYWORD('DISABLE'),
-                    style.SQL_KEYWORD('CONSTRAINT'),
-                    style.SQL_FIELD(self.quote_name(constraint)),
-                    style.SQL_KEYWORD('KEEP'),
-                    style.SQL_KEYWORD('INDEX'),
-                ) for table, constraint in constraints
-            ] + [
-                "%s %s %s;" % (
-                    style.SQL_KEYWORD('TRUNCATE'),
-                    style.SQL_KEYWORD('TABLE'),
-                    style.SQL_FIELD(self.quote_name(table)),
-                ) for table in truncated_tables
-            ] + [
-                "%s %s %s %s %s %s;" % (
-                    style.SQL_KEYWORD('ALTER'),
-                    style.SQL_KEYWORD('TABLE'),
-                    style.SQL_FIELD(self.quote_name(table)),
-                    style.SQL_KEYWORD('ENABLE'),
-                    style.SQL_KEYWORD('CONSTRAINT'),
-                    style.SQL_FIELD(self.quote_name(constraint)),
-                ) for table, constraint in constraints
-            ]
+            sql = (
+                [
+                    "%s %s %s %s %s %s %s %s;"
+                    % (
+                        style.SQL_KEYWORD('ALTER'),
+                        style.SQL_KEYWORD('TABLE'),
+                        style.SQL_FIELD(self.quote_name(table)),
+                        style.SQL_KEYWORD('DISABLE'),
+                        style.SQL_KEYWORD('CONSTRAINT'),
+                        style.SQL_FIELD(self.quote_name(constraint)),
+                        style.SQL_KEYWORD('KEEP'),
+                        style.SQL_KEYWORD('INDEX'),
+                    )
+                    for table, constraint in constraints
+                ]
+                + [
+                    "%s %s %s;"
+                    % (
+                        style.SQL_KEYWORD('TRUNCATE'),
+                        style.SQL_KEYWORD('TABLE'),
+                        style.SQL_FIELD(self.quote_name(table)),
+                    )
+                    for table in truncated_tables
+                ]
+                + [
+                    "%s %s %s %s %s %s;"
+                    % (
+                        style.SQL_KEYWORD('ALTER'),
+                        style.SQL_KEYWORD('TABLE'),
+                        style.SQL_FIELD(self.quote_name(table)),
+                        style.SQL_KEYWORD('ENABLE'),
+                        style.SQL_KEYWORD('CONSTRAINT'),
+                        style.SQL_FIELD(self.quote_name(constraint)),
+                    )
+                    for table, constraint in constraints
+                ]
+            )
             # Since we've just deleted all the rows, running our sequence
             # ALTER code will reset the sequence to 0.
             sql.extend(self.sequence_reset_by_name_sql(style, sequences))
@@ -434,6 +452,7 @@ END;
 
     def sequence_reset_sql(self, style, model_list):
         from django.db import models
+
         output = []
         query = self._sequence_reset_sql
         for model in model_list:
@@ -442,13 +461,16 @@ END;
                     no_autofield_sequence_name = self._get_no_autofield_sequence_name(model._meta.db_table)
                     table = self.quote_name(model._meta.db_table)
                     column = self.quote_name(f.column)
-                    output.append(query % {
-                        'no_autofield_sequence_name': no_autofield_sequence_name,
-                        'table': table,
-                        'column': column,
-                        'table_name': strip_quotes(table),
-                        'column_name': strip_quotes(column),
-                    })
+                    output.append(
+                        query
+                        % {
+                            'no_autofield_sequence_name': no_autofield_sequence_name,
+                            'table': table,
+                            'column': column,
+                            'table_name': strip_quotes(table),
+                            'column_name': strip_quotes(column),
+                        }
+                    )
                     # Only one AutoField is allowed per model, so don't
                     # continue to loop
                     break
@@ -457,13 +479,16 @@ END;
                     no_autofield_sequence_name = self._get_no_autofield_sequence_name(f.m2m_db_table())
                     table = self.quote_name(f.m2m_db_table())
                     column = self.quote_name('id')
-                    output.append(query % {
-                        'no_autofield_sequence_name': no_autofield_sequence_name,
-                        'table': table,
-                        'column': column,
-                        'table_name': strip_quotes(table),
-                        'column_name': 'ID',
-                    })
+                    output.append(
+                        query
+                        % {
+                            'no_autofield_sequence_name': no_autofield_sequence_name,
+                            'table': table,
+                            'column': column,
+                            'table_name': strip_quotes(table),
+                            'column_name': 'ID',
+                        }
+                    )
         return output
 
     def start_transaction_sql(self):
@@ -525,8 +550,7 @@ END;
         if timezone.is_aware(value):
             raise ValueError("Oracle backend does not support timezone-aware times.")
 
-        return Oracle_datetime(1900, 1, 1, value.hour, value.minute,
-                               value.second, value.microsecond)
+        return Oracle_datetime(1900, 1, 1, value.hour, value.minute, value.second, value.microsecond)
 
     def combine_expression(self, connector, sub_expressions):
         lhs, rhs = sub_expressions
@@ -553,11 +577,14 @@ END;
         return '%s_SQ' % truncate_name(strip_quotes(table), name_length).upper()
 
     def _get_sequence_name(self, cursor, table, pk_name):
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT sequence_name
             FROM user_tab_identity_cols
             WHERE table_name = UPPER(%s)
-            AND column_name = UPPER(%s)""", [table, pk_name])
+            AND column_name = UPPER(%s)""",
+            [table, pk_name],
+        )
         row = cursor.fetchone()
         return self._get_no_autofield_sequence_name(table) if row is None else row[0]
 

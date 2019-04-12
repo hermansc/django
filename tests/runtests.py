@@ -18,9 +18,7 @@ from django.test import TestCase, TransactionTestCase
 from django.test.runner import default_test_processes
 from django.test.selenium import SeleniumTestCaseBase
 from django.test.utils import get_runner
-from django.utils.deprecation import (
-    RemovedInDjango31Warning, RemovedInDjango40Warning,
-)
+from django.utils.deprecation import RemovedInDjango31Warning, RemovedInDjango40Warning
 from django.utils.log import DEFAULT_LOGGING
 
 try:
@@ -53,11 +51,7 @@ tempfile.tempdir = os.environ['TMPDIR'] = TMPDIR
 atexit.register(shutil.rmtree, TMPDIR)
 
 
-SUBDIRS_TO_SKIP = [
-    'data',
-    'import_error_package',
-    'test_runner_apps',
-]
+SUBDIRS_TO_SKIP = ['data', 'import_error_package', 'test_runner_apps']
 
 ALWAYS_INSTALLED_APPS = [
     'django.contrib.contenttypes',
@@ -80,10 +74,7 @@ ALWAYS_MIDDLEWARE = [
 # Need to add the associated contrib app to INSTALLED_APPS in some cases to
 # avoid "RuntimeError: Model class X doesn't declare an explicit app_label
 # and isn't in an application in INSTALLED_APPS."
-CONTRIB_TESTS_TO_APPS = {
-    'flatpages_tests': 'django.contrib.flatpages',
-    'redirects_tests': 'django.contrib.redirects',
-}
+CONTRIB_TESTS_TO_APPS = {'flatpages_tests': 'django.contrib.flatpages', 'redirects_tests': 'django.contrib.redirects'}
 
 
 def get_test_modules():
@@ -97,10 +88,12 @@ def get_test_modules():
 
     for modpath, dirpath in discovery_paths:
         for f in os.scandir(dirpath):
-            if ('.' not in f.name and
-                    os.path.basename(f.name) not in SUBDIRS_TO_SKIP and
-                    not f.is_file() and
-                    os.path.exists(os.path.join(f.path, '__init__.py'))):
+            if (
+                '.' not in f.name
+                and os.path.basename(f.name) not in SUBDIRS_TO_SKIP
+                and not f.is_file()
+                and os.path.exists(os.path.join(f.path, '__init__.py'))
+            ):
                 modules.append((modpath, f.name))
     return modules
 
@@ -125,8 +118,8 @@ def setup(verbosity, test_labels, parallel):
 
     # Force declaring available_apps in TransactionTestCase for faster tests.
     def no_available_apps(self):
-        raise Exception("Please define available_apps in TransactionTestCase "
-                        "and its subclasses.")
+        raise Exception("Please define available_apps in TransactionTestCase " "and its subclasses.")
+
     TransactionTestCase.available_apps = property(no_available_apps)
     TestCase.available_apps = None
 
@@ -145,19 +138,21 @@ def setup(verbosity, test_labels, parallel):
     settings.ROOT_URLCONF = 'urls'
     settings.STATIC_URL = '/static/'
     settings.STATIC_ROOT = os.path.join(TMPDIR, 'static')
-    settings.TEMPLATES = [{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATE_DIR],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    }]
+    settings.TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [TEMPLATE_DIR],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ]
+            },
+        }
+    ]
     settings.LANGUAGE_CODE = 'en'
     settings.SITE_ID = 1
     settings.MIDDLEWARE = ALWAYS_MIDDLEWARE
@@ -173,9 +168,7 @@ def setup(verbosity, test_labels, parallel):
     # tests.
     log_config['loggers']['django']['level'] = 'ERROR'
     settings.LOGGING = log_config
-    settings.SILENCED_SYSTEM_CHECKS = [
-        'fields.W342',  # ForeignKey(unique=True) -> OneToOneField
-    ]
+    settings.SILENCED_SYSTEM_CHECKS = ['fields.W342']  # ForeignKey(unique=True) -> OneToOneField
 
     # Load all the ALWAYS_INSTALLED_APPS.
     django.setup()
@@ -236,6 +229,7 @@ def teardown(state):
     # atexit.register(shutil.rmtree, TMPDIR) handler. Prevents
     # FileNotFoundError at the end of a test run (#27890).
     from multiprocessing.util import _finalizer_registry
+
     _finalizer_registry.pop((-100, 0), None)
 
 
@@ -254,6 +248,7 @@ class ActionSelenium(argparse.Action):
     """
     Validate the comma-separated list of requested browsers.
     """
+
     def __call__(self, parser, namespace, values, option_string=None):
         browsers = values.split(',')
         for browser in browsers:
@@ -264,8 +259,9 @@ class ActionSelenium(argparse.Action):
         setattr(namespace, self.dest, browsers)
 
 
-def django_tests(verbosity, interactive, failfast, keepdb, reverse,
-                 test_labels, debug_sql, parallel, tags, exclude_tags):
+def django_tests(
+    verbosity, interactive, failfast, keepdb, reverse, test_labels, debug_sql, parallel, tags, exclude_tags
+):
     state = setup(verbosity, test_labels, parallel)
     extra_tests = []
 
@@ -285,18 +281,13 @@ def django_tests(verbosity, interactive, failfast, keepdb, reverse,
         tags=tags,
         exclude_tags=exclude_tags,
     )
-    failures = test_runner.run_tests(
-        test_labels or get_installed(),
-        extra_tests=extra_tests,
-    )
+    failures = test_runner.run_tests(test_labels or get_installed(), extra_tests=extra_tests)
     teardown(state)
     return failures
 
 
 def get_subprocess_args(options):
-    subprocess_args = [
-        sys.executable, __file__, '--settings=%s' % options.settings
-    ]
+    subprocess_args = [sys.executable, __file__, '--settings=%s' % options.settings]
     if options.failfast:
         subprocess_args.append('--failfast')
     if options.verbosity:
@@ -379,8 +370,7 @@ def paired_tests(paired_test, options, test_labels, parallel):
     subprocess_args = get_subprocess_args(options)
 
     for i, label in enumerate(test_labels):
-        print('***** %d of %d: Check test pairing with %s' % (
-              i + 1, len(test_labels), label))
+        print('***** %d of %d: Check test pairing with %s' % (i + 1, len(test_labels), label))
         failures = subprocess.call(subprocess_args + [label, paired_test])
         if failures:
             print('***** Found problem pair with %s' % label)
@@ -393,74 +383,84 @@ def paired_tests(paired_test, options, test_labels, parallel):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the Django test suite.")
     parser.add_argument(
-        'modules', nargs='*', metavar='module',
-        help='Optional path(s) to test modules; e.g. "i18n" or '
-             '"i18n.tests.TranslationTests.test_lazy_objects".',
+        'modules',
+        nargs='*',
+        metavar='module',
+        help='Optional path(s) to test modules; e.g. "i18n" or ' '"i18n.tests.TranslationTests.test_lazy_objects".',
     )
     parser.add_argument(
-        '-v', '--verbosity', default=1, type=int, choices=[0, 1, 2, 3],
+        '-v',
+        '--verbosity',
+        default=1,
+        type=int,
+        choices=[0, 1, 2, 3],
         help='Verbosity level; 0=minimal output, 1=normal output, 2=all output',
     )
     parser.add_argument(
-        '--noinput', action='store_false', dest='interactive',
+        '--noinput',
+        action='store_false',
+        dest='interactive',
         help='Tells Django to NOT prompt the user for input of any kind.',
     )
     parser.add_argument(
-        '--failfast', action='store_true',
-        help='Tells Django to stop running the test suite after first failed test.',
+        '--failfast', action='store_true', help='Tells Django to stop running the test suite after first failed test.'
     )
     parser.add_argument(
-        '-k', '--keepdb', action='store_true',
-        help='Tells Django to preserve the test database between runs.',
+        '-k', '--keepdb', action='store_true', help='Tells Django to preserve the test database between runs.'
     )
     parser.add_argument(
         '--settings',
         help='Python path to settings module, e.g. "myproject.settings". If '
-             'this isn\'t provided, either the DJANGO_SETTINGS_MODULE '
-             'environment variable or "test_sqlite" will be used.',
+        'this isn\'t provided, either the DJANGO_SETTINGS_MODULE '
+        'environment variable or "test_sqlite" will be used.',
     )
     parser.add_argument(
         '--bisect',
         help='Bisect the test suite to discover a test that causes a test '
-             'failure when combined with the named test.',
+        'failure when combined with the named test.',
     )
+    parser.add_argument('--pair', help='Run the test suite in pairs with the named test to find problem pairs.')
     parser.add_argument(
-        '--pair',
-        help='Run the test suite in pairs with the named test to find problem pairs.',
-    )
-    parser.add_argument(
-        '--reverse', action='store_true',
+        '--reverse',
+        action='store_true',
         help='Sort test suites and test cases in opposite order to debug '
-             'test side effects not apparent with normal execution lineup.',
+        'test side effects not apparent with normal execution lineup.',
     )
     parser.add_argument(
-        '--selenium', action=ActionSelenium, metavar='BROWSERS',
+        '--selenium',
+        action=ActionSelenium,
+        metavar='BROWSERS',
         help='A comma-separated list of browsers to run the Selenium tests against.',
     )
     parser.add_argument(
-        '--selenium-hub',
-        help='A URL for a selenium hub instance to use in combination with --selenium.',
+        '--selenium-hub', help='A URL for a selenium hub instance to use in combination with --selenium.'
     )
     parser.add_argument(
-        '--external-host', default=socket.gethostname(),
+        '--external-host',
+        default=socket.gethostname(),
         help='The external host that can be reached by the selenium hub instance when running Selenium '
-             'tests via Selenium Hub.',
+        'tests via Selenium Hub.',
     )
+    parser.add_argument('--debug-sql', action='store_true', help='Turn on the SQL query logger within tests.')
     parser.add_argument(
-        '--debug-sql', action='store_true',
-        help='Turn on the SQL query logger within tests.',
-    )
-    parser.add_argument(
-        '--parallel', nargs='?', default=0, type=int,
-        const=default_test_processes(), metavar='N',
+        '--parallel',
+        nargs='?',
+        default=0,
+        type=int,
+        const=default_test_processes(),
+        metavar='N',
         help='Run tests using up to N parallel processes.',
     )
     parser.add_argument(
-        '--tag', dest='tags', action='append',
+        '--tag',
+        dest='tags',
+        action='append',
         help='Run only tests with the specified tags. Can be used multiple times.',
     )
     parser.add_argument(
-        '--exclude-tag', dest='exclude_tags', action='append',
+        '--exclude-tag',
+        dest='exclude_tags',
+        action='append',
         help='Do not run tests with the specified tag. Can be used multiple times.',
     )
 
@@ -497,9 +497,15 @@ if __name__ == "__main__":
         paired_tests(options.pair, options, options.modules, options.parallel)
     else:
         failures = django_tests(
-            options.verbosity, options.interactive, options.failfast,
-            options.keepdb, options.reverse, options.modules,
-            options.debug_sql, options.parallel, options.tags,
+            options.verbosity,
+            options.interactive,
+            options.failfast,
+            options.keepdb,
+            options.reverse,
+            options.modules,
+            options.debug_sql,
+            options.parallel,
+            options.tags,
             options.exclude_tags,
         )
         if failures:

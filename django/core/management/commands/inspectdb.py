@@ -13,20 +13,16 @@ class Command(BaseCommand):
     db_module = 'django.db'
 
     def add_arguments(self, parser):
+        parser.add_argument('table', nargs='*', type=str, help='Selects what tables or views should be introspected.')
         parser.add_argument(
-            'table', nargs='*', type=str,
-            help='Selects what tables or views should be introspected.',
-        )
-        parser.add_argument(
-            '--database', default=DEFAULT_DB_ALIAS,
+            '--database',
+            default=DEFAULT_DB_ALIAS,
             help='Nominates a database to introspect. Defaults to using the "default" database.',
         )
         parser.add_argument(
-            '--include-partitions', action='store_true', help='Also output models for partition tables.',
+            '--include-partitions', action='store_true', help='Also output models for partition tables.'
         )
-        parser.add_argument(
-            '--include-views', action='store_true', help='Also output models for database views.',
-        )
+        parser.add_argument('--include-views', action='store_true', help='Also output models for database views.')
 
     def handle(self, **options):
         try:
@@ -65,7 +61,7 @@ class Command(BaseCommand):
             if options['include_views']:
                 types.add('v')
 
-            for table_name in (options['table'] or sorted(info.name for info in table_info if info.type in types)):
+            for table_name in options['table'] or sorted(info.name for info in table_info if info.type in types):
                 if table_name_filter is not None and callable(table_name_filter):
                     if not table_name_filter(table_name):
                         continue
@@ -80,8 +76,7 @@ class Command(BaseCommand):
                         constraints = {}
                     primary_key_column = connection.introspection.get_primary_key_column(cursor, table_name)
                     unique_columns = [
-                        c['columns'][0] for c in constraints.values()
-                        if c['unique'] and len(c['columns']) == 1
+                        c['columns'][0] for c in constraints.values() if c['unique'] and len(c['columns']) == 1
                     ]
                     table_description = connection.introspection.get_table_description(cursor, table_name)
                 except Exception as e:
@@ -101,8 +96,7 @@ class Command(BaseCommand):
                     column_name = row.name
                     is_relation = column_name in relations
 
-                    att_name, params, notes = self.normalize_col_name(
-                        column_name, used_column_names, is_relation)
+                    att_name, params, notes = self.normalize_col_name(column_name, used_column_names, is_relation)
                     extra_params.update(params)
                     comment_notes.extend(notes)
 
@@ -117,7 +111,8 @@ class Command(BaseCommand):
 
                     if is_relation:
                         rel_to = (
-                            "self" if relations[column_name][1] == table_name
+                            "self"
+                            if relations[column_name][1] == table_name
                             else table2model(relations[column_name][1])
                         )
                         if rel_to in known_models:
@@ -248,7 +243,8 @@ class Command(BaseCommand):
             if row.precision is None or row.scale is None:
                 field_notes.append(
                     'max_digits and decimal_places have been guessed, as this '
-                    'database handles decimal fields as float')
+                    'database handles decimal fields as float'
+                )
                 field_params['max_digits'] = row.precision if row.precision is not None else 10
                 field_params['decimal_places'] = row.scale if row.scale is not None else 5
             else:
@@ -285,7 +281,7 @@ class Command(BaseCommand):
         meta += [
             '    class Meta:',
             '        managed = False%s' % managed_comment,
-            '        db_table = %r' % table_name
+            '        db_table = %r' % table_name,
         ]
         if unique_together:
             tup = '(' + ', '.join(unique_together) + ',)'

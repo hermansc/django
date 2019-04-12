@@ -27,14 +27,14 @@ class GeographyTest(TestCase):
     def test02_distance_lookup(self):
         "Testing distance lookup support on non-point geography fields."
         z = Zipcode.objects.get(code='77002')
-        cities1 = list(City.objects
-                       .filter(point__distance_lte=(z.poly, D(mi=500)))
-                       .order_by('name')
-                       .values_list('name', flat=True))
-        cities2 = list(City.objects
-                       .filter(point__dwithin=(z.poly, D(mi=500)))
-                       .order_by('name')
-                       .values_list('name', flat=True))
+        cities1 = list(
+            City.objects.filter(point__distance_lte=(z.poly, D(mi=500)))
+            .order_by('name')
+            .values_list('name', flat=True)
+        )
+        cities2 = list(
+            City.objects.filter(point__dwithin=(z.poly, D(mi=500))).order_by('name').values_list('name', flat=True)
+        )
         for cities in [cities1, cities2]:
             self.assertEqual(['Dallas', 'Houston', 'Oklahoma City'], cities)
 
@@ -66,11 +66,7 @@ class GeographyTest(TestCase):
         # Getting the shapefile and mapping dictionary.
         shp_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data'))
         co_shp = os.path.join(shp_path, 'counties', 'counties.shp')
-        co_mapping = {
-            'name': 'Name',
-            'state': 'State',
-            'mpoly': 'MULTIPOLYGON',
-        }
+        co_mapping = {'name': 'Name', 'state': 'State', 'mpoly': 'MULTIPOLYGON'}
         # Reference county names, number of polygons, and state names.
         names = ['Bexar', 'Galveston', 'Harris', 'Honolulu', 'Pueblo']
         num_polys = [1, 2, 1, 19, 1]  # Number of polygons for each.
@@ -98,9 +94,9 @@ class GeographyFunctionTests(FuncTestMixin, TestCase):
         if not connection.ops.geography:
             self.skipTest("This test needs geography support")
         expected = (-96.8016128540039, 29.7633724212646, -95.3631439208984, 32.782058715820)
-        res = City.objects.filter(
-            name__in=('Houston', 'Dallas')
-        ).aggregate(extent=models.Extent(Cast('point', models.PointField())))
+        res = City.objects.filter(name__in=('Houston', 'Dallas')).aggregate(
+            extent=models.Extent(Cast('point', models.PointField()))
+        )
         for val, exp in zip(res['extent'], expected):
             self.assertAlmostEqual(exp, val, 4)
 
@@ -118,10 +114,7 @@ class GeographyFunctionTests(FuncTestMixin, TestCase):
         else:
             ref_dists = [0, 4891.20, 8071.64, 9123.95]
         htown = City.objects.get(name='Houston')
-        qs = Zipcode.objects.annotate(
-            distance=Distance('poly', htown.point),
-            distance2=Distance(htown.point, 'poly'),
-        )
+        qs = Zipcode.objects.annotate(distance=Distance('poly', htown.point), distance2=Distance(htown.point, 'poly'))
         for z, ref in zip(qs, ref_dists):
             self.assertAlmostEqual(z.distance.m, ref, 2)
 

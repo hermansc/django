@@ -50,21 +50,17 @@ class DatabaseOperations(BaseDatabaseOperations):
             return "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
 
     def date_trunc_sql(self, lookup_type, field_name):
-        fields = {
-            'year': '%%Y-01-01',
-            'month': '%%Y-%%m-01',
-        }  # Use double percents to escape.
+        fields = {'year': '%%Y-01-01', 'month': '%%Y-%%m-01'}  # Use double percents to escape.
         if lookup_type in fields:
             format_str = fields[lookup_type]
             return "CAST(DATE_FORMAT(%s, '%s') AS DATE)" % (field_name, format_str)
         elif lookup_type == 'quarter':
             return "MAKEDATE(YEAR(%s), 1) + INTERVAL QUARTER(%s) QUARTER - INTERVAL 1 QUARTER" % (
-                field_name, field_name
+                field_name,
+                field_name,
             )
         elif lookup_type == 'week':
-            return "DATE_SUB(%s, INTERVAL WEEKDAY(%s) DAY)" % (
-                field_name, field_name
-            )
+            return "DATE_SUB(%s, INTERVAL WEEKDAY(%s) DAY)" % (field_name, field_name)
         else:
             return "DATE(%s)" % (field_name)
 
@@ -93,8 +89,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if lookup_type == 'quarter':
             return (
                 "CAST(DATE_FORMAT(MAKEDATE(YEAR({field_name}), 1) + "
-                "INTERVAL QUARTER({field_name}) QUARTER - " +
-                "INTERVAL 1 QUARTER, '%%Y-%%m-01 00:00:00') AS DATETIME)"
+                "INTERVAL QUARTER({field_name}) QUARTER - " + "INTERVAL 1 QUARTER, '%%Y-%%m-01 00:00:00') AS DATETIME)"
             ).format(field_name=field_name)
         if lookup_type == 'week':
             return (
@@ -165,10 +160,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if tables:
             sql = ['SET FOREIGN_KEY_CHECKS = 0;']
             for table in tables:
-                sql.append('%s %s;' % (
-                    style.SQL_KEYWORD('TRUNCATE'),
-                    style.SQL_FIELD(self.quote_name(table)),
-                ))
+                sql.append('%s %s;' % (style.SQL_KEYWORD('TRUNCATE'), style.SQL_FIELD(self.quote_name(table))))
             sql.append('SET FOREIGN_KEY_CHECKS = 1;')
             sql.extend(self.sequence_reset_by_name_sql(style, sequences))
             return sql
@@ -178,8 +170,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def validate_autopk_value(self, value):
         # MySQLism: zero in AUTO_INCREMENT field does not work. Refs #17653.
         if value == 0:
-            raise ValueError('The database backend does not accept 0 as a '
-                             'value for AutoField.')
+            raise ValueError('The database backend does not accept 0 as a ' 'value for AutoField.')
         return value
 
     def adapt_datetimefield_value(self, value):
@@ -269,13 +260,19 @@ class DatabaseOperations(BaseDatabaseOperations):
             if self.connection.mysql_is_mariadb:
                 # MariaDB includes the microsecond component in TIME_TO_SEC as
                 # a decimal. MySQL returns an integer without microseconds.
-                return 'CAST((TIME_TO_SEC(%(lhs)s) - TIME_TO_SEC(%(rhs)s)) * 1000000 AS SIGNED)' % {
-                    'lhs': lhs_sql, 'rhs': rhs_sql
-                }, lhs_params + rhs_params
+                return (
+                    'CAST((TIME_TO_SEC(%(lhs)s) - TIME_TO_SEC(%(rhs)s)) * 1000000 AS SIGNED)'
+                    % {'lhs': lhs_sql, 'rhs': rhs_sql},
+                    lhs_params + rhs_params,
+                )
             return (
-                "((TIME_TO_SEC(%(lhs)s) * 1000000 + MICROSECOND(%(lhs)s)) -"
-                " (TIME_TO_SEC(%(rhs)s) * 1000000 + MICROSECOND(%(rhs)s)))"
-            ) % {'lhs': lhs_sql, 'rhs': rhs_sql}, lhs_params * 2 + rhs_params * 2
+                (
+                    "((TIME_TO_SEC(%(lhs)s) * 1000000 + MICROSECOND(%(lhs)s)) -"
+                    " (TIME_TO_SEC(%(rhs)s) * 1000000 + MICROSECOND(%(rhs)s)))"
+                )
+                % {'lhs': lhs_sql, 'rhs': rhs_sql},
+                lhs_params * 2 + rhs_params * 2,
+            )
         else:
             return "TIMESTAMPDIFF(MICROSECOND, %s, %s)" % (rhs_sql, lhs_sql), rhs_params + lhs_params
 

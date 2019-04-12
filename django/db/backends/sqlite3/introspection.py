@@ -3,9 +3,7 @@ from collections import namedtuple
 
 import sqlparse
 
-from django.db.backends.base.introspection import (
-    BaseDatabaseIntrospection, FieldInfo as BaseFieldInfo, TableInfo,
-)
+from django.db.backends.base.introspection import BaseDatabaseIntrospection, FieldInfo as BaseFieldInfo, TableInfo
 from django.db.models.indexes import Index
 
 FieldInfo = namedtuple('FieldInfo', BaseFieldInfo._fields + ('pk',))
@@ -67,10 +65,12 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """Return a list of table and view names in the current database."""
         # Skip the sqlite_sequence system table used for autoincrement key
         # generation.
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT name, type FROM sqlite_master
             WHERE type in ('table', 'view') AND NOT name='sqlite_sequence'
-            ORDER BY name""")
+            ORDER BY name"""
+        )
         return [TableInfo(row[0], row[1][0]) for row in cursor.fetchall()]
 
     def get_table_description(self, cursor, table_name):
@@ -80,10 +80,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         cursor.execute('PRAGMA table_info(%s)' % self.connection.ops.quote_name(table_name))
         return [
-            FieldInfo(
-                name, data_type, None, get_field_size(data_type), None, None,
-                not notnull, default, pk == 1,
-            )
+            FieldInfo(name, data_type, None, get_field_size(data_type), None, None, not notnull, default, pk == 1)
             for cid, name, data_type, notnull, default, pk in cursor.fetchall()
         ]
 
@@ -101,15 +98,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
 
         # Schema for this table
         cursor.execute(
-            "SELECT sql, type FROM sqlite_master "
-            "WHERE tbl_name = %s AND type IN ('table', 'view')",
-            [table_name]
+            "SELECT sql, type FROM sqlite_master " "WHERE tbl_name = %s AND type IN ('table', 'view')", [table_name]
         )
         create_sql, table_type = cursor.fetchone()
         if table_type == 'view':
             # It might be a view, then no results will be returned
             return relations
-        results = create_sql[create_sql.index('(') + 1:create_sql.rindex(')')]
+        results = create_sql[create_sql.index('(') + 1 : create_sql.rindex(')')]
 
         # Walk through and look for references to other tables. SQLite doesn't
         # really have enforced references, but since it echoes out the SQL used
@@ -135,7 +130,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             result = cursor.fetchall()[0]
             other_table_results = result[0].strip()
             li, ri = other_table_results.index('('), other_table_results.rindex(')')
-            other_table_results = other_table_results[li + 1:ri]
+            other_table_results = other_table_results[li + 1 : ri]
 
             for other_desc in other_table_results.split(','):
                 other_desc = other_desc.strip()
@@ -159,7 +154,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         # Schema for this table
         cursor.execute("SELECT sql FROM sqlite_master WHERE tbl_name = %s AND type = %s", [table_name, "table"])
         results = cursor.fetchone()[0].strip()
-        results = results[results.index('(') + 1:results.rindex(')')]
+        results = results[results.index('(') + 1 : results.rindex(')')]
 
         # Walk through and look for references to other tables. SQLite doesn't
         # really have enforced references, but since it echoes out the SQL used
@@ -182,9 +177,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """Return the column name of the primary key for the given table."""
         # Don't use PRAGMA because that causes issues with some transactions
         cursor.execute(
-            "SELECT sql, type FROM sqlite_master "
-            "WHERE tbl_name = %s AND type IN ('table', 'view')",
-            [table_name]
+            "SELECT sql, type FROM sqlite_master " "WHERE tbl_name = %s AND type IN ('table', 'view')", [table_name]
         )
         row = cursor.fetchone()
         if row is None:
@@ -193,7 +186,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         if table_type == 'view':
             # Views don't have a primary key.
             return None
-        fields_sql = create_sql[create_sql.index('(') + 1:create_sql.rindex(')')]
+        fields_sql = create_sql[create_sql.index('(') + 1 : create_sql.rindex(')')]
         for field_desc in fields_sql.split(','):
             field_desc = field_desc.strip()
             m = re.match(r'(?:(?:["`\[])(.*)(?:["`\]])|(\w+)).*PRIMARY KEY.*', field_desc)
@@ -289,22 +282,30 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 elif token.ttype == sqlparse.tokens.Literal.String.Symbol:
                     if token.value[1:-1] in columns:
                         check_columns.append(token.value[1:-1])
-        unique_constraint = {
-            'unique': True,
-            'columns': unique_columns,
-            'primary_key': False,
-            'foreign_key': None,
-            'check': False,
-            'index': False,
-        } if unique_columns else None
-        check_constraint = {
-            'check': True,
-            'columns': check_columns,
-            'primary_key': False,
-            'unique': False,
-            'foreign_key': None,
-            'index': False,
-        } if check_columns else None
+        unique_constraint = (
+            {
+                'unique': True,
+                'columns': unique_columns,
+                'primary_key': False,
+                'foreign_key': None,
+                'check': False,
+                'index': False,
+            }
+            if unique_columns
+            else None
+        )
+        check_constraint = (
+            {
+                'check': True,
+                'columns': check_columns,
+                'primary_key': False,
+                'unique': False,
+                'foreign_key': None,
+                'index': False,
+            }
+            if check_columns
+            else None
+        )
         return constraint_name, unique_constraint, check_constraint, token
 
     def _parse_table_constraints(self, sql, columns):
@@ -346,9 +347,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         # Find inline check constraints.
         try:
             table_schema = cursor.execute(
-                "SELECT sql FROM sqlite_master WHERE type='table' and name=%s" % (
-                    self.connection.ops.quote_name(table_name),
-                )
+                "SELECT sql FROM sqlite_master WHERE type='table' and name=%s"
+                % (self.connection.ops.quote_name(table_name),)
             ).fetchone()[0]
         except TypeError:
             # table_name is a view.

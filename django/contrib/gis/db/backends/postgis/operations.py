@@ -1,9 +1,7 @@
 import re
 
 from django.conf import settings
-from django.contrib.gis.db.backends.base.operations import (
-    BaseSpatialOperations,
-)
+from django.contrib.gis.db.backends.base.operations import BaseSpatialOperations
 from django.contrib.gis.db.backends.utils import SpatialOperator
 from django.contrib.gis.db.models import GeometryField, RasterField
 from django.contrib.gis.gdal import GDALRaster
@@ -39,8 +37,9 @@ class PostGISOperator(SpatialOperator):
 
     def as_sql(self, connection, lookup, template_params, *args):
         if lookup.lhs.output_field.geography and not self.geography:
-            raise ValueError('PostGIS geography does not support the "%s" '
-                             'function/operator.' % (self.func or self.op,))
+            raise ValueError(
+                'PostGIS geography does not support the "%s" ' 'function/operator.' % (self.func or self.op,)
+            )
 
         template_params = self.check_raster(lookup, template_params)
         return super().as_sql(connection, lookup, template_params, *args)
@@ -147,10 +146,7 @@ class PostGISOperations(BaseSpatialOperations, DatabaseOperations):
 
     @cached_property
     def function_names(self):
-        function_names = {
-            'BoundingCircle': 'ST_MinimumBoundingCircle',
-            'NumPoints': 'ST_NPoints',
-        }
+        function_names = {'BoundingCircle': 'ST_MinimumBoundingCircle', 'NumPoints': 'ST_NPoints'}
         if self.spatial_version < (2, 4, 0):
             function_names['ForcePolygonCW'] = 'ST_ForceRHR'
         return function_names
@@ -254,8 +250,9 @@ class PostGISOperations(BaseSpatialOperations, DatabaseOperations):
                 dist_param = value.m
             elif geodetic:
                 if lookup_type == 'dwithin':
-                    raise ValueError('Only numeric values of degree units are '
-                                     'allowed on geographic DWithin queries.')
+                    raise ValueError(
+                        'Only numeric values of degree units are ' 'allowed on geographic DWithin queries.'
+                    )
                 dist_param = value.m
             else:
                 dist_param = getattr(value, Distance.unit_attname(f.units_name(self.connection)))
@@ -363,18 +360,12 @@ class PostGISOperations(BaseSpatialOperations, DatabaseOperations):
 
     def distance_expr_for_lookup(self, lhs, rhs, **kwargs):
         return super().distance_expr_for_lookup(
-            self._normalize_distance_lookup_arg(lhs),
-            self._normalize_distance_lookup_arg(rhs),
-            **kwargs
+            self._normalize_distance_lookup_arg(lhs), self._normalize_distance_lookup_arg(rhs), **kwargs
         )
 
     @staticmethod
     def _normalize_distance_lookup_arg(arg):
-        is_raster = (
-            arg.field.geom_type == 'RASTER'
-            if hasattr(arg, 'field') else
-            isinstance(arg, GDALRaster)
-        )
+        is_raster = arg.field.geom_type == 'RASTER' if hasattr(arg, 'field') else isinstance(arg, GDALRaster)
         return ST_Polygon(arg) if is_raster else arg
 
     def get_geometry_converter(self, expression):
@@ -383,6 +374,7 @@ class PostGISOperations(BaseSpatialOperations, DatabaseOperations):
 
         def converter(value, expression, connection):
             return None if value is None else GEOSGeometryBase(read(value), geom_class)
+
         return converter
 
     def get_area_att_for_field(self, field):

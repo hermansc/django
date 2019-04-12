@@ -3,10 +3,15 @@ import os
 from django.contrib.auth import validators
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import (
-    CommonPasswordValidator, MinimumLengthValidator, NumericPasswordValidator,
-    UserAttributeSimilarityValidator, get_default_password_validators,
-    get_password_validators, password_changed,
-    password_validators_help_text_html, password_validators_help_texts,
+    CommonPasswordValidator,
+    MinimumLengthValidator,
+    NumericPasswordValidator,
+    UserAttributeSimilarityValidator,
+    get_default_password_validators,
+    get_password_validators,
+    password_changed,
+    password_validators_help_text_html,
+    password_validators_help_texts,
     validate_password,
 )
 from django.core.exceptions import ValidationError
@@ -16,12 +21,12 @@ from django.test.utils import isolate_apps
 from django.utils.html import conditional_escape
 
 
-@override_settings(AUTH_PASSWORD_VALIDATORS=[
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {
-        'min_length': 12,
-    }},
-])
+@override_settings(
+    AUTH_PASSWORD_VALIDATORS=[
+        {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+        {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 12}},
+    ]
+)
 class PasswordValidationTest(SimpleTestCase):
     def test_get_default_password_validators(self):
         validators = get_default_password_validators()
@@ -85,6 +90,7 @@ class PasswordValidationTest(SimpleTestCase):
         class AmpersandValidator:
             def get_help_text(self):
                 return 'Must contain &'
+
         help_text = password_validators_help_text_html([AmpersandValidator()])
         self.assertEqual(help_text, '<ul><li>Must contain &amp;</li></ul>')
         # help_text is marked safe and therefore unchanged by conditional_escape().
@@ -111,17 +117,17 @@ class MinimumLengthValidatorTest(SimpleTestCase):
         self.assertEqual(cm.exception.messages, [expected_error % 3])
 
     def test_help_text(self):
-        self.assertEqual(
-            MinimumLengthValidator().get_help_text(),
-            "Your password must contain at least 8 characters."
-        )
+        self.assertEqual(MinimumLengthValidator().get_help_text(), "Your password must contain at least 8 characters.")
 
 
 class UserAttributeSimilarityValidatorTest(TestCase):
     def test_validate(self):
         user = User.objects.create_user(
-            username='testclient', password='password', email='testclient@example.com',
-            first_name='Test', last_name='Client',
+            username='testclient',
+            password='password',
+            email='testclient@example.com',
+            first_name='Test',
+            last_name='Client',
         )
         expected_error = "The password is too similar to the %s."
 
@@ -137,25 +143,22 @@ class UserAttributeSimilarityValidatorTest(TestCase):
         self.assertEqual(cm.exception.messages, [expected_error % "email address"])
 
         with self.assertRaises(ValidationError) as cm:
-            UserAttributeSimilarityValidator(
-                user_attributes=['first_name'],
-                max_similarity=0.3,
-            ).validate('testclient', user=user)
+            UserAttributeSimilarityValidator(user_attributes=['first_name'], max_similarity=0.3).validate(
+                'testclient', user=user
+            )
         self.assertEqual(cm.exception.messages, [expected_error % "first name"])
         # max_similarity=1 doesn't allow passwords that are identical to the
         # attribute's value.
         with self.assertRaises(ValidationError) as cm:
-            UserAttributeSimilarityValidator(
-                user_attributes=['first_name'],
-                max_similarity=1,
-            ).validate(user.first_name, user=user)
+            UserAttributeSimilarityValidator(user_attributes=['first_name'], max_similarity=1).validate(
+                user.first_name, user=user
+            )
         self.assertEqual(cm.exception.messages, [expected_error % "first name"])
         # max_similarity=0 rejects all passwords.
         with self.assertRaises(ValidationError) as cm:
-            UserAttributeSimilarityValidator(
-                user_attributes=['first_name'],
-                max_similarity=0,
-            ).validate('XXX', user=user)
+            UserAttributeSimilarityValidator(user_attributes=['first_name'], max_similarity=0).validate(
+                'XXX', user=user
+            )
         self.assertEqual(cm.exception.messages, [expected_error % "first name"])
         # Passes validation.
         self.assertIsNone(
@@ -178,7 +181,7 @@ class UserAttributeSimilarityValidatorTest(TestCase):
     def test_help_text(self):
         self.assertEqual(
             UserAttributeSimilarityValidator().get_help_text(),
-            "Your password can't be too similar to your other personal information."
+            "Your password can't be too similar to your other personal information.",
         )
 
 
@@ -208,10 +211,7 @@ class CommonPasswordValidatorTest(SimpleTestCase):
             self.assertEqual(password, password.lower())
 
     def test_help_text(self):
-        self.assertEqual(
-            CommonPasswordValidator().get_help_text(),
-            "Your password can't be a commonly used password."
-        )
+        self.assertEqual(CommonPasswordValidator().get_help_text(), "Your password can't be a commonly used password.")
 
 
 class NumericPasswordValidatorTest(SimpleTestCase):
@@ -225,19 +225,19 @@ class NumericPasswordValidatorTest(SimpleTestCase):
         self.assertEqual(cm.exception.error_list[0].code, 'password_entirely_numeric')
 
     def test_help_text(self):
-        self.assertEqual(
-            NumericPasswordValidator().get_help_text(),
-            "Your password can't be entirely numeric."
-        )
+        self.assertEqual(NumericPasswordValidator().get_help_text(), "Your password can't be entirely numeric.")
 
 
 class UsernameValidatorsTests(SimpleTestCase):
     def test_unicode_validator(self):
         valid_usernames = ['joe', 'René', 'ᴮᴵᴳᴮᴵᴿᴰ', 'أحمد']
         invalid_usernames = [
-            "o'connell", "عبد ال",
-            "zerowidth\u200Bspace", "nonbreaking\u00A0space",
-            "en\u2013dash", 'trailingnewline\u000A',
+            "o'connell",
+            "عبد ال",
+            "zerowidth\u200Bspace",
+            "nonbreaking\u00A0space",
+            "en\u2013dash",
+            'trailingnewline\u000A',
         ]
         v = validators.UnicodeUsernameValidator()
         for valid in valid_usernames:

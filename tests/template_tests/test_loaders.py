@@ -13,15 +13,10 @@ from .utils import TEMPLATE_DIR
 
 
 class CachedLoaderTests(SimpleTestCase):
-
     def setUp(self):
         self.engine = Engine(
             dirs=[TEMPLATE_DIR],
-            loaders=[
-                ('django.template.loaders.cached.Loader', [
-                    'django.template.loaders.filesystem.Loader',
-                ]),
-            ],
+            loaders=[('django.template.loaders.cached.Loader', ['django.template.loaders.filesystem.Loader'])],
         )
 
     def test_get_template(self):
@@ -95,7 +90,6 @@ class CachedLoaderTests(SimpleTestCase):
 
 
 class FileSystemLoaderTests(SimpleTestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.engine = Engine(dirs=[TEMPLATE_DIR], loaders=['django.template.loaders.filesystem.Loader'])
@@ -116,10 +110,7 @@ class FileSystemLoaderTests(SimpleTestCase):
 
         def check_sources(path, expected_sources):
             expected_sources = [os.path.abspath(s) for s in expected_sources]
-            self.assertEqual(
-                [origin.name for origin in loader.get_template_sources(path)],
-                expected_sources,
-            )
+            self.assertEqual([origin.name for origin in loader.get_template_sources(path)], expected_sources)
 
         with self.set_dirs(dirs):
             yield check_sources
@@ -169,8 +160,7 @@ class FileSystemLoaderTests(SimpleTestCase):
             check_sources('Ångström', ['/Straße/Ångström'])
 
     @unittest.skipUnless(
-        os.path.normcase('/TEST') == os.path.normpath('/test'),
-        "This test only runs on case-sensitive file systems.",
+        os.path.normcase('/TEST') == os.path.normpath('/test'), "This test only runs on case-sensitive file systems."
     )
     def test_case_sensitivity(self):
         with self.source_checker(['/dir1', '/DIR2']) as check_sources:
@@ -181,10 +171,7 @@ class FileSystemLoaderTests(SimpleTestCase):
         with self.assertRaises(TemplateDoesNotExist):
             self.engine.get_template('doesnotexist.html')
 
-    @unittest.skipIf(
-        sys.platform == 'win32',
-        "Python on Windows doesn't have working os.chmod().",
-    )
+    @unittest.skipIf(sys.platform == 'win32', "Python on Windows doesn't have working os.chmod().")
     def test_permissions_error(self):
         with tempfile.NamedTemporaryFile() as tmpfile:
             tmpdir = os.path.dirname(tmpfile.name)
@@ -201,12 +188,9 @@ class FileSystemLoaderTests(SimpleTestCase):
 
 
 class AppDirectoriesLoaderTests(SimpleTestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.engine = Engine(
-            loaders=['django.template.loaders.app_directories.Loader'],
-        )
+        cls.engine = Engine(loaders=['django.template.loaders.app_directories.Loader'])
         super().setUpClass()
 
     @override_settings(INSTALLED_APPS=['template_tests'])
@@ -223,14 +207,9 @@ class AppDirectoriesLoaderTests(SimpleTestCase):
 
 
 class LocmemLoaderTests(SimpleTestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.engine = Engine(
-            loaders=[('django.template.loaders.locmem.Loader', {
-                'index.html': 'index',
-            })],
-        )
+        cls.engine = Engine(loaders=[('django.template.loaders.locmem.Loader', {'index.html': 'index'})])
         super().setUpClass()
 
     def test_get_template(self):

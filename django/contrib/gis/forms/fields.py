@@ -12,6 +12,7 @@ class GeometryField(forms.Field):
     accepted by GEOSGeometry is accepted by this form.  By default,
     this includes WKT, HEXEWKB, WKB (in a buffer), and GeoJSON.
     """
+
     widget = OpenLayersWidget
     geom_type = 'GEOMETRY'
 
@@ -19,8 +20,9 @@ class GeometryField(forms.Field):
         'required': _('No geometry value provided.'),
         'invalid_geom': _('Invalid geometry value.'),
         'invalid_geom_type': _('Invalid geometry type.'),
-        'transform_error': _('An error occurred when transforming the geometry '
-                             'to the SRID of the geometry form field.'),
+        'transform_error': _(
+            'An error occurred when transforming the geometry ' 'to the SRID of the geometry form field.'
+        ),
     }
 
     def __init__(self, *, srid=None, geom_type=None, **kwargs):
@@ -78,8 +80,7 @@ class GeometryField(forms.Field):
             try:
                 geom.transform(self.srid)
             except GEOSException:
-                raise forms.ValidationError(
-                    self.error_messages['transform_error'], code='transform_error')
+                raise forms.ValidationError(self.error_messages['transform_error'], code='transform_error')
 
         return geom
 

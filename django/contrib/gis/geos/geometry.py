@@ -14,9 +14,7 @@ from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.geos.libgeos import GEOM_PTR
 from django.contrib.gis.geos.mutable_list import ListMixin
 from django.contrib.gis.geos.prepared import PreparedGeometry
-from django.contrib.gis.geos.prototypes.io import (
-    ewkb_w, wkb_r, wkb_w, wkt_r, wkt_w,
-)
+from django.contrib.gis.geos.prototypes.io import ewkb_w, wkb_r, wkb_w, wkt_r, wkt_w
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import force_bytes, force_str
 
@@ -40,9 +38,8 @@ class GEOSGeometryBase(GEOSBase):
                     from .linestring import LineString, LinearRing
                     from .point import Point
                     from .polygon import Polygon
-                    from .collections import (
-                        GeometryCollection, MultiPoint, MultiLineString, MultiPolygon,
-                    )
+                    from .collections import GeometryCollection, MultiPoint, MultiLineString, MultiPolygon
+
                     GEOSGeometryBase._GEOS_CLASSES = {
                         0: Point,
                         1: LineString,
@@ -385,6 +382,7 @@ class GEOSGeometryBase(GEOSBase):
         Return GeoJSON representation of this Geometry.
         """
         return self.ogr.json
+
     geojson = json
 
     @property
@@ -514,7 +512,7 @@ class GEOSGeometryBase(GEOSBase):
         Mitre ratio limit only affects mitered join style.
         """
         return self._topology(
-            capi.geos_bufferwithstyle(self.ptr, width, quadsegs, end_cap_style, join_style, mitre_limit),
+            capi.geos_bufferwithstyle(self.ptr, width, quadsegs, end_cap_style, join_style, mitre_limit)
         )
 
     @property
@@ -615,6 +613,7 @@ class GEOSGeometryBase(GEOSBase):
         (xmin, ymin, xmax, ymax).
         """
         from .point import Point
+
         env = self.envelope
         if isinstance(env, Point):
             xmin, ymin = env.tuple
@@ -641,6 +640,7 @@ class LinearGeometryMixin:
     """
     Used for LineString and MultiLineString.
     """
+
     def interpolate(self, distance):
         return self._topology(capi.geos_interpolate(self.ptr, distance))
 
@@ -649,12 +649,14 @@ class LinearGeometryMixin:
 
     def project(self, point):
         from .point import Point
+
         if not isinstance(point, Point):
             raise TypeError('locate_point argument must be a Point')
         return capi.geos_project(self.ptr, point.ptr)
 
     def project_normalized(self, point):
         from .point import Point
+
         if not isinstance(point, Point):
             raise TypeError('locate_point argument must be a Point')
         return capi.geos_project_normalized(self.ptr, point.ptr)

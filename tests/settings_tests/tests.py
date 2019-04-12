@@ -7,18 +7,11 @@ from unittest import mock
 from django.conf import ENVIRONMENT_VARIABLE, LazySettings, Settings, settings
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
-from django.test import (
-    SimpleTestCase, TestCase, TransactionTestCase, modify_settings,
-    override_settings, signals,
-)
+from django.test import SimpleTestCase, TestCase, TransactionTestCase, modify_settings, override_settings, signals
 from django.test.utils import requires_tz_support
 
 
-@modify_settings(ITEMS={
-    'prepend': ['b'],
-    'append': ['d'],
-    'remove': ['a', 'e']
-})
+@modify_settings(ITEMS={'prepend': ['b'], 'append': ['d'], 'remove': ['a', 'e']})
 @override_settings(ITEMS=['a', 'c', 'e'], ITEMS_OUTER=[1, 2, 3], TEST='override', TEST_OUTER='outer')
 class FullyDecoratedTranTestCase(TransactionTestCase):
 
@@ -30,28 +23,16 @@ class FullyDecoratedTranTestCase(TransactionTestCase):
         self.assertEqual(settings.TEST, 'override')
         self.assertEqual(settings.TEST_OUTER, 'outer')
 
-    @modify_settings(ITEMS={
-        'append': ['e', 'f'],
-        'prepend': ['a'],
-        'remove': ['d', 'c'],
-    })
+    @modify_settings(ITEMS={'append': ['e', 'f'], 'prepend': ['a'], 'remove': ['d', 'c']})
     def test_method_list_override(self):
         self.assertEqual(settings.ITEMS, ['a', 'b', 'e', 'f'])
         self.assertEqual(settings.ITEMS_OUTER, [1, 2, 3])
 
-    @modify_settings(ITEMS={
-        'append': ['b'],
-        'prepend': ['d'],
-        'remove': ['a', 'c', 'e'],
-    })
+    @modify_settings(ITEMS={'append': ['b'], 'prepend': ['d'], 'remove': ['a', 'c', 'e']})
     def test_method_list_override_no_ops(self):
         self.assertEqual(settings.ITEMS, ['b', 'd'])
 
-    @modify_settings(ITEMS={
-        'append': 'e',
-        'prepend': 'a',
-        'remove': 'c',
-    })
+    @modify_settings(ITEMS={'append': 'e', 'prepend': 'a', 'remove': 'c'})
     def test_method_list_override_strings(self):
         self.assertEqual(settings.ITEMS, ['a', 'b', 'd', 'e'])
 
@@ -72,23 +53,14 @@ class FullyDecoratedTranTestCase(TransactionTestCase):
         self.assertEqual(FullyDecoratedTranTestCase.__module__, __name__)
 
 
-@modify_settings(ITEMS={
-    'prepend': ['b'],
-    'append': ['d'],
-    'remove': ['a', 'e']
-})
+@modify_settings(ITEMS={'prepend': ['b'], 'append': ['d'], 'remove': ['a', 'e']})
 @override_settings(ITEMS=['a', 'c', 'e'], TEST='override')
 class FullyDecoratedTestCase(TestCase):
-
     def test_override(self):
         self.assertEqual(settings.ITEMS, ['b', 'c', 'd'])
         self.assertEqual(settings.TEST, 'override')
 
-    @modify_settings(ITEMS={
-        'append': 'e',
-        'prepend': 'a',
-        'remove': 'c',
-    })
+    @modify_settings(ITEMS={'append': 'e', 'prepend': 'a', 'remove': 'c'})
     @override_settings(TEST='override2')
     def test_method_override(self):
         self.assertEqual(settings.ITEMS, ['a', 'b', 'd', 'e'])
@@ -100,13 +72,13 @@ class ClassDecoratedTestCaseSuper(TestCase):
     Dummy class for testing max recursion error in child class call to
     super().  Refs #17011.
     """
+
     def test_max_recursion_error(self):
         pass
 
 
 @override_settings(TEST='override')
 class ClassDecoratedTestCase(ClassDecoratedTestCaseSuper):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -355,7 +327,6 @@ class TestComplexSettingOverride(SimpleTestCase):
 
 
 class SecureProxySslHeaderTest(SimpleTestCase):
-
     @override_settings(SECURE_PROXY_SSL_HEADER=None)
     def test_none(self):
         req = HttpRequest()
@@ -434,11 +405,8 @@ class TestListSettings(unittest.TestCase):
     Make sure settings that should be lists or tuples throw
     ImproperlyConfigured if they are set to a string instead of a list or tuple.
     """
-    list_or_tuple_settings = (
-        "INSTALLED_APPS",
-        "TEMPLATE_DIRS",
-        "LOCALE_PATHS",
-    )
+
+    list_or_tuple_settings = ("INSTALLED_APPS", "TEMPLATE_DIRS", "LOCALE_PATHS")
 
     def test_tuple_settings(self):
         settings_module = ModuleType('fake_settings_module')
@@ -469,6 +437,7 @@ class OverrideSettingsIsolationOnExceptionTests(SimpleTestCase):
     receiver failure detailed in receiver(). In each case, ALL receivers are
     called when exiting the context manager.
     """
+
     def setUp(self):
         signals.setting_changed.connect(self.receiver)
         self.addCleanup(signals.setting_changed.disconnect, self.receiver)
@@ -506,8 +475,7 @@ class OverrideSettingsIsolationOnExceptionTests(SimpleTestCase):
         with the ``enter=False`` keyword argument.
         """
         kwargs_with_exit = [
-            kwargs for args, kwargs in self.spy_receiver.call_args_list
-            if ('enter', False) in kwargs.items()
+            kwargs for args, kwargs in self.spy_receiver.call_args_list if ('enter', False) in kwargs.items()
         ]
         self.assertEqual(len(kwargs_with_exit), call_count)
 
@@ -546,6 +514,7 @@ class OverrideSettingsIsolationOnExceptionTests(SimpleTestCase):
         Error is raised correctly when reusing the same override_settings
         instance.
         """
+
         @override_settings(SETTING_ENTER='ENTER')
         def decorated_function():
             pass

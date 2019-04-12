@@ -6,7 +6,6 @@ from django.test import SimpleTestCase
 
 
 class CPointerBaseTests(SimpleTestCase):
-
     def test(self):
         destructor_mock = mock.Mock()
 
@@ -60,7 +59,7 @@ class CPointerBaseTests(SimpleTestCase):
 
         # The destructor is called if set.
         fg = FakeGeom2()
-        ptr = fg.ptr_type(ctypes.c_float(1.))
+        ptr = fg.ptr_type(ctypes.c_float(1.0))
         fg.ptr = ptr
         del fg
         destructor_mock.assert_called_with(ptr)

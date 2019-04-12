@@ -6,18 +6,14 @@ from zipimport import zipimporter
 
 from django.test import SimpleTestCase, modify_settings
 from django.test.utils import extend_sys_path
-from django.utils.module_loading import (
-    autodiscover_modules, import_string, module_has_submodule,
-)
+from django.utils.module_loading import autodiscover_modules, import_string, module_has_submodule
 
 
 class DefaultLoader(unittest.TestCase):
-
     def test_loader(self):
         "Normal module existence can be tested"
         test_module = import_module('utils_tests.test_module')
-        test_no_submodule = import_module(
-            'utils_tests.test_no_submodule')
+        test_no_submodule = import_module('utils_tests.test_no_submodule')
 
         # An importable child
         self.assertTrue(module_has_submodule(test_module, 'good_module'))
@@ -41,6 +37,7 @@ class DefaultLoader(unittest.TestCase):
 
         # Don't be confused by caching of import misses
         import types  # NOQA: causes attempted import of utils_tests.types
+
         self.assertFalse(module_has_submodule(sys.modules['utils_tests'], 'types'))
 
         # A module which doesn't have a __path__ (so no submodules)
@@ -134,7 +131,6 @@ class ModuleImportTests(SimpleTestCase):
 
 @modify_settings(INSTALLED_APPS={'append': 'utils_tests.test_module'})
 class AutodiscoverModulesTestCase(SimpleTestCase):
-
     def tearDown(self):
         sys.path_importer_cache.clear()
 
@@ -163,23 +159,27 @@ class AutodiscoverModulesTestCase(SimpleTestCase):
 
     def test_autodiscover_modules_several_found_with_registry(self):
         from .test_module import site
+
         autodiscover_modules('good_module', 'another_good_module', register_to=site)
         self.assertEqual(site._registry, {'lorem': 'ipsum'})
 
     def test_validate_registry_keeps_intact(self):
         from .test_module import site
+
         with self.assertRaisesMessage(Exception, "Some random exception."):
             autodiscover_modules('another_bad_module', register_to=site)
         self.assertEqual(site._registry, {})
 
     def test_validate_registry_resets_after_erroneous_module(self):
         from .test_module import site
+
         with self.assertRaisesMessage(Exception, "Some random exception."):
             autodiscover_modules('another_good_module', 'another_bad_module', register_to=site)
         self.assertEqual(site._registry, {'lorem': 'ipsum'})
 
     def test_validate_registry_resets_after_missing_module(self):
         from .test_module import site
+
         autodiscover_modules('does_not_exist', 'another_good_module', 'does_not_exist2', register_to=site)
         self.assertEqual(site._registry, {'lorem': 'ipsum'})
 
@@ -211,6 +211,7 @@ class CustomLoader(EggLoader):
     split into two classes. Although the EggLoader combines both functions
     into one class, this isn't required.
     """
+
     def setUp(self):
         super().setUp()
         sys.path_hooks.insert(0, TestFinder)

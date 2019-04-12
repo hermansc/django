@@ -25,21 +25,12 @@ class Port(models.Model):
 
 
 class Connection(models.Model):
-    start = models.ForeignKey(
-        Port,
-        models.CASCADE,
-        related_name='connection_start',
-        unique=True,
-    )
-    end = models.ForeignKey(
-        Port,
-        models.CASCADE,
-        related_name='connection_end',
-        unique=True,
-    )
+    start = models.ForeignKey(Port, models.CASCADE, related_name='connection_start', unique=True)
+    end = models.ForeignKey(Port, models.CASCADE, related_name='connection_end', unique=True)
 
     def __str__(self):
         return "%s to %s" % (self.start, self.end)
+
 
 # Another non-tree hierarchy that exercises code paths similar to the above
 # example, but in a slightly different configuration.
@@ -69,6 +60,7 @@ class Enrollment(models.Model):
     std = models.ForeignKey(Student, models.CASCADE)
     cls = models.ForeignKey(Class, models.CASCADE)
 
+
 # Models for testing bug #8036.
 
 
@@ -94,6 +86,7 @@ class Client(models.Model):
 class SpecialClient(Client):
     value = models.IntegerField()
 
+
 # Some model inheritance exercises
 
 
@@ -114,6 +107,7 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
 
 # Models for testing bug #19870.
 

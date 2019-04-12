@@ -21,7 +21,6 @@ class MyWrapper:
 
 
 class MyAutoField(models.CharField):
-
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = 10
         super().__init__(*args, **kwargs)

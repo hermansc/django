@@ -12,6 +12,7 @@ class DummyStorage(storage.Storage):
     A storage class that implements get_modified_time() but raises
     NotImplementedError for path().
     """
+
     def _save(self, name, content):
         return 'dummy'
 
@@ -26,7 +27,6 @@ class DummyStorage(storage.Storage):
 
 
 class PathNotImplementedStorage(storage.Storage):
-
     def _save(self, name, content):
         return 'dummy'
 
@@ -61,6 +61,7 @@ class NeverCopyRemoteStorage(PathNotImplementedStorage):
     """
     Return a future modified time for all files so that nothing is collected.
     """
+
     def get_modified_time(self, name):
         return datetime.now() + timedelta(days=30)
 
@@ -71,7 +72,6 @@ class QueryStringStorage(storage.Storage):
 
 
 class SimpleStorage(ManifestStaticFilesStorage):
-
     def file_hash(self, name, content=None):
         return 'deploy12345'
 
@@ -81,10 +81,7 @@ class ExtraPatternsStorage(ManifestStaticFilesStorage):
     A storage class to test pattern substitutions with more than one pattern
     entry. The added pattern rewrites strings like "url(...)" to JS_URL("...").
     """
+
     patterns = tuple(ManifestStaticFilesStorage.patterns) + (
-        (
-            "*.js", (
-                (r"""(url\(['"]{0,1}\s*(.*?)["']{0,1}\))""", 'JS_URL("%s")'),
-            ),
-        ),
+        ("*.js", ((r"""(url\(['"]{0,1}\s*(.*?)["']{0,1}\))""", 'JS_URL("%s")'),)),
     )

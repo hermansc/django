@@ -5,7 +5,6 @@ from . import views
 
 urlpatterns = [
     path('', include('test_client.urls')),
-
     path('no_template_view/', views.no_template_view),
     path('staff_only/', views.staff_only_view),
     path('get_view/', views.get_view),

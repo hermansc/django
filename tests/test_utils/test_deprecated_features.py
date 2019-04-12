@@ -8,6 +8,7 @@ class AllowDatabaseQueriesDeprecationTests(SimpleTestCase):
     def test_enabled(self):
         class AllowedDatabaseQueries(SimpleTestCase):
             allow_database_queries = True
+
         message = (
             '`SimpleTestCase.allow_database_queries` is deprecated. Restrict '
             'the databases available during the execution of '
@@ -21,6 +22,7 @@ class AllowDatabaseQueriesDeprecationTests(SimpleTestCase):
     def test_explicitly_disabled(self):
         class AllowedDatabaseQueries(SimpleTestCase):
             allow_database_queries = False
+
         message = (
             '`SimpleTestCase.allow_database_queries` is deprecated. Restrict '
             'the databases available during the execution of '
@@ -36,6 +38,7 @@ class MultiDbDeprecationTests(SimpleTestCase):
     def test_transaction_test_case(self):
         class MultiDbTestCase(TransactionTestCase):
             multi_db = True
+
         message = (
             '`TransactionTestCase.multi_db` is deprecated. Databases '
             'available during this test can be defined using '
@@ -51,6 +54,7 @@ class MultiDbDeprecationTests(SimpleTestCase):
     def test_test_case(self):
         class MultiDbTestCase(TestCase):
             multi_db = True
+
         message = (
             '`TestCase.multi_db` is deprecated. Databases available during '
             'this test can be defined using '

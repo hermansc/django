@@ -76,7 +76,6 @@ class MinusOneSRID(models.Model):
 
 
 class NonConcreteField(models.IntegerField):
-
     def db_type(self, connection):
         return None
 

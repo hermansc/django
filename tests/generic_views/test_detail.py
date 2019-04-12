@@ -12,7 +12,6 @@ from .models import Artist, Author, Book, Page
 
 @override_settings(ROOT_URLCONF='generic_views.urls')
 class DetailViewTest(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.artist1 = Artist.objects.create(name='Rene Magritte')

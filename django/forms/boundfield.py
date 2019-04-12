@@ -13,6 +13,7 @@ __all__ = ('BoundField',)
 @html_safe
 class BoundField:
     "A Field plus data"
+
     def __init__(self, form, field, name):
         self.form = form
         self.field = field
@@ -138,8 +139,7 @@ class BoundField:
         """
         contents = contents or self.label
         if label_suffix is None:
-            label_suffix = (self.field.label_suffix if self.field.label_suffix is not None
-                            else self.form.label_suffix)
+            label_suffix = self.field.label_suffix if self.field.label_suffix is not None else self.form.label_suffix
         # Only add the suffix if the label does not end in punctuation.
         # Translators: If found as last label character, these punctuation
         # characters will prevent the default label_suffix to be appended to the label
@@ -210,8 +210,7 @@ class BoundField:
         data = self.form.get_initial_for_field(self.field, self.name)
         # If this is an auto-generated default date, nix the microseconds for
         # standardized handling. See #22502.
-        if (isinstance(data, (datetime.datetime, datetime.time)) and
-                not self.field.widget.supports_microseconds):
+        if isinstance(data, (datetime.datetime, datetime.time)) and not self.field.widget.supports_microseconds:
             data = data.replace(microsecond=0)
         return data
 
@@ -239,6 +238,7 @@ class BoundWidget:
       </label>
     {% endfor %}
     """
+
     def __init__(self, parent_widget, data, renderer):
         self.parent_widget = parent_widget
         self.data = data

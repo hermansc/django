@@ -2,15 +2,12 @@
 Testing some internals of the template processing. These are *not* examples to be copied in user code.
 """
 from django.template import Library, TemplateSyntaxError
-from django.template.base import (
-    FilterExpression, Parser, Token, TokenType, Variable,
-)
+from django.template.base import FilterExpression, Parser, Token, TokenType, Variable
 from django.template.defaultfilters import register as filter_library
 from django.test import SimpleTestCase
 
 
 class ParserTests(SimpleTestCase):
-
     def test_token_smart_split(self):
         """
         #7027 -- _() syntax should work with spaces
@@ -56,12 +53,8 @@ class ParserTests(SimpleTestCase):
         self.assertEqual(Variable("_('Better News')").resolve(c), "Better News")
 
         # Escaped quotes work correctly as well.
-        self.assertEqual(
-            Variable(r'"Some \"Good\" News"').resolve(c), 'Some "Good" News'
-        )
-        self.assertEqual(
-            Variable(r"'Some \'Better\' News'").resolve(c), "Some 'Better' News"
-        )
+        self.assertEqual(Variable(r'"Some \"Good\" News"').resolve(c), 'Some "Good" News')
+        self.assertEqual(Variable(r"'Some \'Better\' News'").resolve(c), "Some 'Better' News")
 
         # Variables should reject access of attributes beginning with
         # underscores.
@@ -96,23 +89,19 @@ class ParserTests(SimpleTestCase):
         @register.filter
         def two_one_opt_arg(value, arg, arg2=False):
             pass
+
         parser.add_library(register)
-        for expr in (
-                '1|no_arguments:"1"',
-                '1|two_arguments',
-                '1|two_arguments:"1"',
-                '1|two_one_opt_arg',
-        ):
+        for expr in ('1|no_arguments:"1"', '1|two_arguments', '1|two_arguments:"1"', '1|two_one_opt_arg'):
             with self.assertRaises(TemplateSyntaxError):
                 FilterExpression(expr, parser)
         for expr in (
-                # Correct number of arguments
-                '1|no_arguments',
-                '1|one_argument:"1"',
-                # One optional
-                '1|one_opt_argument',
-                '1|one_opt_argument:"1"',
-                # Not supplying all
-                '1|two_one_opt_arg:"1"',
+            # Correct number of arguments
+            '1|no_arguments',
+            '1|one_argument:"1"',
+            # One optional
+            '1|one_opt_argument',
+            '1|one_opt_argument:"1"',
+            # Not supplying all
+            '1|two_one_opt_arg:"1"',
         ):
             FilterExpression(expr, parser)

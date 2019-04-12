@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class ASinTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_asin=ASin('normal')).first()
@@ -35,9 +34,7 @@ class ASinTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=0, normal=1, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_asin=ASin('small'),
-            normal_asin=ASin('normal'),
-            big_asin=ASin('big'),
+            small_asin=ASin('small'), normal_asin=ASin('normal'), big_asin=ASin('big')
         ).first()
         self.assertIsInstance(obj.small_asin, float)
         self.assertIsInstance(obj.normal_asin, float)

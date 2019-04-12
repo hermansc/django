@@ -1,6 +1,4 @@
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.checks import Error
 from django.core.exceptions import FieldDoesNotExist, FieldError
@@ -81,12 +79,13 @@ class AbstractInheritanceTests(SimpleTestCase):
         self.assertIsInstance(FirstChild._meta.get_field('name'), models.CharField)
         self.assertEqual(
             AnotherChild.check(),
-            [Error(
-                "The field 'name' clashes with the field 'name' "
-                "from model 'model_inheritance.concreteparent'.",
-                obj=AnotherChild._meta.get_field('name'),
-                id="models.E006",
-            )]
+            [
+                Error(
+                    "The field 'name' clashes with the field 'name' " "from model 'model_inheritance.concreteparent'.",
+                    obj=AnotherChild._meta.get_field('name'),
+                    id="models.E006",
+                )
+            ],
         )
 
     def test_virtual_field(self):
@@ -131,6 +130,7 @@ class AbstractInheritanceTests(SimpleTestCase):
             "the same name from base class 'ConcreteDescendant'."
         )
         with self.assertRaisesMessage(FieldError, msg):
+
             class Descendant(ConcreteDescendant):
                 name = models.IntegerField()
 
@@ -187,12 +187,13 @@ class AbstractInheritanceTests(SimpleTestCase):
 
         self.assertEqual(
             Descendant.check(),
-            [Error(
-                "The field 'foo_id' clashes with the field 'foo' "
-                "from model 'model_inheritance.descendant'.",
-                obj=Descendant._meta.get_field('foo_id'),
-                id='models.E006',
-            )]
+            [
+                Error(
+                    "The field 'foo_id' clashes with the field 'foo' " "from model 'model_inheritance.descendant'.",
+                    obj=Descendant._meta.get_field('foo_id'),
+                    id='models.E006',
+                )
+            ],
         )
 
     def test_shadow_related_name_when_set_to_none(self):
@@ -245,7 +246,7 @@ class AbstractInheritanceTests(SimpleTestCase):
                     obj=Foo._meta.get_field('foo'),
                     id='fields.E303',
                 ),
-            ]
+            ],
         )
 
     def test_multi_inheritance_field_clashes(self):
@@ -267,12 +268,13 @@ class AbstractInheritanceTests(SimpleTestCase):
 
         self.assertEqual(
             ConcreteDescendant.check(),
-            [Error(
-                "The field 'name' clashes with the field 'name' from "
-                "model 'model_inheritance.concretebase'.",
-                obj=ConcreteDescendant._meta.get_field('name'),
-                id="models.E006",
-            )]
+            [
+                Error(
+                    "The field 'name' clashes with the field 'name' from " "model 'model_inheritance.concretebase'.",
+                    obj=ConcreteDescendant._meta.get_field('name'),
+                    id="models.E006",
+                )
+            ],
         )
 
     def test_override_one2one_relation_auto_field_clashes(self):
@@ -291,6 +293,7 @@ class AbstractInheritanceTests(SimpleTestCase):
             "declared field of the same name."
         )
         with self.assertRaisesMessage(FieldError, msg):
+
             class Descendant(ConcreteParent, AbstractParent):
                 concreteparent_ptr = models.CharField(max_length=30)
 
@@ -330,8 +333,7 @@ class AbstractInheritanceTests(SimpleTestCase):
         model5 = type('Model5', (Mixin2, ConcreteModel2, Mixin, AbstractModel), model_dict.copy())
 
         self.assertEqual(
-            fields(model1),
-            [('id', models.AutoField), ('name', models.CharField), ('age', models.IntegerField)]
+            fields(model1), [('id', models.AutoField), ('name', models.CharField), ('age', models.IntegerField)]
         )
 
         self.assertEqual(fields(model2), [('id', models.AutoField), ('name', models.CharField)])
@@ -345,9 +347,11 @@ class AbstractInheritanceTests(SimpleTestCase):
         self.assertEqual(
             fields(model5),
             [
-                ('id', models.AutoField), ('foo', models.IntegerField),
+                ('id', models.AutoField),
+                ('foo', models.IntegerField),
                 ('concretemodel_ptr', models.OneToOneField),
-                ('age', models.SmallIntegerField), ('concretemodel2_ptr', models.OneToOneField),
+                ('age', models.SmallIntegerField),
+                ('concretemodel2_ptr', models.OneToOneField),
                 ('name', models.CharField),
-            ]
+            ],
         )

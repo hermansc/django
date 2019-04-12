@@ -39,7 +39,6 @@ class LiveServerBase(StaticLiveServerTestCase):
 
 
 class StaticLiveServerChecks(LiveServerBase):
-
     @classmethod
     def setUpClass(cls):
         # If contrib.staticfiles isn't configured properly, the exception
@@ -76,7 +75,6 @@ class StaticLiveServerChecks(LiveServerBase):
 
 
 class StaticLiveServerView(LiveServerBase):
-
     def urlopen(self, url):
         return urlopen(self.live_server_url + url)
 

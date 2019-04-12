@@ -3,9 +3,7 @@ from django.urls import include, path
 
 from . import views
 
-ns_patterns = ([
-    path('xview/func/', views.xview_dec(views.xview), name='func'),
-], 'test')
+ns_patterns = ([path('xview/func/', views.xview_dec(views.xview), name='func')], 'test')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

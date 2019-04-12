@@ -10,7 +10,6 @@ TEST_DATABASE_PREFIX = 'test_'
 
 
 class DatabaseCreation(BaseDatabaseCreation):
-
     @cached_property
     def _maindb_connection(self):
         """
@@ -41,7 +40,8 @@ class DatabaseCreation(BaseDatabaseCreation):
                     if not autoclobber:
                         confirm = input(
                             "It appears the test database, %s, already exists. "
-                            "Type 'yes' to delete it, or 'no' to cancel: " % parameters['user'])
+                            "Type 'yes' to delete it, or 'no' to cancel: " % parameters['user']
+                        )
                     if autoclobber or confirm == 'yes':
                         if verbosity >= 1:
                             self.log("Destroying old test database for alias '%s'..." % self.connection.alias)
@@ -49,8 +49,9 @@ class DatabaseCreation(BaseDatabaseCreation):
                             self._execute_test_db_destruction(cursor, parameters, verbosity)
                         except DatabaseError as e:
                             if 'ORA-29857' in str(e):
-                                self._handle_objects_preventing_db_destruction(cursor, parameters,
-                                                                               verbosity, autoclobber)
+                                self._handle_objects_preventing_db_destruction(
+                                    cursor, parameters, verbosity, autoclobber
+                                )
                             else:
                                 # Ran into a database error that isn't about leftover objects in the tablespace
                                 self.log('Got an error destroying the old test database: %s' % e)
@@ -80,7 +81,8 @@ class DatabaseCreation(BaseDatabaseCreation):
                     if not autoclobber:
                         confirm = input(
                             "It appears the test user, %s, already exists. Type "
-                            "'yes' to delete it, or 'no' to cancel: " % parameters['user'])
+                            "'yes' to delete it, or 'no' to cancel: " % parameters['user']
+                        )
                     if autoclobber or confirm == 'yes':
                         try:
                             if verbosity >= 1:
@@ -109,14 +111,17 @@ class DatabaseCreation(BaseDatabaseCreation):
         credentials in the SAVED_USER/SAVED_PASSWORD key in the settings dict.
         """
         real_settings = settings.DATABASES[self.connection.alias]
-        real_settings['SAVED_USER'] = self.connection.settings_dict['SAVED_USER'] = \
-            self.connection.settings_dict['USER']
-        real_settings['SAVED_PASSWORD'] = self.connection.settings_dict['SAVED_PASSWORD'] = \
-            self.connection.settings_dict['PASSWORD']
+        real_settings['SAVED_USER'] = self.connection.settings_dict['SAVED_USER'] = self.connection.settings_dict[
+            'USER'
+        ]
+        real_settings['SAVED_PASSWORD'] = self.connection.settings_dict[
+            'SAVED_PASSWORD'
+        ] = self.connection.settings_dict['PASSWORD']
         real_test_settings = real_settings['TEST']
         test_settings = self.connection.settings_dict['TEST']
-        real_test_settings['USER'] = real_settings['USER'] = test_settings['USER'] = \
-            self.connection.settings_dict['USER'] = parameters['user']
+        real_test_settings['USER'] = real_settings['USER'] = test_settings['USER'] = self.connection.settings_dict[
+            'USER'
+        ] = parameters['user']
         real_settings['PASSWORD'] = self.connection.settings_dict['PASSWORD'] = parameters['password']
 
     def set_as_test_mirror(self, primary_settings_dict):
@@ -159,8 +164,10 @@ class DatabaseCreation(BaseDatabaseCreation):
                 self.log('Tests cancelled -- test database cannot be recreated.')
                 sys.exit(1)
         else:
-            self.log("Django is configured to use pre-existing test user '%s',"
-                     " and will not attempt to delete it." % parameters['user'])
+            self.log(
+                "Django is configured to use pre-existing test user '%s',"
+                " and will not attempt to delete it." % parameters['user']
+            )
             self.log('Tests cancelled -- test database cannot be recreated.')
             sys.exit(1)
 
@@ -263,9 +270,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         if verbosity >= 2:
             self.log('_destroy_test_user(): user=%s' % parameters['user'])
             self.log('Be patient. This can take some time...')
-        statements = [
-            'DROP USER %(user)s CASCADE',
-        ]
+        statements = ['DROP USER %(user)s CASCADE']
         self._execute_statements(cursor, statements, parameters, verbosity)
 
     def _execute_statements(self, cursor, statements, parameters, verbosity, allow_quiet_fail=False):
@@ -349,8 +354,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
     def _test_database_tblspace_tmp(self):
         settings_dict = self.connection.settings_dict
-        return settings_dict['TEST'].get('TBLSPACE_TMP',
-                                         TEST_DATABASE_PREFIX + settings_dict['USER'] + '_temp')
+        return settings_dict['TEST'].get('TBLSPACE_TMP', TEST_DATABASE_PREFIX + settings_dict['USER'] + '_temp')
 
     def _test_database_tblspace_datafile(self):
         tblspace = '%s.dbf' % self._test_database_tblspace()

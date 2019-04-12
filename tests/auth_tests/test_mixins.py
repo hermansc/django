@@ -1,9 +1,7 @@
 from unittest import mock
 
 from django.contrib.auth import models
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin,
-)
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -12,13 +10,11 @@ from django.views.generic import View
 
 
 class AlwaysTrueMixin(UserPassesTestMixin):
-
     def test_func(self):
         return True
 
 
 class AlwaysFalseMixin(UserPassesTestMixin):
-
     def test_func(self):
         return False
 
@@ -205,6 +201,7 @@ class LoginRequiredMixinTests(TestCase):
         login_required works on a simple view wrapped in a login_required
         decorator.
         """
+
         class AView(LoginRequiredMixin, EmptyResponseView):
             pass
 
@@ -252,7 +249,9 @@ class PermissionsRequiredMixinTests(TestCase):
     def test_permissioned_denied_redirect(self):
         class AView(PermissionRequiredMixin, EmptyResponseView):
             permission_required = [
-                'auth_tests.add_customuser', 'auth_tests.change_customuser', 'nonexistent-permission',
+                'auth_tests.add_customuser',
+                'auth_tests.change_customuser',
+                'nonexistent-permission',
             ]
 
         # Authenticated users receive PermissionDenied.
@@ -268,7 +267,9 @@ class PermissionsRequiredMixinTests(TestCase):
     def test_permissioned_denied_exception_raised(self):
         class AView(PermissionRequiredMixin, EmptyResponseView):
             permission_required = [
-                'auth_tests.add_customuser', 'auth_tests.change_customuser', 'nonexistent-permission',
+                'auth_tests.add_customuser',
+                'auth_tests.change_customuser',
+                'nonexistent-permission',
             ]
             raise_exception = True
 

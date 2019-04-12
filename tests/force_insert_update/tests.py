@@ -1,9 +1,7 @@
 from django.db import DatabaseError, IntegrityError, transaction
 from django.test import TestCase
 
-from .models import (
-    Counter, InheritedCounter, ProxyCounter, SubCounter, WithCustomPK,
-)
+from .models import Counter, InheritedCounter, ProxyCounter, SubCounter, WithCustomPK
 
 
 class ForceTests(TestCase):

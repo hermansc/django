@@ -11,11 +11,13 @@ DEFER_FIELD = object()
 
 class SerializerDoesNotExist(KeyError):
     """The requested serializer was not found."""
+
     pass
 
 
 class SerializationError(Exception):
     """Something bad happened during serialization."""
+
     pass
 
 
@@ -33,6 +35,7 @@ class DeserializationError(Exception):
 
 class M2MDeserializationError(Exception):
     """Something bad happened during deserialization of a ManyToManyField."""
+
     def __init__(self, original_exc, pk):
         self.original_exc = original_exc
         self.pk = pk
@@ -72,8 +75,18 @@ class Serializer:
     progress_class = ProgressBar
     stream_class = StringIO
 
-    def serialize(self, queryset, *, stream=None, fields=None, use_natural_foreign_keys=False,
-                  use_natural_primary_keys=False, progress_output=None, object_count=0, **options):
+    def serialize(
+        self,
+        queryset,
+        *,
+        stream=None,
+        fields=None,
+        use_natural_foreign_keys=False,
+        use_natural_primary_keys=False,
+        progress_output=None,
+        object_count=0,
+        **options
+    ):
         """
         Serialize a queryset.
         """
@@ -210,11 +223,7 @@ class DeserializedObject:
         self.deferred_fields = deferred_fields
 
     def __repr__(self):
-        return "<%s: %s(pk=%s)>" % (
-            self.__class__.__name__,
-            self.object._meta.label,
-            self.object.pk,
-        )
+        return "<%s: %s(pk=%s)>" % (self.__class__.__name__, self.object._meta.label, self.object.pk)
 
     def save(self, save_m2m=True, using=None, **kwargs):
         # Call save on the Model baseclass directly. This bypasses any
@@ -258,8 +267,7 @@ def build_instance(Model, data, db):
     """
     default_manager = Model._meta.default_manager
     pk = data.get(Model._meta.pk.name)
-    if (pk is None and hasattr(default_manager, 'get_by_natural_key') and
-            hasattr(Model, 'natural_key')):
+    if pk is None and hasattr(default_manager, 'get_by_natural_key') and hasattr(Model, 'natural_key'):
         natural_key = Model(**data).natural_key()
         try:
             data[Model._meta.pk.attname] = Model._meta.pk.to_python(
@@ -273,12 +281,15 @@ def build_instance(Model, data, db):
 def deserialize_m2m_values(field, field_value, using, handle_forward_references):
     model = field.remote_field.model
     if hasattr(model._default_manager, 'get_by_natural_key'):
+
         def m2m_convert(value):
             if hasattr(value, '__iter__') and not isinstance(value, str):
                 return model._default_manager.db_manager(using).get_by_natural_key(*value).pk
             else:
                 return model._meta.pk.to_python(value)
+
     else:
+
         def m2m_convert(v):
             return model._meta.pk.to_python(v)
 
@@ -300,8 +311,11 @@ def deserialize_fk_value(field, field_value, using, handle_forward_references):
     model = field.remote_field.model
     default_manager = model._default_manager
     field_name = field.remote_field.field_name
-    if (hasattr(default_manager, 'get_by_natural_key') and
-            hasattr(field_value, '__iter__') and not isinstance(field_value, str)):
+    if (
+        hasattr(default_manager, 'get_by_natural_key')
+        and hasattr(field_value, '__iter__')
+        and not isinstance(field_value, str)
+    ):
         try:
             obj = default_manager.db_manager(using).get_by_natural_key(*field_value)
         except ObjectDoesNotExist:

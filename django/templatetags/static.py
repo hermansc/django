@@ -9,14 +9,12 @@ register = template.Library()
 
 
 class PrefixNode(template.Node):
-
     def __repr__(self):
         return "<PrefixNode for %r>" % self.name
 
     def __init__(self, varname=None, name=None):
         if name is None:
-            raise template.TemplateSyntaxError(
-                "Prefix nodes must be given a name to return.")
+            raise template.TemplateSyntaxError("Prefix nodes must be given a name to return.")
         self.varname = varname
         self.name = name
 
@@ -28,8 +26,7 @@ class PrefixNode(template.Node):
         # token.split_contents() isn't useful here because tags using this method don't accept variable as arguments
         tokens = token.contents.split()
         if len(tokens) > 1 and tokens[1] != 'as':
-            raise template.TemplateSyntaxError(
-                "First argument in '%s' must be 'as'" % tokens[0])
+            raise template.TemplateSyntaxError("First argument in '%s' must be 'as'" % tokens[0])
         if len(tokens) > 1:
             varname = tokens[2]
         else:
@@ -93,8 +90,7 @@ def get_media_prefix(parser, token):
 class StaticNode(template.Node):
     def __init__(self, varname=None, path=None):
         if path is None:
-            raise template.TemplateSyntaxError(
-                "Static template nodes must be given a path to return.")
+            raise template.TemplateSyntaxError("Static template nodes must be given a path to return.")
         self.path = path
         self.varname = varname
 
@@ -115,6 +111,7 @@ class StaticNode(template.Node):
     def handle_simple(cls, path):
         if apps.is_installed('django.contrib.staticfiles'):
             from django.contrib.staticfiles.storage import staticfiles_storage
+
             return staticfiles_storage.url(path)
         else:
             return urljoin(PrefixNode.handle_simple("STATIC_URL"), quote(path))
@@ -127,8 +124,7 @@ class StaticNode(template.Node):
         bits = token.split_contents()
 
         if len(bits) < 2:
-            raise template.TemplateSyntaxError(
-                "'%s' takes at least one argument (path to file)" % bits[0])
+            raise template.TemplateSyntaxError("'%s' takes at least one argument (path to file)" % bits[0])
 
         path = parser.compile_filter(bits[1])
 

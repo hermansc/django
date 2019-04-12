@@ -4,8 +4,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 
 
-def format(number, decimal_sep, decimal_pos=None, grouping=0, thousand_sep='',
-           force_grouping=False, use_l10n=None):
+def format(number, decimal_sep, decimal_pos=None, grouping=0, thousand_sep='', force_grouping=False, use_l10n=None):
     """
     Get a number (as a number or string), and return it as a string,
     using formats defined as arguments:
@@ -35,8 +34,7 @@ def format(number, decimal_sep, decimal_pos=None, grouping=0, thousand_sep='',
             coefficient, exponent = number.split('e')
             # Format the coefficient.
             coefficient = format(
-                coefficient, decimal_sep, decimal_pos, grouping,
-                thousand_sep, force_grouping, use_l10n,
+                coefficient, decimal_sep, decimal_pos, grouping, thousand_sep, force_grouping, use_l10n
             )
             return '{}e{}'.format(coefficient, exponent)
         else:

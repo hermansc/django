@@ -4,10 +4,34 @@ from django.db import connection, models, transaction
 from django.test import TestCase, TransactionTestCase, skipUnlessDBFeature
 
 from .models import (
-    Award, AwardNote, Book, Child, Contact, Eaten, Email, File, Food, FooFile,
-    FooFileProxy, FooImage, FooPhoto, House, Image, Item, Location, Login,
-    OrderedPerson, OrgUnit, Person, Photo, PlayedWith, PlayedWithNote, Policy,
-    Researcher, Toy, Version,
+    Award,
+    AwardNote,
+    Book,
+    Child,
+    Contact,
+    Eaten,
+    Email,
+    File,
+    Food,
+    FooFile,
+    FooFileProxy,
+    FooImage,
+    FooPhoto,
+    House,
+    Image,
+    Item,
+    Location,
+    Login,
+    OrderedPerson,
+    OrgUnit,
+    Person,
+    Photo,
+    PlayedWith,
+    PlayedWithNote,
+    Policy,
+    Researcher,
+    Toy,
+    Version,
 )
 
 
@@ -106,9 +130,7 @@ class DeleteCascadeTransactionTests(TransactionTestCase):
         Refs #14896.
         """
         r = Researcher.objects.create()
-        email = Email.objects.create(
-            label="office-email", email_address="carl@science.edu"
-        )
+        email = Email.objects.create(label="office-email", email_address="carl@science.edu")
         r.contacts.add(email)
 
         email.delete()
@@ -134,6 +156,7 @@ class LargeDeleteTests(TestCase):
 
         def noop(*args, **kwargs):
             pass
+
         models.signals.post_delete.connect(noop, sender=Book)
         Book.objects.all().delete()
         models.signals.post_delete.disconnect(noop, sender=Book)
@@ -146,6 +169,7 @@ class ProxyDeleteTest(TestCase):
 
     See #16128.
     """
+
     def create_image(self):
         """Return an Image referenced by both a FooImage and a FooFile."""
         # Create an Image
@@ -258,6 +282,7 @@ class Ticket19102Tests(TestCase):
     Note that .values() is not tested here on purpose. .values().delete()
     doesn't work for non fast-path deletes at all.
     """
+
     @classmethod
     def setUpTestData(cls):
         cls.o1 = OrgUnit.objects.create(name='o1')
@@ -268,26 +293,18 @@ class Ticket19102Tests(TestCase):
     @skipUnlessDBFeature("update_can_self_select")
     def test_ticket_19102_annotate(self):
         with self.assertNumQueries(1):
-            Login.objects.order_by('description').filter(
-                orgunit__name__isnull=False
-            ).annotate(
+            Login.objects.order_by('description').filter(orgunit__name__isnull=False).annotate(
                 n=models.Count('description')
-            ).filter(
-                n=1, pk=self.l1.pk
-            ).delete()
+            ).filter(n=1, pk=self.l1.pk).delete()
         self.assertFalse(Login.objects.filter(pk=self.l1.pk).exists())
         self.assertTrue(Login.objects.filter(pk=self.l2.pk).exists())
 
     @skipUnlessDBFeature("update_can_self_select")
     def test_ticket_19102_extra(self):
         with self.assertNumQueries(1):
-            Login.objects.order_by('description').filter(
-                orgunit__name__isnull=False
-            ).extra(
+            Login.objects.order_by('description').filter(orgunit__name__isnull=False).extra(
                 select={'extraf': '1'}
-            ).filter(
-                pk=self.l1.pk
-            ).delete()
+            ).filter(pk=self.l1.pk).delete()
         self.assertFalse(Login.objects.filter(pk=self.l1.pk).exists())
         self.assertTrue(Login.objects.filter(pk=self.l2.pk).exists())
 
@@ -298,9 +315,7 @@ class Ticket19102Tests(TestCase):
         # having smaller PK will be deleted.
         Login.objects.update(description='description')
         with self.assertNumQueries(1):
-            Login.objects.distinct('description').order_by('pk').filter(
-                orgunit__name__isnull=False
-            ).delete()
+            Login.objects.distinct('description').order_by('pk').filter(orgunit__name__isnull=False).delete()
         # Assumed that l1 which is created first has smaller PK.
         self.assertFalse(Login.objects.filter(pk=self.l1.pk).exists())
         self.assertTrue(Login.objects.filter(pk=self.l2.pk).exists())
@@ -308,11 +323,7 @@ class Ticket19102Tests(TestCase):
     @skipUnlessDBFeature("update_can_self_select")
     def test_ticket_19102_select_related(self):
         with self.assertNumQueries(1):
-            Login.objects.filter(
-                pk=self.l1.pk
-            ).filter(
-                orgunit__name__isnull=False
-            ).order_by(
+            Login.objects.filter(pk=self.l1.pk).filter(orgunit__name__isnull=False).order_by(
                 'description'
             ).select_related('orgunit').delete()
         self.assertFalse(Login.objects.filter(pk=self.l1.pk).exists())
@@ -321,13 +332,9 @@ class Ticket19102Tests(TestCase):
     @skipUnlessDBFeature("update_can_self_select")
     def test_ticket_19102_defer(self):
         with self.assertNumQueries(1):
-            Login.objects.filter(
-                pk=self.l1.pk
-            ).filter(
-                orgunit__name__isnull=False
-            ).order_by(
-                'description'
-            ).only('id').delete()
+            Login.objects.filter(pk=self.l1.pk).filter(orgunit__name__isnull=False).order_by('description').only(
+                'id'
+            ).delete()
         self.assertFalse(Login.objects.filter(pk=self.l1.pk).exists())
         self.assertTrue(Login.objects.filter(pk=self.l2.pk).exists())
 
@@ -351,14 +358,8 @@ class DeleteTests(TestCase):
         """
         contact1 = Contact.objects.create(label='Contact 1')
         contact2 = Contact.objects.create(label='Contact 2')
-        researcher1 = Researcher.objects.create(
-            primary_contact=contact1,
-            secondary_contact=contact2,
-        )
-        researcher2 = Researcher.objects.create(
-            primary_contact=contact2,
-            secondary_contact=contact1,
-        )
+        researcher1 = Researcher.objects.create(primary_contact=contact1, secondary_contact=contact2)
+        researcher2 = Researcher.objects.create(primary_contact=contact2, secondary_contact=contact1)
         contact1.delete()
         researcher1.refresh_from_db()
         researcher2.refresh_from_db()

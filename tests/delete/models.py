@@ -37,8 +37,7 @@ class A(models.Model):
     setnull = models.ForeignKey(R, models.SET_NULL, null=True, related_name='setnull_set')
     setdefault = models.ForeignKey(R, models.SET_DEFAULT, default=get_default_r, related_name='setdefault_set')
     setdefault_none = models.ForeignKey(
-        R, models.SET_DEFAULT,
-        default=None, null=True, related_name='setnull_nullable_set',
+        R, models.SET_DEFAULT, default=None, null=True, related_name='setnull_nullable_set'
     )
     cascade = models.ForeignKey(R, models.CASCADE, related_name='cascade_set')
     cascade_nullable = models.ForeignKey(R, models.CASCADE, null=True, related_name='cascade_nullable_set')
@@ -55,9 +54,19 @@ class A(models.Model):
 
 def create_a(name):
     a = A(name=name)
-    for name in ('auto', 'auto_nullable', 'setvalue', 'setnull', 'setdefault',
-                 'setdefault_none', 'cascade', 'cascade_nullable', 'protect',
-                 'donothing', 'o2o_setnull'):
+    for name in (
+        'auto',
+        'auto_nullable',
+        'setvalue',
+        'setnull',
+        'setdefault',
+        'setdefault_none',
+        'cascade',
+        'cascade_nullable',
+        'protect',
+        'donothing',
+        'o2o_setnull',
+    ):
         r = R.objects.create()
         setattr(a, name, r)
     a.child = RChild.objects.create()

@@ -13,13 +13,9 @@ from django.core.cache import cache
 from django.core.exceptions import SuspiciousFileOperation
 from django.core.files.base import ContentFile, File
 from django.core.files.storage import FileSystemStorage, get_storage_class
-from django.core.files.uploadedfile import (
-    InMemoryUploadedFile, SimpleUploadedFile, TemporaryUploadedFile,
-)
+from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile, TemporaryUploadedFile
 from django.db.models.fields.files import FileDescriptor
-from django.test import (
-    LiveServerTestCase, SimpleTestCase, TestCase, override_settings,
-)
+from django.test import LiveServerTestCase, SimpleTestCase, TestCase, override_settings
 from django.test.utils import requires_tz_support
 from django.urls import NoReverseMatch, reverse_lazy
 from django.utils import timezone
@@ -30,14 +26,11 @@ FILE_SUFFIX_REGEX = '[A-Za-z0-9]{7}'
 
 
 class GetStorageClassTests(SimpleTestCase):
-
     def test_get_filesystem_storage(self):
         """
         get_storage_class returns the class for a storage backend name/path.
         """
-        self.assertEqual(
-            get_storage_class('django.core.files.storage.FileSystemStorage'),
-            FileSystemStorage)
+        self.assertEqual(get_storage_class('django.core.files.storage.FileSystemStorage'), FileSystemStorage)
 
     def test_get_invalid_storage_module(self):
         """
@@ -62,17 +55,13 @@ class GetStorageClassTests(SimpleTestCase):
 
 
 class FileSystemStorageTests(unittest.TestCase):
-
     def test_deconstruction(self):
         path, args, kwargs = temp_storage.deconstruct()
         self.assertEqual(path, "django.core.files.storage.FileSystemStorage")
         self.assertEqual(args, ())
         self.assertEqual(kwargs, {'location': temp_storage_location})
 
-        kwargs_orig = {
-            'location': temp_storage_location,
-            'base_url': 'http://myfiles.example.com/'
-        }
+        kwargs_orig = {'location': temp_storage_location, 'base_url': 'http://myfiles.example.com/'}
         storage = FileSystemStorage(**kwargs_orig)
         path, args, kwargs = storage.deconstruct()
         self.assertEqual(kwargs, kwargs_orig)
@@ -285,8 +274,7 @@ class FileStorageTests(SimpleTestCase):
         with self.storage.open('path/to/test.file') as f:
             self.assertEqual(f.read(), b'file saved with path')
 
-        self.assertTrue(os.path.exists(
-            os.path.join(self.temp_dir, 'path', 'to', 'test.file')))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, 'path', 'to', 'test.file')))
 
         self.storage.delete('path/to/test.file')
 
@@ -329,7 +317,7 @@ class FileStorageTests(SimpleTestCase):
         # like encodeURIComponent() JavaScript function do
         self.assertEqual(
             self.storage.url(r"~!*()'@#$%^&*abc`+ =.file"),
-            "/test_media_url/~!*()'%40%23%24%25%5E%26*abc%60%2B%20%3D.file"
+            "/test_media_url/~!*()'%40%23%24%25%5E%26*abc%60%2B%20%3D.file",
         )
         self.assertEqual(self.storage.url("ab\0c"), "/test_media_url/ab%00c")
 
@@ -354,10 +342,7 @@ class FileStorageTests(SimpleTestCase):
 
         # #22717: missing ending slash in base_url should be auto-corrected
         storage = self.storage_class(location=self.temp_dir, base_url='/no_ending_slash')
-        self.assertEqual(
-            storage.url('test.file'),
-            '%s%s' % (storage.base_url, 'test.file')
-        )
+        self.assertEqual(storage.url('test.file'), '%s%s' % (storage.base_url, 'test.file'))
 
     def test_listdir(self):
         """
@@ -484,6 +469,7 @@ class FileStorageTests(SimpleTestCase):
 
         def failing_chunks():
             raise OSError
+
         f1.chunks = failing_chunks
         with self.assertRaises(OSError):
             self.storage.save('error.file', f1)
@@ -571,6 +557,7 @@ class OverwritingStorage(FileSystemStorage):
     Overwrite existing files instead of appending a suffix to generate an
     unused name.
     """
+
     # Mask out O_EXCL so os.open() doesn't raise OSError if the file exists.
     OS_OPEN_FLAGS = FileSystemStorage.OS_OPEN_FLAGS & ~os.O_EXCL
 
@@ -690,8 +677,7 @@ class FileFieldStorageTests(TestCase):
 
     def test_filefield_read(self):
         # Files can be read in a little at a time, if necessary.
-        obj = Storage.objects.create(
-            normal=SimpleUploadedFile("assignment.txt", b"content"))
+        obj = Storage.objects.create(normal=SimpleUploadedFile("assignment.txt", b"content"))
         obj.normal.open()
         self.assertEqual(obj.normal.read(3), b"con")
         self.assertEqual(obj.normal.read(), b"tent")
@@ -755,10 +741,7 @@ class FileFieldStorageTests(TestCase):
             for o in objs:
                 o.delete()
 
-    @unittest.skipIf(
-        sys.platform.startswith('win'),
-        "Windows supports at most 260 characters in a path.",
-    )
+    @unittest.skipIf(sys.platform.startswith('win'), "Windows supports at most 260 characters in a path.")
     def test_extended_length_storage(self):
         # Testing FileField with max_length > 255. Most systems have filename
         # length limitation of 255. Path takes extra chars.
@@ -846,6 +829,7 @@ class FileFieldStorageTests(TestCase):
 # Tests for a race condition on file saving (#4948).
 # This is written in such a way that it'll always pass on platforms
 # without threading.
+
 
 class SlowFile(ContentFile):
     def chunks(self):
@@ -952,7 +936,6 @@ class FileStoragePathParsing(SimpleTestCase):
 
 
 class ContentFileStorageTestCase(unittest.TestCase):
-
     def setUp(self):
         self.storage_dir = tempfile.mkdtemp()
         self.storage = FileSystemStorage(self.storage_dir)

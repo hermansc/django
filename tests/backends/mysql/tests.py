@@ -19,10 +19,7 @@ class IsolationLevelTests(TestCase):
 
     read_committed = 'read committed'
     repeatable_read = 'repeatable read'
-    isolation_values = {
-        level: level.upper()
-        for level in (read_committed, repeatable_read)
-    }
+    isolation_values = {level: level.upper() for level in (read_committed, repeatable_read)}
 
     @classmethod
     def setUpClass(cls):
@@ -57,8 +54,7 @@ class IsolationLevelTests(TestCase):
         with get_connection() as new_connection:
             new_connection.settings_dict['OPTIONS']['isolation_level'] = self.other_isolation_level
             self.assertEqual(
-                self.get_isolation_level(new_connection),
-                self.isolation_values[self.other_isolation_level]
+                self.get_isolation_level(new_connection), self.isolation_values[self.other_isolation_level]
             )
 
     def test_uppercase_isolation_level(self):
@@ -66,18 +62,14 @@ class IsolationLevelTests(TestCase):
         with get_connection() as new_connection:
             new_connection.settings_dict['OPTIONS']['isolation_level'] = self.other_isolation_level.upper()
             self.assertEqual(
-                self.get_isolation_level(new_connection),
-                self.isolation_values[self.other_isolation_level]
+                self.get_isolation_level(new_connection), self.isolation_values[self.other_isolation_level]
             )
 
     def test_default_isolation_level(self):
         # If not specified in settings, the default is read committed.
         with get_connection() as new_connection:
             new_connection.settings_dict['OPTIONS'].pop('isolation_level', None)
-            self.assertEqual(
-                self.get_isolation_level(new_connection),
-                self.isolation_values[self.read_committed]
-            )
+            self.assertEqual(self.get_isolation_level(new_connection), self.isolation_values[self.read_committed])
 
     def test_isolation_level_validation(self):
         new_connection = connection.copy()

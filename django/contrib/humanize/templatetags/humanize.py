@@ -8,10 +8,7 @@ from django.template import defaultfilters
 from django.utils.formats import number_format
 from django.utils.safestring import mark_safe
 from django.utils.timezone import is_aware, utc
-from django.utils.translation import (
-    gettext as _, gettext_lazy, ngettext, ngettext_lazy, npgettext_lazy,
-    pgettext,
-)
+from django.utils.translation import gettext as _, gettext_lazy, ngettext, ngettext_lazy, npgettext_lazy, pgettext
 
 register = template.Library()
 
@@ -81,50 +78,83 @@ def intcomma(value, use_l10n=True):
 
 # A tuple of standard large number to their converters
 intword_converters = (
-    (6, lambda number: (
-        ngettext('%(value).1f million', '%(value).1f million', number),
-        ngettext('%(value)s million', '%(value)s million', number),
-    )),
-    (9, lambda number: (
-        ngettext('%(value).1f billion', '%(value).1f billion', number),
-        ngettext('%(value)s billion', '%(value)s billion', number),
-    )),
-    (12, lambda number: (
-        ngettext('%(value).1f trillion', '%(value).1f trillion', number),
-        ngettext('%(value)s trillion', '%(value)s trillion', number),
-    )),
-    (15, lambda number: (
-        ngettext('%(value).1f quadrillion', '%(value).1f quadrillion', number),
-        ngettext('%(value)s quadrillion', '%(value)s quadrillion', number),
-    )),
-    (18, lambda number: (
-        ngettext('%(value).1f quintillion', '%(value).1f quintillion', number),
-        ngettext('%(value)s quintillion', '%(value)s quintillion', number),
-    )),
-    (21, lambda number: (
-        ngettext('%(value).1f sextillion', '%(value).1f sextillion', number),
-        ngettext('%(value)s sextillion', '%(value)s sextillion', number),
-    )),
-    (24, lambda number: (
-        ngettext('%(value).1f septillion', '%(value).1f septillion', number),
-        ngettext('%(value)s septillion', '%(value)s septillion', number),
-    )),
-    (27, lambda number: (
-        ngettext('%(value).1f octillion', '%(value).1f octillion', number),
-        ngettext('%(value)s octillion', '%(value)s octillion', number),
-    )),
-    (30, lambda number: (
-        ngettext('%(value).1f nonillion', '%(value).1f nonillion', number),
-        ngettext('%(value)s nonillion', '%(value)s nonillion', number),
-    )),
-    (33, lambda number: (
-        ngettext('%(value).1f decillion', '%(value).1f decillion', number),
-        ngettext('%(value)s decillion', '%(value)s decillion', number),
-    )),
-    (100, lambda number: (
-        ngettext('%(value).1f googol', '%(value).1f googol', number),
-        ngettext('%(value)s googol', '%(value)s googol', number),
-    )),
+    (
+        6,
+        lambda number: (
+            ngettext('%(value).1f million', '%(value).1f million', number),
+            ngettext('%(value)s million', '%(value)s million', number),
+        ),
+    ),
+    (
+        9,
+        lambda number: (
+            ngettext('%(value).1f billion', '%(value).1f billion', number),
+            ngettext('%(value)s billion', '%(value)s billion', number),
+        ),
+    ),
+    (
+        12,
+        lambda number: (
+            ngettext('%(value).1f trillion', '%(value).1f trillion', number),
+            ngettext('%(value)s trillion', '%(value)s trillion', number),
+        ),
+    ),
+    (
+        15,
+        lambda number: (
+            ngettext('%(value).1f quadrillion', '%(value).1f quadrillion', number),
+            ngettext('%(value)s quadrillion', '%(value)s quadrillion', number),
+        ),
+    ),
+    (
+        18,
+        lambda number: (
+            ngettext('%(value).1f quintillion', '%(value).1f quintillion', number),
+            ngettext('%(value)s quintillion', '%(value)s quintillion', number),
+        ),
+    ),
+    (
+        21,
+        lambda number: (
+            ngettext('%(value).1f sextillion', '%(value).1f sextillion', number),
+            ngettext('%(value)s sextillion', '%(value)s sextillion', number),
+        ),
+    ),
+    (
+        24,
+        lambda number: (
+            ngettext('%(value).1f septillion', '%(value).1f septillion', number),
+            ngettext('%(value)s septillion', '%(value)s septillion', number),
+        ),
+    ),
+    (
+        27,
+        lambda number: (
+            ngettext('%(value).1f octillion', '%(value).1f octillion', number),
+            ngettext('%(value)s octillion', '%(value)s octillion', number),
+        ),
+    ),
+    (
+        30,
+        lambda number: (
+            ngettext('%(value).1f nonillion', '%(value).1f nonillion', number),
+            ngettext('%(value)s nonillion', '%(value)s nonillion', number),
+        ),
+    ),
+    (
+        33,
+        lambda number: (
+            ngettext('%(value).1f decillion', '%(value).1f decillion', number),
+            ngettext('%(value)s decillion', '%(value)s decillion', number),
+        ),
+    ),
+    (
+        100,
+        lambda number: (
+            ngettext('%(value).1f googol', '%(value).1f googol', number),
+            ngettext('%(value)s googol', '%(value)s googol', number),
+        ),
+    ),
 )
 
 
@@ -174,8 +204,9 @@ def apnumber(value):
         return value
     if not 0 < value < 10:
         return value
-    return (_('one'), _('two'), _('three'), _('four'), _('five'),
-            _('six'), _('seven'), _('eight'), _('nine'))[value - 1]
+    return (_('one'), _('two'), _('three'), _('four'), _('five'), _('six'), _('seven'), _('eight'), _('nine'))[
+        value - 1
+    ]
 
 
 # Perform the comparison in the default time zone when USE_TZ = True
@@ -270,7 +301,7 @@ class NaturalTimeFormatter:
             delta = now - value
             if delta.days != 0:
                 return cls.time_strings['past-day'] % {
-                    'delta': defaultfilters.timesince(value, now, time_strings=cls.past_substrings),
+                    'delta': defaultfilters.timesince(value, now, time_strings=cls.past_substrings)
                 }
             elif delta.seconds == 0:
                 return cls.time_strings['now']
@@ -286,7 +317,7 @@ class NaturalTimeFormatter:
             delta = value - now
             if delta.days != 0:
                 return cls.time_strings['future-day'] % {
-                    'delta': defaultfilters.timeuntil(value, now, time_strings=cls.future_substrings),
+                    'delta': defaultfilters.timeuntil(value, now, time_strings=cls.future_substrings)
                 }
             elif delta.seconds == 0:
                 return cls.time_strings['now']

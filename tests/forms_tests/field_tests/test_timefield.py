@@ -7,7 +7,6 @@ from . import FormFieldAssertionsMixin
 
 
 class TimeFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
-
     def test_timefield_1(self):
         f = TimeField()
         self.assertEqual(datetime.time(14, 25), f.clean(datetime.time(14, 25)))

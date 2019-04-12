@@ -5,17 +5,17 @@ from django.db import ProgrammingError
 
 try:
     from django.contrib.gis.db.backends.postgis.operations import PostGISOperations
+
     HAS_POSTGRES = True
 except ImportError:
     HAS_POSTGRES = False
 
 
 if HAS_POSTGRES:
+
     class FakeConnection:
         def __init__(self):
-            self.settings_dict = {
-                'NAME': 'test',
-            }
+            self.settings_dict = {'NAME': 'test'}
 
     class FakePostGISOperations(PostGISOperations):
         def __init__(self, version=None):
@@ -65,11 +65,7 @@ class TestPostGISVersionCheck(unittest.TestCase):
         self.assertEqual(expect, actual)
 
     def test_valid_version_numbers(self):
-        versions = [
-            ('1.3.0', 1, 3, 0),
-            ('2.1.1', 2, 1, 1),
-            ('2.2.0dev', 2, 2, 0),
-        ]
+        versions = [('1.3.0', 1, 3, 0), ('2.1.1', 2, 1, 1), ('2.2.0dev', 2, 2, 0)]
 
         for version in versions:
             with self.subTest(version=version):

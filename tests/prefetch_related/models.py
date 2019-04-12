@@ -1,8 +1,6 @@
 import uuid
 
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.query import ModelIterable, QuerySet
@@ -13,7 +11,8 @@ class Author(models.Model):
     name = models.CharField(max_length=50, unique=True)
     first_book = models.ForeignKey('Book', models.CASCADE, related_name='first_time_authors')
     favorite_authors = models.ManyToManyField(
-        'self', through='FavoriteAuthors', symmetrical=False, related_name='favors_me')
+        'self', through='FavoriteAuthors', symmetrical=False, related_name='favors_me'
+    )
 
     class Meta:
         ordering = ['id']
@@ -60,17 +59,11 @@ class Book(models.Model):
 class BookWithYear(Book):
     book = models.OneToOneField(Book, models.CASCADE, parent_link=True)
     published_year = models.IntegerField()
-    aged_authors = models.ManyToManyField(
-        AuthorWithAge, related_name='books_with_year')
+    aged_authors = models.ManyToManyField(AuthorWithAge, related_name='books_with_year')
 
 
 class Bio(models.Model):
-    author = models.OneToOneField(
-        Author,
-        models.CASCADE,
-        primary_key=True,
-        to_field='name',
-    )
+    author = models.OneToOneField(Author, models.CASCADE, primary_key=True, to_field='name')
     books = models.ManyToManyField(Book, blank=True)
 
 
@@ -92,6 +85,7 @@ class BookReview(models.Model):
 
 
 # Models for default manager tests
+
 
 class Qualification(models.Model):
     name = models.CharField(max_length=10)
@@ -139,29 +133,16 @@ class Department(models.Model):
 
 # GenericRelation/GenericForeignKey tests
 
+
 class TaggedItem(models.Model):
     tag = models.SlugField()
-    content_type = models.ForeignKey(
-        ContentType,
-        models.CASCADE,
-        related_name="taggeditem_set2",
-    )
+    content_type = models.ForeignKey(ContentType, models.CASCADE, related_name="taggeditem_set2")
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    created_by_ct = models.ForeignKey(
-        ContentType,
-        models.SET_NULL,
-        null=True,
-        related_name='taggeditem_set3',
-    )
+    created_by_ct = models.ForeignKey(ContentType, models.SET_NULL, null=True, related_name='taggeditem_set3')
     created_by_fkey = models.PositiveIntegerField(null=True)
-    created_by = GenericForeignKey('created_by_ct', 'created_by_fkey',)
-    favorite_ct = models.ForeignKey(
-        ContentType,
-        models.SET_NULL,
-        null=True,
-        related_name='taggeditem_set4',
-    )
+    created_by = GenericForeignKey('created_by_ct', 'created_by_fkey')
+    favorite_ct = models.ForeignKey(ContentType, models.SET_NULL, null=True, related_name='taggeditem_set4')
     favorite_fkey = models.CharField(max_length=64, null=True)
     favorite = GenericForeignKey('favorite_ct', 'favorite_fkey')
 
@@ -175,10 +156,12 @@ class TaggedItem(models.Model):
 class Bookmark(models.Model):
     url = models.URLField()
     tags = GenericRelation(TaggedItem, related_query_name='bookmarks')
-    favorite_tags = GenericRelation(TaggedItem,
-                                    content_type_field='favorite_ct',
-                                    object_id_field='favorite_fkey',
-                                    related_query_name='favorite_bookmarks')
+    favorite_tags = GenericRelation(
+        TaggedItem,
+        content_type_field='favorite_ct',
+        object_id_field='favorite_fkey',
+        related_query_name='favorite_bookmarks',
+    )
 
     class Meta:
         ordering = ['id']
@@ -197,6 +180,7 @@ class Comment(models.Model):
 
 
 # Models for lookup ordering tests
+
 
 class House(models.Model):
     name = models.CharField(max_length=50)
@@ -239,6 +223,7 @@ class Person(models.Model):
 
 # Models for nullable FK tests
 
+
 class Employee(models.Model):
     name = models.CharField(max_length=50)
     boss = models.ForeignKey('self', models.SET_NULL, null=True, related_name='serfs')
@@ -251,6 +236,7 @@ class Employee(models.Model):
 
 
 # Ticket #19607
+
 
 class LessonEntry(models.Model):
     name1 = models.CharField(max_length=200)
@@ -270,6 +256,7 @@ class WordEntry(models.Model):
 
 # Ticket #21410: Regression when related_name="+"
 
+
 class Author2(models.Model):
     name = models.CharField(max_length=50, unique=True)
     first_book = models.ForeignKey('Book', models.CASCADE, related_name='first_time_authors+')
@@ -283,6 +270,7 @@ class Author2(models.Model):
 
 
 # Models for many-to-many with UUID pk test:
+
 
 class Pet(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

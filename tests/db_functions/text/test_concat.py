@@ -14,22 +14,13 @@ lorem_ipsum = """
 
 
 class ConcatTests(TestCase):
-
     def test_basic(self):
         Author.objects.create(name='Jayden')
         Author.objects.create(name='John Smith', alias='smithj', goes_by='John')
         Author.objects.create(name='Margaret', goes_by='Maggie')
         Author.objects.create(name='Rhonda', alias='adnohR')
         authors = Author.objects.annotate(joined=Concat('alias', 'goes_by'))
-        self.assertQuerysetEqual(
-            authors.order_by('name'), [
-                '',
-                'smithjJohn',
-                'Maggie',
-                'adnohR',
-            ],
-            lambda a: a.joined
-        )
+        self.assertQuerysetEqual(authors.order_by('name'), ['', 'smithjJohn', 'Maggie', 'adnohR'], lambda a: a.joined)
 
     def test_gt_two_expressions(self):
         with self.assertRaisesMessage(ValueError, 'Concat must take at least two expressions'):
@@ -40,29 +31,23 @@ class ConcatTests(TestCase):
         Author.objects.create(name='John Smith', alias='smithj', goes_by='John')
         Author.objects.create(name='Margaret', goes_by='Maggie')
         Author.objects.create(name='Rhonda', alias='adnohR')
-        authors = Author.objects.annotate(
-            joined=Concat('name', V(' ('), 'goes_by', V(')'), output_field=CharField()),
-        )
+        authors = Author.objects.annotate(joined=Concat('name', V(' ('), 'goes_by', V(')'), output_field=CharField()))
         self.assertQuerysetEqual(
-            authors.order_by('name'), [
-                'Jayden ()',
-                'John Smith (John)',
-                'Margaret (Maggie)',
-                'Rhonda ()',
-            ],
-            lambda a: a.joined
+            authors.order_by('name'),
+            ['Jayden ()', 'John Smith (John)', 'Margaret (Maggie)', 'Rhonda ()'],
+            lambda a: a.joined,
         )
 
     def test_mixed_char_text(self):
         Article.objects.create(title='The Title', text=lorem_ipsum, written=timezone.now())
-        article = Article.objects.annotate(
-            title_text=Concat('title', V(' - '), 'text', output_field=TextField()),
-        ).get(title='The Title')
+        article = Article.objects.annotate(title_text=Concat('title', V(' - '), 'text', output_field=TextField())).get(
+            title='The Title'
+        )
         self.assertEqual(article.title + ' - ' + article.text, article.title_text)
         # Wrap the concat in something else to ensure that text is returned
         # rather than bytes.
         article = Article.objects.annotate(
-            title_text=Upper(Concat('title', V(' - '), 'text', output_field=TextField())),
+            title_text=Upper(Concat('title', V(' - '), 'text', output_field=TextField()))
         ).get(title='The Title')
         expected = article.title + ' - ' + article.text
         self.assertEqual(expected.upper(), article.title_text)

@@ -9,6 +9,7 @@ class PrefetchRelatedObjectsTests(TestCase):
     Since prefetch_related_objects() is just the inner part of
     prefetch_related(), only do basic tests to ensure its API hasn't changed.
     """
+
     @classmethod
     def setUpTestData(cls):
         cls.book1 = Book.objects.create(title='Poems')
@@ -77,16 +78,13 @@ class PrefetchRelatedObjectsTests(TestCase):
 
         with self.assertNumQueries(0):
             self.assertEqual(
-                [
-                    [[str(r) for r in b.read_by.all()] for b in a.books.all()]
-                    for a in authors
-                ],
+                [[[str(r) for r in b.read_by.all()] for b in a.books.all()] for a in authors],
                 [
                     [['Amy'], ['Belinda']],  # Charlotte - Poems, Jane Eyre
-                    [['Amy']],               # Anne - Poems
-                    [['Amy'], []],           # Emily - Poems, Wuthering Heights
-                    [['Amy', 'Belinda']],    # Jane - Sense and Sense
-                ]
+                    [['Amy']],  # Anne - Poems
+                    [['Amy'], []],  # Emily - Poems, Wuthering Heights
+                    [['Amy', 'Belinda']],  # Jane - Sense and Sense
+                ],
             )
 
     def test_prefetch_object(self):
@@ -109,8 +107,7 @@ class PrefetchRelatedObjectsTests(TestCase):
         book1 = Book.objects.get(id=self.book1.id)
         with self.assertNumQueries(1):
             prefetch_related_objects(
-                [book1],
-                Prefetch('authors', queryset=Author.objects.filter(id__in=[self.author1.id, self.author2.id]))
+                [book1], Prefetch('authors', queryset=Author.objects.filter(id__in=[self.author1.id, self.author2.id]))
             )
 
         with self.assertNumQueries(0):

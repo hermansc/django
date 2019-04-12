@@ -2,9 +2,14 @@ from django.forms.models import inlineformset_factory
 from django.test import TestCase
 
 from .models import (
-    AutoPKChildOfUUIDPKParent, AutoPKParent, ChildRelatedViaAK,
-    ChildWithEditablePK, ParentWithUUIDAlternateKey, UUIDPKChild,
-    UUIDPKChildOfAutoPKParent, UUIDPKParent,
+    AutoPKChildOfUUIDPKParent,
+    AutoPKParent,
+    ChildRelatedViaAK,
+    ChildWithEditablePK,
+    ParentWithUUIDAlternateKey,
+    UUIDPKChild,
+    UUIDPKChildOfAutoPKParent,
+    UUIDPKParent,
 )
 
 
@@ -27,14 +32,16 @@ class InlineFormsetTests(TestCase):
         value to avoid triggering validation on empty forms.
         """
         FormSet = inlineformset_factory(UUIDPKParent, UUIDPKChild, fields='__all__')
-        formset = FormSet({
-            'uuidpkchild_set-TOTAL_FORMS': 3,
-            'uuidpkchild_set-INITIAL_FORMS': 0,
-            'uuidpkchild_set-MAX_NUM_FORMS': '',
-            'uuidpkchild_set-0-name': 'Foo',
-            'uuidpkchild_set-1-name': '',
-            'uuidpkchild_set-2-name': '',
-        })
+        formset = FormSet(
+            {
+                'uuidpkchild_set-TOTAL_FORMS': 3,
+                'uuidpkchild_set-INITIAL_FORMS': 0,
+                'uuidpkchild_set-MAX_NUM_FORMS': '',
+                'uuidpkchild_set-0-name': 'Foo',
+                'uuidpkchild_set-1-name': '',
+                'uuidpkchild_set-2-name': '',
+            }
+        )
         self.assertTrue(formset.is_valid())
 
     def test_inlineformset_factory_nulls_default_pks_uuid_parent_auto_child(self):

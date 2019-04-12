@@ -64,38 +64,25 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             sequence_name = "%s_%s_seq" % (table, column)
             col_type = "integer" if new_type.lower() == "serial" else "bigint"
             return (
-                (
-                    self.sql_alter_column_type % {
-                        "column": self.quote_name(column),
-                        "type": col_type,
-                    },
-                    [],
-                ),
+                (self.sql_alter_column_type % {"column": self.quote_name(column), "type": col_type}, []),
                 [
+                    (self.sql_delete_sequence % {"sequence": self.quote_name(sequence_name)}, []),
+                    (self.sql_create_sequence % {"sequence": self.quote_name(sequence_name)}, []),
                     (
-                        self.sql_delete_sequence % {
-                            "sequence": self.quote_name(sequence_name),
-                        },
-                        [],
-                    ),
-                    (
-                        self.sql_create_sequence % {
-                            "sequence": self.quote_name(sequence_name),
-                        },
-                        [],
-                    ),
-                    (
-                        self.sql_alter_column % {
+                        self.sql_alter_column
+                        % {
                             "table": self.quote_name(table),
-                            "changes": self.sql_alter_column_default % {
+                            "changes": self.sql_alter_column_default
+                            % {
                                 "column": self.quote_name(column),
                                 "default": "nextval('%s')" % self.quote_name(sequence_name),
-                            }
+                            },
                         },
                         [],
                     ),
                     (
-                        self.sql_set_sequence_max % {
+                        self.sql_set_sequence_max
+                        % {
                             "table": self.quote_name(table),
                             "column": self.quote_name(column),
                             "sequence": self.quote_name(sequence_name),
@@ -103,7 +90,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                         [],
                     ),
                     (
-                        self.sql_set_sequence_owner % {
+                        self.sql_set_sequence_owner
+                        % {
                             'table': self.quote_name(table),
                             'column': self.quote_name(column),
                             'sequence': self.quote_name(sequence_name),
@@ -115,25 +103,24 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         else:
             return super()._alter_column_type_sql(model, old_field, new_field, new_type)
 
-    def _alter_field(self, model, old_field, new_field, old_type, new_type,
-                     old_db_params, new_db_params, strict=False):
+    def _alter_field(
+        self, model, old_field, new_field, old_type, new_type, old_db_params, new_db_params, strict=False
+    ):
         # Drop indexes on varchar/text/citext columns that are changing to a
         # different type.
         if (old_field.db_index or old_field.unique) and (
-            (old_type.startswith('varchar') and not new_type.startswith('varchar')) or
-            (old_type.startswith('text') and not new_type.startswith('text')) or
-            (old_type.startswith('citext') and not new_type.startswith('citext'))
+            (old_type.startswith('varchar') and not new_type.startswith('varchar'))
+            or (old_type.startswith('text') and not new_type.startswith('text'))
+            or (old_type.startswith('citext') and not new_type.startswith('citext'))
         ):
             index_name = self._create_index_name(model._meta.db_table, [old_field.column], suffix='_like')
             self.execute(self._delete_index_sql(model, index_name))
 
-        super()._alter_field(
-            model, old_field, new_field, old_type, new_type, old_db_params,
-            new_db_params, strict,
-        )
+        super()._alter_field(model, old_field, new_field, old_type, new_type, old_db_params, new_db_params, strict)
         # Added an index? Create any PostgreSQL-specific indexes.
-        if ((not (old_field.db_index or old_field.unique) and new_field.db_index) or
-                (not old_field.unique and new_field.unique)):
+        if (not (old_field.db_index or old_field.unique) and new_field.db_index) or (
+            not old_field.unique and new_field.unique
+        ):
             like_index_statement = self._create_like_index_sql(model, new_field)
             if like_index_statement is not None:
                 self.execute(like_index_statement)

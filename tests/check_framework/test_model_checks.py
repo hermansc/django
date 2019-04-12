@@ -2,9 +2,7 @@ from django.core import checks
 from django.core.checks import Error
 from django.db import models
 from django.test import SimpleTestCase
-from django.test.utils import (
-    isolate_apps, modify_settings, override_system_checks,
-)
+from django.test.utils import isolate_apps, modify_settings, override_system_checks
 
 
 @isolate_apps('check_framework', attr_name='apps')
@@ -19,14 +17,17 @@ class DuplicateDBTableTests(SimpleTestCase):
             class Meta:
                 db_table = 'test_table'
 
-        self.assertEqual(checks.run_checks(app_configs=self.apps.get_app_configs()), [
-            Error(
-                "db_table 'test_table' is used by multiple models: "
-                "check_framework.Model1, check_framework.Model2.",
-                obj='test_table',
-                id='models.E028',
-            )
-        ])
+        self.assertEqual(
+            checks.run_checks(app_configs=self.apps.get_app_configs()),
+            [
+                Error(
+                    "db_table 'test_table' is used by multiple models: "
+                    "check_framework.Model1, check_framework.Model2.",
+                    obj='test_table',
+                    id='models.E028',
+                )
+            ],
+        )
 
     @modify_settings(INSTALLED_APPS={'append': 'basic'})
     @isolate_apps('basic', 'check_framework', kwarg_name='apps')
@@ -41,14 +42,16 @@ class DuplicateDBTableTests(SimpleTestCase):
                 app_label = 'check_framework'
                 db_table = 'test_table'
 
-        self.assertEqual(checks.run_checks(app_configs=apps.get_app_configs()), [
-            Error(
-                "db_table 'test_table' is used by multiple models: "
-                "basic.Model1, check_framework.Model2.",
-                obj='test_table',
-                id='models.E028',
-            )
-        ])
+        self.assertEqual(
+            checks.run_checks(app_configs=apps.get_app_configs()),
+            [
+                Error(
+                    "db_table 'test_table' is used by multiple models: " "basic.Model1, check_framework.Model2.",
+                    obj='test_table',
+                    id='models.E028',
+                )
+            ],
+        )
 
     def test_no_collision_for_unmanaged_models(self):
         class Unmanaged(models.Model):

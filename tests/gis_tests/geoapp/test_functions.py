@@ -4,9 +4,7 @@ import re
 from decimal import Decimal
 
 from django.contrib.gis.db.models import functions
-from django.contrib.gis.geos import (
-    GEOSGeometry, LineString, Point, Polygon, fromstr,
-)
+from django.contrib.gis.geos import GEOSGeometry, LineString, Point, Polygon, fromstr
 from django.contrib.gis.measure import Area
 from django.db import NotSupportedError, connection
 from django.db.models import Sum
@@ -23,6 +21,7 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
 
     Please keep the tests in function's alphabetic order.
     """
+
     fixtures = ['initial']
 
     def test_asgeojson(self):
@@ -60,16 +59,14 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
         # SELECT ST_AsGeoJson("geoapp_city"."point", 8, 0)
         # FROM "geoapp_city" WHERE "geoapp_city"."name" = 'Pueblo';
         self.assertJSONEqual(
-            pueblo_json,
-            City.objects.annotate(geojson=functions.AsGeoJSON('point')).get(name='Pueblo').geojson
+            pueblo_json, City.objects.annotate(geojson=functions.AsGeoJSON('point')).get(name='Pueblo').geojson
         )
 
         # SELECT ST_AsGeoJson("geoapp_city"."point", 8, 2) FROM "geoapp_city"
         # WHERE "geoapp_city"."name" = 'Houston';
         # This time we want to include the CRS by using the `crs` keyword.
         self.assertJSONEqual(
-            City.objects.annotate(json=functions.AsGeoJSON('point', crs=True)).get(name='Houston').json,
-            houston_json,
+            City.objects.annotate(json=functions.AsGeoJSON('point', crs=True)).get(name='Houston').json, houston_json
         )
 
         # SELECT ST_AsGeoJson("geoapp_city"."point", 8, 1) FROM "geoapp_city"
@@ -77,18 +74,16 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
         # This time we include the bounding box by using the `bbox` keyword.
         self.assertJSONEqual(
             victoria_json,
-            City.objects.annotate(
-                geojson=functions.AsGeoJSON('point', bbox=True)
-            ).get(name='Victoria').geojson
+            City.objects.annotate(geojson=functions.AsGeoJSON('point', bbox=True)).get(name='Victoria').geojson,
         )
 
         # SELECT ST_AsGeoJson("geoapp_city"."point", 5, 3) FROM "geoapp_city"
         # WHERE "geoapp_city"."name" = 'Chicago';
         # Finally, we set every available keyword.
         self.assertJSONEqual(
-            City.objects.annotate(
-                geojson=functions.AsGeoJSON('point', bbox=True, crs=True, precision=5)
-            ).get(name='Chicago').geojson,
+            City.objects.annotate(geojson=functions.AsGeoJSON('point', bbox=True, crs=True, precision=5))
+            .get(name='Chicago')
+            .geojson,
             chicago_json,
         )
 
@@ -116,7 +111,7 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
         self.assertTrue(gml_regex.match(ptown.gml))
         self.assertIn(
             '<gml:pos srsDimension="2">',
-            City.objects.annotate(gml=functions.AsGML('point', version=3)).get(name='Pueblo').gml
+            City.objects.annotate(gml=functions.AsGML('point', version=3)).get(name='Pueblo').gml,
         )
 
     @skipUnlessDBFeature("has_AsKML_function")
@@ -217,14 +212,8 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
 
     @skipUnlessDBFeature("has_ForcePolygonCW_function")
     def test_force_polygon_cw(self):
-        rings = (
-            ((0, 0), (5, 0), (0, 5), (0, 0)),
-            ((1, 1), (1, 3), (3, 1), (1, 1)),
-        )
-        rhr_rings = (
-            ((0, 0), (0, 5), (5, 0), (0, 0)),
-            ((1, 1), (3, 1), (1, 3), (1, 1)),
-        )
+        rings = (((0, 0), (5, 0), (0, 5), (0, 0)), ((1, 1), (1, 3), (3, 1), (1, 1)))
+        rhr_rings = (((0, 0), (0, 5), (5, 0), (0, 0)), ((1, 1), (3, 1), (1, 3), (1, 1)))
         State.objects.create(name='Foo', poly=Polygon(*rings))
         st = State.objects.annotate(force_polygon_cw=functions.ForcePolygonCW('poly')).get(name='Foo')
         self.assertEqual(rhr_rings, st.force_polygon_cw.coords)
@@ -237,23 +226,26 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
         ref_hash = '9vk1mfq8jx0c8e0386z6'
         h1 = City.objects.annotate(geohash=functions.GeoHash('point')).get(name='Houston')
         h2 = City.objects.annotate(geohash=functions.GeoHash('point', precision=5)).get(name='Houston')
-        self.assertEqual(ref_hash, h1.geohash[:len(ref_hash)])
+        self.assertEqual(ref_hash, h1.geohash[: len(ref_hash)])
         self.assertEqual(ref_hash[:5], h2.geohash)
 
     @skipUnlessDBFeature('has_GeometryDistance_function')
     def test_geometry_distance(self):
         point = Point(-90, 40, srid=4326)
         qs = City.objects.annotate(distance=functions.GeometryDistance('point', point)).order_by('distance')
-        self.assertEqual([city.distance for city in qs], [
-            2.99091995527296,
-            5.33507274054713,
-            9.33852187483721,
-            9.91769193646233,
-            11.556465744884,
-            14.713098433352,
-            34.3635252198568,
-            276.987855073372,
-        ])
+        self.assertEqual(
+            [city.distance for city in qs],
+            [
+                2.99091995527296,
+                5.33507274054713,
+                9.33852187483721,
+                9.91769193646233,
+                11.556465744884,
+                14.713098433352,
+                34.3635252198568,
+                276.987855073372,
+            ],
+        )
 
     @skipUnlessDBFeature("has_Intersection_function")
     def test_intersection(self):
@@ -298,8 +290,7 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
     def test_area_lookups(self):
         # Create projected countries so the test works on all backends.
         CountryWebMercator.objects.bulk_create(
-            CountryWebMercator(name=c.name, mpoly=c.mpoly.transform(3857, clone=True))
-            for c in Country.objects.all()
+            CountryWebMercator(name=c.name, mpoly=c.mpoly.transform(3857, clone=True)) for c in Country.objects.all()
         )
         qs = CountryWebMercator.objects.annotate(area=functions.Area('mpoly'))
         self.assertEqual(qs.get(area__lt=Area(sq_km=500000)), CountryWebMercator.objects.get(name='New Zealand'))
@@ -373,7 +364,7 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
             # -- since PostGIS also uses GEOS these should be the same.
             ref = {
                 'New Zealand': Country.objects.get(name='New Zealand').mpoly.point_on_surface,
-                'Texas': Country.objects.get(name='Texas').mpoly.point_on_surface
+                'Texas': Country.objects.get(name='Texas').mpoly.point_on_surface,
             }
 
         qs = Country.objects.annotate(point_on_surface=functions.PointOnSurface('mpoly'))
@@ -416,14 +407,16 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
 
         # Boundary for San Marino, courtesy of Bjorn Sandvik of thematicmapping.org
         # from the world borders dataset he provides.
-        wkt = ('MULTIPOLYGON(((12.41580 43.95795,12.45055 43.97972,12.45389 43.98167,'
-               '12.46250 43.98472,12.47167 43.98694,12.49278 43.98917,'
-               '12.50555 43.98861,12.51000 43.98694,12.51028 43.98277,'
-               '12.51167 43.94333,12.51056 43.93916,12.49639 43.92333,'
-               '12.49500 43.91472,12.48778 43.90583,12.47444 43.89722,'
-               '12.46472 43.89555,12.45917 43.89611,12.41639 43.90472,'
-               '12.41222 43.90610,12.40782 43.91366,12.40389 43.92667,'
-               '12.40500 43.94833,12.40889 43.95499,12.41580 43.95795)))')
+        wkt = (
+            'MULTIPOLYGON(((12.41580 43.95795,12.45055 43.97972,12.45389 43.98167,'
+            '12.46250 43.98472,12.47167 43.98694,12.49278 43.98917,'
+            '12.50555 43.98861,12.51000 43.98694,12.51028 43.98277,'
+            '12.51167 43.94333,12.51056 43.93916,12.49639 43.92333,'
+            '12.49500 43.91472,12.48778 43.90583,12.47444 43.89722,'
+            '12.46472 43.89555,12.45917 43.89611,12.41639 43.90472,'
+            '12.41222 43.90610,12.40782 43.91366,12.40389 43.92667,'
+            '12.40500 43.94833,12.40889 43.95499,12.41580 43.95795)))'
+        )
         Country.objects.create(name='San Marino', mpoly=fromstr(wkt))
 
         # Because floating-point arithmetic isn't exact, we set a tolerance
@@ -435,10 +428,7 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
         ref = fromstr('MULTIPOLYGON(((12.4 44,12.5 44,12.5 43.9,12.4 43.9,12.4 44)))')
         self.assertTrue(
             ref.equals_exact(
-                Country.objects.annotate(
-                    snap=functions.SnapToGrid('mpoly', 0.1)
-                ).get(name='San Marino').snap,
-                tol
+                Country.objects.annotate(snap=functions.SnapToGrid('mpoly', 0.1)).get(name='San Marino').snap, tol
             )
         )
 
@@ -447,10 +437,8 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
         ref = fromstr('MULTIPOLYGON(((12.4 43.93,12.45 43.93,12.5 43.93,12.45 43.93,12.4 43.93)))')
         self.assertTrue(
             ref.equals_exact(
-                Country.objects.annotate(
-                    snap=functions.SnapToGrid('mpoly', 0.05, 0.23)
-                ).get(name='San Marino').snap,
-                tol
+                Country.objects.annotate(snap=functions.SnapToGrid('mpoly', 0.05, 0.23)).get(name='San Marino').snap,
+                tol,
             )
         )
 
@@ -461,10 +449,10 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
         )
         self.assertTrue(
             ref.equals_exact(
-                Country.objects.annotate(
-                    snap=functions.SnapToGrid('mpoly', 0.05, 0.23, 0.5, 0.17)
-                ).get(name='San Marino').snap,
-                tol
+                Country.objects.annotate(snap=functions.SnapToGrid('mpoly', 0.05, 0.23, 0.5, 0.17))
+                .get(name='San Marino')
+                .snap,
+                tol,
             )
         )
 
@@ -505,8 +493,8 @@ class GISFunctionsTests(FuncTestMixin, TestCase):
 
     # Some combined function tests
     @skipUnlessDBFeature(
-        "has_Difference_function", "has_Intersection_function",
-        "has_SymDifference_function", "has_Union_function")
+        "has_Difference_function", "has_Intersection_function", "has_SymDifference_function", "has_Union_function"
+    )
     def test_diff_intersection_union(self):
         geom = Point(5, 23, srid=4326)
         qs = Country.objects.all().annotate(

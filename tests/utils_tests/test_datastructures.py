@@ -6,13 +6,16 @@ import copy
 
 from django.test import SimpleTestCase
 from django.utils.datastructures import (
-    CaseInsensitiveMapping, DictWrapper, ImmutableList, MultiValueDict,
-    MultiValueDictKeyError, OrderedSet,
+    CaseInsensitiveMapping,
+    DictWrapper,
+    ImmutableList,
+    MultiValueDict,
+    MultiValueDictKeyError,
+    OrderedSet,
 )
 
 
 class OrderedSetTests(SimpleTestCase):
-
     def test_bool(self):
         # Refs #23664
         s = OrderedSet()
@@ -30,20 +33,13 @@ class OrderedSetTests(SimpleTestCase):
 
 
 class MultiValueDictTests(SimpleTestCase):
-
     def test_multivaluedict(self):
         d = MultiValueDict({'name': ['Adrian', 'Simon'], 'position': ['Developer']})
         self.assertEqual(d['name'], 'Simon')
         self.assertEqual(d.get('name'), 'Simon')
         self.assertEqual(d.getlist('name'), ['Adrian', 'Simon'])
-        self.assertEqual(
-            sorted(d.items()),
-            [('name', 'Simon'), ('position', 'Developer')]
-        )
-        self.assertEqual(
-            sorted(d.lists()),
-            [('name', ['Adrian', 'Simon']), ('position', ['Developer'])]
-        )
+        self.assertEqual(sorted(d.items()), [('name', 'Simon'), ('position', 'Developer')])
+        self.assertEqual(sorted(d.lists()), [('name', ['Adrian', 'Simon']), ('position', ['Developer'])])
         with self.assertRaises(MultiValueDictKeyError) as cm:
             d.__getitem__('lastname')
         self.assertEqual(str(cm.exception), "'lastname'")
@@ -63,18 +59,14 @@ class MultiValueDictTests(SimpleTestCase):
 
     def test_copy(self):
         for copy_func in [copy.copy, lambda d: d.copy()]:
-            d1 = MultiValueDict({
-                "developers": ["Carl", "Fred"]
-            })
+            d1 = MultiValueDict({"developers": ["Carl", "Fred"]})
             self.assertEqual(d1["developers"], "Fred")
             d2 = copy_func(d1)
             d2.update({"developers": "Groucho"})
             self.assertEqual(d2["developers"], "Groucho")
             self.assertEqual(d1["developers"], "Fred")
 
-            d1 = MultiValueDict({
-                "key": [[]]
-            })
+            d1 = MultiValueDict({"key": [[]]})
             self.assertEqual(d1["key"], [])
             d2 = copy_func(d1)
             d2["key"].append("Penguin")
@@ -82,10 +74,7 @@ class MultiValueDictTests(SimpleTestCase):
             self.assertEqual(d2["key"], ["Penguin"])
 
     def test_dict_translation(self):
-        mvd = MultiValueDict({
-            'devs': ['Bob', 'Joe'],
-            'pm': ['Rory'],
-        })
+        mvd = MultiValueDict({'devs': ['Bob', 'Joe'], 'pm': ['Rory']})
         d = mvd.dict()
         self.assertEqual(sorted(d), sorted(mvd))
         for key in mvd:
@@ -118,7 +107,6 @@ class MultiValueDictTests(SimpleTestCase):
 
 
 class ImmutableListTests(SimpleTestCase):
-
     def test_sort(self):
         d = ImmutableList(range(10))
 
@@ -139,23 +127,17 @@ class ImmutableListTests(SimpleTestCase):
 
 
 class DictWrapperTests(SimpleTestCase):
-
     def test_dictwrapper(self):
         def f(x):
             return "*%s" % x
+
         d = DictWrapper({'a': 'a'}, f, 'xx_')
-        self.assertEqual(
-            "Normal: %(a)s. Modified: %(xx_a)s" % d,
-            'Normal: a. Modified: *a'
-        )
+        self.assertEqual("Normal: %(a)s. Modified: %(xx_a)s" % d, 'Normal: a. Modified: *a')
 
 
 class CaseInsensitiveMappingTests(SimpleTestCase):
     def setUp(self):
-        self.dict1 = CaseInsensitiveMapping({
-            'Accept': 'application/json',
-            'content-type': 'text/html',
-        })
+        self.dict1 = CaseInsensitiveMapping({'Accept': 'application/json', 'content-type': 'text/html'})
 
     def test_create_with_invalid_values(self):
         msg = 'dictionary update sequence element #1 has length 4; 2 is required'

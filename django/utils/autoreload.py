@@ -267,6 +267,7 @@ class BaseReloader:
         logger.debug('Waiting for apps ready_event.')
         self.wait_for_apps_ready(apps, django_main_thread)
         from django.urls import get_resolver
+
         # Prevent a race condition where URL modules aren't loaded when the
         # reloader starts by accessing the urlconf_module property.
         get_resolver().urlconf_module
@@ -399,12 +400,7 @@ class WatchmanReloader(BaseReloader):
 
     def _subscribe(self, directory, name, expression):
         root, rel_path = self._watch_root(directory)
-        query = {
-            'expression': expression,
-            'fields': ['name'],
-            'since': self._get_clock(root),
-            'dedup_results': True,
-        }
+        query = {'expression': expression, 'fields': ['name'], 'since': self._get_clock(root), 'dedup_results': True}
         if rel_path:
             query['relative_root'] = rel_path
         logger.debug('Issuing watchman subscription %s, for root %s. Query: %s', name, root, query)

@@ -5,7 +5,6 @@ from django.test import SimpleTestCase
 
 
 class TypedChoiceFieldTest(SimpleTestCase):
-
     def test_typedchoicefield_1(self):
         f = TypedChoiceField(choices=[(1, "+1"), (-1, "-1")], coerce=int)
         self.assertEqual(1, f.clean('1'))
@@ -52,8 +51,11 @@ class TypedChoiceFieldTest(SimpleTestCase):
         self.assertFalse(f.has_changed('1', '1'))
 
         f = TypedChoiceField(
-            choices=[('', '---------'), ('a', "a"), ('b', "b")], coerce=str,
-            required=False, initial=None, empty_value=None,
+            choices=[('', '---------'), ('a', "a"), ('b', "b")],
+            coerce=str,
+            required=False,
+            initial=None,
+            empty_value=None,
         )
         self.assertFalse(f.has_changed(None, ''))
         self.assertTrue(f.has_changed('', 'a'))
@@ -64,6 +66,7 @@ class TypedChoiceFieldTest(SimpleTestCase):
         A coerce function which results in a value not present in choices
         should raise an appropriate error (#21397).
         """
+
         def coerce_func(val):
             return decimal.Decimal('1.%s' % val)
 

@@ -4,7 +4,6 @@ __all__ = ['CICharField', 'CIEmailField', 'CIText', 'CITextField']
 
 
 class CIText:
-
     def get_internal_type(self):
         return 'CI' + super().get_internal_type()
 

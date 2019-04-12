@@ -4,7 +4,6 @@ from django.utils import translation
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_formats(self):
         self.assertEqual(filesizeformat(1023), '1023\xa0bytes')
         self.assertEqual(filesizeformat(1024), '1.0\xa0KB')

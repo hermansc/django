@@ -5,9 +5,7 @@
 from ctypes import c_double, c_int
 
 from django.contrib.gis.geos.libgeos import GEOM_PTR, GEOSFuncFactory
-from django.contrib.gis.geos.prototypes.errcheck import (
-    check_geom, check_minus_one, check_string,
-)
+from django.contrib.gis.geos.prototypes.errcheck import check_geom, check_minus_one, check_string
 from django.contrib.gis.geos.prototypes.geom import geos_char_p
 
 
@@ -37,9 +35,7 @@ geos_union = Topology('GEOSUnion', argtypes=[GEOM_PTR, GEOM_PTR])
 geos_unary_union = GEOSFuncFactory('GEOSUnaryUnion', argtypes=[GEOM_PTR], restype=GEOM_PTR)
 
 # GEOSRelate returns a string, not a geometry.
-geos_relate = GEOSFuncFactory(
-    'GEOSRelate', argtypes=[GEOM_PTR, GEOM_PTR], restype=geos_char_p, errcheck=check_string
-)
+geos_relate = GEOSFuncFactory('GEOSRelate', argtypes=[GEOM_PTR, GEOM_PTR], restype=geos_char_p, errcheck=check_string)
 
 # Linear referencing routines
 geos_project = GEOSFuncFactory(

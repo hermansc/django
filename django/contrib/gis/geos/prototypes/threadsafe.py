@@ -1,13 +1,12 @@
 import threading
 
 from django.contrib.gis.geos.base import GEOSBase
-from django.contrib.gis.geos.libgeos import (
-    CONTEXT_PTR, error_h, lgeos, notice_h,
-)
+from django.contrib.gis.geos.libgeos import CONTEXT_PTR, error_h, lgeos, notice_h
 
 
 class GEOSContextHandle(GEOSBase):
     """Represent a GEOS context handle."""
+
     ptr_type = CONTEXT_PTR
     destructor = lgeos.finishGEOS_r
 
@@ -31,6 +30,7 @@ class GEOSFunc:
     Serve as a wrapper for GEOS C Functions. Use thread-safe function
     variants when available.
     """
+
     def __init__(self, func_name):
         # GEOS thread-safe function signatures end with '_r' and take an
         # additional context handle parameter.

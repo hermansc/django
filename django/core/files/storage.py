@@ -16,10 +16,7 @@ from django.utils.functional import LazyObject, cached_property
 from django.utils.module_loading import import_string
 from django.utils.text import get_valid_filename
 
-__all__ = (
-    'Storage', 'FileSystemStorage', 'DefaultStorage', 'default_storage',
-    'get_storage_class',
-)
+__all__ = ('Storage', 'FileSystemStorage', 'DefaultStorage', 'default_storage', 'get_storage_class')
 
 
 class Storage:
@@ -171,12 +168,12 @@ class FileSystemStorage(Storage):
     """
     Standard filesystem storage
     """
+
     # The combination of O_CREAT and O_EXCL makes os.open() raise OSError if
     # the file already exists before it's opened.
     OS_OPEN_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_BINARY', 0)
 
-    def __init__(self, location=None, base_url=None, file_permissions_mode=None,
-                 directory_permissions_mode=None):
+    def __init__(self, location=None, base_url=None, file_permissions_mode=None, directory_permissions_mode=None):
         self._location = location
         self._base_url = base_url
         self._file_permissions_mode = file_permissions_mode

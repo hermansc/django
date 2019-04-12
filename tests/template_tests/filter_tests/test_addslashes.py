@@ -6,7 +6,6 @@ from ..utils import setup
 
 
 class AddslashesTests(SimpleTestCase):
-
     @setup({'addslashes01': '{% autoescape off %}{{ a|addslashes }} {{ b|addslashes }}{% endautoescape %}'})
     def test_addslashes01(self):
         output = self.engine.render_to_string('addslashes01', {"a": "<a>'", "b": mark_safe("<a>'")})
@@ -19,11 +18,9 @@ class AddslashesTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_quotes(self):
         self.assertEqual(
-            addslashes('"double quotes" and \'single quotes\''),
-            '\\"double quotes\\" and \\\'single quotes\\\'',
+            addslashes('"double quotes" and \'single quotes\''), '\\"double quotes\\" and \\\'single quotes\\\''
         )
 
     def test_backslashes(self):

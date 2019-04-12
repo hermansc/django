@@ -20,17 +20,9 @@ from .models import B, Person, Through
 
 
 class DependencyOrderingTests(unittest.TestCase):
-
     def test_simple_dependencies(self):
-        raw = [
-            ('s1', ('s1_db', ['alpha'])),
-            ('s2', ('s2_db', ['bravo'])),
-            ('s3', ('s3_db', ['charlie'])),
-        ]
-        dependencies = {
-            'alpha': ['charlie'],
-            'bravo': ['charlie'],
-        }
+        raw = [('s1', ('s1_db', ['alpha'])), ('s2', ('s2_db', ['bravo'])), ('s3', ('s3_db', ['charlie']))]
+        dependencies = {'alpha': ['charlie'], 'bravo': ['charlie']}
 
         ordered = dependency_ordered(raw, dependencies=dependencies)
         ordered_sigs = [sig for sig, value in ordered]
@@ -42,15 +34,8 @@ class DependencyOrderingTests(unittest.TestCase):
         self.assertLess(ordered_sigs.index('s3'), ordered_sigs.index('s2'))
 
     def test_chained_dependencies(self):
-        raw = [
-            ('s1', ('s1_db', ['alpha'])),
-            ('s2', ('s2_db', ['bravo'])),
-            ('s3', ('s3_db', ['charlie'])),
-        ]
-        dependencies = {
-            'alpha': ['bravo'],
-            'bravo': ['charlie'],
-        }
+        raw = [('s1', ('s1_db', ['alpha'])), ('s2', ('s2_db', ['bravo'])), ('s3', ('s3_db', ['charlie']))]
+        dependencies = {'alpha': ['bravo'], 'bravo': ['charlie']}
 
         ordered = dependency_ordered(raw, dependencies=dependencies)
         ordered_sigs = [sig for sig, value in ordered]
@@ -73,11 +58,7 @@ class DependencyOrderingTests(unittest.TestCase):
             ('s3', ('s3_db', ['charlie'])),
             ('s4', ('s4_db', ['delta'])),
         ]
-        dependencies = {
-            'alpha': ['bravo', 'delta'],
-            'bravo': ['charlie'],
-            'delta': ['charlie'],
-        }
+        dependencies = {'alpha': ['bravo', 'delta'], 'bravo': ['charlie'], 'delta': ['charlie']}
 
         ordered = dependency_ordered(raw, dependencies=dependencies)
         ordered_sigs = [sig for sig, aliases in ordered]
@@ -97,33 +78,21 @@ class DependencyOrderingTests(unittest.TestCase):
         self.assertLess(ordered_sigs.index('s3'), ordered_sigs.index('s1'))
 
     def test_circular_dependencies(self):
-        raw = [
-            ('s1', ('s1_db', ['alpha'])),
-            ('s2', ('s2_db', ['bravo'])),
-        ]
-        dependencies = {
-            'bravo': ['alpha'],
-            'alpha': ['bravo'],
-        }
+        raw = [('s1', ('s1_db', ['alpha'])), ('s2', ('s2_db', ['bravo']))]
+        dependencies = {'bravo': ['alpha'], 'alpha': ['bravo']}
 
         with self.assertRaises(ImproperlyConfigured):
             dependency_ordered(raw, dependencies=dependencies)
 
     def test_own_alias_dependency(self):
-        raw = [
-            ('s1', ('s1_db', ['alpha', 'bravo']))
-        ]
-        dependencies = {
-            'alpha': ['bravo']
-        }
+        raw = [('s1', ('s1_db', ['alpha', 'bravo']))]
+        dependencies = {'alpha': ['bravo']}
 
         with self.assertRaises(ImproperlyConfigured):
             dependency_ordered(raw, dependencies=dependencies)
 
         # reordering aliases shouldn't matter
-        raw = [
-            ('s1', ('s1_db', ['bravo', 'alpha']))
-        ]
+        raw = [('s1', ('s1_db', ['bravo', 'alpha']))]
 
         with self.assertRaises(ImproperlyConfigured):
             dependency_ordered(raw, dependencies=dependencies)
@@ -138,10 +107,8 @@ MockTestRunner.run_tests = mock.Mock(return_value=[])
 
 
 class ManageCommandTests(unittest.TestCase):
-
     def test_custom_test_runner(self):
-        call_command('test', 'sites',
-                     testrunner='test_runner.tests.MockTestRunner')
+        call_command('test', 'sites', testrunner='test_runner.tests.MockTestRunner')
         MockTestRunner.run_tests.assert_called_with(('sites',))
 
     def test_bad_test_runner(self):
@@ -154,11 +121,10 @@ class CustomTestRunnerOptionsSettingsTests(AdminScriptTestCase):
     Custom runners can add command line arguments. The runner is specified
     through a settings file.
     """
+
     def setUp(self):
         super().setUp()
-        settings = {
-            'TEST_RUNNER': '\'test_runner.runner.CustomOptionsTestRunner\'',
-        }
+        settings = {'TEST_RUNNER': '\'test_runner.runner.CustomOptionsTestRunner\''}
         self.write_settings('settings.py', sdict=settings)
 
     def test_default_options(self):
@@ -180,8 +146,7 @@ class CustomTestRunnerOptionsSettingsTests(AdminScriptTestCase):
         self.assertOutput(out, '1:foo:3')
 
     def test_all_options_given(self):
-        args = ['test', '--settings=test_project.settings', '--option_a=bar',
-                '--option_b=foo', '--option_c=31337']
+        args = ['test', '--settings=test_project.settings', '--option_a=bar', '--option_b=foo', '--option_c=31337']
         out, err = self.run_django_admin(args)
         self.assertNoOutput(err)
         self.assertOutput(out, 'bar:foo:31337')
@@ -192,14 +157,19 @@ class CustomTestRunnerOptionsCmdlineTests(AdminScriptTestCase):
     Custom runners can add command line arguments when the runner is specified
     using --testrunner.
     """
+
     def setUp(self):
         super().setUp()
         self.write_settings('settings.py')
 
     def test_testrunner_option(self):
         args = [
-            'test', '--testrunner', 'test_runner.runner.CustomOptionsTestRunner',
-            '--option_a=bar', '--option_b=foo', '--option_c=31337'
+            'test',
+            '--testrunner',
+            'test_runner.runner.CustomOptionsTestRunner',
+            '--option_a=bar',
+            '--option_b=foo',
+            '--option_c=31337',
         ]
         out, err = self.run_django_admin(args, 'test_project.settings')
         self.assertNoOutput(err)
@@ -207,8 +177,11 @@ class CustomTestRunnerOptionsCmdlineTests(AdminScriptTestCase):
 
     def test_testrunner_equals(self):
         args = [
-            'test', '--testrunner=test_runner.runner.CustomOptionsTestRunner',
-            '--option_a=bar', '--option_b=foo', '--option_c=31337'
+            'test',
+            '--testrunner=test_runner.runner.CustomOptionsTestRunner',
+            '--option_a=bar',
+            '--option_b=foo',
+            '--option_c=31337',
         ]
         out, err = self.run_django_admin(args, 'test_project.settings')
         self.assertNoOutput(err)
@@ -238,8 +211,9 @@ class SQLiteInMemoryTestDbs(TransactionTestCase):
     available_apps = ['test_runner']
     databases = {'default', 'other'}
 
-    @unittest.skipUnless(all(db.connections[conn].vendor == 'sqlite' for conn in db.connections),
-                         "This is an sqlite-specific issue")
+    @unittest.skipUnless(
+        all(db.connections[conn].vendor == 'sqlite' for conn in db.connections), "This is an sqlite-specific issue"
+    )
     def test_transaction_support(self):
         # Assert connections mocking is appropriately applied by preventing
         # any attempts at calling create_test_db on the global connection
@@ -248,22 +222,17 @@ class SQLiteInMemoryTestDbs(TransactionTestCase):
             create_test_db = mock.patch.object(
                 connection.creation,
                 'create_test_db',
-                side_effect=AssertionError("Global connection object shouldn't be manipulated.")
+                side_effect=AssertionError("Global connection object shouldn't be manipulated."),
             )
             create_test_db.start()
             self.addCleanup(create_test_db.stop)
-        for option_key, option_value in (
-                ('NAME', ':memory:'), ('TEST', {'NAME': ':memory:'})):
-            tested_connections = db.ConnectionHandler({
-                'default': {
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    option_key: option_value,
-                },
-                'other': {
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    option_key: option_value,
-                },
-            })
+        for option_key, option_value in (('NAME', ':memory:'), ('TEST', {'NAME': ':memory:'})):
+            tested_connections = db.ConnectionHandler(
+                {
+                    'default': {'ENGINE': 'django.db.backends.sqlite3', option_key: option_value},
+                    'other': {'ENGINE': 'django.db.backends.sqlite3', option_key: option_value},
+                }
+            )
             with mock.patch('django.test.utils.connections', new=tested_connections):
                 other = tested_connections['other']
                 DiscoverRunner(verbosity=0).setup_databases()
@@ -294,14 +263,7 @@ class AliasedDefaultTestSetupTest(unittest.TestCase):
         """
         setup_datebases() doesn't fail when 'default' is aliased
         """
-        tested_connections = db.ConnectionHandler({
-            'default': {
-                'NAME': 'dummy'
-            },
-            'aliased': {
-                'NAME': 'dummy'
-            }
-        })
+        tested_connections = db.ConnectionHandler({'default': {'NAME': 'dummy'}, 'aliased': {'NAME': 'dummy'}})
         with mock.patch('django.test.utils.connections', new=tested_connections):
             runner_instance = DiscoverRunner(verbosity=0)
             old_config = runner_instance.setup_databases()
@@ -309,21 +271,16 @@ class AliasedDefaultTestSetupTest(unittest.TestCase):
 
 
 class SetupDatabasesTests(unittest.TestCase):
-
     def setUp(self):
         self.runner_instance = DiscoverRunner(verbosity=0)
 
     def test_setup_aliased_databases(self):
-        tested_connections = db.ConnectionHandler({
-            'default': {
-                'ENGINE': 'django.db.backends.dummy',
-                'NAME': 'dbname',
-            },
-            'other': {
-                'ENGINE': 'django.db.backends.dummy',
-                'NAME': 'dbname',
+        tested_connections = db.ConnectionHandler(
+            {
+                'default': {'ENGINE': 'django.db.backends.dummy', 'NAME': 'dbname'},
+                'other': {'ENGINE': 'django.db.backends.dummy', 'NAME': 'dbname'},
             }
-        })
+        )
 
         with mock.patch('django.db.backends.dummy.base.DatabaseWrapper.creation_class') as mocked_db_creation:
             with mock.patch('django.test.utils.connections', new=tested_connections):
@@ -332,12 +289,9 @@ class SetupDatabasesTests(unittest.TestCase):
         mocked_db_creation.return_value.destroy_test_db.assert_called_once_with('dbname', 0, False)
 
     def test_destroy_test_db_restores_db_name(self):
-        tested_connections = db.ConnectionHandler({
-            'default': {
-                'ENGINE': settings.DATABASES[db.DEFAULT_DB_ALIAS]["ENGINE"],
-                'NAME': 'xxx_test_database',
-            },
-        })
+        tested_connections = db.ConnectionHandler(
+            {'default': {'ENGINE': settings.DATABASES[db.DEFAULT_DB_ALIAS]["ENGINE"], 'NAME': 'xxx_test_database'}}
+        )
         # Using the real current name as old_name to not mess with the test suite.
         old_name = settings.DATABASES[db.DEFAULT_DB_ALIAS]["NAME"]
         with mock.patch('django.db.connections', new=tested_connections):
@@ -345,11 +299,7 @@ class SetupDatabasesTests(unittest.TestCase):
             self.assertEqual(tested_connections['default'].settings_dict["NAME"], old_name)
 
     def test_serialization(self):
-        tested_connections = db.ConnectionHandler({
-            'default': {
-                'ENGINE': 'django.db.backends.dummy',
-            },
-        })
+        tested_connections = db.ConnectionHandler({'default': {'ENGINE': 'django.db.backends.dummy'}})
         with mock.patch('django.db.backends.dummy.base.DatabaseWrapper.creation_class') as mocked_db_creation:
             with mock.patch('django.test.utils.connections', new=tested_connections):
                 self.runner_instance.setup_databases()
@@ -358,12 +308,9 @@ class SetupDatabasesTests(unittest.TestCase):
         )
 
     def test_serialized_off(self):
-        tested_connections = db.ConnectionHandler({
-            'default': {
-                'ENGINE': 'django.db.backends.dummy',
-                'TEST': {'SERIALIZE': False},
-            },
-        })
+        tested_connections = db.ConnectionHandler(
+            {'default': {'ENGINE': 'django.db.backends.dummy', 'TEST': {'SERIALIZE': False}}}
+        )
         with mock.patch('django.db.backends.dummy.base.DatabaseWrapper.creation_class') as mocked_db_creation:
             with mock.patch('django.test.utils.connections', new=tested_connections):
                 self.runner_instance.setup_databases()
@@ -419,12 +366,15 @@ class RunTestsExceptionHandlingTests(unittest.TestCase):
         """
         Teardown functions are run when run_checks() raises SystemCheckError.
         """
-        with mock.patch('django.test.runner.DiscoverRunner.setup_test_environment'), \
-                mock.patch('django.test.runner.DiscoverRunner.setup_databases'), \
-                mock.patch('django.test.runner.DiscoverRunner.build_suite'), \
-                mock.patch('django.test.runner.DiscoverRunner.run_checks', side_effect=SystemCheckError), \
-                mock.patch('django.test.runner.DiscoverRunner.teardown_databases') as teardown_databases, \
-                mock.patch('django.test.runner.DiscoverRunner.teardown_test_environment') as teardown_test_environment:
+        with mock.patch('django.test.runner.DiscoverRunner.setup_test_environment'), mock.patch(
+            'django.test.runner.DiscoverRunner.setup_databases'
+        ), mock.patch('django.test.runner.DiscoverRunner.build_suite'), mock.patch(
+            'django.test.runner.DiscoverRunner.run_checks', side_effect=SystemCheckError
+        ), mock.patch(
+            'django.test.runner.DiscoverRunner.teardown_databases'
+        ) as teardown_databases, mock.patch(
+            'django.test.runner.DiscoverRunner.teardown_test_environment'
+        ) as teardown_test_environment:
             runner = DiscoverRunner(verbosity=0, interactive=False)
             with self.assertRaises(SystemCheckError):
                 runner.run_tests(['test_runner_apps.sample.tests_sample.TestDjangoTestCase'])
@@ -436,13 +386,15 @@ class RunTestsExceptionHandlingTests(unittest.TestCase):
         SystemCheckError is surfaced when run_checks() raises SystemCheckError
         and teardown databases() raises ValueError.
         """
-        with mock.patch('django.test.runner.DiscoverRunner.setup_test_environment'), \
-                mock.patch('django.test.runner.DiscoverRunner.setup_databases'), \
-                mock.patch('django.test.runner.DiscoverRunner.build_suite'), \
-                mock.patch('django.test.runner.DiscoverRunner.run_checks', side_effect=SystemCheckError), \
-                mock.patch('django.test.runner.DiscoverRunner.teardown_databases', side_effect=ValueError) \
-                as teardown_databases, \
-                mock.patch('django.test.runner.DiscoverRunner.teardown_test_environment') as teardown_test_environment:
+        with mock.patch('django.test.runner.DiscoverRunner.setup_test_environment'), mock.patch(
+            'django.test.runner.DiscoverRunner.setup_databases'
+        ), mock.patch('django.test.runner.DiscoverRunner.build_suite'), mock.patch(
+            'django.test.runner.DiscoverRunner.run_checks', side_effect=SystemCheckError
+        ), mock.patch(
+            'django.test.runner.DiscoverRunner.teardown_databases', side_effect=ValueError
+        ) as teardown_databases, mock.patch(
+            'django.test.runner.DiscoverRunner.teardown_test_environment'
+        ) as teardown_test_environment:
             runner = DiscoverRunner(verbosity=0, interactive=False)
             with self.assertRaises(SystemCheckError):
                 runner.run_tests(['test_runner_apps.sample.tests_sample.TestDjangoTestCase'])
@@ -454,13 +406,15 @@ class RunTestsExceptionHandlingTests(unittest.TestCase):
         Exceptions on teardown are surfaced if no exceptions happen during
         run_checks().
         """
-        with mock.patch('django.test.runner.DiscoverRunner.setup_test_environment'), \
-                mock.patch('django.test.runner.DiscoverRunner.setup_databases'), \
-                mock.patch('django.test.runner.DiscoverRunner.build_suite'), \
-                mock.patch('django.test.runner.DiscoverRunner.run_checks'), \
-                mock.patch('django.test.runner.DiscoverRunner.teardown_databases', side_effect=ValueError) \
-                as teardown_databases, \
-                mock.patch('django.test.runner.DiscoverRunner.teardown_test_environment') as teardown_test_environment:
+        with mock.patch('django.test.runner.DiscoverRunner.setup_test_environment'), mock.patch(
+            'django.test.runner.DiscoverRunner.setup_databases'
+        ), mock.patch('django.test.runner.DiscoverRunner.build_suite'), mock.patch(
+            'django.test.runner.DiscoverRunner.run_checks'
+        ), mock.patch(
+            'django.test.runner.DiscoverRunner.teardown_databases', side_effect=ValueError
+        ) as teardown_databases, mock.patch(
+            'django.test.runner.DiscoverRunner.teardown_test_environment'
+        ) as teardown_test_environment:
             runner = DiscoverRunner(verbosity=0, interactive=False)
             with self.assertRaises(ValueError):
                 # Suppress the output when running TestDjangoTestCase.

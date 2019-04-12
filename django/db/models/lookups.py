@@ -26,6 +26,7 @@ class Lookup:
             # Warn the user as soon as possible if they are trying to apply
             # a bilateral transformation on a nested QuerySet: that won't work.
             from django.db.models.sql.query import Query  # avoid circular import
+
             if isinstance(rhs, Query):
                 raise NotImplementedError("Bilateral transformations on nested querysets are not implemented.")
         self.bilateral_transforms = bilateral_transforms
@@ -130,6 +131,7 @@ class Transform(RegisterLookupMixin, Func):
     RegisterLookupMixin() is first so that get_lookup() and get_transform()
     first examine self and then check output_field.
     """
+
     bilateral = False
     arity = 1
 
@@ -152,8 +154,7 @@ class BuiltinLookup(Lookup):
         lhs_sql, params = super().process_lhs(compiler, connection, lhs)
         field_internal_type = self.lhs.output_field.get_internal_type()
         db_type = self.lhs.output_field.db_type(connection=connection)
-        lhs_sql = connection.ops.field_cast_sql(
-            db_type, field_internal_type) % lhs_sql
+        lhs_sql = connection.ops.field_cast_sql(db_type, field_internal_type) % lhs_sql
         lhs_sql = connection.ops.lookup_cast(self.lookup_name, field_internal_type) % lhs_sql
         return lhs_sql, list(params)
 
@@ -173,6 +174,7 @@ class FieldGetDbPrepValueMixin:
     Some lookups require Field.get_db_prep_value() to be called on their
     inputs.
     """
+
     get_db_prep_lookup_value_is_iterable = False
 
     def get_db_prep_lookup(self, value, connection):
@@ -182,8 +184,8 @@ class FieldGetDbPrepValueMixin:
         return (
             '%s',
             [get_db_prep_value(v, connection, prepared=True) for v in value]
-            if self.get_db_prep_lookup_value_is_iterable else
-            [get_db_prep_value(value, connection, prepared=True)]
+            if self.get_db_prep_lookup_value_is_iterable
+            else [get_db_prep_value(value, connection, prepared=True)],
         )
 
 
@@ -192,6 +194,7 @@ class FieldGetDbPrepValueIterableMixin(FieldGetDbPrepValueMixin):
     Some lookups require Field.get_db_prep_value() to be called on each value
     in an iterable.
     """
+
     get_db_prep_lookup_value_is_iterable = True
 
     def get_prep_lookup(self):
@@ -230,10 +233,12 @@ class FieldGetDbPrepValueIterableMixin(FieldGetDbPrepValueMixin):
         # sql/param pair. Zip them to get sql and param pairs that refer to the
         # same argument and attempt to replace them with the result of
         # compiling the param step.
-        sql, params = zip(*(
-            self.resolve_expression_parameter(compiler, connection, sql, param)
-            for sql, param in zip(*pre_processed)
-        ))
+        sql, params = zip(
+            *(
+                self.resolve_expression_parameter(compiler, connection, sql, param)
+                for sql, param in zip(*pre_processed)
+            )
+        )
         params = itertools.chain.from_iterable(params)
         return sql, tuple(params)
 
@@ -244,6 +249,7 @@ class Exact(FieldGetDbPrepValueMixin, BuiltinLookup):
 
     def process_rhs(self, compiler, connection):
         from django.db.models.sql.query import Query
+
         if isinstance(self.rhs, Query):
             if self.rhs.has_limit_one():
                 # The subquery must select only the pk.
@@ -251,8 +257,7 @@ class Exact(FieldGetDbPrepValueMixin, BuiltinLookup):
                 self.rhs.add_fields(['pk'])
             else:
                 raise ValueError(
-                    'The QuerySet value for an exact lookup must be limited to '
-                    'one result using slicing.'
+                    'The QuerySet value for an exact lookup must be limited to ' 'one result using slicing.'
                 )
         return super().process_rhs(compiler, connection)
 
@@ -294,6 +299,7 @@ class IntegerFieldFloatRounding:
     Allow floats to work as query values for IntegerField. Without this, the
     decimal portion of the float would always be discarded.
     """
+
     def get_prep_lookup(self):
         if isinstance(self.rhs, float):
             self.rhs = math.ceil(self.rhs)
@@ -364,8 +370,8 @@ class In(FieldGetDbPrepValueIterableMixin, BuiltinLookup):
                 in_clause_elements.append(' OR ')
             in_clause_elements.append('%s IN (' % lhs)
             params.extend(lhs_params)
-            sqls = rhs[offset: offset + max_in_list_size]
-            sqls_params = rhs_params[offset: offset + max_in_list_size]
+            sqls = rhs[offset : offset + max_in_list_size]
+            sqls_params = rhs_params[offset : offset + max_in_list_size]
             param_group = ', '.join(sqls)
             in_clause_elements.append(param_group)
             in_clause_elements.append(')')
@@ -499,9 +505,7 @@ class YearComparisonLookup(YearLookup):
         return connection.operators[self.lookup_name] % rhs
 
     def get_bound(self, start, finish):
-        raise NotImplementedError(
-            'subclasses of YearComparisonLookup must provide a get_bound() method'
-        )
+        raise NotImplementedError('subclasses of YearComparisonLookup must provide a get_bound() method')
 
 
 class YearExact(YearLookup, Exact):

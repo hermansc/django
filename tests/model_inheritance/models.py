@@ -45,6 +45,7 @@ class Student(CommonInfo):
 # Abstract base classes with related models
 #
 
+
 class Post(models.Model):
     title = models.CharField(max_length=50)
 
@@ -76,6 +77,7 @@ class Link(Attachment):
 #
 # Multi-table inheritance
 #
+
 
 class Chef(models.Model):
     name = models.CharField(max_length=50)
@@ -143,6 +145,7 @@ class ParkingLot(Place):
 #       model_inheritance_same_model_name/models.py - They are defined
 #       here in order to have the name conflict between apps
 #
+
 
 class Title(models.Model):
     title = models.CharField(max_length=50)

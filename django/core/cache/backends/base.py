@@ -245,13 +245,14 @@ class BaseCache:
         if len(key) > MEMCACHE_MAX_KEY_LENGTH:
             warnings.warn(
                 'Cache key will cause errors if used with memcached: %r '
-                '(longer than %s)' % (key, MEMCACHE_MAX_KEY_LENGTH), CacheKeyWarning
+                '(longer than %s)' % (key, MEMCACHE_MAX_KEY_LENGTH),
+                CacheKeyWarning,
             )
         for char in key:
             if ord(char) < 33 or ord(char) == 127:
                 warnings.warn(
-                    'Cache key contains characters that will cause errors if '
-                    'used with memcached: %r' % key, CacheKeyWarning
+                    'Cache key contains characters that will cause errors if ' 'used with memcached: %r' % key,
+                    CacheKeyWarning,
                 )
                 break
 

@@ -11,11 +11,7 @@ update_proxy_permissions = import_module('django.contrib.auth.migrations.0011_up
 
 
 class ProxyModelWithDifferentAppLabelTests(TestCase):
-    available_apps = [
-        'auth_tests',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-    ]
+    available_apps = ['auth_tests', 'django.contrib.auth', 'django.contrib.contenttypes']
 
     def setUp(self):
         """
@@ -26,9 +22,7 @@ class ProxyModelWithDifferentAppLabelTests(TestCase):
         Permission.objects.all().delete()
         self.concrete_content_type = ContentType.objects.get_for_model(UserProxy)
         self.default_permission = Permission.objects.create(
-            content_type=self.concrete_content_type,
-            codename='add_userproxy',
-            name='Can add userproxy',
+            content_type=self.concrete_content_type, codename='add_userproxy', name='Can add userproxy'
         )
         self.custom_permission = Permission.objects.create(
             content_type=self.concrete_content_type,
@@ -85,11 +79,7 @@ class ProxyModelWithDifferentAppLabelTests(TestCase):
 
 
 class ProxyModelWithSameAppLabelTests(TestCase):
-    available_apps = [
-        'auth_tests',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-    ]
+    available_apps = ['auth_tests', 'django.contrib.auth', 'django.contrib.contenttypes']
 
     def setUp(self):
         """
@@ -100,14 +90,10 @@ class ProxyModelWithSameAppLabelTests(TestCase):
         Permission.objects.all().delete()
         self.concrete_content_type = ContentType.objects.get_for_model(Proxy)
         self.default_permission = Permission.objects.create(
-            content_type=self.concrete_content_type,
-            codename='add_proxy',
-            name='Can add proxy',
+            content_type=self.concrete_content_type, codename='add_proxy', name='Can add proxy'
         )
         self.custom_permission = Permission.objects.create(
-            content_type=self.concrete_content_type,
-            codename='display_proxys',
-            name='May display proxys information',
+            content_type=self.concrete_content_type, codename='display_proxys', name='May display proxys information'
         )
 
     def test_proxy_model_permissions_contenttype(self):

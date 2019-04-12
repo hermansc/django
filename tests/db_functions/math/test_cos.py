@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class CosTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_cos=Cos('normal')).first()
@@ -35,9 +34,7 @@ class CosTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_cos=Cos('small'),
-            normal_cos=Cos('normal'),
-            big_cos=Cos('big'),
+            small_cos=Cos('small'), normal_cos=Cos('normal'), big_cos=Cos('big')
         ).first()
         self.assertIsInstance(obj.small_cos, float)
         self.assertIsInstance(obj.normal_cos, float)

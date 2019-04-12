@@ -9,8 +9,12 @@ from django.db import models
 from .utils import AttributeSetter
 
 __all__ = [
-    'RangeField', 'IntegerRangeField', 'BigIntegerRangeField',
-    'DecimalRangeField', 'DateTimeRangeField', 'DateRangeField',
+    'RangeField',
+    'IntegerRangeField',
+    'BigIntegerRangeField',
+    'DecimalRangeField',
+    'DateTimeRangeField',
+    'DateRangeField',
     'FloatRangeField',
 ]
 
@@ -112,9 +116,7 @@ class DecimalRangeField(RangeField):
 
 class FloatRangeField(RangeField):
     system_check_deprecated_details = {
-        'msg': (
-            'FloatRangeField is deprecated and will be removed in Django 3.1.'
-        ),
+        'msg': ('FloatRangeField is deprecated and will be removed in Django 3.1.'),
         'hint': 'Use DecimalRangeField instead.',
         'id': 'fields.W902',
     }
@@ -154,6 +156,7 @@ class DateTimeRangeContains(models.Lookup):
     Lookup for Date/DateTimeRange containment to cast the rhs to the correct
     type.
     """
+
     lookup_name = 'contains'
 
     def process_rhs(self, compiler, connection):

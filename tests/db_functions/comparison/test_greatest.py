@@ -12,7 +12,6 @@ from ..models import Article, Author, DecimalModel, Fan
 
 
 class GreatestTests(TestCase):
-
     def test_basic(self):
         now = timezone.now()
         before = now - timedelta(hours=1)
@@ -39,10 +38,7 @@ class GreatestTests(TestCase):
         now = timezone.now()
         Article.objects.create(title='Testing with Django', written=now)
         articles = Article.objects.annotate(
-            last_updated=Greatest(
-                Coalesce('written', past),
-                Coalesce('published', past),
-            ),
+            last_updated=Greatest(Coalesce('written', past), Coalesce('published', past))
         )
         self.assertEqual(articles.first().last_updated, now)
 
@@ -53,10 +49,7 @@ class GreatestTests(TestCase):
         Article.objects.create(title='Testing with Django', written=now)
         past_sql = RawSQL("cast(%s as datetime)", (past,))
         articles = Article.objects.annotate(
-            last_updated=Greatest(
-                Coalesce('written', past_sql),
-                Coalesce('published', past_sql),
-            ),
+            last_updated=Greatest(Coalesce('written', past_sql), Coalesce('published', past_sql))
         )
         self.assertEqual(articles.first().last_updated, now)
 
@@ -84,8 +77,5 @@ class GreatestTests(TestCase):
     def test_decimal_filter(self):
         obj = DecimalModel.objects.create(n1=Decimal('1.1'), n2=Decimal('1.2'))
         self.assertCountEqual(
-            DecimalModel.objects.annotate(
-                greatest=Greatest('n1', 'n2'),
-            ).filter(greatest=Decimal('1.2')),
-            [obj],
+            DecimalModel.objects.annotate(greatest=Greatest('n1', 'n2')).filter(greatest=Decimal('1.2')), [obj]
         )

@@ -102,9 +102,7 @@ class UrlTagTests(SimpleTestCase):
 
     @setup({'url19': '{% url named_url client.id %}'})
     def test_url19(self):
-        output = self.engine.render_to_string(
-            'url19', {'client': {'id': 1}, 'named_url': 'client'}
-        )
+        output = self.engine.render_to_string('url19', {'client': {'id': 1}, 'named_url': 'client'})
         self.assertEqual(output, '/client/1/')
 
     @setup({'url20': '{% url url_name_in_var client.id %}'})
@@ -112,9 +110,13 @@ class UrlTagTests(SimpleTestCase):
         output = self.engine.render_to_string('url20', {'client': {'id': 1}, 'url_name_in_var': 'named.client'})
         self.assertEqual(output, '/named-client/1/')
 
-    @setup({'url21': '{% autoescape off %}'
-                     '{% url "client_action" id=client.id action="!$&\'()*+,;=~:@," %}'
-                     '{% endautoescape %}'})
+    @setup(
+        {
+            'url21': '{% autoescape off %}'
+            '{% url "client_action" id=client.id action="!$&\'()*+,;=~:@," %}'
+            '{% endautoescape %}'
+        }
+    )
     def test_url21(self):
         output = self.engine.render_to_string('url21', {'client': {'id': 1}})
         self.assertEqual(output, '/client/1/!$&\'()*+,;=~:@,/')

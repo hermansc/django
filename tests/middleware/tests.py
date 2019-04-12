@@ -9,13 +9,16 @@ from django.conf import settings
 from django.core import mail
 from django.core.exceptions import PermissionDenied
 from django.http import (
-    FileResponse, HttpRequest, HttpResponse, HttpResponseNotFound,
-    HttpResponsePermanentRedirect, HttpResponseRedirect, StreamingHttpResponse,
+    FileResponse,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseNotFound,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+    StreamingHttpResponse,
 )
 from django.middleware.clickjacking import XFrameOptionsMiddleware
-from django.middleware.common import (
-    BrokenLinkEmailsMiddleware, CommonMiddleware,
-)
+from django.middleware.common import BrokenLinkEmailsMiddleware, CommonMiddleware
 from django.middleware.gzip import GZipMiddleware
 from django.middleware.http import ConditionalGetMiddleware
 from django.test import RequestFactory, SimpleTestCase, override_settings
@@ -338,10 +341,7 @@ class CommonMiddlewareTest(SimpleTestCase):
         self.assertIsInstance(r, HttpResponseRedirect)
 
 
-@override_settings(
-    IGNORABLE_404_URLS=[re.compile(r'foo')],
-    MANAGERS=['PHB@dilbert.com'],
-)
+@override_settings(IGNORABLE_404_URLS=[re.compile(r'foo')], MANAGERS=['PHB@dilbert.com'])
 class BrokenLinkEmailsMiddlewareTest(SimpleTestCase):
 
     rf = RequestFactory()
@@ -624,7 +624,7 @@ class XFrameOptionsMiddlewareTest(SimpleTestCase):
         SAMEORIGIN.
         """
         with override_settings(X_FRAME_OPTIONS=None):
-            del settings.X_FRAME_OPTIONS    # restored by override_settings
+            del settings.X_FRAME_OPTIONS  # restored by override_settings
             r = XFrameOptionsMiddleware().process_response(HttpRequest(), HttpResponse())
             self.assertEqual(r['X-Frame-Options'], 'SAMEORIGIN')
 
@@ -667,6 +667,7 @@ class XFrameOptionsMiddlewareTest(SimpleTestCase):
         header value can be overridden based on something in the request or
         response.
         """
+
         class OtherXFrameOptionsMiddleware(XFrameOptionsMiddleware):
             # This is just an example for testing purposes...
             def get_xframe_options_value(self, request, response):
@@ -696,6 +697,7 @@ class GZipMiddlewareTest(SimpleTestCase):
     """
     Tests the GZipMiddleware.
     """
+
     short_string = b"This string is too short to be worth compressing."
     compressible_string = b'a' * 500
     incompressible_string = b''.join(int2byte(random.randint(0, 255)) for _ in range(500))
@@ -750,10 +752,7 @@ class GZipMiddlewareTest(SimpleTestCase):
         Compression is performed on responses with streaming Unicode content.
         """
         r = GZipMiddleware().process_response(self.req, self.stream_resp_unicode)
-        self.assertEqual(
-            self.decompress(b''.join(r)),
-            b''.join(x.encode() for x in self.sequence_unicode)
-        )
+        self.assertEqual(self.decompress(b''.join(r)), b''.join(x.encode() for x in self.sequence_unicode))
         self.assertEqual(r.get('Content-Encoding'), 'gzip')
         self.assertFalse(r.has_header('Content-Length'))
 
@@ -826,6 +825,7 @@ class ETagGZipMiddlewareTest(SimpleTestCase):
     """
     ETags are handled properly by GZipMiddleware.
     """
+
     rf = RequestFactory()
     compressible_string = b'a' * 500
 
@@ -855,13 +855,11 @@ class ETagGZipMiddlewareTest(SimpleTestCase):
         """
         request = self.rf.get('/', HTTP_ACCEPT_ENCODING='gzip, deflate')
         response = GZipMiddleware().process_response(
-            request,
-            ConditionalGetMiddleware().process_response(request, HttpResponse(self.compressible_string))
+            request, ConditionalGetMiddleware().process_response(request, HttpResponse(self.compressible_string))
         )
         gzip_etag = response['ETag']
         next_request = self.rf.get('/', HTTP_ACCEPT_ENCODING='gzip, deflate', HTTP_IF_NONE_MATCH=gzip_etag)
         next_response = ConditionalGetMiddleware().process_response(
-            next_request,
-            HttpResponse(self.compressible_string)
+            next_request, HttpResponse(self.compressible_string)
         )
         self.assertEqual(next_response.status_code, 304)

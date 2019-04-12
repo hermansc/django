@@ -6,32 +6,24 @@ from django.test.utils import freeze_time
 
 
 class TestSigner(SimpleTestCase):
-
     def test_signature(self):
         "signature() method should generate a signature"
         signer = signing.Signer('predictable-secret')
         signer2 = signing.Signer('predictable-secret2')
-        for s in (
-            b'hello',
-            b'3098247:529:087:',
-            '\u2019'.encode(),
-        ):
-            self.assertEqual(
-                signer.signature(s),
-                signing.base64_hmac(signer.salt + 'signer', s, 'predictable-secret')
-            )
+        for s in (b'hello', b'3098247:529:087:', '\u2019'.encode()):
+            self.assertEqual(signer.signature(s), signing.base64_hmac(signer.salt + 'signer', s, 'predictable-secret'))
             self.assertNotEqual(signer.signature(s), signer2.signature(s))
 
     def test_signature_with_salt(self):
         "signature(value, salt=...) should work"
         signer = signing.Signer('predictable-secret', salt='extra-salt')
         self.assertEqual(
-            signer.signature('hello'),
-            signing.base64_hmac('extra-salt' + 'signer', 'hello', 'predictable-secret')
+            signer.signature('hello'), signing.base64_hmac('extra-salt' + 'signer', 'hello', 'predictable-secret')
         )
         self.assertNotEqual(
             signing.Signer('predictable-secret', salt='one').signature('hello'),
-            signing.Signer('predictable-secret', salt='two').signature('hello'))
+            signing.Signer('predictable-secret', salt='two').signature('hello'),
+        )
 
     def test_sign_unsign(self):
         "sign/unsign should be reversible"
@@ -54,12 +46,7 @@ class TestSigner(SimpleTestCase):
         signer = signing.Signer('predictable-secret')
         value = 'Another string'
         signed_value = signer.sign(value)
-        transforms = (
-            lambda s: s.upper(),
-            lambda s: s + 'a',
-            lambda s: 'a' + s[1:],
-            lambda s: s.replace(':', ''),
-        )
+        transforms = (lambda s: s.upper(), lambda s: s + 'a', lambda s: 'a' + s[1:], lambda s: s.replace(':', ''))
         self.assertEqual(value, signer.unsign(signed_value))
         for transform in transforms:
             with self.assertRaises(signing.BadSignature):
@@ -67,11 +54,7 @@ class TestSigner(SimpleTestCase):
 
     def test_dumps_loads(self):
         "dumps and loads be reversible for any JSON serializable object"
-        objects = [
-            ['a', 'list'],
-            'a string \u2019',
-            {'a': 'dictionary'},
-        ]
+        objects = [['a', 'list'], 'a string \u2019', {'a': 'dictionary'}]
         for o in objects:
             self.assertNotEqual(o, signing.dumps(o))
             self.assertEqual(o, signing.loads(signing.dumps(o)))
@@ -80,16 +63,8 @@ class TestSigner(SimpleTestCase):
 
     def test_decode_detects_tampering(self):
         "loads should raise exception for tampered objects"
-        transforms = (
-            lambda s: s.upper(),
-            lambda s: s + 'a',
-            lambda s: 'a' + s[1:],
-            lambda s: s.replace(':', ''),
-        )
-        value = {
-            'foo': 'bar',
-            'baz': 1,
-        }
+        transforms = (lambda s: s.upper(), lambda s: s + 'a', lambda s: 'a' + s[1:], lambda s: s.replace(':', ''))
+        value = {'foo': 'bar', 'baz': 1}
         encoded = signing.dumps(value)
         self.assertEqual(value, signing.loads(encoded))
         for transform in transforms:
@@ -118,7 +93,6 @@ class TestSigner(SimpleTestCase):
 
 
 class TestTimestampSigner(SimpleTestCase):
-
     def test_timestamp_signer(self):
         value = 'hello'
         with freeze_time(123456789):

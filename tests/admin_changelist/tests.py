@@ -16,25 +16,52 @@ from django.db.models.lookups import Contains, Exact
 from django.template import Context, Template, TemplateSyntaxError
 from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
-from django.test.utils import (
-    CaptureQueriesContext, isolate_apps, register_lookup,
-)
+from django.test.utils import CaptureQueriesContext, isolate_apps, register_lookup
 from django.urls import reverse
 from django.utils import formats
 
 from .admin import (
-    BandAdmin, ChildAdmin, ChordsBandAdmin, ConcertAdmin,
-    CustomPaginationAdmin, CustomPaginator, DynamicListDisplayChildAdmin,
-    DynamicListDisplayLinksChildAdmin, DynamicListFilterChildAdmin,
-    DynamicSearchFieldsChildAdmin, EmptyValueChildAdmin, EventAdmin,
-    FilteredChildAdmin, GroupAdmin, InvitationAdmin,
-    NoListDisplayLinksParentAdmin, ParentAdmin, QuartetAdmin, SwallowAdmin,
+    BandAdmin,
+    ChildAdmin,
+    ChordsBandAdmin,
+    ConcertAdmin,
+    CustomPaginationAdmin,
+    CustomPaginator,
+    DynamicListDisplayChildAdmin,
+    DynamicListDisplayLinksChildAdmin,
+    DynamicListFilterChildAdmin,
+    DynamicSearchFieldsChildAdmin,
+    EmptyValueChildAdmin,
+    EventAdmin,
+    FilteredChildAdmin,
+    GroupAdmin,
+    InvitationAdmin,
+    NoListDisplayLinksParentAdmin,
+    ParentAdmin,
+    QuartetAdmin,
+    SwallowAdmin,
     site as custom_site,
 )
 from .models import (
-    Band, CharPK, Child, ChordsBand, ChordsMusician, Concert, CustomIdUser,
-    Event, Genre, Group, Invitation, Membership, Musician, OrderedObject,
-    Parent, Quartet, Swallow, SwallowOneToOne, UnorderedObject,
+    Band,
+    CharPK,
+    Child,
+    ChordsBand,
+    ChordsMusician,
+    Concert,
+    CustomIdUser,
+    Event,
+    Genre,
+    Group,
+    Invitation,
+    Membership,
+    Musician,
+    OrderedObject,
+    Parent,
+    Quartet,
+    Swallow,
+    SwallowOneToOne,
+    UnorderedObject,
 )
 
 
@@ -68,11 +95,7 @@ class ChangeListTests(TestCase):
     def test_specified_ordering_by_f_expression(self):
         class OrderedByFBandAdmin(admin.ModelAdmin):
             list_display = ['name', 'genres', 'nr_of_members']
-            ordering = (
-                F('nr_of_members').desc(nulls_last=True),
-                Upper(F('name')).asc(),
-                F('genres').asc(),
-            )
+            ordering = (F('nr_of_members').desc(nulls_last=True), Upper(F('name')).asc(), F('genres').asc())
 
         m = OrderedByFBandAdmin(Band, custom_site)
         request = self.factory.get('/band/')
@@ -182,10 +205,7 @@ class ChangeListTests(TestCase):
         table_output = template.render(context)
         link = reverse('admin:admin_changelist_child_change', args=(new_child.id,))
         row_html = build_tbody_html(
-            new_child.id,
-            link,
-            '<td class="field-age_display">&amp;dagger;</td>'
-            '<td class="field-age">-empty-</td>'
+            new_child.id, link, '<td class="field-age_display">&amp;dagger;</td>' '<td class="field-age">-empty-</td>'
         )
         self.assertNotEqual(table_output.find(row_html), -1, 'Failed to find expected row element: %s' % table_output)
 
@@ -235,9 +255,7 @@ class ChangeListTests(TestCase):
         table_output = template.render(context)
         # make sure that hidden fields are in the correct place
         hiddenfields_div = (
-            '<div class="hiddenfields">'
-            '<input type="hidden" name="form-0-id" value="%d" id="id_form-0-id">'
-            '</div>'
+            '<div class="hiddenfields">' '<input type="hidden" name="form-0-id" value="%d" id="id_form-0-id">' '</div>'
         ) % new_child.id
         self.assertInHTML(hiddenfields_div, table_output, msg_prefix='Failed to find hidden fields')
 
@@ -958,11 +976,7 @@ class ChangeListTests(TestCase):
             null_field = models.BooleanField(null=True)
 
             class Meta:
-                unique_together = {
-                    ('field', 'other_field'),
-                    ('field', 'null_field'),
-                    ('related', 'other_related_id'),
-                }
+                unique_together = {('field', 'other_field'), ('field', 'null_field'), ('related', 'other_related_id')}
 
         class ModelAdmin(admin.ModelAdmin):
             def get_queryset(self, request):
@@ -1006,10 +1020,7 @@ class ChangeListTests(TestCase):
         total_ordering = [F('field'), F('other_field').desc(nulls_last=True)]
         # F() objects composite unique nullable.
         non_total_ordering = [F('field'), F('null_field').desc(nulls_last=True)]
-        tests += (
-            (total_ordering, total_ordering),
-            (non_total_ordering, non_total_ordering + ['-pk']),
-        )
+        tests += ((total_ordering, total_ordering), (non_total_ordering, non_total_ordering + ['-pk']))
         for ordering, expected in tests:
             with self.subTest(ordering=ordering):
                 self.assertEqual(change_list._get_deterministic_ordering(ordering), expected)
@@ -1091,7 +1102,6 @@ class ChangeListTests(TestCase):
 
 
 class GetAdminLogTests(TestCase):
-
     def test_custom_user_pk_not_named_id(self):
         """
         {% get_admin_log %} works if the user model's primary key isn't named
@@ -1156,17 +1166,16 @@ class SeleniumTests(AdminSeleniumTestCase):
         form_id = '#changelist-form'
 
         # Test amount of rows in the Changelist
-        rows = self.selenium.find_elements_by_css_selector(
-            '%s #result_list tbody tr' % form_id)
+        rows = self.selenium.find_elements_by_css_selector('%s #result_list tbody tr' % form_id)
         self.assertEqual(len(rows), 1)
 
         # Test current selection
-        selection_indicator = self.selenium.find_element_by_css_selector(
-            '%s .action-counter' % form_id)
+        selection_indicator = self.selenium.find_element_by_css_selector('%s .action-counter' % form_id)
         self.assertEqual(selection_indicator.text, "0 of 1 selected")
 
         # Select a row and check again
         row_selector = self.selenium.find_element_by_css_selector(
-            '%s #result_list tbody tr:first-child .action-select' % form_id)
+            '%s #result_list tbody tr:first-child .action-select' % form_id
+        )
         row_selector.click()
         self.assertEqual(selection_indicator.text, "1 of 1 selected")

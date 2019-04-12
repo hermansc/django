@@ -5,15 +5,37 @@ from django.forms.models import modelform_factory
 from django.test import TestCase, skipIfDBFeature
 
 from .models import (
-    A, Address, B, Board, C, Cafe, CharLink, Company, Contact, Content, D,
-    Developer, Guild, HasLinkThing, Link, Node, Note, OddRelation1,
-    OddRelation2, Organization, Person, Place, Related, Restaurant, Tag, Team,
+    A,
+    Address,
+    B,
+    Board,
+    C,
+    Cafe,
+    CharLink,
+    Company,
+    Contact,
+    Content,
+    D,
+    Developer,
+    Guild,
+    HasLinkThing,
+    Link,
+    Node,
+    Note,
+    OddRelation1,
+    OddRelation2,
+    Organization,
+    Person,
+    Place,
+    Related,
+    Restaurant,
+    Tag,
+    Team,
     TextLink,
 )
 
 
 class GenericRelationTests(TestCase):
-
     def test_inherited_models_content_type(self):
         """
         GenericRelations on inherited classes use the correct content type.
@@ -31,9 +53,9 @@ class GenericRelationTests(TestCase):
         originating model of a query.  See #12664.
         """
         p = Person.objects.create(account=23, name='Chef')
-        Address.objects.create(street='123 Anywhere Place',
-                               city='Conifer', state='CO',
-                               zipcode='80433', content_object=p)
+        Address.objects.create(
+            street='123 Anywhere Place', city='Conifer', state='CO', zipcode='80433', content_object=p
+        )
 
         qs = Person.objects.filter(addresses__zipcode='80433')
         self.assertEqual(1, qs.count())
@@ -77,21 +99,18 @@ class GenericRelationTests(TestCase):
         org = Organization.objects.create(name='org name')
         org.contacts.add(org_contact)
         # search with a non-matching note and a matching org name
-        qs = Contact.objects.filter(Q(notes__note__icontains=r'other note') |
-                                    Q(organizations__name__icontains=r'org name'))
+        qs = Contact.objects.filter(
+            Q(notes__note__icontains=r'other note') | Q(organizations__name__icontains=r'org name')
+        )
         self.assertIn(org_contact, qs)
         # search again, with the same query parameters, in reverse order
         qs = Contact.objects.filter(
-            Q(organizations__name__icontains=r'org name') |
-            Q(notes__note__icontains=r'other note'))
+            Q(organizations__name__icontains=r'org name') | Q(notes__note__icontains=r'other note')
+        )
         self.assertIn(org_contact, qs)
 
     def test_join_reuse(self):
-        qs = Person.objects.filter(
-            addresses__street='foo'
-        ).filter(
-            addresses__street='bar'
-        )
+        qs = Person.objects.filter(addresses__street='foo').filter(addresses__street='bar')
         self.assertEqual(str(qs.query).count('JOIN'), 2)
 
     def test_generic_relation_ordering(self):

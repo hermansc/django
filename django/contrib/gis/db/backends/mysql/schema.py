@@ -17,7 +17,8 @@ class MySQLGISSchemaEditor(DatabaseSchemaEditor):
 
     def skip_default(self, field):
         return (
-            super().skip_default(field) or
+            super().skip_default(field)
+            or
             # Geometry fields are stored as BLOB/TEXT and can't have defaults.
             isinstance(field, GeometryField)
         )
@@ -29,7 +30,8 @@ class MySQLGISSchemaEditor(DatabaseSchemaEditor):
             qn = self.connection.ops.quote_name
             db_table = model._meta.db_table
             self.geometry_sql.append(
-                self.sql_add_spatial_index % {
+                self.sql_add_spatial_index
+                % {
                     'index': qn(self._create_spatial_index_name(model, field)),
                     'table': qn(db_table),
                     'column': qn(field.column),
@@ -57,7 +59,8 @@ class MySQLGISSchemaEditor(DatabaseSchemaEditor):
             except OperationalError:
                 logger.error(
                     "Couldn't remove spatial index: %s (may be expected "
-                    "if your storage engine doesn't support them).", sql
+                    "if your storage engine doesn't support them).",
+                    sql,
                 )
 
         super().remove_field(model, field)
@@ -71,7 +74,6 @@ class MySQLGISSchemaEditor(DatabaseSchemaEditor):
                 self.execute(sql)
             except OperationalError:
                 logger.error(
-                    "Cannot create SPATIAL INDEX %s. Only MyISAM and (as of "
-                    "MySQL 5.7.5) InnoDB support them.", sql
+                    "Cannot create SPATIAL INDEX %s. Only MyISAM and (as of " "MySQL 5.7.5) InnoDB support them.", sql
                 )
         self.geometry_sql = []

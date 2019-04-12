@@ -9,7 +9,6 @@ from django.utils import translation
 
 
 class TemplateTests(SimpleTestCase):
-
     def test_string_origin(self):
         template = Engine().from_string('string template')
         self.assertEqual(template.origin.name, UNKNOWN_SOURCE)
@@ -76,10 +75,7 @@ class TemplateTests(SimpleTestCase):
 
     def test_unknown_block_tag(self):
         engine = Engine()
-        msg = (
-            "Invalid block tag on line 1: 'foobar'. Did you forget to "
-            "register or load this tag?"
-        )
+        msg = "Invalid block tag on line 1: 'foobar'. Did you forget to " "register or load this tag?"
         with self.assertRaisesMessage(TemplateSyntaxError, msg):
             engine.from_string("lala{% foobar %}")
 
@@ -103,20 +99,13 @@ class TemplateTests(SimpleTestCase):
         Errors raised while compiling nodes should include the token
         information.
         """
-        engine = Engine(
-            debug=True,
-            libraries={'bad_tag': 'template_tests.templatetags.bad_tag'},
-        )
+        engine = Engine(debug=True, libraries={'bad_tag': 'template_tests.templatetags.bad_tag'})
         with self.assertRaises(RuntimeError) as e:
             engine.from_string("{% load bad_tag %}{% badtag %}")
         self.assertEqual(e.exception.template_debug['during'], '{% badtag %}')
 
     def test_compile_tag_error_27584(self):
-        engine = Engine(
-            app_dirs=True,
-            debug=True,
-            libraries={'tag_27584': 'template_tests.templatetags.tag_27584'},
-        )
+        engine = Engine(app_dirs=True, debug=True, libraries={'tag_27584': 'template_tests.templatetags.tag_27584'})
         t = engine.get_template('27584_parent.html')
         with self.assertRaises(TemplateSyntaxError) as e:
             t.render(Context())
@@ -124,11 +113,7 @@ class TemplateTests(SimpleTestCase):
 
     def test_compile_tag_error_27956(self):
         """Errors in a child of {% extends %} are displayed correctly."""
-        engine = Engine(
-            app_dirs=True,
-            debug=True,
-            libraries={'tag_27584': 'template_tests.templatetags.tag_27584'},
-        )
+        engine = Engine(app_dirs=True, debug=True, libraries={'tag_27584': 'template_tests.templatetags.tag_27584'})
         t = engine.get_template('27956_child.html')
         with self.assertRaises(TemplateSyntaxError) as e:
             t.render(Context())
@@ -159,8 +144,7 @@ class TemplateTests(SimpleTestCase):
         """
         engine = Engine()
         parent = engine.from_string('{% block content %}parent{% endblock %}')
-        child = engine.from_string(
-            '{% extends parent %}{% block content %}child{% endblock %}')
+        child = engine.from_string('{% extends parent %}{% block content %}child{% endblock %}')
         self.assertEqual(child.render(Context({'parent': parent})), 'child')
 
     def test_node_origin(self):

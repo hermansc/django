@@ -23,9 +23,7 @@ class TimesinceTests(TimezoneTestCase):
 
     @setup({'timesince02': '{{ a|timesince }}'})
     def test_timesince02(self):
-        output = self.engine.render_to_string(
-            'timesince02', {'a': datetime.now() - timedelta(days=1, minutes=1)}
-        )
+        output = self.engine.render_to_string('timesince02', {'a': datetime.now() - timedelta(days=1, minutes=1)})
         self.assertEqual(output, '1\xa0day')
 
     @setup({'timesince03': '{{ a|timesince }}'})
@@ -39,16 +37,14 @@ class TimesinceTests(TimezoneTestCase):
     @setup({'timesince04': '{{ a|timesince:b }}'})
     def test_timesince04(self):
         output = self.engine.render_to_string(
-            'timesince04',
-            {'a': self.now - timedelta(days=2), 'b': self.now - timedelta(days=1)},
+            'timesince04', {'a': self.now - timedelta(days=2), 'b': self.now - timedelta(days=1)}
         )
         self.assertEqual(output, '1\xa0day')
 
     @setup({'timesince05': '{{ a|timesince:b }}'})
     def test_timesince05(self):
         output = self.engine.render_to_string(
-            'timesince05',
-            {'a': self.now - timedelta(days=2, minutes=1), 'b': self.now - timedelta(days=2)},
+            'timesince05', {'a': self.now - timedelta(days=2, minutes=1), 'b': self.now - timedelta(days=2)}
         )
         self.assertEqual(output, '1\xa0minute')
 
@@ -127,7 +123,6 @@ class TimesinceTests(TimezoneTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_since_now(self):
         self.assertEqual(timesince_filter(datetime.now() - timedelta(1)), '1\xa0day')
 

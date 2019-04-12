@@ -69,7 +69,8 @@ urlpatterns = [
     path('show/', show, name='show_message'),
     re_path(
         '^template_response/add/(debug|info|success|warning|error)/$',
-        add_template_response, name='add_template_response',
+        add_template_response,
+        name='add_template_response',
     ),
     path('template_response/show/', show_template_response, name='show_template_response'),
 ]

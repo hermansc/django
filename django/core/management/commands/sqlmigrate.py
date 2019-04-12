@@ -14,12 +14,12 @@ class Command(BaseCommand):
         parser.add_argument('app_label', help='App label of the application containing the migration.')
         parser.add_argument('migration_name', help='Migration name to print the SQL for.')
         parser.add_argument(
-            '--database', default=DEFAULT_DB_ALIAS,
+            '--database',
+            default=DEFAULT_DB_ALIAS,
             help='Nominates a database to create SQL for. Defaults to the "default" database.',
         )
         parser.add_argument(
-            '--backwards', action='store_true',
-            help='Creates SQL to unapply the migration, rather than to apply it',
+            '--backwards', action='store_true', help='Creates SQL to unapply the migration, rather than to apply it'
         )
 
     def execute(self, *args, **options):
@@ -48,11 +48,15 @@ class Command(BaseCommand):
         try:
             migration = executor.loader.get_migration_by_prefix(app_label, migration_name)
         except AmbiguityError:
-            raise CommandError("More than one migration matches '%s' in app '%s'. Please be more specific." % (
-                migration_name, app_label))
+            raise CommandError(
+                "More than one migration matches '%s' in app '%s'. Please be more specific."
+                % (migration_name, app_label)
+            )
         except KeyError:
-            raise CommandError("Cannot find a migration matching '%s' from app '%s'. Is it in INSTALLED_APPS?" % (
-                migration_name, app_label))
+            raise CommandError(
+                "Cannot find a migration matching '%s' from app '%s'. Is it in INSTALLED_APPS?"
+                % (migration_name, app_label)
+            )
         targets = [(app_label, migration.name)]
 
         # Show begin/end around output for atomic migrations, if the database

@@ -7,6 +7,7 @@ class ArticleTranslationDescriptor(ForwardManyToOneDescriptor):
     """
     The set of articletranslation should not set any local fields.
     """
+
     def __set__(self, instance, value):
         if instance is None:
             raise AttributeError("%s must be accessed via instance" % self.field.name)
@@ -30,6 +31,7 @@ class ActiveTranslationField(models.ForeignObject):
     This field will allow querying and fetching the currently active translation
     for Article from ArticleTranslation.
     """
+
     requires_unique_target = False
 
     def get_extra_restriction(self, where_class, alias, related_alias):
@@ -90,19 +92,10 @@ class ArticleTranslation(models.Model):
 
 
 class ArticleTag(models.Model):
-    article = models.ForeignKey(
-        Article,
-        models.CASCADE,
-        related_name='tags',
-        related_query_name='tag',
-    )
+    article = models.ForeignKey(Article, models.CASCADE, related_name='tags', related_query_name='tag')
     name = models.CharField(max_length=255)
 
 
 class ArticleIdea(models.Model):
-    articles = models.ManyToManyField(
-        Article,
-        related_name='ideas',
-        related_query_name='idea_things',
-    )
+    articles = models.ManyToManyField(Article, related_name='ideas', related_query_name='idea_things')
     name = models.CharField(max_length=255)

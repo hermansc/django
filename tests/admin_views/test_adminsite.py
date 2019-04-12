@@ -11,9 +11,7 @@ site = admin.AdminSite(name="test_adminsite")
 site.register(User)
 site.register(Article)
 
-urlpatterns = [
-    path('test_admin/admin/', site.urls),
-]
+urlpatterns = [path('test_admin/admin/', site.urls)]
 
 
 @override_settings(ROOT_URLCONF='admin_views.test_adminsite')
@@ -22,6 +20,7 @@ class SiteEachContextTest(TestCase):
     Check each_context contains the documented variables and that available_apps context
     variable structure is the expected one.
     """
+
     request_factory = RequestFactory()
 
     @classmethod
@@ -83,6 +82,7 @@ class SiteActionsTests(SimpleTestCase):
     def test_add_action(self):
         def test_action():
             pass
+
         self.site.add_action(test_action)
         self.assertEqual(self.site.get_action('test_action'), test_action)
 

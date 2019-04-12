@@ -4,7 +4,6 @@ from ..utils import setup
 
 
 class SpacelessTagTests(SimpleTestCase):
-
     @setup({'spaceless01': "{% spaceless %} <b>    <i> text </i>    </b> {% endspaceless %}"})
     def test_spaceless01(self):
         output = self.engine.render_to_string('spaceless01')
@@ -25,9 +24,13 @@ class SpacelessTagTests(SimpleTestCase):
         output = self.engine.render_to_string('spaceless04', {'text': 'This & that'})
         self.assertEqual(output, "<b><i>This &amp; that</i></b>")
 
-    @setup({'spaceless05': "{% autoescape off %}{% spaceless %}"
-                           "<b>   <i>{{ text }}</i>  </b>{% endspaceless %}"
-                           "{% endautoescape %}"})
+    @setup(
+        {
+            'spaceless05': "{% autoescape off %}{% spaceless %}"
+            "<b>   <i>{{ text }}</i>  </b>{% endspaceless %}"
+            "{% endautoescape %}"
+        }
+    )
     def test_spaceless05(self):
         output = self.engine.render_to_string('spaceless05', {'text': 'This & that'})
         self.assertEqual(output, "<b><i>This & that</i></b>")

@@ -15,7 +15,4 @@ def City(response):
 
 
 def Country(response):
-    return {
-        'country_code': response.country.iso_code,
-        'country_name': response.country.name,
-    }
+    return {'country_code': response.country.iso_code, 'country_name': response.country.name}

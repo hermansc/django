@@ -12,7 +12,6 @@ except ImportError:
 
 @skipIf(numpy is False, "Numpy must be installed to run these tests.")
 class NumpyTests(SimpleTestCase):
-
     @setup({'numpy-array-index01': '{{ var.1 }}'})
     def test_numpy_array_index01(self):
         """
@@ -20,8 +19,7 @@ class NumpyTests(SimpleTestCase):
         item of a subscriptable object.
         """
         output = self.engine.render_to_string(
-            'numpy-array-index01',
-            {'var': numpy.array(["first item", "second item"])},
+            'numpy-array-index01', {'var': numpy.array(["first item", "second item"])}
         )
         self.assertEqual(output, 'second item')
 
@@ -31,8 +29,7 @@ class NumpyTests(SimpleTestCase):
         Fail silently when the array index is out of range.
         """
         output = self.engine.render_to_string(
-            'numpy-array-index02',
-            {'var': numpy.array(["first item", "second item"])},
+            'numpy-array-index02', {'var': numpy.array(["first item", "second item"])}
         )
         if self.engine.string_if_invalid:
             self.assertEqual(output, 'INVALID')

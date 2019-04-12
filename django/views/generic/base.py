@@ -3,8 +3,11 @@ from functools import update_wrapper
 
 from django.core.exceptions import ImproperlyConfigured
 from django.http import (
-    HttpResponse, HttpResponseGone, HttpResponseNotAllowed,
-    HttpResponsePermanentRedirect, HttpResponseRedirect,
+    HttpResponse,
+    HttpResponseGone,
+    HttpResponseNotAllowed,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
 )
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -18,6 +21,7 @@ class ContextMixin:
     A default context mixin that passes the keyword arguments received by
     get_context_data() as the template context.
     """
+
     extra_context = None
 
     def get_context_data(self, **kwargs):
@@ -50,13 +54,16 @@ class View:
         """Main entry point for a request-response process."""
         for key in initkwargs:
             if key in cls.http_method_names:
-                raise TypeError("You tried to pass in the %s method name as a "
-                                "keyword argument to %s(). Don't do that."
-                                % (key, cls.__name__))
+                raise TypeError(
+                    "You tried to pass in the %s method name as a "
+                    "keyword argument to %s(). Don't do that." % (key, cls.__name__)
+                )
             if not hasattr(cls, key):
-                raise TypeError("%s() received an invalid keyword %r. as_view "
-                                "only accepts arguments that are already "
-                                "attributes of the class." % (cls.__name__, key))
+                raise TypeError(
+                    "%s() received an invalid keyword %r. as_view "
+                    "only accepts arguments that are already "
+                    "attributes of the class." % (cls.__name__, key)
+                )
 
         def view(request, *args, **kwargs):
             self = cls(**initkwargs)
@@ -69,6 +76,7 @@ class View:
                     "setup() and forget to call super()?" % cls.__name__
                 )
             return self.dispatch(request, *args, **kwargs)
+
         view.view_class = cls
         view.view_initkwargs = initkwargs
 
@@ -98,8 +106,7 @@ class View:
 
     def http_method_not_allowed(self, request, *args, **kwargs):
         logger.warning(
-            'Method Not Allowed (%s): %s', request.method, request.path,
-            extra={'status_code': 405, 'request': request}
+            'Method Not Allowed (%s): %s', request.method, request.path, extra={'status_code': 405, 'request': request}
         )
         return HttpResponseNotAllowed(self._allowed_methods())
 
@@ -116,6 +123,7 @@ class View:
 
 class TemplateResponseMixin:
     """A mixin that can be used to render a template."""
+
     template_name = None
     template_engine = None
     response_class = TemplateResponse
@@ -145,7 +153,8 @@ class TemplateResponseMixin:
         if self.template_name is None:
             raise ImproperlyConfigured(
                 "TemplateResponseMixin requires either a definition of "
-                "'template_name' or an implementation of 'get_template_names()'")
+                "'template_name' or an implementation of 'get_template_names()'"
+            )
         else:
             return [self.template_name]
 
@@ -154,6 +163,7 @@ class TemplateView(TemplateResponseMixin, ContextMixin, View):
     """
     Render a template. Pass keyword arguments from the URLconf to the context.
     """
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         return self.render_to_response(context)
@@ -161,6 +171,7 @@ class TemplateView(TemplateResponseMixin, ContextMixin, View):
 
 class RedirectView(View):
     """Provide a redirect on any GET request."""
+
     permanent = False
     url = None
     pattern_name = None
@@ -192,10 +203,7 @@ class RedirectView(View):
             else:
                 return HttpResponseRedirect(url)
         else:
-            logger.warning(
-                'Gone: %s', request.path,
-                extra={'status_code': 410, 'request': request}
-            )
+            logger.warning('Gone: %s', request.path, extra={'status_code': 410, 'request': request})
             return HttpResponseGone()
 
     def head(self, request, *args, **kwargs):

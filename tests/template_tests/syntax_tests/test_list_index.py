@@ -4,7 +4,6 @@ from ..utils import setup
 
 
 class ListIndexTests(SimpleTestCase):
-
     @setup({'list-index01': '{{ var.1 }}'})
     def test_list_index01(self):
         """

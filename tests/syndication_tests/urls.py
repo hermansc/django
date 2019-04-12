@@ -4,12 +4,8 @@ from . import feeds
 
 urlpatterns = [
     path('syndication/rss2/', feeds.TestRss2Feed()),
-    path(
-        'syndication/rss2/guid_ispermalink_true/',
-        feeds.TestRss2FeedWithGuidIsPermaLinkTrue()),
-    path(
-        'syndication/rss2/guid_ispermalink_false/',
-        feeds.TestRss2FeedWithGuidIsPermaLinkFalse()),
+    path('syndication/rss2/guid_ispermalink_true/', feeds.TestRss2FeedWithGuidIsPermaLinkTrue()),
+    path('syndication/rss2/guid_ispermalink_false/', feeds.TestRss2FeedWithGuidIsPermaLinkFalse()),
     path('syndication/rss091/', feeds.TestRss091Feed()),
     path('syndication/no_pubdate/', feeds.TestNoPubdateFeed()),
     path('syndication/atom/', feeds.TestAtomFeed()),

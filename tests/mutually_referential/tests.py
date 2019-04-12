@@ -4,7 +4,6 @@ from .models import Parent
 
 
 class MutuallyReferentialTests(TestCase):
-
     def test_mutually_referential(self):
         # Create a Parent
         q = Parent(name='Elizabeth')

@@ -15,7 +15,6 @@ EXPIRED_ETAG = '"7fae4cd4b0f81e7d2914700043aa8ed6"'
 
 @override_settings(ROOT_URLCONF='conditional_processing.urls')
 class ConditionalGet(SimpleTestCase):
-
     def assertFullResponse(self, response, check_last_modified=True, check_etag=True):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, FULL_RESPONSE.encode())

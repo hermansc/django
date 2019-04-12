@@ -6,8 +6,25 @@ from django.db.models.sql.constants import GET_ITERATOR_CHUNK_SIZE
 from django.test import TestCase, skipIfDBFeature, skipUnlessDBFeature
 
 from .models import (
-    MR, A, Avatar, Base, Child, HiddenUser, HiddenUserProfile, M, M2MFrom,
-    M2MTo, MRNull, Parent, R, RChild, S, T, User, create_a, get_default_r,
+    MR,
+    A,
+    Avatar,
+    Base,
+    Child,
+    HiddenUser,
+    HiddenUserProfile,
+    M,
+    M2MFrom,
+    M2MTo,
+    MRNull,
+    Parent,
+    R,
+    RChild,
+    S,
+    T,
+    User,
+    create_a,
+    get_default_r,
 )
 
 
@@ -76,6 +93,7 @@ class OnDeleteTests(TestCase):
         def check_do_nothing(sender, **kwargs):
             obj = kwargs['instance']
             obj.donothing_set.update(donothing=replacement_r)
+
         models.signals.pre_delete.connect(check_do_nothing)
         a = create_a('do_nothing')
         a.donothing.delete()
@@ -140,7 +158,6 @@ class OnDeleteTests(TestCase):
 
 
 class DeletionTests(TestCase):
-
     def test_m2m(self):
         m = M.objects.create()
         r = R.objects.create()
@@ -229,12 +246,8 @@ class DeletionTests(TestCase):
         T.objects.create(pk=2, s=s2)
         RChild.objects.create(r_ptr=r)
         r.delete()
-        self.assertEqual(
-            pre_delete_order, [(T, 2), (T, 1), (RChild, 1), (S, 2), (S, 1), (R, 1)]
-        )
-        self.assertEqual(
-            post_delete_order, [(T, 1), (T, 2), (RChild, 1), (S, 1), (S, 2), (R, 1)]
-        )
+        self.assertEqual(pre_delete_order, [(T, 2), (T, 1), (RChild, 1), (S, 2), (S, 1), (R, 1)])
+        self.assertEqual(post_delete_order, [(T, 1), (T, 2), (RChild, 1), (S, 1), (S, 2), (R, 1)])
 
         models.signals.post_delete.disconnect(log_post_delete)
         models.signals.pre_delete.disconnect(log_pre_delete)
@@ -262,9 +275,7 @@ class DeletionTests(TestCase):
 
     @skipUnlessDBFeature("can_defer_constraint_checks")
     def test_can_defer_constraint_checks(self):
-        u = User.objects.create(
-            avatar=Avatar.objects.create()
-        )
+        u = User.objects.create(avatar=Avatar.objects.create())
         a = Avatar.objects.get(pk=u.avatar_id)
         # 1 query to find the users for the avatar.
         # 1 query to delete the user
@@ -277,6 +288,7 @@ class DeletionTests(TestCase):
 
         def noop(*args, **kwargs):
             calls.append('')
+
         models.signals.post_delete.connect(noop, sender=User)
 
         self.assertNumQueries(3, a.delete)
@@ -287,14 +299,13 @@ class DeletionTests(TestCase):
 
     @skipIfDBFeature("can_defer_constraint_checks")
     def test_cannot_defer_constraint_checks(self):
-        u = User.objects.create(
-            avatar=Avatar.objects.create()
-        )
+        u = User.objects.create(avatar=Avatar.objects.create())
         # Attach a signal to make sure we will not do fast_deletes.
         calls = []
 
         def noop(*args, **kwargs):
             calls.append('')
+
         models.signals.post_delete.connect(noop, sender=User)
 
         a = Avatar.objects.get(pk=u.avatar_id)
@@ -439,11 +450,8 @@ class DeletionTests(TestCase):
 
 
 class FastDeleteTests(TestCase):
-
     def test_fast_delete_fk(self):
-        u = User.objects.create(
-            avatar=Avatar.objects.create()
-        )
+        u = User.objects.create(avatar=Avatar.objects.create())
         a = Avatar.objects.get(pk=u.avatar_id)
         # 1 query to fast-delete the user
         # 1 query to delete the avatar
@@ -485,8 +493,7 @@ class FastDeleteTests(TestCase):
         User.objects.create(avatar=a)
         u2 = User.objects.create()
         expected_queries = 1 if connection.features.update_can_self_select else 2
-        self.assertNumQueries(expected_queries,
-                              User.objects.filter(avatar__desc='a').delete)
+        self.assertNumQueries(expected_queries, User.objects.filter(avatar__desc='a').delete)
         self.assertEqual(User.objects.count(), 1)
         self.assertTrue(User.objects.filter(pk=u2.pk).exists())
 
@@ -527,7 +534,4 @@ class FastDeleteTests(TestCase):
         filter doesn't match any row.
         """
         with self.assertNumQueries(1):
-            self.assertEqual(
-                User.objects.filter(avatar__desc='missing').delete(),
-                (0, {'delete.User': 0})
-            )
+            self.assertEqual(User.objects.filter(avatar__desc='missing').delete(), (0, {'delete.User': 0}))

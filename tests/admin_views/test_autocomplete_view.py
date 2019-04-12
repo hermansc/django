@@ -45,8 +45,7 @@ class AutocompleteJsonViewTests(AdminViewBasicTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='user', password='secret',
-            email='user@example.com', is_staff=True,
+            username='user', password='secret', email='user@example.com', is_staff=True
         )
         super().setUpTestData()
 
@@ -57,10 +56,7 @@ class AutocompleteJsonViewTests(AdminViewBasicTestCase):
         response = AutocompleteJsonView.as_view(**self.as_view_args)(request)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode('utf-8'))
-        self.assertEqual(data, {
-            'results': [{'id': str(q.pk), 'text': q.question}],
-            'pagination': {'more': False},
-        })
+        self.assertEqual(data, {'results': [{'id': str(q.pk), 'text': q.question}], 'pagination': {'more': False}})
 
     def test_must_be_logged_in(self):
         response = self.client.get(self.url, {'term': ''})
@@ -85,8 +81,7 @@ class AutocompleteJsonViewTests(AdminViewBasicTestCase):
             with self.subTest(permission=permission):
                 self.user.user_permissions.clear()
                 p = Permission.objects.get(
-                    content_type=ContentType.objects.get_for_model(Question),
-                    codename='%s_question' % permission,
+                    content_type=ContentType.objects.get_for_model(Question), codename='%s_question' % permission
                 )
                 self.user.user_permissions.add(p)
                 request.user = User.objects.get(pk=self.user.pk)
@@ -135,20 +130,26 @@ class AutocompleteJsonViewTests(AdminViewBasicTestCase):
         response = AutocompleteJsonView.as_view(model_admin=model_admin)(request)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode('utf-8'))
-        self.assertEqual(data, {
-            'results': [{'id': str(q.pk), 'text': q.question} for q in Question.objects.all()[:PAGINATOR_SIZE]],
-            'pagination': {'more': True},
-        })
+        self.assertEqual(
+            data,
+            {
+                'results': [{'id': str(q.pk), 'text': q.question} for q in Question.objects.all()[:PAGINATOR_SIZE]],
+                'pagination': {'more': True},
+            },
+        )
         # The second page of results.
         request = self.factory.get(self.url, {'term': '', 'page': '2'})
         request.user = self.superuser
         response = AutocompleteJsonView.as_view(model_admin=model_admin)(request)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode('utf-8'))
-        self.assertEqual(data, {
-            'results': [{'id': str(q.pk), 'text': q.question} for q in Question.objects.all()[PAGINATOR_SIZE:]],
-            'pagination': {'more': False},
-        })
+        self.assertEqual(
+            data,
+            {
+                'results': [{'id': str(q.pk), 'text': q.question} for q in Question.objects.all()[PAGINATOR_SIZE:]],
+                'pagination': {'more': False},
+            },
+        )
 
 
 @override_settings(ROOT_URLCONF='admin_views.urls')
@@ -156,14 +157,13 @@ class SeleniumTests(AdminSeleniumTestCase):
     available_apps = ['admin_views'] + AdminSeleniumTestCase.available_apps
 
     def setUp(self):
-        self.superuser = User.objects.create_superuser(
-            username='super', password='secret', email='super@example.com',
-        )
+        self.superuser = User.objects.create_superuser(username='super', password='secret', email='super@example.com')
         self.admin_login(username='super', password='secret', login_url=reverse('autocomplete_admin:index'))
 
     def test_select(self):
         from selenium.webdriver.common.keys import Keys
         from selenium.webdriver.support.ui import Select
+
         self.selenium.get(self.live_server_url + reverse('autocomplete_admin:admin_views_answer_add'))
         elem = self.selenium.find_element_by_css_selector('.select2-selection')
         elem.click()  # Open the autocomplete dropdown.
@@ -199,6 +199,7 @@ class SeleniumTests(AdminSeleniumTestCase):
     def test_select_multiple(self):
         from selenium.webdriver.common.keys import Keys
         from selenium.webdriver.support.ui import Select
+
         self.selenium.get(self.live_server_url + reverse('autocomplete_admin:admin_views_question_add'))
         elem = self.selenium.find_element_by_css_selector('.select2-selection')
         elem.click()  # Open the autocomplete dropdown.

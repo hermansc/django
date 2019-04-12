@@ -12,7 +12,6 @@ class YesNoTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_true(self):
         self.assertEqual(yesno(True), 'yes')
 

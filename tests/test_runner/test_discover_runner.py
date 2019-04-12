@@ -22,7 +22,6 @@ def change_cwd(directory):
 
 
 class DiscoverRunnerTests(SimpleTestCase):
-
     def test_init_debug_mode(self):
         runner = DiscoverRunner()
         self.assertFalse(runner.debug_mode)
@@ -37,45 +36,41 @@ class DiscoverRunnerTests(SimpleTestCase):
         self.assertTrue(ns.debug_mode)
 
     def test_dotted_test_module(self):
-        count = DiscoverRunner().build_suite(
-            ['test_runner_apps.sample.tests_sample'],
-        ).countTestCases()
+        count = DiscoverRunner().build_suite(['test_runner_apps.sample.tests_sample']).countTestCases()
 
         self.assertEqual(count, 4)
 
     def test_dotted_test_class_vanilla_unittest(self):
-        count = DiscoverRunner().build_suite(
-            ['test_runner_apps.sample.tests_sample.TestVanillaUnittest'],
-        ).countTestCases()
+        count = (
+            DiscoverRunner().build_suite(['test_runner_apps.sample.tests_sample.TestVanillaUnittest']).countTestCases()
+        )
 
         self.assertEqual(count, 1)
 
     def test_dotted_test_class_django_testcase(self):
-        count = DiscoverRunner().build_suite(
-            ['test_runner_apps.sample.tests_sample.TestDjangoTestCase'],
-        ).countTestCases()
+        count = (
+            DiscoverRunner().build_suite(['test_runner_apps.sample.tests_sample.TestDjangoTestCase']).countTestCases()
+        )
 
         self.assertEqual(count, 1)
 
     def test_dotted_test_method_django_testcase(self):
-        count = DiscoverRunner().build_suite(
-            ['test_runner_apps.sample.tests_sample.TestDjangoTestCase.test_sample'],
-        ).countTestCases()
+        count = (
+            DiscoverRunner()
+            .build_suite(['test_runner_apps.sample.tests_sample.TestDjangoTestCase.test_sample'])
+            .countTestCases()
+        )
 
         self.assertEqual(count, 1)
 
     def test_pattern(self):
-        count = DiscoverRunner(
-            pattern="*_tests.py",
-        ).build_suite(['test_runner_apps.sample']).countTestCases()
+        count = DiscoverRunner(pattern="*_tests.py").build_suite(['test_runner_apps.sample']).countTestCases()
 
         self.assertEqual(count, 1)
 
     def test_file_path(self):
         with change_cwd(".."):
-            count = DiscoverRunner().build_suite(
-                ['test_runner_apps/sample/'],
-            ).countTestCases()
+            count = DiscoverRunner().build_suite(['test_runner_apps/sample/']).countTestCases()
 
         self.assertEqual(count, 5)
 
@@ -86,22 +81,15 @@ class DiscoverRunnerTests(SimpleTestCase):
         """
         with change_cwd("."):
             suite = DiscoverRunner().build_suite([])
-            self.assertEqual(
-                suite._tests[0].id().split(".")[0],
-                os.path.basename(os.getcwd()),
-            )
+            self.assertEqual(suite._tests[0].id().split(".")[0], os.path.basename(os.getcwd()))
 
     def test_empty_test_case(self):
-        count = DiscoverRunner().build_suite(
-            ['test_runner_apps.sample.tests_sample.EmptyTestCase'],
-        ).countTestCases()
+        count = DiscoverRunner().build_suite(['test_runner_apps.sample.tests_sample.EmptyTestCase']).countTestCases()
 
         self.assertEqual(count, 0)
 
     def test_discovery_on_package(self):
-        count = DiscoverRunner().build_suite(
-            ['test_runner_apps.sample.tests'],
-        ).countTestCases()
+        count = DiscoverRunner().build_suite(['test_runner_apps.sample.tests']).countTestCases()
 
         self.assertEqual(count, 1)
 
@@ -113,9 +101,7 @@ class DiscoverRunnerTests(SimpleTestCase):
         This results in tests from adjacent modules being run when they
         should not. The discover runner avoids this behavior.
         """
-        count = DiscoverRunner().build_suite(
-            ['test_runner_apps.sample.empty'],
-        ).countTestCases()
+        count = DiscoverRunner().build_suite(['test_runner_apps.sample.empty']).countTestCases()
 
         self.assertEqual(count, 0)
 
@@ -125,11 +111,13 @@ class DiscoverRunnerTests(SimpleTestCase):
             self.assertEqual(
                 suite._tests[0].__class__.__name__,
                 'TestDjangoTestCase',
-                msg="TestDjangoTestCase should be the first test case")
+                msg="TestDjangoTestCase should be the first test case",
+            )
             self.assertEqual(
                 suite._tests[1].__class__.__name__,
                 'TestZimpleTestCase',
-                msg="TestZimpleTestCase should be the second test case")
+                msg="TestZimpleTestCase should be the second test case",
+            )
             # All others can follow in unspecified order, including doctests
             self.assertIn('DocTestCase', [t.__class__.__name__ for t in suite._tests[2:]])
 
@@ -150,28 +138,18 @@ class DiscoverRunnerTests(SimpleTestCase):
         by ``DiscoverRunner.reorder_by``.
         """
         runner = DiscoverRunner(reverse=True)
-        suite = runner.build_suite(
-            test_labels=('test_runner_apps.sample', 'test_runner_apps.simple'))
-        self.assertIn('test_runner_apps.simple', next(iter(suite)).id(),
-                      msg="Test labels should be reversed.")
+        suite = runner.build_suite(test_labels=('test_runner_apps.sample', 'test_runner_apps.simple'))
+        self.assertIn('test_runner_apps.simple', next(iter(suite)).id(), msg="Test labels should be reversed.")
         suite = runner.build_suite(test_labels=('test_runner_apps.simple',))
         suite = tuple(suite)
-        self.assertIn('DjangoCase', suite[0].id(),
-                      msg="Test groups should not be reversed.")
-        self.assertIn('SimpleCase', suite[4].id(),
-                      msg="Test groups order should be preserved.")
-        self.assertIn('DjangoCase2', suite[0].id(),
-                      msg="Django test cases should be reversed.")
-        self.assertIn('SimpleCase2', suite[4].id(),
-                      msg="Simple test cases should be reversed.")
-        self.assertIn('UnittestCase2', suite[8].id(),
-                      msg="Unittest test cases should be reversed.")
-        self.assertIn('test_2', suite[0].id(),
-                      msg="Methods of Django cases should be reversed.")
-        self.assertIn('test_2', suite[4].id(),
-                      msg="Methods of simple cases should be reversed.")
-        self.assertIn('test_2', suite[8].id(),
-                      msg="Methods of unittest cases should be reversed.")
+        self.assertIn('DjangoCase', suite[0].id(), msg="Test groups should not be reversed.")
+        self.assertIn('SimpleCase', suite[4].id(), msg="Test groups order should be preserved.")
+        self.assertIn('DjangoCase2', suite[0].id(), msg="Django test cases should be reversed.")
+        self.assertIn('SimpleCase2', suite[4].id(), msg="Simple test cases should be reversed.")
+        self.assertIn('UnittestCase2', suite[8].id(), msg="Unittest test cases should be reversed.")
+        self.assertIn('test_2', suite[0].id(), msg="Methods of Django cases should be reversed.")
+        self.assertIn('test_2', suite[4].id(), msg="Methods of simple cases should be reversed.")
+        self.assertIn('test_2', suite[8].id(), msg="Methods of unittest cases should be reversed.")
 
     def test_overridable_get_test_runner_kwargs(self):
         self.assertIsInstance(DiscoverRunner().get_test_runner_kwargs(), dict)
@@ -247,10 +225,12 @@ class DiscoverRunnerGetDatabasesTests(SimpleTestCase):
         self.assertNotIn(self.skip_msg, output)
 
     def test_default_and_other(self):
-        databases, output = self.get_databases([
-            'test_runner_apps.databases.tests.DefaultDatabaseTests',
-            'test_runner_apps.databases.tests.OtherDatabaseTests',
-        ])
+        databases, output = self.get_databases(
+            [
+                'test_runner_apps.databases.tests.DefaultDatabaseTests',
+                'test_runner_apps.databases.tests.OtherDatabaseTests',
+            ]
+        )
         self.assertEqual(databases, set(connections))
         self.assertNotIn(self.skip_msg, output)
 

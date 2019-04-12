@@ -63,8 +63,8 @@ class Field(GDALBase):
             return None
         yy, mm, dd, hh, mn, ss, tz = [c_int() for i in range(7)]
         status = capi.get_field_as_datetime(
-            self._feat.ptr, self._index, byref(yy), byref(mm), byref(dd),
-            byref(hh), byref(mn), byref(ss), byref(tz))
+            self._feat.ptr, self._index, byref(yy), byref(mm), byref(dd), byref(hh), byref(mn), byref(ss), byref(tz)
+        )
         if status:
             return (yy, mm, dd, hh, mn, ss, tz)
         else:

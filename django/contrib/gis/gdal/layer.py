@@ -7,9 +7,7 @@ from django.contrib.gis.gdal.feature import Feature
 from django.contrib.gis.gdal.field import OGRFieldTypes
 from django.contrib.gis.gdal.geometries import OGRGeometry
 from django.contrib.gis.gdal.geomtype import OGRGeomType
-from django.contrib.gis.gdal.prototypes import (
-    ds as capi, geom as geom_api, srs as srs_api,
-)
+from django.contrib.gis.gdal.prototypes import ds as capi, geom as geom_api, srs as srs_api
 from django.contrib.gis.gdal.srs import SpatialReference
 from django.utils.encoding import force_bytes, force_str
 
@@ -133,10 +131,10 @@ class Layer(GDALBase):
         Return a list of string names corresponding to each of the Fields
         available in this Layer.
         """
-        return [force_str(
-            capi.get_field_name(capi.get_field_defn(self._ldefn, i)),
-            self._ds.encoding, strings_only=True,
-        ) for i in range(self.num_fields)]
+        return [
+            force_str(capi.get_field_name(capi.get_field_defn(self._ldefn, i)), self._ds.encoding, strings_only=True)
+            for i in range(self.num_fields)
+        ]
 
     @property
     def field_types(self):
@@ -145,20 +143,19 @@ class Layer(GDALBase):
         return the list [OFTInteger, OFTReal, OFTString] for an OGR layer that
         has an integer, a floating-point, and string fields.
         """
-        return [OGRFieldTypes[capi.get_field_type(capi.get_field_defn(self._ldefn, i))]
-                for i in range(self.num_fields)]
+        return [
+            OGRFieldTypes[capi.get_field_type(capi.get_field_defn(self._ldefn, i))] for i in range(self.num_fields)
+        ]
 
     @property
     def field_widths(self):
         "Return a list of the maximum field widths for the features."
-        return [capi.get_field_width(capi.get_field_defn(self._ldefn, i))
-                for i in range(self.num_fields)]
+        return [capi.get_field_width(capi.get_field_defn(self._ldefn, i)) for i in range(self.num_fields)]
 
     @property
     def field_precisions(self):
         "Return the field precisions for the features."
-        return [capi.get_field_precision(capi.get_field_defn(self._ldefn, i))
-                for i in range(self.num_fields)]
+        return [capi.get_field_precision(capi.get_field_defn(self._ldefn, i)) for i in range(self.num_fields)]
 
     def _get_spatial_filter(self):
         try:
@@ -200,6 +197,7 @@ class Layer(GDALBase):
         """
         if geos:
             from django.contrib.gis.geos import GEOSGeometry
+
             return [GEOSGeometry(feat.geom.wkb) for feat in self]
         else:
             return [feat.geom for feat in self]

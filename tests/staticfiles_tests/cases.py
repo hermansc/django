@@ -16,11 +16,7 @@ class BaseStaticFilesMixin:
     """
 
     def assertFileContains(self, filepath, text):
-        self.assertIn(
-            text,
-            self._get_file(filepath),
-            "'%s' not in '%s'" % (text, filepath),
-        )
+        self.assertIn(text, self._get_file(filepath), "'%s' not in '%s'" % (text, filepath))
 
     def assertFileNotFound(self, filepath):
         with self.assertRaises(OSError):
@@ -60,6 +56,7 @@ class CollectionTestCase(BaseStaticFilesMixin, SimpleTestCase):
     is separated because some test cases need those asserts without
     all these tests.
     """
+
     run_collectstatic_in_setUp = True
 
     def setUp(self):
@@ -79,8 +76,7 @@ class CollectionTestCase(BaseStaticFilesMixin, SimpleTestCase):
         super().tearDown()
 
     def run_collectstatic(self, *, verbosity=0, **kwargs):
-        call_command('collectstatic', interactive=False, verbosity=verbosity,
-                     ignore_patterns=['*.ignoreme'], **kwargs)
+        call_command('collectstatic', interactive=False, verbosity=verbosity, ignore_patterns=['*.ignoreme'], **kwargs)
 
     def _get_file(self, filepath):
         assert filepath, 'filepath is empty.'
@@ -93,6 +89,7 @@ class TestDefaults:
     """
     A few standard test cases.
     """
+
     def test_staticfiles_dirs(self):
         """
         Can find a file in a STATICFILES_DIRS directory.

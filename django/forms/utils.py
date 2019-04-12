@@ -35,9 +35,8 @@ def flatatt(attrs):
         elif value is not None:
             key_value_attrs.append((attr, value))
 
-    return (
-        format_html_join('', ' {}="{}"', sorted(key_value_attrs)) +
-        format_html_join('', ' {}', sorted(boolean_attrs))
+    return format_html_join('', ' {}="{}"', sorted(key_value_attrs)) + format_html_join(
+        '', ' {}', sorted(boolean_attrs)
     )
 
 
@@ -48,6 +47,7 @@ class ErrorDict(dict):
 
     The dictionary keys are the field names, and the values are the errors.
     """
+
     def as_data(self):
         return {f: e.as_data() for f, e in self.items()}
 
@@ -60,10 +60,7 @@ class ErrorDict(dict):
     def as_ul(self):
         if not self:
             return ''
-        return format_html(
-            '<ul class="errorlist">{}</ul>',
-            format_html_join('', '<li>{}{}</li>', self.items())
-        )
+        return format_html('<ul class="errorlist">{}</ul>', format_html_join('', '<li>{}{}</li>', self.items()))
 
     def as_text(self):
         output = []
@@ -81,6 +78,7 @@ class ErrorList(UserList, list):
     """
     A collection of errors that knows how to display itself in various formats.
     """
+
     def __init__(self, initlist=None, error_class=None):
         super().__init__(initlist)
 
@@ -96,10 +94,7 @@ class ErrorList(UserList, list):
         errors = []
         for error in self.as_data():
             message = next(iter(error))
-            errors.append({
-                'message': escape(message) if escape_html else message,
-                'code': error.code or '',
-            })
+            errors.append({'message': escape(message) if escape_html else message, 'code': error.code or ''})
         return errors
 
     def as_json(self, escape_html=False):
@@ -110,9 +105,7 @@ class ErrorList(UserList, list):
             return ''
 
         return format_html(
-            '<ul class="{}">{}</ul>',
-            self.error_class,
-            format_html_join('', '<li>{}</li>', ((e,) for e in self))
+            '<ul class="{}">{}</ul>', self.error_class, format_html_join('', '<li>{}</li>', ((e,) for e in self))
         )
 
     def as_text(self):
@@ -148,6 +141,7 @@ class ErrorList(UserList, list):
 
 # Utilities for time zone support in DateTimeField et al.
 
+
 def from_current_timezone(value):
     """
     When time zone support is enabled, convert naive datetimes
@@ -159,11 +153,13 @@ def from_current_timezone(value):
             return timezone.make_aware(value, current_timezone)
         except Exception as exc:
             raise ValidationError(
-                _('%(datetime)s couldn\'t be interpreted '
-                  'in time zone %(current_timezone)s; it '
-                  'may be ambiguous or it may not exist.'),
+                _(
+                    '%(datetime)s couldn\'t be interpreted '
+                    'in time zone %(current_timezone)s; it '
+                    'may be ambiguous or it may not exist.'
+                ),
                 code='ambiguous_timezone',
-                params={'datetime': value, 'current_timezone': current_timezone}
+                params={'datetime': value, 'current_timezone': current_timezone},
             ) from exc
     return value
 

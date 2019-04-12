@@ -9,8 +9,13 @@ from django.utils.deprecation import RemovedInDjango31Warning
 from django.utils.translation import gettext_lazy as _
 
 __all__ = [
-    'BaseRangeField', 'IntegerRangeField', 'DecimalRangeField',
-    'DateTimeRangeField', 'DateRangeField', 'FloatRangeField', 'RangeWidget',
+    'BaseRangeField',
+    'IntegerRangeField',
+    'DecimalRangeField',
+    'DateTimeRangeField',
+    'DateRangeField',
+    'FloatRangeField',
+    'RangeWidget',
 ]
 
 
@@ -32,15 +37,9 @@ class BaseRangeField(forms.MultiValueField):
     def prepare_value(self, value):
         lower_base, upper_base = self.fields
         if isinstance(value, self.range_type):
-            return [
-                lower_base.prepare_value(value.lower),
-                upper_base.prepare_value(value.upper),
-            ]
+            return [lower_base.prepare_value(value.lower), upper_base.prepare_value(value.upper)]
         if value is None:
-            return [
-                lower_base.prepare_value(None),
-                upper_base.prepare_value(None),
-            ]
+            return [lower_base.prepare_value(None), upper_base.prepare_value(None)]
         return value
 
     def compress(self, values):
@@ -48,17 +47,11 @@ class BaseRangeField(forms.MultiValueField):
             return None
         lower, upper = values
         if lower is not None and upper is not None and lower > upper:
-            raise exceptions.ValidationError(
-                self.error_messages['bound_ordering'],
-                code='bound_ordering',
-            )
+            raise exceptions.ValidationError(self.error_messages['bound_ordering'], code='bound_ordering')
         try:
             range_value = self.range_type(lower, upper)
         except TypeError:
-            raise exceptions.ValidationError(
-                self.error_messages['invalid'],
-                code='invalid',
-            )
+            raise exceptions.ValidationError(self.error_messages['invalid'], code='invalid')
         else:
             return range_value
 
@@ -80,8 +73,7 @@ class FloatRangeField(DecimalRangeField):
 
     def __init__(self, **kwargs):
         warnings.warn(
-            'FloatRangeField is deprecated in favor of DecimalRangeField.',
-            RemovedInDjango31Warning, stacklevel=2,
+            'FloatRangeField is deprecated in favor of DecimalRangeField.', RemovedInDjango31Warning, stacklevel=2
         )
         super().__init__(**kwargs)
 

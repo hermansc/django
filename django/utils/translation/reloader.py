@@ -22,6 +22,7 @@ def translation_file_changed(sender, file_path, **kwargs):
     if file_path.suffix == '.mo':
         import gettext
         from django.utils.translation import trans_real
+
         gettext._translations = {}
         trans_real._translations = {}
         trans_real._default = None

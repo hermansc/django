@@ -14,6 +14,7 @@ class BytesToCharFieldConversionMixin:
         LPAD(column1, CHAR_LENGTH(column2), ' ')
     returns the LONGTEXT (bytes) instead of VARCHAR.
     """
+
     def convert_value(self, value, expression, connection):
         if connection.features.db_functions_convert_bytes_to_str:
             if self.output_field.get_internal_type() == 'CharField' and isinstance(value, bytes):
@@ -24,10 +25,7 @@ class BytesToCharFieldConversionMixin:
 class MySQLSHA2Mixin:
     def as_mysql(self, compiler, connection, **extra_content):
         return super().as_sql(
-            compiler,
-            connection,
-            template='SHA2(%%(expressions)s, %s)' % self.function[3:],
-            **extra_content,
+            compiler, connection, template='SHA2(%%(expressions)s, %s)' % self.function[3:], **extra_content
         )
 
 
@@ -61,16 +59,16 @@ class Chr(Transform):
 
     def as_mysql(self, compiler, connection, **extra_context):
         return super().as_sql(
-            compiler, connection, function='CHAR',
+            compiler,
+            connection,
+            function='CHAR',
             template='%(function)s(%(expressions)s USING utf16)',
-            **extra_context
+            **extra_context,
         )
 
     def as_oracle(self, compiler, connection, **extra_context):
         return super().as_sql(
-            compiler, connection,
-            template='%(function)s(%(expressions)s USING NCHAR_CS)',
-            **extra_context
+            compiler, connection, template='%(function)s(%(expressions)s USING NCHAR_CS)', **extra_context
         )
 
     def as_sqlite(self, compiler, connection, **extra_context):
@@ -82,29 +80,25 @@ class ConcatPair(Func):
     Concatenate two arguments together. This is used by `Concat` because not
     all backend databases support more than two arguments.
     """
+
     function = 'CONCAT'
 
     def as_sqlite(self, compiler, connection, **extra_context):
         coalesced = self.coalesce()
         return super(ConcatPair, coalesced).as_sql(
-            compiler, connection, template='%(expressions)s', arg_joiner=' || ',
-            **extra_context
+            compiler, connection, template='%(expressions)s', arg_joiner=' || ', **extra_context
         )
 
     def as_mysql(self, compiler, connection, **extra_context):
         # Use CONCAT_WS with an empty separator so that NULLs are ignored.
         return super().as_sql(
-            compiler, connection, function='CONCAT_WS',
-            template="%(function)s('', %(expressions)s)",
-            **extra_context
+            compiler, connection, function='CONCAT_WS', template="%(function)s('', %(expressions)s)", **extra_context
         )
 
     def coalesce(self):
         # null on either side results in null for expression, wrap with coalesce
         c = self.copy()
-        c.set_source_expressions([
-            Coalesce(expression, Value('')) for expression in c.get_source_expressions()
-        ])
+        c.set_source_expressions([Coalesce(expression, Value('')) for expression in c.get_source_expressions()])
         return c
 
 
@@ -114,6 +108,7 @@ class Concat(Func):
     null expression when any arguments are null will wrap each argument in
     coalesce functions to ensure a non-null result.
     """
+
     function = None
     template = "%(expressions)s"
 
@@ -158,6 +153,7 @@ class Left(Func):
 
 class Length(Transform):
     """Return the number of characters in the expression."""
+
     function = 'LENGTH'
     lookup_name = 'length'
     output_field = IntegerField()
@@ -232,14 +228,15 @@ class Reverse(Transform):
         # REVERSE in Oracle is undocumented and doesn't support multi-byte
         # strings. Use a special subquery instead.
         return super().as_sql(
-            compiler, connection,
+            compiler,
+            connection,
             template=(
                 '(SELECT LISTAGG(s) WITHIN GROUP (ORDER BY n DESC) FROM '
                 '(SELECT LEVEL n, SUBSTR(%(expressions)s, LEVEL, 1) s '
                 'FROM DUAL CONNECT BY LEVEL <= LENGTH(%(expressions)s)) '
                 'GROUP BY %(expressions)s)'
             ),
-            **extra_context
+            **extra_context,
         )
 
 
@@ -293,6 +290,7 @@ class StrIndex(Func):
     first occurrence of a substring inside another string, or 0 if the
     substring is not found.
     """
+
     function = 'INSTR'
     arity = 2
     output_field = IntegerField()

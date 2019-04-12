@@ -2,9 +2,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.core.cache.backends.db import BaseDatabaseCache
 from django.core.management.base import BaseCommand, CommandError
-from django.db import (
-    DEFAULT_DB_ALIAS, connections, models, router, transaction,
-)
+from django.db import DEFAULT_DB_ALIAS, connections, models, router, transaction
 from django.db.utils import DatabaseError
 
 
@@ -15,18 +13,19 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'args', metavar='table_name', nargs='*',
+            'args',
+            metavar='table_name',
+            nargs='*',
             help='Optional table names. Otherwise, settings.CACHES is used to find cache tables.',
         )
         parser.add_argument(
             '--database',
             default=DEFAULT_DB_ALIAS,
             help='Nominates a database onto which the cache tables will be '
-                 'installed. Defaults to the "default" database.',
+            'installed. Defaults to the "default" database.',
         )
         parser.add_argument(
-            '--dry-run', action='store_true',
-            help='Does not create the table, just prints the SQL that would be run.',
+            '--dry-run', action='store_true', help='Does not create the table, just prints the SQL that would be run.'
         )
 
     def handle(self, *tablenames, **options):
@@ -64,11 +63,7 @@ class Command(BaseCommand):
         index_output = []
         qn = connection.ops.quote_name
         for f in fields:
-            field_output = [
-                qn(f.name),
-                f.db_type(connection=connection),
-                '%sNULL' % ('NOT ' if not f.null else ''),
-            ]
+            field_output = [qn(f.name), f.db_type(connection=connection), '%sNULL' % ('NOT ' if not f.null else '')]
             if f.primary_key:
                 field_output.append("PRIMARY KEY")
             elif f.unique:
@@ -76,8 +71,8 @@ class Command(BaseCommand):
             if f.db_index:
                 unique = "UNIQUE " if f.unique else ""
                 index_output.append(
-                    "CREATE %sINDEX %s ON %s (%s);" %
-                    (unique, qn('%s_%s' % (tablename, f.name)), qn(tablename), qn(f.name))
+                    "CREATE %sINDEX %s ON %s (%s);"
+                    % (unique, qn('%s_%s' % (tablename, f.name)), qn(tablename), qn(f.name))
                 )
             table_output.append(" ".join(field_output))
         full_statement = ["CREATE TABLE %s (" % qn(tablename)]
@@ -98,9 +93,7 @@ class Command(BaseCommand):
                 try:
                     curs.execute(full_statement)
                 except DatabaseError as e:
-                    raise CommandError(
-                        "Cache table '%s' could not be created.\nThe error was: %s." %
-                        (tablename, e))
+                    raise CommandError("Cache table '%s' could not be created.\nThe error was: %s." % (tablename, e))
                 for statement in index_output:
                     curs.execute(statement)
 

@@ -51,11 +51,13 @@ _SEP_UNSAFE = re.compile(r'^[A-z0-9-_=]*$')
 
 class BadSignature(Exception):
     """Signature does not match."""
+
     pass
 
 
 class SignatureExpired(BadSignature):
     """Signature timestamp is older than required max_age."""
+
     pass
 
 
@@ -83,6 +85,7 @@ class JSONSerializer:
     Simple wrapper around json to be used in signing.dumps and
     signing.loads.
     """
+
     def dumps(self, obj):
         return json.dumps(obj, separators=(',', ':')).encode('latin-1')
 
@@ -143,16 +146,12 @@ def loads(s, key=None, salt='django.core.signing', serializer=JSONSerializer, ma
 
 
 class Signer:
-
     def __init__(self, key=None, sep=':', salt=None):
         # Use of native strings in all versions of Python
         self.key = key or settings.SECRET_KEY
         self.sep = sep
         if _SEP_UNSAFE.match(self.sep):
-            raise ValueError(
-                'Unsafe Signer separator: %r (cannot be empty or consist of '
-                'only A-z0-9-_=)' % sep,
-            )
+            raise ValueError('Unsafe Signer separator: %r (cannot be empty or consist of ' 'only A-z0-9-_=)' % sep)
         self.salt = salt or '%s.%s' % (self.__class__.__module__, self.__class__.__name__)
 
     def signature(self, value):
@@ -171,7 +170,6 @@ class Signer:
 
 
 class TimestampSigner(Signer):
-
     def timestamp(self):
         return baseconv.base62.encode(int(time.time()))
 
@@ -193,6 +191,5 @@ class TimestampSigner(Signer):
             # Check timestamp is not older than max_age
             age = time.time() - timestamp
             if age > max_age:
-                raise SignatureExpired(
-                    'Signature age %s > %s seconds' % (age, max_age))
+                raise SignatureExpired('Signature age %s > %s seconds' % (age, max_age))
         return value

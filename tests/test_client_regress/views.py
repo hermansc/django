@@ -34,13 +34,17 @@ def get_view(request):
 
 def request_data(request, template='base.html', data='sausage'):
     "A simple view that returns the request data in the context"
-    return render(request, template, {
-        'get-foo': request.GET.get('foo'),
-        'get-bar': request.GET.get('bar'),
-        'post-foo': request.POST.get('foo'),
-        'post-bar': request.POST.get('bar'),
-        'data': data,
-    })
+    return render(
+        request,
+        template,
+        {
+            'get-foo': request.GET.get('foo'),
+            'get-bar': request.GET.get('bar'),
+            'post-foo': request.POST.get('foo'),
+            'post-bar': request.POST.get('bar'),
+            'data': data,
+        },
+    )
 
 
 def view_with_argument(request, name):
@@ -98,9 +102,7 @@ def return_unicode(request):
 
 
 def return_undecodable_binary(request):
-    return HttpResponse(
-        b'%PDF-1.4\r\n%\x93\x8c\x8b\x9e ReportLab Generated PDF document http://www.reportlab.com'
-    )
+    return HttpResponse(b'%PDF-1.4\r\n%\x93\x8c\x8b\x9e ReportLab Generated PDF document http://www.reportlab.com')
 
 
 def return_json_response(request):
@@ -149,5 +151,4 @@ def request_context_view(request):
 
 def render_template_multiple_times(request):
     """A view that renders a template multiple times."""
-    return HttpResponse(
-        render_to_string('base.html') + render_to_string('base.html'))
+    return HttpResponse(render_to_string('base.html') + render_to_string('base.html'))

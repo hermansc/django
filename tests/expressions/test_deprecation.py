@@ -19,6 +19,4 @@ class GetGroupByColsTest(SimpleTestCase):
             'expressions.test_deprecation.MissingAliasFunc.get_group_by_cols().'
         )
         with self.assertRaisesMessage(RemovedInDjango40Warning, msg):
-            Employee.objects.values(
-                one=MissingAliasFunc(),
-            ).annotate(cnt=Count('company_ceo_set'))
+            Employee.objects.values(one=MissingAliasFunc()).annotate(cnt=Count('company_ceo_set'))

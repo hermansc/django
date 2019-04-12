@@ -1,6 +1,4 @@
-from django.forms import (
-    CharField, ChoiceField, Form, IntegerField, RadioSelect, Select, TextInput,
-)
+from django.forms import CharField, ChoiceField, Form, IntegerField, RadioSelect, Select, TextInput
 from django.test import SimpleTestCase
 from django.utils import translation
 from django.utils.translation import gettext_lazy
@@ -15,7 +13,7 @@ class FormsI18nTests(SimpleTestCase):
         self.assertHTMLEqual(
             f.as_p(),
             '<p><label for="id_username">username:</label>'
-            '<input id="id_username" type="text" name="username" maxlength="10" required></p>'
+            '<input id="id_username" type="text" name="username" maxlength="10" required></p>',
         )
 
         # Translations are done at rendering time, so multi-lingual apps can define forms)
@@ -23,22 +21,20 @@ class FormsI18nTests(SimpleTestCase):
             self.assertHTMLEqual(
                 f.as_p(),
                 '<p><label for="id_username">Benutzername:</label>'
-                '<input id="id_username" type="text" name="username" maxlength="10" required></p>'
+                '<input id="id_username" type="text" name="username" maxlength="10" required></p>',
             )
         with translation.override('pl'):
             self.assertHTMLEqual(
                 f.as_p(),
                 '<p><label for="id_username">u\u017cytkownik:</label>'
-                '<input id="id_username" type="text" name="username" maxlength="10" required></p>'
+                '<input id="id_username" type="text" name="username" maxlength="10" required></p>',
             )
 
     def test_non_ascii_label(self):
         class SomeForm(Form):
             field_1 = CharField(max_length=10, label=gettext_lazy('field_1'))
             field_2 = CharField(
-                max_length=10,
-                label=gettext_lazy('field_2'),
-                widget=TextInput(attrs={'id': 'field_2_id'}),
+                max_length=10, label=gettext_lazy('field_2'), widget=TextInput(attrs={'id': 'field_2_id'})
             )
 
         f = SomeForm()
@@ -65,7 +61,7 @@ class FormsI18nTests(SimpleTestCase):
             '<input type="radio" id="id_somechoice_1" value="\xf8" name="somechoice" required> '
             'Mies</label></li>\n<li><label for="id_somechoice_2">'
             '<input type="radio" id="id_somechoice_2" value="\xdf" name="somechoice" required> '
-            'Nainen</label></li>\n</ul></p>'
+            'Nainen</label></li>\n</ul></p>',
         )
 
         # Translated error messages
@@ -84,7 +80,7 @@ class FormsI18nTests(SimpleTestCase):
                 '<input type="radio" id="id_somechoice_1" value="\xf8" name="somechoice" required> '
                 'Mies</label></li>\n<li><label for="id_somechoice_2">'
                 '<input type="radio" id="id_somechoice_2" value="\xdf" name="somechoice" required> '
-                'Nainen</label></li>\n</ul></p>'
+                'Nainen</label></li>\n</ul></p>',
             )
 
     def test_select_translated_text(self):

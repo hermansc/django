@@ -9,6 +9,7 @@ from . import Error, Tags, Warning, register
 def check_url_config(app_configs, **kwargs):
     if getattr(settings, 'ROOT_URLCONF', None):
         from django.urls import get_resolver
+
         resolver = get_resolver()
         return check_resolver(resolver)
     return []
@@ -36,17 +37,20 @@ def check_url_namespaces_unique(app_configs, **kwargs):
         return []
 
     from django.urls import get_resolver
+
     resolver = get_resolver()
     all_namespaces = _load_all_namespaces(resolver)
     counter = Counter(all_namespaces)
     non_unique_namespaces = [n for n, count in counter.items() if count > 1]
     errors = []
     for namespace in non_unique_namespaces:
-        errors.append(Warning(
-            "URL namespace '{}' isn't unique. You may not be able to reverse "
-            "all URLs in this namespace".format(namespace),
-            id="urls.W005",
-        ))
+        errors.append(
+            Warning(
+                "URL namespace '{}' isn't unique. You may not be able to reverse "
+                "all URLs in this namespace".format(namespace),
+                id="urls.W005",
+            )
+        )
     return errors
 
 
@@ -56,8 +60,7 @@ def _load_all_namespaces(resolver, parents=()):
     """
     url_patterns = getattr(resolver, 'url_patterns', [])
     namespaces = [
-        ':'.join(parents + (url.namespace,)) for url in url_patterns
-        if getattr(url, 'namespace', None) is not None
+        ':'.join(parents + (url.namespace,)) for url in url_patterns if getattr(url, 'namespace', None) is not None
     ]
     for pattern in url_patterns:
         namespace = getattr(pattern, 'namespace', None)
@@ -85,12 +88,14 @@ def get_warning_for_invalid_pattern(pattern):
     else:
         hint = None
 
-    return [Error(
-        "Your URL pattern {!r} is invalid. Ensure that urlpatterns is a list "
-        "of path() and/or re_path() instances.".format(pattern),
-        hint=hint,
-        id="urls.E004",
-    )]
+    return [
+        Error(
+            "Your URL pattern {!r} is invalid. Ensure that urlpatterns is a list "
+            "of path() and/or re_path() instances.".format(pattern),
+            hint=hint,
+            id="urls.E004",
+        )
+    ]
 
 
 @register(Tags.urls)
@@ -104,7 +109,4 @@ def check_url_settings(app_configs, **kwargs):
 
 
 def E006(name):
-    return Error(
-        'The {} setting must end with a slash.'.format(name),
-        id='urls.E006',
-    )
+    return Error('The {} setting must end with a slash.'.format(name), id='urls.E006')

@@ -10,10 +10,17 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signals import request_finished
 from django.db import close_old_connections
 from django.http import (
-    BadHeaderError, HttpResponse, HttpResponseNotAllowed,
-    HttpResponseNotModified, HttpResponsePermanentRedirect,
-    HttpResponseRedirect, JsonResponse, QueryDict, SimpleCookie,
-    StreamingHttpResponse, parse_cookie,
+    BadHeaderError,
+    HttpResponse,
+    HttpResponseNotAllowed,
+    HttpResponseNotModified,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+    JsonResponse,
+    QueryDict,
+    SimpleCookie,
+    StreamingHttpResponse,
+    parse_cookie,
 )
 from django.test import SimpleTestCase
 from django.utils.functional import lazystr
@@ -252,8 +259,7 @@ class QueryDictTests(SimpleTestCase):
 
     def test_fromkeys_with_nonempty_value(self):
         self.assertEqual(
-            QueryDict.fromkeys(['key1', 'key2', 'key3'], value='val'),
-            QueryDict('key1=val&key2=val&key3=val')
+            QueryDict.fromkeys(['key1', 'key2', 'key3'], value='val'), QueryDict('key1=val&key2=val&key3=val')
         )
 
     def test_fromkeys_is_immutable_by_default(self):
@@ -287,7 +293,6 @@ class QueryDictTests(SimpleTestCase):
 
 
 class HttpResponseTests(unittest.TestCase):
-
     def test_headers_type(self):
         r = HttpResponse()
 
@@ -468,9 +473,7 @@ class HttpResponseSubclassesTests(SimpleTestCase):
         self.assertEqual(response.status_code, 302)
         # Standard HttpResponse init args can be used
         response = HttpResponseRedirect(
-            '/redirected/',
-            content='The resource has temporarily moved',
-            content_type='text/html',
+            '/redirected/', content='The resource has temporarily moved', content_type='text/html'
         )
         self.assertContains(response, 'The resource has temporarily moved', status_code=302)
         self.assertEqual(response.url, response['Location'])
@@ -534,9 +537,7 @@ class JsonResponseTests(SimpleTestCase):
 
     def test_json_response_raises_type_error_with_default_setting(self):
         with self.assertRaisesMessage(
-            TypeError,
-            'In order to allow non-dict objects to be serialized set the '
-            'safe parameter to False'
+            TypeError, 'In order to allow non-dict objects to be serialized set the ' 'safe parameter to False'
         ):
             JsonResponse([1, 2, 3])
 
@@ -631,7 +632,6 @@ class StreamingHttpResponseTests(SimpleTestCase):
 
 
 class FileCloseTests(SimpleTestCase):
-
     def setUp(self):
         # Disable the request_finished signal during this test
         # to avoid interfering with the database connection.
@@ -720,7 +720,7 @@ class CookieTests(unittest.TestCase):
         # treats all semicolons as delimiters, even within quotes.
         self.assertEqual(
             parse_cookie('keebler="E=mc2; L=\\"Loves\\"; fudge=\\012;"'),
-            {'keebler': '"E=mc2', 'L': '\\"Loves\\"', 'fudge': '\\012', '': '"'}
+            {'keebler': '"E=mc2', 'L': '\\"Loves\\"', 'fudge': '\\012', '': '"'},
         )
         # Illegal cookies that have an '=' char in an unquoted value.
         self.assertEqual(parse_cookie('keebler=E=mc2'), {'keebler': 'E=mc2'})

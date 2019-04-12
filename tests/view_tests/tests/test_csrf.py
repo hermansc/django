@@ -1,14 +1,11 @@
 from django.template import TemplateDoesNotExist
-from django.test import (
-    Client, RequestFactory, SimpleTestCase, override_settings,
-)
+from django.test import Client, RequestFactory, SimpleTestCase, override_settings
 from django.utils.translation import override
 from django.views.csrf import CSRF_FAILURE_TEMPLATE_NAME, csrf_failure
 
 
 @override_settings(ROOT_URLCONF='view_tests.urls')
 class CsrfViewTests(SimpleTestCase):
-
     def setUp(self):
         super().setUp()
         self.client = Client(enforce_csrf_checks=True)
@@ -32,9 +29,7 @@ class CsrfViewTests(SimpleTestCase):
             self.assertContains(response, 'Verboden', status_code=403)
             self.assertContains(response, 'CSRF-verificatie mislukt. Verzoek afgebroken.', status_code=403)
 
-    @override_settings(
-        SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')
-    )
+    @override_settings(SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https'))
     def test_no_referer(self):
         """
         Referer header is strictly checked for POST over HTTPS. Trigger the
@@ -86,16 +81,21 @@ class CsrfViewTests(SimpleTestCase):
         response = self.client.post('/')
         self.assertContains(response, 'Forbidden', status_code=403)
 
-    @override_settings(TEMPLATES=[{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {
-            'loaders': [
-                ('django.template.loaders.locmem.Loader', {
-                    CSRF_FAILURE_TEMPLATE_NAME: 'Test template for CSRF failure'
-                }),
-            ],
-        },
-    }])
+    @override_settings(
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'OPTIONS': {
+                    'loaders': [
+                        (
+                            'django.template.loaders.locmem.Loader',
+                            {CSRF_FAILURE_TEMPLATE_NAME: 'Test template for CSRF failure'},
+                        )
+                    ]
+                },
+            }
+        ]
+    )
     def test_custom_template(self):
         """A custom CSRF_FAILURE_TEMPLATE_NAME is used."""
         response = self.client.post('/')

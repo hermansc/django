@@ -5,18 +5,15 @@ from django.test import SimpleTestCase
 
 
 class DateTimeFieldTest(SimpleTestCase):
-
     def test_datetimefield_1(self):
         f = DateTimeField()
         self.assertEqual(datetime.datetime(2006, 10, 25, 0, 0), f.clean(datetime.date(2006, 10, 25)))
         self.assertEqual(datetime.datetime(2006, 10, 25, 14, 30), f.clean(datetime.datetime(2006, 10, 25, 14, 30)))
         self.assertEqual(
-            datetime.datetime(2006, 10, 25, 14, 30, 59),
-            f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59))
+            datetime.datetime(2006, 10, 25, 14, 30, 59), f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59))
         )
         self.assertEqual(
-            datetime.datetime(2006, 10, 25, 14, 30, 59, 200),
-            f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59, 200))
+            datetime.datetime(2006, 10, 25, 14, 30, 59, 200), f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59, 200))
         )
         self.assertEqual(datetime.datetime(2006, 10, 25, 14, 30, 45, 200), f.clean('2006-10-25 14:30:45.000200'))
         self.assertEqual(datetime.datetime(2006, 10, 25, 14, 30, 45, 200), f.clean('2006-10-25 14:30:45.0002'))
@@ -44,12 +41,10 @@ class DateTimeFieldTest(SimpleTestCase):
         self.assertEqual(datetime.datetime(2006, 10, 25, 0, 0), f.clean(datetime.date(2006, 10, 25)))
         self.assertEqual(datetime.datetime(2006, 10, 25, 14, 30), f.clean(datetime.datetime(2006, 10, 25, 14, 30)))
         self.assertEqual(
-            datetime.datetime(2006, 10, 25, 14, 30, 59),
-            f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59))
+            datetime.datetime(2006, 10, 25, 14, 30, 59), f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59))
         )
         self.assertEqual(
-            datetime.datetime(2006, 10, 25, 14, 30, 59, 200),
-            f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59, 200))
+            datetime.datetime(2006, 10, 25, 14, 30, 59, 200), f.clean(datetime.datetime(2006, 10, 25, 14, 30, 59, 200))
         )
         self.assertEqual(datetime.datetime(2006, 10, 25, 14, 30), f.clean('2006 10 25 2:30 PM'))
         with self.assertRaisesMessage(ValidationError, "'Enter a valid date/time.'"):

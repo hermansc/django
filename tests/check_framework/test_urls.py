@@ -1,7 +1,10 @@
 from django.conf import settings
 from django.core.checks.messages import Error, Warning
 from django.core.checks.urls import (
-    E006, check_url_config, check_url_namespaces_unique, check_url_settings,
+    E006,
+    check_url_config,
+    check_url_namespaces_unique,
+    check_url_settings,
     get_warning_for_invalid_pattern,
 )
 from django.test import SimpleTestCase
@@ -32,33 +35,42 @@ class CheckUrlConfigTests(SimpleTestCase):
         self.assertEqual(len(result), 1)
         warning = result[0]
         self.assertEqual(warning.id, 'urls.W001')
-        self.assertEqual(warning.msg, (
-            "Your URL pattern '^include-with-dollar$' uses include with a "
-            "route ending with a '$'. Remove the dollar from the route to "
-            "avoid problems including URLs."
-        ))
+        self.assertEqual(
+            warning.msg,
+            (
+                "Your URL pattern '^include-with-dollar$' uses include with a "
+                "route ending with a '$'. Remove the dollar from the route to "
+                "avoid problems including URLs."
+            ),
+        )
 
     @override_settings(ROOT_URLCONF='check_framework.urls.contains_tuple')
     def test_contains_tuple_not_url_instance(self):
         result = check_url_config(None)
         warning = result[0]
         self.assertEqual(warning.id, 'urls.E004')
-        self.assertRegex(warning.msg, (
-            r"^Your URL pattern \('\^tuple/\$', <function <lambda> at 0x(\w+)>\) is "
-            r"invalid. Ensure that urlpatterns is a list of path\(\) and/or re_path\(\) "
-            r"instances\.$"
-        ))
+        self.assertRegex(
+            warning.msg,
+            (
+                r"^Your URL pattern \('\^tuple/\$', <function <lambda> at 0x(\w+)>\) is "
+                r"invalid. Ensure that urlpatterns is a list of path\(\) and/or re_path\(\) "
+                r"instances\.$"
+            ),
+        )
 
     @override_settings(ROOT_URLCONF='check_framework.urls.include_contains_tuple')
     def test_contains_included_tuple(self):
         result = check_url_config(None)
         warning = result[0]
         self.assertEqual(warning.id, 'urls.E004')
-        self.assertRegex(warning.msg, (
-            r"^Your URL pattern \('\^tuple/\$', <function <lambda> at 0x(\w+)>\) is "
-            r"invalid. Ensure that urlpatterns is a list of path\(\) and/or re_path\(\) "
-            r"instances\.$"
-        ))
+        self.assertRegex(
+            warning.msg,
+            (
+                r"^Your URL pattern \('\^tuple/\$', <function <lambda> at 0x(\w+)>\) is "
+                r"invalid. Ensure that urlpatterns is a list of path\(\) and/or re_path\(\) "
+                r"instances\.$"
+            ),
+        )
 
     @override_settings(ROOT_URLCONF='check_framework.urls.beginning_with_slash')
     def test_beginning_with_slash(self):
@@ -73,10 +85,7 @@ class CheckUrlConfigTests(SimpleTestCase):
         self.assertEqual(warning2.id, 'urls.W002')
         self.assertEqual(warning2.msg, msg % '/url-starting-with-slash/$')
 
-    @override_settings(
-        ROOT_URLCONF='check_framework.urls.beginning_with_slash',
-        APPEND_SLASH=False,
-    )
+    @override_settings(ROOT_URLCONF='check_framework.urls.beginning_with_slash', APPEND_SLASH=False)
     def test_beginning_with_slash_append_slash(self):
         # It can be useful to start a URL pattern with a slash when
         # APPEND_SLASH=False (#27238).
@@ -136,7 +145,6 @@ class CheckUrlConfigTests(SimpleTestCase):
 
 
 class UpdatedToPathTests(SimpleTestCase):
-
     @override_settings(ROOT_URLCONF='check_framework.urls.path_compatibility.contains_re_named_group')
     def test_contains_re_named_group(self):
         result = check_url_config(None)
@@ -166,20 +174,23 @@ class UpdatedToPathTests(SimpleTestCase):
 
 
 class CheckCustomErrorHandlersTests(SimpleTestCase):
-
     @override_settings(ROOT_URLCONF='check_framework.urls.bad_error_handlers')
     def test_bad_handlers(self):
         result = check_url_config(None)
         self.assertEqual(len(result), 4)
         for code, num_params, error in zip([400, 403, 404, 500], [2, 2, 2, 1], result):
             with self.subTest('handler{}'.format(code)):
-                self.assertEqual(error, Error(
-                    "The custom handler{} view "
-                    "'check_framework.urls.bad_error_handlers.bad_handler' "
-                    "does not take the correct number of arguments (request{})."
-                    .format(code, ', exception' if num_params == 2 else ''),
-                    id='urls.E007',
-                ))
+                self.assertEqual(
+                    error,
+                    Error(
+                        "The custom handler{} view "
+                        "'check_framework.urls.bad_error_handlers.bad_handler' "
+                        "does not take the correct number of arguments (request{}).".format(
+                            code, ', exception' if num_params == 2 else ''
+                        ),
+                        id='urls.E007',
+                    ),
+                )
 
     @override_settings(ROOT_URLCONF='check_framework.urls.good_error_handlers')
     def test_good_handlers(self):
@@ -188,7 +199,6 @@ class CheckCustomErrorHandlersTests(SimpleTestCase):
 
 
 class CheckURLSettingsTests(SimpleTestCase):
-
     @override_settings(STATIC_URL='a/', MEDIA_URL='b/')
     def test_slash_no_errors(self):
         self.assertEqual(check_url_settings(None), [])

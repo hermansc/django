@@ -196,6 +196,7 @@ class FieldDeconstructionTests(SimpleTestCase):
     def test_foreign_key(self):
         # Test basic pointing
         from django.contrib.auth.models import Permission
+
         field = models.ForeignKey("auth.Permission", models.CASCADE)
         field.remote_field.model = Permission
         field.remote_field.field_name = "id"
@@ -241,8 +242,7 @@ class FieldDeconstructionTests(SimpleTestCase):
         self.assertEqual(path, "django.db.models.ForeignKey")
         self.assertEqual(args, [])
         self.assertEqual(
-            kwargs,
-            {"to": "auth.Permission", "related_query_name": "foobar", "on_delete": models.CASCADE}
+            kwargs, {"to": "auth.Permission", "related_query_name": "foobar", "on_delete": models.CASCADE}
         )
         # Test limit_choices_to
         field = models.ForeignKey("auth.Permission", models.CASCADE, limit_choices_to={'foo': 'bar'})
@@ -250,8 +250,7 @@ class FieldDeconstructionTests(SimpleTestCase):
         self.assertEqual(path, "django.db.models.ForeignKey")
         self.assertEqual(args, [])
         self.assertEqual(
-            kwargs,
-            {"to": "auth.Permission", "limit_choices_to": {'foo': 'bar'}, "on_delete": models.CASCADE}
+            kwargs, {"to": "auth.Permission", "limit_choices_to": {'foo': 'bar'}, "on_delete": models.CASCADE}
         )
         # Test unique
         field = models.ForeignKey("auth.Permission", models.CASCADE, unique=True)
@@ -276,6 +275,7 @@ class FieldDeconstructionTests(SimpleTestCase):
     def test_one_to_one(self):
         # Test basic pointing
         from django.contrib.auth.models import Permission
+
         field = models.OneToOneField("auth.Permission", models.CASCADE)
         field.remote_field.model = Permission
         field.remote_field.field_name = "id"
@@ -321,8 +321,7 @@ class FieldDeconstructionTests(SimpleTestCase):
         self.assertEqual(path, "django.db.models.OneToOneField")
         self.assertEqual(args, [])
         self.assertEqual(
-            kwargs,
-            {"to": "auth.Permission", "related_query_name": "foobar", "on_delete": models.CASCADE}
+            kwargs, {"to": "auth.Permission", "related_query_name": "foobar", "on_delete": models.CASCADE}
         )
         # Test limit_choices_to
         field = models.OneToOneField("auth.Permission", models.CASCADE, limit_choices_to={'foo': 'bar'})
@@ -330,8 +329,7 @@ class FieldDeconstructionTests(SimpleTestCase):
         self.assertEqual(path, "django.db.models.OneToOneField")
         self.assertEqual(args, [])
         self.assertEqual(
-            kwargs,
-            {"to": "auth.Permission", "limit_choices_to": {'foo': 'bar'}, "on_delete": models.CASCADE}
+            kwargs, {"to": "auth.Permission", "limit_choices_to": {'foo': 'bar'}, "on_delete": models.CASCADE}
         )
         # Test unique
         field = models.OneToOneField("auth.Permission", models.CASCADE, unique=True)

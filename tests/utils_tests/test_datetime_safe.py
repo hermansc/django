@@ -1,14 +1,10 @@
-from datetime import (
-    date as original_date, datetime as original_datetime,
-    time as original_time,
-)
+from datetime import date as original_date, datetime as original_datetime, time as original_time
 
 from django.test import SimpleTestCase
 from django.utils.datetime_safe import date, datetime, time
 
 
 class DatetimeTests(SimpleTestCase):
-
     def setUp(self):
         self.percent_y_safe = (1900, 1, 1)  # >= 1900 required on Windows.
         self.just_safe = (1000, 1, 1)

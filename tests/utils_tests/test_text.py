@@ -7,11 +7,10 @@ from django.utils.functional import lazystr
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy, override
 
-IS_WIDE_BUILD = (len('\U0001F4A9') == 1)
+IS_WIDE_BUILD = len('\U0001F4A9') == 1
 
 
 class TestUtilsText(SimpleTestCase):
-
     def test_get_text_list(self):
         self.assertEqual(text.get_text_list(['a', 'b', 'c', 'd']), 'a, b, c or d')
         self.assertEqual(text.get_text_list(['a', 'b', 'c'], 'and'), 'a, b and c')
@@ -23,32 +22,19 @@ class TestUtilsText(SimpleTestCase):
 
     def test_smart_split(self):
         testdata = [
-            ('This is "a person" test.',
-                ['This', 'is', '"a person"', 'test.']),
-            ('This is "a person\'s" test.',
-                ['This', 'is', '"a person\'s"', 'test.']),
-            ('This is "a person\\"s" test.',
-                ['This', 'is', '"a person\\"s"', 'test.']),
-            ('"a \'one',
-                ['"a', "'one"]),
-            ('all friends\' tests',
-                ['all', 'friends\'', 'tests']),
-            ('url search_page words="something else"',
-                ['url', 'search_page', 'words="something else"']),
-            ("url search_page words='something else'",
-                ['url', 'search_page', "words='something else'"]),
-            ('url search_page words "something else"',
-                ['url', 'search_page', 'words', '"something else"']),
-            ('url search_page words-"something else"',
-                ['url', 'search_page', 'words-"something else"']),
-            ('url search_page words=hello',
-                ['url', 'search_page', 'words=hello']),
-            ('url search_page words="something else',
-                ['url', 'search_page', 'words="something', 'else']),
-            ("cut:','|cut:' '",
-                ["cut:','|cut:' '"]),
-            (lazystr("a b c d"),  # Test for #20231
-                ['a', 'b', 'c', 'd']),
+            ('This is "a person" test.', ['This', 'is', '"a person"', 'test.']),
+            ('This is "a person\'s" test.', ['This', 'is', '"a person\'s"', 'test.']),
+            ('This is "a person\\"s" test.', ['This', 'is', '"a person\\"s"', 'test.']),
+            ('"a \'one', ['"a', "'one"]),
+            ('all friends\' tests', ['all', 'friends\'', 'tests']),
+            ('url search_page words="something else"', ['url', 'search_page', 'words="something else"']),
+            ("url search_page words='something else'", ['url', 'search_page', "words='something else'"]),
+            ('url search_page words "something else"', ['url', 'search_page', 'words', '"something else"']),
+            ('url search_page words-"something else"', ['url', 'search_page', 'words-"something else"']),
+            ('url search_page words=hello', ['url', 'search_page', 'words=hello']),
+            ('url search_page words="something else', ['url', 'search_page', 'words="something', 'else']),
+            ("cut:','|cut:' '", ["cut:','|cut:' '"]),
+            (lazystr("a b c d"), ['a', 'b', 'c', 'd']),  # Test for #20231
         ]
         for test, expected in testdata:
             self.assertEqual(list(text.smart_split(test)), expected)
@@ -102,29 +88,23 @@ class TestUtilsText(SimpleTestCase):
         )
         self.assertEqual(
             '<p id="par"><strong><em>The quick brown fox jumped over the lazy dog.</em></strong></p>',
-            truncator.words(10, html=True)
+            truncator.words(10, html=True),
         )
         self.assertEqual(
-            '<p id="par"><strong><em>The quick brown fox…</em></strong></p>',
-            truncator.words(4, html=True)
+            '<p id="par"><strong><em>The quick brown fox…</em></strong></p>', truncator.words(4, html=True)
         )
         self.assertEqual(
-            '<p id="par"><strong><em>The quick brown fox....</em></strong></p>',
-            truncator.words(4, '....', html=True)
+            '<p id="par"><strong><em>The quick brown fox....</em></strong></p>', truncator.words(4, '....', html=True)
         )
         self.assertEqual(
-            '<p id="par"><strong><em>The quick brown fox</em></strong></p>',
-            truncator.words(4, '', html=True)
+            '<p id="par"><strong><em>The quick brown fox</em></strong></p>', truncator.words(4, '', html=True)
         )
 
         # Test with new line inside tag
         truncator = text.Truncator(
             '<p>The quick <a href="xyz.html"\n id="mylink">brown fox</a> jumped over the lazy dog.</p>'
         )
-        self.assertEqual(
-            '<p>The quick <a href="xyz.html"\n id="mylink">brown…</a></p>',
-            truncator.words(3, html=True)
-        )
+        self.assertEqual('<p>The quick <a href="xyz.html"\n id="mylink">brown…</a></p>', truncator.words(3, html=True))
 
         # Test self-closing tags
         truncator = text.Truncator('<br/>The <hr />quick brown fox jumped over the lazy dog.')
@@ -201,12 +181,7 @@ class TestUtilsText(SimpleTestCase):
             self.assertEqual(text.unescape_entities(lazystr(value)), output)
 
     def test_unescape_string_literal(self):
-        items = [
-            ('"abc"', 'abc'),
-            ("'abc'", 'abc'),
-            ('"a \"bc\""', 'a "bc"'),
-            ("'\'ab\' c'", "'ab' c"),
-        ]
+        items = [('"abc"', 'abc'), ("'abc'", 'abc'), ('"a \"bc\""', 'a "bc"'), ("'\'ab\' c'", "'ab' c")]
         for value, output in items:
             self.assertEqual(text.unescape_string_literal(value), output)
             self.assertEqual(text.unescape_string_literal(lazystr(value)), output)
@@ -239,9 +214,6 @@ class TestUtilsText(SimpleTestCase):
         self.assertEqual('update-update', s)
 
         # The format string can be lazy. (string comes from contrib.admin)
-        s = format_lazy(
-            gettext_lazy("Added {name} \"{object}\"."),
-            name='article', object='My first try',
-        )
+        s = format_lazy(gettext_lazy("Added {name} \"{object}\"."), name='article', object='My first try')
         with override('fr'):
             self.assertEqual('Ajout de article «\xa0My first try\xa0».', s)

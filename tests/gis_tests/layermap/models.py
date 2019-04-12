@@ -97,24 +97,11 @@ co_mapping = {
     'mpoly': 'MULTIPOLYGON',  # Will convert POLYGON features into MULTIPOLYGONS.
 }
 
-cofeat_mapping = {
-    'name': 'Name',
-    'poly': 'POLYGON',
-}
+cofeat_mapping = {'name': 'Name', 'poly': 'POLYGON'}
 
-city_mapping = {
-    'name': 'Name',
-    'population': 'Population',
-    'density': 'Density',
-    'dt': 'Created',
-    'point': 'POINT',
-}
+city_mapping = {'name': 'Name', 'population': 'Population', 'density': 'Density', 'dt': 'Created', 'point': 'POINT'}
 
-inter_mapping = {
-    'name': 'Name',
-    'length': 'Length',
-    'path': 'LINESTRING',
-}
+inter_mapping = {'name': 'Name', 'length': 'Length', 'path': 'LINESTRING'}
 
 has_nulls_mapping = {
     'geom': 'POLYGON',

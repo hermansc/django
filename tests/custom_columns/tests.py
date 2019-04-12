@@ -5,7 +5,6 @@ from .models import Article, Author
 
 
 class CustomColumnsTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.a1 = Author.objects.create(first_name="John", last_name="Smith")
@@ -16,26 +15,13 @@ class CustomColumnsTests(TestCase):
         cls.article.authors.set(cls.authors)
 
     def test_query_all_available_authors(self):
-        self.assertQuerysetEqual(
-            Author.objects.all(), [
-                "Peter Jones", "John Smith",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(Author.objects.all(), ["Peter Jones", "John Smith"], str)
 
     def test_get_first_name(self):
-        self.assertEqual(
-            Author.objects.get(first_name__exact="John"),
-            self.a1,
-        )
+        self.assertEqual(Author.objects.get(first_name__exact="John"), self.a1)
 
     def test_filter_first_name(self):
-        self.assertQuerysetEqual(
-            Author.objects.filter(first_name__exact="John"), [
-                "John Smith",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(Author.objects.filter(first_name__exact="John"), ["John Smith"], str)
 
     def test_field_error(self):
         msg = (
@@ -53,41 +39,23 @@ class CustomColumnsTests(TestCase):
             self.a1.last
 
     def test_get_all_authors_for_an_article(self):
-        self.assertQuerysetEqual(
-            self.article.authors.all(), [
-                "Peter Jones",
-                "John Smith",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(self.article.authors.all(), ["Peter Jones", "John Smith"], str)
 
     def test_get_all_articles_for_an_author(self):
         self.assertQuerysetEqual(
-            self.a1.article_set.all(), [
-                "Django lets you build Web apps easily",
-            ],
-            lambda a: a.headline
+            self.a1.article_set.all(), ["Django lets you build Web apps easily"], lambda a: a.headline
         )
 
     def test_get_author_m2m_relation(self):
-        self.assertQuerysetEqual(
-            self.article.authors.filter(last_name='Jones'), [
-                "Peter Jones"
-            ],
-            str
-        )
+        self.assertQuerysetEqual(self.article.authors.filter(last_name='Jones'), ["Peter Jones"], str)
 
     def test_author_querying(self):
         self.assertQuerysetEqual(
-            Author.objects.all().order_by('last_name'),
-            ['<Author: Peter Jones>', '<Author: John Smith>']
+            Author.objects.all().order_by('last_name'), ['<Author: Peter Jones>', '<Author: John Smith>']
         )
 
     def test_author_filtering(self):
-        self.assertQuerysetEqual(
-            Author.objects.filter(first_name__exact='John'),
-            ['<Author: John Smith>']
-        )
+        self.assertQuerysetEqual(Author.objects.filter(first_name__exact='John'), ['<Author: John Smith>'])
 
     def test_author_get(self):
         self.assertEqual(self.a1, Author.objects.get(first_name__exact='John'))
@@ -112,14 +80,7 @@ class CustomColumnsTests(TestCase):
 
     def test_m2m_table(self):
         self.assertQuerysetEqual(
-            self.article.authors.all().order_by('last_name'),
-            ['<Author: Peter Jones>', '<Author: John Smith>']
+            self.article.authors.all().order_by('last_name'), ['<Author: Peter Jones>', '<Author: John Smith>']
         )
-        self.assertQuerysetEqual(
-            self.a1.article_set.all(),
-            ['<Article: Django lets you build Web apps easily>']
-        )
-        self.assertQuerysetEqual(
-            self.article.authors.filter(last_name='Jones'),
-            ['<Author: Peter Jones>']
-        )
+        self.assertQuerysetEqual(self.a1.article_set.all(), ['<Article: Django lets you build Web apps easily>'])
+        self.assertQuerysetEqual(self.article.authors.filter(last_name='Jones'), ['<Author: Peter Jones>'])

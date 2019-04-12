@@ -18,10 +18,7 @@ class Person(models.Model):
 
     # Relation Fields
     person_country = models.ForeignObject(
-        Country,
-        from_fields=['person_country_id'],
-        to_fields=['id'],
-        on_delete=models.CASCADE,
+        Country, from_fields=['person_country_id'], to_fields=['id'], on_delete=models.CASCADE
     )
     friends = models.ManyToManyField('self', through='Friendship', symmetrical=False)
 

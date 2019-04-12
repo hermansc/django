@@ -3,9 +3,7 @@ This module collects helper functions and classes that "span" multiple levels
 of MVC. In other words, these functions/classes introduce controlled coupling
 for convenience's sake.
 """
-from django.http import (
-    Http404, HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect,
-)
+from django.http import Http404, HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.template import loader
 from django.urls import NoReverseMatch, reverse
 from django.utils.functional import Promise
@@ -69,8 +67,7 @@ def get_object_or_404(klass, *args, **kwargs):
     if not hasattr(queryset, 'get'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
         raise ValueError(
-            "First argument to get_object_or_404() must be a Model, Manager, "
-            "or QuerySet, not '%s'." % klass__name
+            "First argument to get_object_or_404() must be a Model, Manager, " "or QuerySet, not '%s'." % klass__name
         )
     try:
         return queryset.get(*args, **kwargs)
@@ -90,8 +87,7 @@ def get_list_or_404(klass, *args, **kwargs):
     if not hasattr(queryset, 'filter'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
         raise ValueError(
-            "First argument to get_list_or_404() must be a Model, Manager, or "
-            "QuerySet, not '%s'." % klass__name
+            "First argument to get_list_or_404() must be a Model, Manager, or " "QuerySet, not '%s'." % klass__name
         )
     obj_list = list(queryset.filter(*args, **kwargs))
     if not obj_list:

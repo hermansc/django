@@ -11,15 +11,20 @@ class RadioSelectTest(WidgetTest):
 
     def test_render(self):
         choices = (('', '------'),) + self.beatles
-        self.check_html(self.widget(choices=choices), 'beatle', 'J', html=(
-            """<ul>
+        self.check_html(
+            self.widget(choices=choices),
+            'beatle',
+            'J',
+            html=(
+                """<ul>
             <li><label><input type="radio" name="beatle" value=""> ------</label></li>
             <li><label><input checked type="radio" name="beatle" value="J"> John</label></li>
             <li><label><input type="radio" name="beatle" value="P"> Paul</label></li>
             <li><label><input type="radio" name="beatle" value="G"> George</label></li>
             <li><label><input type="radio" name="beatle" value="R"> Ringo</label></li>
             </ul>"""
-        ))
+            ),
+        )
 
     def test_nested_choices(self):
         nested_choices = (
@@ -48,10 +53,7 @@ class RadioSelectTest(WidgetTest):
         </ul></li>
         </ul>
         """
-        self.check_html(
-            self.widget(choices=nested_choices), 'nestchoice', 'dvd',
-            attrs={'id': 'media'}, html=html,
-        )
+        self.check_html(self.widget(choices=nested_choices), 'nestchoice', 'dvd', attrs={'id': 'media'}, html=html)
 
     def test_constructor_attrs(self):
         """
@@ -105,11 +107,7 @@ class RadioSelectTest(WidgetTest):
 
     @override_settings(USE_L10N=True, USE_THOUSAND_SEPARATOR=True)
     def test_doesnt_localize_input_value(self):
-        choices = [
-            (1, 'One'),
-            (1000, 'One thousand'),
-            (1000000, 'One million'),
-        ]
+        choices = [(1, 'One'), (1000, 'One thousand'), (1000000, 'One million')]
         html = """
         <ul>
         <li><label><input type="radio" name="number" value="1"> One</label></li>
@@ -119,10 +117,7 @@ class RadioSelectTest(WidgetTest):
         """
         self.check_html(self.widget(choices=choices), 'number', None, html=html)
 
-        choices = [
-            (datetime.time(0, 0), 'midnight'),
-            (datetime.time(12, 0), 'noon'),
-        ]
+        choices = [(datetime.time(0, 0), 'midnight'), (datetime.time(12, 0), 'noon')]
         html = """
         <ul>
         <li><label><input type="radio" name="time" value="00:00:00"> midnight</label></li>
@@ -134,12 +129,17 @@ class RadioSelectTest(WidgetTest):
     def test_render_as_subwidget(self):
         """A RadioSelect as a subwidget of MultiWidget."""
         choices = (('', '------'),) + self.beatles
-        self.check_html(MultiWidget([self.widget(choices=choices)]), 'beatle', ['J'], html=(
-            """<ul>
+        self.check_html(
+            MultiWidget([self.widget(choices=choices)]),
+            'beatle',
+            ['J'],
+            html=(
+                """<ul>
             <li><label><input type="radio" name="beatle_0" value=""> ------</label></li>
             <li><label><input checked type="radio" name="beatle_0" value="J"> John</label></li>
             <li><label><input type="radio" name="beatle_0" value="P"> Paul</label></li>
             <li><label><input type="radio" name="beatle_0" value="G"> George</label></li>
             <li><label><input type="radio" name="beatle_0" value="R"> Ringo</label></li>
             </ul>"""
-        ))
+            ),
+        )

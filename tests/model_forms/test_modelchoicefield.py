@@ -19,12 +19,10 @@ class ModelChoiceFieldTests(TestCase):
 
     def test_basics(self):
         f = forms.ModelChoiceField(Category.objects.all())
-        self.assertEqual(list(f.choices), [
-            ('', '---------'),
-            (self.c1.pk, 'Entertainment'),
-            (self.c2.pk, 'A test'),
-            (self.c3.pk, 'Third'),
-        ])
+        self.assertEqual(
+            list(f.choices),
+            [('', '---------'), (self.c1.pk, 'Entertainment'), (self.c2.pk, 'A test'), (self.c3.pk, 'Third')],
+        )
         with self.assertRaises(ValidationError):
             f.clean('')
         with self.assertRaises(ValidationError):
@@ -67,11 +65,7 @@ class ModelChoiceFieldTests(TestCase):
 
         # queryset can be changed after the field is created.
         f.queryset = Category.objects.exclude(name='Third')
-        self.assertEqual(list(f.choices), [
-            ('', '---------'),
-            (self.c1.pk, 'Entertainment'),
-            (self.c2.pk, 'A test'),
-        ])
+        self.assertEqual(list(f.choices), [('', '---------'), (self.c1.pk, 'Entertainment'), (self.c2.pk, 'A test')])
         self.assertEqual(f.clean(self.c2.id).name, 'A test')
         with self.assertRaises(ValidationError):
             f.clean(self.c3.id)
@@ -80,40 +74,40 @@ class ModelChoiceFieldTests(TestCase):
         gen_one = list(f.choices)
         gen_two = f.choices
         self.assertEqual(gen_one[2], (self.c2.pk, 'A test'))
-        self.assertEqual(list(gen_two), [
-            ('', '---------'),
-            (self.c1.pk, 'Entertainment'),
-            (self.c2.pk, 'A test'),
-        ])
+        self.assertEqual(list(gen_two), [('', '---------'), (self.c1.pk, 'Entertainment'), (self.c2.pk, 'A test')])
 
         # Overriding label_from_instance() to print custom labels.
         f.queryset = Category.objects.all()
         f.label_from_instance = lambda obj: 'category ' + str(obj)
-        self.assertEqual(list(f.choices), [
-            ('', '---------'),
-            (self.c1.pk, 'category Entertainment'),
-            (self.c2.pk, 'category A test'),
-            (self.c3.pk, 'category Third'),
-        ])
+        self.assertEqual(
+            list(f.choices),
+            [
+                ('', '---------'),
+                (self.c1.pk, 'category Entertainment'),
+                (self.c2.pk, 'category A test'),
+                (self.c3.pk, 'category Third'),
+            ],
+        )
 
     def test_choices_freshness(self):
         f = forms.ModelChoiceField(Category.objects.all())
         self.assertEqual(len(f.choices), 4)
-        self.assertEqual(list(f.choices), [
-            ('', '---------'),
-            (self.c1.pk, 'Entertainment'),
-            (self.c2.pk, 'A test'),
-            (self.c3.pk, 'Third'),
-        ])
+        self.assertEqual(
+            list(f.choices),
+            [('', '---------'), (self.c1.pk, 'Entertainment'), (self.c2.pk, 'A test'), (self.c3.pk, 'Third')],
+        )
         c4 = Category.objects.create(name='Fourth', slug='4th', url='4th')
         self.assertEqual(len(f.choices), 5)
-        self.assertEqual(list(f.choices), [
-            ('', '---------'),
-            (self.c1.pk, 'Entertainment'),
-            (self.c2.pk, 'A test'),
-            (self.c3.pk, 'Third'),
-            (c4.pk, 'Fourth'),
-        ])
+        self.assertEqual(
+            list(f.choices),
+            [
+                ('', '---------'),
+                (self.c1.pk, 'Entertainment'),
+                (self.c2.pk, 'A test'),
+                (self.c3.pk, 'Third'),
+                (c4.pk, 'Fourth'),
+            ],
+        )
 
     def test_choices_bool(self):
         f = forms.ModelChoiceField(Category.objects.all(), empty_label=None)
@@ -162,6 +156,7 @@ class ModelChoiceFieldTests(TestCase):
         ModelChoiceField with RadioSelect widget doesn't produce unnecessary
         db queries when accessing its BoundField's attrs.
         """
+
         class ModelChoiceForm(forms.Form):
             category = forms.ModelChoiceField(Category.objects.all(), widget=forms.RadioSelect)
 
@@ -182,8 +177,7 @@ class ModelChoiceFieldTests(TestCase):
         book = Book.objects.create(author=Writer.objects.create(name='Test writer'))
         form = ModelChoiceForm({}, instance=book)
         self.assertEqual(
-            form.errors['author'],
-            ['Select a valid choice. That choice is not one of the available choices.']
+            form.errors['author'], ['Select a valid choice. That choice is not one of the available choices.']
         )
 
     def test_disabled_modelchoicefield_has_changed(self):
@@ -201,8 +195,7 @@ class ModelChoiceFieldTests(TestCase):
         category1 = Category.objects.create(name='cat1')
         category2 = Category.objects.create(name='cat2')
         article = Article.objects.create(
-            pub_date=datetime.date(1988, 1, 4),
-            writer=Writer.objects.create(name='Test writer'),
+            pub_date=datetime.date(1988, 1, 4), writer=Writer.objects.create(name='Test writer')
         )
         article.categories.set([category1.pk])
 
@@ -269,7 +262,8 @@ class ModelChoiceFieldTests(TestCase):
 <li><label><input type="checkbox" name="name" value="%d" data-slug="entertainment">Entertainment</label></li>
 <li><label><input type="checkbox" name="name" value="%d" data-slug="test">A test</label></li>
 <li><label><input type="checkbox" name="name" value="%d" data-slug="third-test">Third</label></li>
-</ul>''' % (self.c1.pk, self.c2.pk, self.c3.pk),
+</ul>'''
+            % (self.c1.pk, self.c2.pk, self.c3.pk),
         )
 
     def test_choices_not_fetched_when_not_rendering(self):
@@ -280,12 +274,10 @@ class ModelChoiceFieldTests(TestCase):
     def test_queryset_manager(self):
         f = forms.ModelChoiceField(Category.objects)
         self.assertEqual(len(f.choices), 4)
-        self.assertEqual(list(f.choices), [
-            ('', '---------'),
-            (self.c1.pk, 'Entertainment'),
-            (self.c2.pk, 'A test'),
-            (self.c3.pk, 'Third'),
-        ])
+        self.assertEqual(
+            list(f.choices),
+            [('', '---------'), (self.c1.pk, 'Entertainment'), (self.c2.pk, 'A test'), (self.c3.pk, 'Third')],
+        )
 
     def test_num_queries(self):
         """

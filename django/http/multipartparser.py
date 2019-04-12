@@ -11,12 +11,8 @@ import collections
 from urllib.parse import unquote
 
 from django.conf import settings
-from django.core.exceptions import (
-    RequestDataTooBig, SuspiciousMultipartForm, TooManyFieldsSent,
-)
-from django.core.files.uploadhandler import (
-    SkipFile, StopFutureHandlers, StopUpload,
-)
+from django.core.exceptions import RequestDataTooBig, SuspiciousMultipartForm, TooManyFieldsSent
+from django.core.files.uploadhandler import SkipFile, StopFutureHandlers, StopUpload
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import force_str
 from django.utils.text import unescape_entities
@@ -32,6 +28,7 @@ class InputStreamExhausted(Exception):
     """
     No more reads are allowed from this device.
     """
+
     pass
 
 
@@ -47,6 +44,7 @@ class MultiPartParser:
     ``MultiValueDict.parse()`` reads the input stream in ``chunk_size`` chunks
     and returns a tuple of ``(MultiValueDict(POST), MultiValueDict(FILES))``.
     """
+
     def __init__(self, META, input_data, upload_handlers, encoding=None):
         """
         Initialize the MultiPartParser object.
@@ -122,11 +120,7 @@ class MultiPartParser:
         # This allows overriding everything if need be.
         for handler in handlers:
             result = handler.handle_raw_input(
-                self._input_data,
-                self._meta,
-                self._content_length,
-                self._boundary,
-                encoding,
+                self._input_data, self._meta, self._content_length, self._boundary, encoding
             )
             # Check to see if it was handled
             if result is not None:
@@ -173,11 +167,12 @@ class MultiPartParser:
                 if item_type == FIELD:
                     # Avoid storing more than DATA_UPLOAD_MAX_NUMBER_FIELDS.
                     num_post_keys += 1
-                    if (settings.DATA_UPLOAD_MAX_NUMBER_FIELDS is not None and
-                            settings.DATA_UPLOAD_MAX_NUMBER_FIELDS < num_post_keys):
+                    if (
+                        settings.DATA_UPLOAD_MAX_NUMBER_FIELDS is not None
+                        and settings.DATA_UPLOAD_MAX_NUMBER_FIELDS < num_post_keys
+                    ):
                         raise TooManyFieldsSent(
-                            'The number of GET/POST parameters exceeded '
-                            'settings.DATA_UPLOAD_MAX_NUMBER_FIELDS.'
+                            'The number of GET/POST parameters exceeded ' 'settings.DATA_UPLOAD_MAX_NUMBER_FIELDS.'
                         )
 
                     # Avoid reading more than DATA_UPLOAD_MAX_MEMORY_SIZE.
@@ -199,8 +194,10 @@ class MultiPartParser:
                     # Add two here to make the check consistent with the
                     # x-www-form-urlencoded check that includes '&='.
                     num_bytes_read += len(field_name) + 2
-                    if (settings.DATA_UPLOAD_MAX_MEMORY_SIZE is not None and
-                            num_bytes_read > settings.DATA_UPLOAD_MAX_MEMORY_SIZE):
+                    if (
+                        settings.DATA_UPLOAD_MAX_MEMORY_SIZE is not None
+                        and num_bytes_read > settings.DATA_UPLOAD_MAX_MEMORY_SIZE
+                    ):
                         raise RequestDataTooBig('Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.')
 
                     self._post.appendlist(field_name, force_str(data, encoding, errors='replace'))
@@ -227,8 +224,7 @@ class MultiPartParser:
                         for handler in handlers:
                             try:
                                 handler.new_file(
-                                    field_name, file_name, content_type,
-                                    content_length, charset, content_type_extra,
+                                    field_name, file_name, content_type, content_length, charset, content_type_extra
                                 )
                             except StopFutureHandlers:
                                 break
@@ -299,7 +295,7 @@ class MultiPartParser:
 
     def IE_sanitize(self, filename):
         """Cleanup filename from Internet Explorer full paths."""
-        return filename and filename[filename.rfind("\\") + 1:].strip()
+        return filename and filename[filename.rfind("\\") + 1 :].strip()
 
     def _close_files(self):
         # Free up all file handles.
@@ -318,6 +314,7 @@ class LazyStream:
     LazyStream object will support iteration, reading, and keeping a "look-back"
     variable in case you need to "unget" some bytes.
     """
+
     def __init__(self, producer, length=None):
         """
         Every LazyStream must have a producer when instantiated.
@@ -413,10 +410,7 @@ class LazyStream:
         maliciously-malformed MIME request.
         """
         self._unget_history = [num_bytes] + self._unget_history[:49]
-        number_equal = len([
-            current_number for current_number in self._unget_history
-            if current_number == num_bytes
-        ])
+        number_equal = len([current_number for current_number in self._unget_history if current_number == num_bytes])
 
         if number_equal > 40:
             raise SuspiciousMultipartForm(
@@ -431,6 +425,7 @@ class ChunkIter:
     An iterable that will yield chunks of data. Given a file-like object as the
     constructor, yield chunks of read operations from that object.
     """
+
     def __init__(self, flo, chunk_size=64 * 1024):
         self.flo = flo
         self.chunk_size = chunk_size
@@ -453,6 +448,7 @@ class InterBoundaryIter:
     """
     A Producer that will iterate over boundaries.
     """
+
     def __init__(self, stream, boundary):
         self._stream = stream
         self._boundary = boundary
@@ -555,10 +551,10 @@ class BoundaryIter:
             next = index + len(self._boundary)
             # backup over CRLF
             last = max(0, end - 1)
-            if data[last:last + 1] == b'\n':
+            if data[last : last + 1] == b'\n':
                 end -= 1
             last = max(0, end - 1)
-            if data[last:last + 1] == b'\r':
+            if data[last : last + 1] == b'\r':
                 end -= 1
             return end, next
 
@@ -604,7 +600,7 @@ def parse_boundary_stream(stream, max_header_size):
 
     # here we place any excess chunk back onto the stream, as
     # well as throwing away the CRLFCRLF bytes from above.
-    stream.unget(chunk[header_end + 4:])
+    stream.unget(chunk[header_end + 4 :])
 
     TYPE = RAW
     outdict = {}
@@ -664,7 +660,7 @@ def parse_header(line):
                 name = name[:-1]
                 if p.count(b"'") == 2:
                     has_encoding = True
-            value = p[i + 1:].strip()
+            value = p[i + 1 :].strip()
             if has_encoding:
                 encoding, lang, value = value.split(b"'")
                 value = unquote(value.decode(), encoding=encoding.decode())

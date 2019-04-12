@@ -2,9 +2,15 @@ from unittest import mock, skipUnless
 
 from django.conf.global_settings import PASSWORD_HASHERS
 from django.contrib.auth.hashers import (
-    UNUSABLE_PASSWORD_PREFIX, UNUSABLE_PASSWORD_SUFFIX_LENGTH,
-    BasePasswordHasher, PBKDF2PasswordHasher, PBKDF2SHA1PasswordHasher,
-    check_password, get_hasher, identify_hasher, is_password_usable,
+    UNUSABLE_PASSWORD_PREFIX,
+    UNUSABLE_PASSWORD_SUFFIX_LENGTH,
+    BasePasswordHasher,
+    PBKDF2PasswordHasher,
+    PBKDF2SHA1PasswordHasher,
+    check_password,
+    get_hasher,
+    identify_hasher,
+    is_password_usable,
     make_password,
 )
 from django.test import SimpleTestCase
@@ -36,7 +42,6 @@ class PBKDF2SingleIterationHasher(PBKDF2PasswordHasher):
 
 @override_settings(PASSWORD_HASHERS=PASSWORD_HASHERS)
 class TestUtilsHashPass(SimpleTestCase):
-
     def test_simple(self):
         encoded = make_password('lètmein')
         self.assertTrue(encoded.startswith('pbkdf2_sha256$'))
@@ -158,8 +163,7 @@ class TestUtilsHashPass(SimpleTestCase):
 
         # password truncation no longer works
         password = (
-            'VSK0UYV6FFQVZ0KG88DYN9WADAADZO1CTSIVDJUNZSUML6IBX7LN7ZS3R5'
-            'JGB3RGZ7VI7G7DJQ9NI8BQFSRPTG6UWTTVESA5ZPUN'
+            'VSK0UYV6FFQVZ0KG88DYN9WADAADZO1CTSIVDJUNZSUML6IBX7LN7ZS3R5' 'JGB3RGZ7VI7G7DJQ9NI8BQFSRPTG6UWTTVESA5ZPUN'
         )
         encoded = make_password(password, hasher='bcrypt_sha256')
         self.assertTrue(check_password(password, encoded))
@@ -229,8 +233,7 @@ class TestUtilsHashPass(SimpleTestCase):
         with mock.patch.object(hasher, 'rounds', 4):
             encoded = make_password('letmein', hasher='bcrypt')
 
-        with mock.patch.object(hasher, 'rounds', 6), \
-                mock.patch.object(hasher, 'encode', side_effect=hasher.encode):
+        with mock.patch.object(hasher, 'rounds', 6), mock.patch.object(hasher, 'encode', side_effect=hasher.encode):
             hasher.harden_runtime('wrong_password', encoded)
 
             # Increasing rounds from 4 to 6 means an increase of 4 in workload,
@@ -267,10 +270,7 @@ class TestUtilsHashPass(SimpleTestCase):
         self.assertFalse(check_password(None, make_password('lètmein')))
 
     def test_bad_algorithm(self):
-        msg = (
-            "Unknown password hashing algorithm '%s'. Did you specify it in "
-            "the PASSWORD_HASHERS setting?"
-        )
+        msg = "Unknown password hashing algorithm '%s'. Did you specify it in " "the PASSWORD_HASHERS setting?"
         with self.assertRaisesMessage(ValueError, msg % 'lolcat'):
             make_password('lètmein', hasher='lolcat')
         with self.assertRaisesMessage(ValueError, msg % 'lolcat'):
@@ -299,7 +299,7 @@ class TestUtilsHashPass(SimpleTestCase):
             'django.contrib.auth.hashers.PBKDF2PasswordHasher',
             'django.contrib.auth.hashers.SHA1PasswordHasher',
             'django.contrib.auth.hashers.MD5PasswordHasher',
-        ],
+        ]
     )
     def test_upgrade(self):
         self.assertEqual('pbkdf2_sha256', get_hasher('default').algorithm)
@@ -310,6 +310,7 @@ class TestUtilsHashPass(SimpleTestCase):
 
                 def setter(password):
                     state['upgraded'] = True
+
                 self.assertTrue(check_password('lètmein', encoded, setter))
                 self.assertTrue(state['upgraded'])
 
@@ -319,6 +320,7 @@ class TestUtilsHashPass(SimpleTestCase):
 
         def setter():
             state['upgraded'] = True
+
         self.assertFalse(check_password('WRONG', encoded, setter))
         self.assertFalse(state['upgraded'])
 
@@ -327,7 +329,7 @@ class TestUtilsHashPass(SimpleTestCase):
             'django.contrib.auth.hashers.PBKDF2PasswordHasher',
             'django.contrib.auth.hashers.SHA1PasswordHasher',
             'django.contrib.auth.hashers.MD5PasswordHasher',
-        ],
+        ]
     )
     def test_no_upgrade_on_incorrect_pass(self):
         self.assertEqual('pbkdf2_sha256', get_hasher('default').algorithm)
@@ -338,6 +340,7 @@ class TestUtilsHashPass(SimpleTestCase):
 
                 def setter():
                     state['upgraded'] = True
+
                 self.assertFalse(check_password('WRONG', encoded, setter))
                 self.assertFalse(state['upgraded'])
 
@@ -379,8 +382,9 @@ class TestUtilsHashPass(SimpleTestCase):
         with mock.patch.object(hasher, 'iterations', 1):
             encoded = make_password('letmein')
 
-        with mock.patch.object(hasher, 'iterations', 6), \
-                mock.patch.object(hasher, 'encode', side_effect=hasher.encode):
+        with mock.patch.object(hasher, 'iterations', 6), mock.patch.object(
+            hasher, 'encode', side_effect=hasher.encode
+        ):
             hasher.harden_runtime('wrong_password', encoded)
 
             # Encode should get called once ...
@@ -401,8 +405,7 @@ class TestUtilsHashPass(SimpleTestCase):
         def setter(password):
             state['upgraded'] = True
 
-        with self.settings(PASSWORD_HASHERS=[
-                'auth_tests.test_hashers.PBKDF2SingleIterationHasher']):
+        with self.settings(PASSWORD_HASHERS=['auth_tests.test_hashers.PBKDF2SingleIterationHasher']):
             encoded = make_password('letmein')
             algo, iterations, salt, hash = encoded.split('$', 3)
             self.assertEqual(iterations, '1')
@@ -413,9 +416,12 @@ class TestUtilsHashPass(SimpleTestCase):
 
         # Revert to the old iteration count and check if the password would get
         # updated to the new iteration count.
-        with self.settings(PASSWORD_HASHERS=[
+        with self.settings(
+            PASSWORD_HASHERS=[
                 'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-                'auth_tests.test_hashers.PBKDF2SingleIterationHasher']):
+                'auth_tests.test_hashers.PBKDF2SingleIterationHasher',
+            ]
+        ):
             self.assertTrue(check_password('letmein', encoded, setter))
             self.assertTrue(state['upgraded'])
 
@@ -423,8 +429,7 @@ class TestUtilsHashPass(SimpleTestCase):
         hasher = get_hasher('default')
         encoded = make_password('letmein')
 
-        with mock.patch.object(hasher, 'harden_runtime'), \
-                mock.patch.object(hasher, 'must_update', return_value=True):
+        with mock.patch.object(hasher, 'harden_runtime'), mock.patch.object(hasher, 'must_update', return_value=True):
             # Correct password supplied, no hardening needed
             check_password('letmein', encoded)
             self.assertEqual(hasher.harden_runtime.call_count, 0)
@@ -482,7 +487,6 @@ class BasePasswordHasherTests(SimpleTestCase):
 @skipUnless(argon2, "argon2-cffi not installed")
 @override_settings(PASSWORD_HASHERS=PASSWORD_HASHERS)
 class TestUtilsHashPassArgon2(SimpleTestCase):
-
     def test_argon2(self):
         encoded = make_password('lètmein', hasher='argon2')
         self.assertTrue(is_password_usable(encoded))

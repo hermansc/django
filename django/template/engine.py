@@ -11,15 +11,21 @@ from .library import import_library
 
 
 class Engine:
-    default_builtins = [
-        'django.template.defaulttags',
-        'django.template.defaultfilters',
-        'django.template.loader_tags',
-    ]
+    default_builtins = ['django.template.defaulttags', 'django.template.defaultfilters', 'django.template.loader_tags']
 
-    def __init__(self, dirs=None, app_dirs=False, context_processors=None,
-                 debug=False, loaders=None, string_if_invalid='',
-                 file_charset='utf-8', libraries=None, builtins=None, autoescape=True):
+    def __init__(
+        self,
+        dirs=None,
+        app_dirs=False,
+        context_processors=None,
+        debug=False,
+        loaders=None,
+        string_if_invalid='',
+        file_charset='utf-8',
+        libraries=None,
+        builtins=None,
+        autoescape=True,
+    ):
         if dirs is None:
             dirs = []
         if context_processors is None:
@@ -32,8 +38,7 @@ class Engine:
                 loaders = [('django.template.loaders.cached.Loader', loaders)]
         else:
             if app_dirs:
-                raise ImproperlyConfigured(
-                    "app_dirs must not be set when loaders is defined.")
+                raise ImproperlyConfigured("app_dirs must not be set when loaders is defined.")
         if libraries is None:
             libraries = {}
         if builtins is None:
@@ -73,6 +78,7 @@ class Engine:
         # local imports are required to avoid import loops.
         from django.template import engines
         from django.template.backends.django import DjangoTemplates
+
         for engine in engines.all():
             if isinstance(engine, DjangoTemplates):
                 return engine.engine
@@ -115,8 +121,7 @@ class Engine:
             loader_class = import_string(loader)
             return loader_class(self, *args)
         else:
-            raise ImproperlyConfigured(
-                "Invalid value in template loaders configuration: %r" % loader)
+            raise ImproperlyConfigured("Invalid value in template loaders configuration: %r" % loader)
 
     def find_template(self, name, dirs=None, skip=None):
         tried = []

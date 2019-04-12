@@ -2,10 +2,7 @@ import struct
 
 from django.forms import ValidationError
 
-from .const import (
-    GDAL_TO_POSTGIS, GDAL_TO_STRUCT, POSTGIS_HEADER_STRUCTURE, POSTGIS_TO_GDAL,
-    STRUCT_SIZE,
-)
+from .const import GDAL_TO_POSTGIS, GDAL_TO_STRUCT, POSTGIS_HEADER_STRUCTURE, POSTGIS_TO_GDAL, STRUCT_SIZE
 
 
 def pack(structure, data):
@@ -86,7 +83,8 @@ def from_pgraster(data):
 
     return {
         'srid': int(header[9]),
-        'width': header[10], 'height': header[11],
+        'width': header[10],
+        'height': header[11],
         'datatype': pixeltypes[0],
         'origin': (header[5], header[6]),
         'scale': (header[3], header[4]),
@@ -103,9 +101,18 @@ def to_pgraster(rast):
     # the endianness and the PostGIS Raster Version, both are fixed by
     # PostGIS at the moment.
     rasterheader = (
-        1, 0, len(rast.bands), rast.scale.x, rast.scale.y,
-        rast.origin.x, rast.origin.y, rast.skew.x, rast.skew.y,
-        rast.srs.srid, rast.width, rast.height,
+        1,
+        0,
+        len(rast.bands),
+        rast.scale.x,
+        rast.scale.y,
+        rast.origin.x,
+        rast.origin.y,
+        rast.skew.x,
+        rast.skew.y,
+        rast.srs.srid,
+        rast.width,
+        rast.height,
     )
 
     # Pack raster header.

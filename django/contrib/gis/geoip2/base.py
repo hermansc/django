@@ -213,6 +213,7 @@ class GeoIP2:
         ll = self.lon_lat(query)
         if ll:
             from django.contrib.gis.geos import Point
+
             return Point(ll, srid=4326)
         else:
             return None

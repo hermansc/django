@@ -9,6 +9,7 @@ class CustomUserNonUniqueUsername(AbstractBaseUser):
     This model is not invalid if it is used with a custom authentication
     backend which supports non-unique usernames.
     """
+
     username = models.CharField(max_length=30)
     email = models.EmailField(blank=True)
     is_staff = models.BooleanField(default=False)

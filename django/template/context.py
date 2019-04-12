@@ -125,7 +125,8 @@ class BaseContext:
         Compare two contexts by comparing theirs 'dicts' attributes.
         """
         return (
-            isinstance(other, BaseContext) and
+            isinstance(other, BaseContext)
+            and
             # because dictionaries can be put in different order
             # we have to flatten them like in templates
             self.flatten() == other.flatten()
@@ -134,6 +135,7 @@ class BaseContext:
 
 class Context(BaseContext):
     "A stack container for variable context"
+
     def __init__(self, dict_=None, autoescape=True, use_l10n=None, use_tz=None):
         self.autoescape = autoescape
         self.use_l10n = use_l10n
@@ -184,6 +186,7 @@ class RenderContext(BaseContext):
     rendering of other templates as they would if they were stored in the normal
     template context.
     """
+
     template = None
 
     def __iter__(self):
@@ -219,6 +222,7 @@ class RequestContext(Context):
     Additional processors can be specified as a list of callables
     using the "processors" keyword argument.
     """
+
     def __init__(self, request, dict_=None, processors=None, use_l10n=None, use_tz=None, autoescape=True):
         super().__init__(dict_, use_l10n=use_l10n, use_tz=use_tz, autoescape=autoescape)
         self.request = request
@@ -239,8 +243,7 @@ class RequestContext(Context):
 
         self.template = template
         # Set context processors according to the template engine's settings.
-        processors = (template.engine.template_context_processors +
-                      self._processors)
+        processors = template.engine.template_context_processors + self._processors
         updates = {}
         for processor in processors:
             updates.update(processor(self.request))

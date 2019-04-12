@@ -7,14 +7,9 @@ from django.utils import translation
 
 @override_settings(
     USE_I18N=True,
-    LOCALE_PATHS=[
-        os.path.join(os.path.dirname(__file__), 'locale'),
-    ],
+    LOCALE_PATHS=[os.path.join(os.path.dirname(__file__), 'locale')],
     LANGUAGE_CODE='en',
-    LANGUAGES=[
-        ('en', 'English'),
-        ('fr', 'French'),
-    ],
+    LANGUAGES=[('en', 'English'), ('fr', 'French')],
 )
 class ContentTypeTests(TestCase):
     def test_verbose_name(self):

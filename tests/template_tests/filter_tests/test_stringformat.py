@@ -11,10 +11,11 @@ class StringformatTests(SimpleTestCase):
     formatting here only needs to deal with pre-escaped characters.
     """
 
-    @setup({
-        'stringformat01':
-        '{% autoescape off %}.{{ a|stringformat:"5s" }}. .{{ b|stringformat:"5s" }}.{% endautoescape %}'
-    })
+    @setup(
+        {
+            'stringformat01': '{% autoescape off %}.{{ a|stringformat:"5s" }}. .{{ b|stringformat:"5s" }}.{% endautoescape %}'
+        }
+    )
     def test_stringformat01(self):
         output = self.engine.render_to_string('stringformat01', {'a': 'a<b', 'b': mark_safe('a<b')})
         self.assertEqual(output, '.  a<b. .  a<b.')
@@ -26,7 +27,6 @@ class StringformatTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_format(self):
         self.assertEqual(stringformat(1, '03d'), '001')
         self.assertEqual(stringformat([1, None], 's'), '[1, None]')

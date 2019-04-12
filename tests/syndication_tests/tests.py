@@ -15,28 +15,32 @@ TZ = timezone.get_default_timezone()
 
 
 class FeedTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.e1 = Entry.objects.create(
-            title='My first entry', updated=datetime.datetime(1980, 1, 1, 12, 30),
-            published=datetime.datetime(1986, 9, 25, 20, 15, 00)
+            title='My first entry',
+            updated=datetime.datetime(1980, 1, 1, 12, 30),
+            published=datetime.datetime(1986, 9, 25, 20, 15, 00),
         )
         cls.e2 = Entry.objects.create(
-            title='My second entry', updated=datetime.datetime(2008, 1, 2, 12, 30),
-            published=datetime.datetime(2006, 3, 17, 18, 0)
+            title='My second entry',
+            updated=datetime.datetime(2008, 1, 2, 12, 30),
+            published=datetime.datetime(2006, 3, 17, 18, 0),
         )
         cls.e3 = Entry.objects.create(
-            title='My third entry', updated=datetime.datetime(2008, 1, 2, 13, 30),
-            published=datetime.datetime(2005, 6, 14, 10, 45)
+            title='My third entry',
+            updated=datetime.datetime(2008, 1, 2, 13, 30),
+            published=datetime.datetime(2005, 6, 14, 10, 45),
         )
         cls.e4 = Entry.objects.create(
-            title='A & B < C > D', updated=datetime.datetime(2008, 1, 3, 13, 30),
-            published=datetime.datetime(2005, 11, 25, 12, 11, 23)
+            title='A & B < C > D',
+            updated=datetime.datetime(2008, 1, 3, 13, 30),
+            published=datetime.datetime(2005, 11, 25, 12, 11, 23),
         )
         cls.e5 = Entry.objects.create(
-            title='My last entry', updated=datetime.datetime(2013, 1, 20, 0, 0),
-            published=datetime.datetime(2013, 3, 25, 20, 0)
+            title='My last entry',
+            updated=datetime.datetime(2013, 1, 20, 0, 0),
+            published=datetime.datetime(2013, 3, 25, 20, 0),
         )
         cls.a1 = Article.objects.create(title='My first article', entry=cls.e1)
 
@@ -47,14 +51,10 @@ class FeedTestCase(TestCase):
 
     def assertChildNodeContent(self, elem, expected):
         for k, v in expected.items():
-            self.assertEqual(
-                elem.getElementsByTagName(k)[0].firstChild.wholeText, v)
+            self.assertEqual(elem.getElementsByTagName(k)[0].firstChild.wholeText, v)
 
     def assertCategories(self, elem, expected):
-        self.assertEqual(
-            {i.firstChild.wholeText for i in elem.childNodes if i.nodeName == 'category'},
-            set(expected)
-        )
+        self.assertEqual({i.firstChild.wholeText for i in elem.childNodes if i.nodeName == 'category'}, set(expected))
 
 
 @override_settings(ROOT_URLCONF='syndication_tests.urls')
@@ -62,6 +62,7 @@ class SyndicationFeedTest(FeedTestCase):
     """
     Tests for the high-level syndication feed framework.
     """
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -94,32 +95,40 @@ class SyndicationFeedTest(FeedTestCase):
         last_build_date = rfc2822_date(timezone.make_aware(d, TZ))
 
         self.assertChildNodes(
-            chan, [
-                'title', 'link', 'description', 'language', 'lastBuildDate',
-                'item', 'atom:link', 'ttl', 'copyright', 'category',
-            ]
+            chan,
+            [
+                'title',
+                'link',
+                'description',
+                'language',
+                'lastBuildDate',
+                'item',
+                'atom:link',
+                'ttl',
+                'copyright',
+                'category',
+            ],
         )
-        self.assertChildNodeContent(chan, {
-            'title': 'My blog',
-            'description': 'A more thorough description of my blog.',
-            'link': 'http://example.com/blog/',
-            'language': 'en',
-            'lastBuildDate': last_build_date,
-            'ttl': '600',
-            'copyright': 'Copyright (c) 2007, Sally Smith',
-        })
+        self.assertChildNodeContent(
+            chan,
+            {
+                'title': 'My blog',
+                'description': 'A more thorough description of my blog.',
+                'link': 'http://example.com/blog/',
+                'language': 'en',
+                'lastBuildDate': last_build_date,
+                'ttl': '600',
+                'copyright': 'Copyright (c) 2007, Sally Smith',
+            },
+        )
         self.assertCategories(chan, ['python', 'django'])
 
         # Ensure the content of the channel is correct
-        self.assertChildNodeContent(chan, {
-            'title': 'My blog',
-            'link': 'http://example.com/blog/',
-        })
+        self.assertChildNodeContent(chan, {'title': 'My blog', 'link': 'http://example.com/blog/'})
 
         # Check feed_url is passed
         self.assertEqual(
-            chan.getElementsByTagName('atom:link')[0].getAttribute('href'),
-            'http://example.com/syndication/rss2/'
+            chan.getElementsByTagName('atom:link')[0].getAttribute('href'), 'http://example.com/syndication/rss2/'
         )
 
         # Find the pubdate of the first feed item
@@ -128,52 +137,46 @@ class SyndicationFeedTest(FeedTestCase):
 
         items = chan.getElementsByTagName('item')
         self.assertEqual(len(items), Entry.objects.count())
-        self.assertChildNodeContent(items[0], {
-            'title': 'My first entry',
-            'description': 'Overridden description: My first entry',
-            'link': 'http://example.com/blog/1/',
-            'guid': 'http://example.com/blog/1/',
-            'pubDate': pub_date,
-            'author': 'test@example.com (Sally Smith)',
-        })
+        self.assertChildNodeContent(
+            items[0],
+            {
+                'title': 'My first entry',
+                'description': 'Overridden description: My first entry',
+                'link': 'http://example.com/blog/1/',
+                'guid': 'http://example.com/blog/1/',
+                'pubDate': pub_date,
+                'author': 'test@example.com (Sally Smith)',
+            },
+        )
         self.assertCategories(items[0], ['python', 'testing'])
         for item in items:
             self.assertChildNodes(item, ['title', 'link', 'description', 'guid', 'category', 'pubDate', 'author'])
             # Assert that <guid> does not have any 'isPermaLink' attribute
-            self.assertIsNone(item.getElementsByTagName(
-                'guid')[0].attributes.get('isPermaLink'))
+            self.assertIsNone(item.getElementsByTagName('guid')[0].attributes.get('isPermaLink'))
 
     def test_rss2_feed_guid_permalink_false(self):
         """
         Test if the 'isPermaLink' attribute of <guid> element of an item
         in the RSS feed is 'false'.
         """
-        response = self.client.get(
-            '/syndication/rss2/guid_ispermalink_false/')
+        response = self.client.get('/syndication/rss2/guid_ispermalink_false/')
         doc = minidom.parseString(response.content)
-        chan = doc.getElementsByTagName(
-            'rss')[0].getElementsByTagName('channel')[0]
+        chan = doc.getElementsByTagName('rss')[0].getElementsByTagName('channel')[0]
         items = chan.getElementsByTagName('item')
         for item in items:
-            self.assertEqual(
-                item.getElementsByTagName('guid')[0].attributes.get(
-                    'isPermaLink').value, "false")
+            self.assertEqual(item.getElementsByTagName('guid')[0].attributes.get('isPermaLink').value, "false")
 
     def test_rss2_feed_guid_permalink_true(self):
         """
         Test if the 'isPermaLink' attribute of <guid> element of an item
         in the RSS feed is 'true'.
         """
-        response = self.client.get(
-            '/syndication/rss2/guid_ispermalink_true/')
+        response = self.client.get('/syndication/rss2/guid_ispermalink_true/')
         doc = minidom.parseString(response.content)
-        chan = doc.getElementsByTagName(
-            'rss')[0].getElementsByTagName('channel')[0]
+        chan = doc.getElementsByTagName('rss')[0].getElementsByTagName('channel')[0]
         items = chan.getElementsByTagName('item')
         for item in items:
-            self.assertEqual(
-                item.getElementsByTagName('guid')[0].attributes.get(
-                    'isPermaLink').value, "true")
+            self.assertEqual(item.getElementsByTagName('guid')[0].attributes.get('isPermaLink').value, "true")
 
     def test_rss2_single_enclosure(self):
         response = self.client.get('/syndication/rss2/single-enclosure/')
@@ -188,7 +191,7 @@ class SyndicationFeedTest(FeedTestCase):
         with self.assertRaisesMessage(
             ValueError,
             "RSS feed items may only have one enclosure, see "
-            "http://www.rssboard.org/rss-profile#element-channel-item-enclosure"
+            "http://www.rssboard.org/rss-profile#element-channel-item-enclosure",
         ):
             self.client.get('/syndication/rss2/multiple-enclosure/')
 
@@ -212,32 +215,40 @@ class SyndicationFeedTest(FeedTestCase):
         self.assertEqual(len(chan_elem), 1)
         chan = chan_elem[0]
         self.assertChildNodes(
-            chan, [
-                'title', 'link', 'description', 'language', 'lastBuildDate',
-                'item', 'atom:link', 'ttl', 'copyright', 'category',
-            ]
+            chan,
+            [
+                'title',
+                'link',
+                'description',
+                'language',
+                'lastBuildDate',
+                'item',
+                'atom:link',
+                'ttl',
+                'copyright',
+                'category',
+            ],
         )
 
         # Ensure the content of the channel is correct
-        self.assertChildNodeContent(chan, {
-            'title': 'My blog',
-            'link': 'http://example.com/blog/',
-        })
+        self.assertChildNodeContent(chan, {'title': 'My blog', 'link': 'http://example.com/blog/'})
         self.assertCategories(chan, ['python', 'django'])
 
         # Check feed_url is passed
         self.assertEqual(
-            chan.getElementsByTagName('atom:link')[0].getAttribute('href'),
-            'http://example.com/syndication/rss091/'
+            chan.getElementsByTagName('atom:link')[0].getAttribute('href'), 'http://example.com/syndication/rss091/'
         )
 
         items = chan.getElementsByTagName('item')
         self.assertEqual(len(items), Entry.objects.count())
-        self.assertChildNodeContent(items[0], {
-            'title': 'My first entry',
-            'description': 'Overridden description: My first entry',
-            'link': 'http://example.com/blog/1/',
-        })
+        self.assertChildNodeContent(
+            items[0],
+            {
+                'title': 'My first entry',
+                'description': 'Overridden description: My first entry',
+                'link': 'http://example.com/blog/1/',
+            },
+        )
         for item in items:
             self.assertChildNodes(item, ['title', 'link', 'description'])
             self.assertCategories(item, [])
@@ -252,8 +263,7 @@ class SyndicationFeedTest(FeedTestCase):
         self.assertEqual(feed.nodeName, 'feed')
         self.assertEqual(feed.getAttribute('xmlns'), 'http://www.w3.org/2005/Atom')
         self.assertChildNodes(
-            feed,
-            ['title', 'subtitle', 'link', 'id', 'updated', 'entry', 'rights', 'category', 'author']
+            feed, ['title', 'subtitle', 'link', 'id', 'updated', 'entry', 'rights', 'category', 'author']
         )
         for link in feed.getElementsByTagName('link'):
             if link.getAttribute('rel') == 'self':
@@ -262,17 +272,9 @@ class SyndicationFeedTest(FeedTestCase):
         entries = feed.getElementsByTagName('entry')
         self.assertEqual(len(entries), Entry.objects.count())
         for entry in entries:
-            self.assertChildNodes(entry, [
-                'title',
-                'link',
-                'id',
-                'summary',
-                'category',
-                'updated',
-                'published',
-                'rights',
-                'author',
-            ])
+            self.assertChildNodes(
+                entry, ['title', 'link', 'id', 'summary', 'category', 'updated', 'published', 'rights', 'author']
+            )
             summary = entry.getElementsByTagName('summary')[0]
             self.assertEqual(summary.getAttribute('type'), 'html')
 
@@ -340,26 +342,17 @@ class SyndicationFeedTest(FeedTestCase):
         self.assertEqual(feed.nodeName, 'feed')
         self.assertEqual(feed.getAttribute('django'), 'rocks')
         self.assertChildNodes(
-            feed,
-            ['title', 'subtitle', 'link', 'id', 'updated', 'entry', 'spam', 'rights', 'category', 'author']
+            feed, ['title', 'subtitle', 'link', 'id', 'updated', 'entry', 'spam', 'rights', 'category', 'author']
         )
 
         entries = feed.getElementsByTagName('entry')
         self.assertEqual(len(entries), Entry.objects.count())
         for entry in entries:
             self.assertEqual(entry.getAttribute('bacon'), 'yum')
-            self.assertChildNodes(entry, [
-                'title',
-                'link',
-                'id',
-                'summary',
-                'ministry',
-                'rights',
-                'author',
-                'updated',
-                'published',
-                'category',
-            ])
+            self.assertChildNodes(
+                entry,
+                ['title', 'link', 'id', 'summary', 'ministry', 'rights', 'author', 'updated', 'published', 'category'],
+            )
             summary = entry.getElementsByTagName('summary')[0]
             self.assertEqual(summary.getAttribute('type'), 'html')
 
@@ -432,15 +425,10 @@ class SyndicationFeedTest(FeedTestCase):
         """
         Test URLs are prefixed with https:// when feed is requested over HTTPS.
         """
-        response = self.client.get('/syndication/rss2/', **{
-            'wsgi.url_scheme': 'https',
-        })
+        response = self.client.get('/syndication/rss2/', **{'wsgi.url_scheme': 'https'})
         doc = minidom.parseString(response.content)
         chan = doc.getElementsByTagName('channel')[0]
-        self.assertEqual(
-            chan.getElementsByTagName('link')[0].firstChild.wholeText[0:5],
-            'https'
-        )
+        self.assertEqual(chan.getElementsByTagName('link')[0].firstChild.wholeText[0:5], 'https')
         atom_link = chan.getElementsByTagName('atom:link')[0]
         self.assertEqual(atom_link.getAttribute('href')[0:5], 'https')
         for link in doc.getElementsByTagName('link'):
@@ -469,11 +457,14 @@ class SyndicationFeedTest(FeedTestCase):
         chan = feed.getElementsByTagName('channel')[0]
         items = chan.getElementsByTagName('item')
 
-        self.assertChildNodeContent(items[0], {
-            'title': 'Title in your templates: My first entry\n',
-            'description': 'Description in your templates: My first entry\n',
-            'link': 'http://example.com/blog/1/',
-        })
+        self.assertChildNodeContent(
+            items[0],
+            {
+                'title': 'Title in your templates: My first entry\n',
+                'description': 'Description in your templates: My first entry\n',
+                'link': 'http://example.com/blog/1/',
+            },
+        )
 
     def test_template_context_feed(self):
         """
@@ -486,10 +477,9 @@ class SyndicationFeedTest(FeedTestCase):
         chan = feed.getElementsByTagName('channel')[0]
         items = chan.getElementsByTagName('item')
 
-        self.assertChildNodeContent(items[0], {
-            'title': 'My first entry (foo is bar)\n',
-            'description': 'My first entry (foo is bar)\n',
-        })
+        self.assertChildNodeContent(
+            items[0], {'title': 'My first entry (foo is bar)\n', 'description': 'My first entry (foo is bar)\n'}
+        )
 
     def test_add_domain(self):
         """

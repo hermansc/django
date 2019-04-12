@@ -1,9 +1,7 @@
 from django.db.models.query_utils import InvalidQuery
 from django.test import TestCase
 
-from .models import (
-    BigChild, Child, ChildProxy, Primary, RefreshPrimaryProxy, Secondary,
-)
+from .models import BigChild, Child, ChildProxy, Primary, RefreshPrimaryProxy, Secondary
 
 
 class AssertionMixin:
@@ -75,20 +73,16 @@ class DeferTests(AssertionMixin, TestCase):
     def test_defer_values_does_not_defer(self):
         # User values() won't defer anything (you get the full list of
         # dictionaries back), but it still works.
-        self.assertEqual(Primary.objects.defer("name").values()[0], {
-            "id": self.p1.id,
-            "name": "p1",
-            "value": "xx",
-            "related_id": self.s1.id,
-        })
+        self.assertEqual(
+            Primary.objects.defer("name").values()[0],
+            {"id": self.p1.id, "name": "p1", "value": "xx", "related_id": self.s1.id},
+        )
 
     def test_only_values_does_not_defer(self):
-        self.assertEqual(Primary.objects.only("name").values()[0], {
-            "id": self.p1.id,
-            "name": "p1",
-            "value": "xx",
-            "related_id": self.s1.id,
-        })
+        self.assertEqual(
+            Primary.objects.only("name").values()[0],
+            {"id": self.p1.id, "name": "p1", "value": "xx", "related_id": self.s1.id},
+        )
 
     def test_get(self):
         # Using defer() and only() with get() is also valid.
@@ -109,18 +103,12 @@ class DeferTests(AssertionMixin, TestCase):
         self.assertEqual(obj.name, "p1")
 
     def test_defer_select_related_raises_invalid_query(self):
-        msg = (
-            'Field Primary.related cannot be both deferred and traversed '
-            'using select_related at the same time.'
-        )
+        msg = 'Field Primary.related cannot be both deferred and traversed ' 'using select_related at the same time.'
         with self.assertRaisesMessage(InvalidQuery, msg):
             Primary.objects.defer("related").select_related("related")[0]
 
     def test_only_select_related_raises_invalid_query(self):
-        msg = (
-            'Field Primary.related cannot be both deferred and traversed using '
-            'select_related at the same time.'
-        )
+        msg = 'Field Primary.related cannot be both deferred and traversed using ' 'select_related at the same time.'
         with self.assertRaisesMessage(InvalidQuery, msg):
             Primary.objects.only("name").select_related("related")[0]
 
@@ -138,13 +126,7 @@ class DeferTests(AssertionMixin, TestCase):
         obj = Primary.objects.defer("value").get(name="p2")
         obj.name = "a new name"
         obj.save()
-        self.assertQuerysetEqual(
-            Primary.objects.all(), [
-                "p1", "a new name",
-            ],
-            lambda p: p.name,
-            ordered=False,
-        )
+        self.assertQuerysetEqual(Primary.objects.all(), ["p1", "a new name"], lambda p: p.name, ordered=False)
 
     def test_defer_baseclass_when_subclass_has_no_added_fields(self):
         # Regression for #10572 - A subclass with no extra fields can defer

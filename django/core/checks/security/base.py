@@ -73,17 +73,12 @@ W009 = Warning(
     "Your SECRET_KEY has less than %(min_length)s characters or less than "
     "%(min_unique_chars)s unique characters. Please generate a long and random "
     "SECRET_KEY, otherwise many of Django's security-critical features will be "
-    "vulnerable to attack." % {
-        'min_length': SECRET_KEY_MIN_LENGTH,
-        'min_unique_chars': SECRET_KEY_MIN_UNIQUE_CHARACTERS,
-    },
+    "vulnerable to attack."
+    % {'min_length': SECRET_KEY_MIN_LENGTH, 'min_unique_chars': SECRET_KEY_MIN_UNIQUE_CHARACTERS},
     id='security.W009',
 )
 
-W018 = Warning(
-    "You should not have DEBUG set to True in deployment.",
-    id='security.W018',
-)
+W018 = Warning("You should not have DEBUG set to True in deployment.", id='security.W018')
 
 W019 = Warning(
     "You have "
@@ -95,10 +90,7 @@ W019 = Warning(
     id='security.W019',
 )
 
-W020 = Warning(
-    "ALLOWED_HOSTS must not be empty in deployment.",
-    id='security.W020',
-)
+W020 = Warning("ALLOWED_HOSTS must not be empty in deployment.", id='security.W020')
 
 W021 = Warning(
     "You have not set the SECURE_HSTS_PRELOAD setting to True. Without this, "
@@ -136,9 +128,9 @@ def check_sts(app_configs, **kwargs):
 @register(Tags.security, deploy=True)
 def check_sts_include_subdomains(app_configs, **kwargs):
     passed_check = (
-        not _security_middleware() or
-        not settings.SECURE_HSTS_SECONDS or
-        settings.SECURE_HSTS_INCLUDE_SUBDOMAINS is True
+        not _security_middleware()
+        or not settings.SECURE_HSTS_SECONDS
+        or settings.SECURE_HSTS_INCLUDE_SUBDOMAINS is True
     )
     return [] if passed_check else [W005]
 
@@ -146,46 +138,35 @@ def check_sts_include_subdomains(app_configs, **kwargs):
 @register(Tags.security, deploy=True)
 def check_sts_preload(app_configs, **kwargs):
     passed_check = (
-        not _security_middleware() or
-        not settings.SECURE_HSTS_SECONDS or
-        settings.SECURE_HSTS_PRELOAD is True
+        not _security_middleware() or not settings.SECURE_HSTS_SECONDS or settings.SECURE_HSTS_PRELOAD is True
     )
     return [] if passed_check else [W021]
 
 
 @register(Tags.security, deploy=True)
 def check_content_type_nosniff(app_configs, **kwargs):
-    passed_check = (
-        not _security_middleware() or
-        settings.SECURE_CONTENT_TYPE_NOSNIFF is True
-    )
+    passed_check = not _security_middleware() or settings.SECURE_CONTENT_TYPE_NOSNIFF is True
     return [] if passed_check else [W006]
 
 
 @register(Tags.security, deploy=True)
 def check_xss_filter(app_configs, **kwargs):
-    passed_check = (
-        not _security_middleware() or
-        settings.SECURE_BROWSER_XSS_FILTER is True
-    )
+    passed_check = not _security_middleware() or settings.SECURE_BROWSER_XSS_FILTER is True
     return [] if passed_check else [W007]
 
 
 @register(Tags.security, deploy=True)
 def check_ssl_redirect(app_configs, **kwargs):
-    passed_check = (
-        not _security_middleware() or
-        settings.SECURE_SSL_REDIRECT is True
-    )
+    passed_check = not _security_middleware() or settings.SECURE_SSL_REDIRECT is True
     return [] if passed_check else [W008]
 
 
 @register(Tags.security, deploy=True)
 def check_secret_key(app_configs, **kwargs):
     passed_check = (
-        getattr(settings, 'SECRET_KEY', None) and
-        len(set(settings.SECRET_KEY)) >= SECRET_KEY_MIN_UNIQUE_CHARACTERS and
-        len(settings.SECRET_KEY) >= SECRET_KEY_MIN_LENGTH
+        getattr(settings, 'SECRET_KEY', None)
+        and len(set(settings.SECRET_KEY)) >= SECRET_KEY_MIN_UNIQUE_CHARACTERS
+        and len(settings.SECRET_KEY) >= SECRET_KEY_MIN_LENGTH
     )
     return [] if passed_check else [W009]
 
@@ -198,10 +179,7 @@ def check_debug(app_configs, **kwargs):
 
 @register(Tags.security, deploy=True)
 def check_xframe_deny(app_configs, **kwargs):
-    passed_check = (
-        not _xframe_middleware() or
-        settings.X_FRAME_OPTIONS == 'DENY'
-    )
+    passed_check = not _xframe_middleware() or settings.X_FRAME_OPTIONS == 'DENY'
     return [] if passed_check else [W019]
 
 

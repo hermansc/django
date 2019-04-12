@@ -21,10 +21,7 @@ class SchemaTests(PostgreSQLTestCase):
     def test_check_constraint_range_value(self):
         constraint_name = 'ints_between'
         self.assertNotIn(constraint_name, self.get_constraints(RangesModel._meta.db_table))
-        constraint = CheckConstraint(
-            check=Q(ints__contained_by=NumericRange(10, 30)),
-            name=constraint_name,
-        )
+        constraint = CheckConstraint(check=Q(ints__contained_by=NumericRange(10, 30)), name=constraint_name)
         with connection.schema_editor() as editor:
             editor.add_constraint(RangesModel, constraint)
         with connection.cursor() as cursor:

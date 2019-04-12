@@ -12,12 +12,8 @@ class DatabaseSequenceTests(TestCase):
         with connection.cursor() as cursor:
             seqs = connection.introspection.get_sequences(cursor, Person._meta.db_table)
             self.assertEqual(
-                seqs,
-                [{'table': Person._meta.db_table, 'column': 'id', 'name': 'backends_person_id_seq'}]
+                seqs, [{'table': Person._meta.db_table, 'column': 'id', 'name': 'backends_person_id_seq'}]
             )
             cursor.execute('ALTER SEQUENCE backends_person_id_seq RENAME TO pers_seq')
             seqs = connection.introspection.get_sequences(cursor, Person._meta.db_table)
-            self.assertEqual(
-                seqs,
-                [{'table': Person._meta.db_table, 'column': 'id', 'name': 'pers_seq'}]
-            )
+            self.assertEqual(seqs, [{'table': Person._meta.db_table, 'column': 'id', 'name': 'pers_seq'}])

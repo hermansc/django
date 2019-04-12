@@ -13,21 +13,18 @@ class TokenBase:
     Base class for operators and literals, mainly for debugging and for throwing
     syntax errors.
     """
+
     id = None  # node/token type name
     value = None  # used by literals
     first = second = None  # used by tree nodes
 
     def nud(self, parser):
         # Null denotation - called in prefix context
-        raise parser.error_class(
-            "Not expecting '%s' in this position in if tag." % self.id
-        )
+        raise parser.error_class("Not expecting '%s' in this position in if tag." % self.id)
 
     def led(self, left, parser):
         # Left denotation - called in infix context
-        raise parser.error_class(
-            "Not expecting '%s' as infix operator in if tag." % self.id
-        )
+        raise parser.error_class("Not expecting '%s' as infix operator in if tag." % self.id)
 
     def display(self):
         """
@@ -45,6 +42,7 @@ def infix(bp, func):
     Create an infix operator, given a binding power and a function that
     evaluates the node.
     """
+
     class Operator(TokenBase):
         lbp = bp
 
@@ -70,6 +68,7 @@ def prefix(bp, func):
     Create a prefix operator, given a binding power and a function that
     evaluates the node.
     """
+
     class Operator(TokenBase):
         lbp = bp
 
@@ -115,6 +114,7 @@ class Literal(TokenBase):
     """
     A basic self-resolvable object similar to a Django template variable.
     """
+
     # IfParser uses Literal in create_var, but TemplateIfParser overrides
     # create_var so that a proper implementation that actually resolves
     # variables, filters etc. is used.
@@ -190,8 +190,7 @@ class IfParser:
         retval = self.expression()
         # Check that we have exhausted all the tokens
         if self.current_token is not EndToken:
-            raise self.error_class("Unused '%s' at end of if expression." %
-                                   self.current_token.display())
+            raise self.error_class("Unused '%s' at end of if expression." % self.current_token.display())
         return retval
 
     def expression(self, rbp=0):

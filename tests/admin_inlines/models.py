@@ -99,6 +99,7 @@ class Inner3(models.Model):
     dummy = models.IntegerField()
     holder = models.ForeignKey(Holder3, models.CASCADE)
 
+
 # Models for ticket #8190
 
 
@@ -114,6 +115,7 @@ class Inner4Stacked(models.Model):
 class Inner4Tabular(models.Model):
     dummy = models.IntegerField(help_text="Awesome tabular help text is awesome.")
     holder = models.ForeignKey(Holder4, models.CASCADE)
+
 
 # Models for #12749
 
@@ -135,6 +137,7 @@ class ShoppingWeakness(models.Model):
     fashionista = models.ForeignKey(Fashionista, models.CASCADE)
     item = models.ForeignKey(OutfitItem, models.CASCADE)
 
+
 # Models for #13510
 
 
@@ -146,6 +149,7 @@ class Title(models.Model):
     collection = models.ForeignKey(TitleCollection, models.SET_NULL, blank=True, null=True)
     title1 = models.CharField(max_length=100)
     title2 = models.CharField(max_length=100)
+
 
 # Models for #15424
 
@@ -164,7 +168,6 @@ class Novel(models.Model):
 
 
 class NovelReadonlyChapter(Novel):
-
     class Meta:
         proxy = True
 
@@ -178,8 +181,10 @@ class FootNote(models.Model):
     """
     Model added for ticket 19838
     """
+
     chapter = models.ForeignKey(Chapter, models.PROTECT)
     note = models.CharField(max_length=40)
+
 
 # Models for #16838
 
@@ -204,6 +209,7 @@ class ReadOnlyInline(models.Model):
 
 
 # Models for #18433
+
 
 class ParentModelWithCustomPk(models.Model):
     my_own_pk = models.CharField(max_length=100, primary_key=True)
@@ -233,6 +239,7 @@ class BinaryTree(models.Model):
     name = models.CharField(max_length=100)
     parent = models.ForeignKey('self', models.SET_NULL, null=True, blank=True)
 
+
 # Models for #19524
 
 
@@ -259,6 +266,7 @@ class SomeChildModel(models.Model):
     position = models.PositiveIntegerField()
     parent = models.ForeignKey(SomeParentModel, models.CASCADE)
     readonly_field = models.CharField(max_length=1)
+
 
 # Other models
 

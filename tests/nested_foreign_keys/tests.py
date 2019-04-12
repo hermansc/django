@@ -1,8 +1,6 @@
 from django.test import TestCase
 
-from .models import (
-    Event, Movie, Package, PackageNullFK, Person, Screening, ScreeningNullFK,
-)
+from .models import Event, Movie, Package, PackageNullFK, Person, Screening, ScreeningNullFK
 
 
 # These are tests for #16715. The basic scheme is always the same: 3 models with
@@ -74,9 +72,7 @@ class NestedForeignKeysTests(TestCase):
     def test_null_exclude(self):
         screening = ScreeningNullFK.objects.create(movie=None)
         ScreeningNullFK.objects.create(movie=self.movie)
-        self.assertEqual(
-            list(ScreeningNullFK.objects.exclude(movie__id=self.movie.pk)),
-            [screening])
+        self.assertEqual(list(ScreeningNullFK.objects.exclude(movie__id=self.movie.pk)), [screening])
 
     # This test failed in #16715 because in some cases INNER JOIN was selected
     # for the second foreign key relation instead of LEFT OUTER JOIN.
@@ -141,8 +137,7 @@ class DeeplyNestedForeignKeysTests(TestCase):
         self.assertEqual(len(Event.objects.values('screening__movie__director__pk')), 2)
         self.assertEqual(len(Event.objects.values('screening__movie__director__name')), 2)
         self.assertEqual(
-            len(Event.objects.values('screening__movie__director__pk', 'screening__movie__director__name')),
-            2
+            len(Event.objects.values('screening__movie__director__pk', 'screening__movie__director__name')), 2
         )
         self.assertEqual(len(Event.objects.values('screening__movie__pk', 'screening__movie__director__pk')), 2)
         self.assertEqual(len(Event.objects.values('screening__movie__pk', 'screening__movie__director__name')), 2)
@@ -164,8 +159,7 @@ class DeeplyNestedForeignKeysTests(TestCase):
         self.assertEqual(len(Package.objects.values('screening__movie__director__pk')), 2)
         self.assertEqual(len(Package.objects.values('screening__movie__director__name')), 2)
         self.assertEqual(
-            len(Package.objects.values('screening__movie__director__pk', 'screening__movie__director__name')),
-            2
+            len(Package.objects.values('screening__movie__director__pk', 'screening__movie__director__name')), 2
         )
         self.assertEqual(len(Package.objects.values('screening__movie__pk', 'screening__movie__director__pk')), 2)
         self.assertEqual(len(Package.objects.values('screening__movie__pk', 'screening__movie__director__name')), 2)

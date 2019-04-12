@@ -1,9 +1,6 @@
 from urllib.parse import quote
 
-from django.http import (
-    HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound,
-    HttpResponseServerError,
-)
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound, HttpResponseServerError
 from django.template import Context, Engine, TemplateDoesNotExist, loader
 from django.views.decorators.csrf import requires_csrf_token
 
@@ -40,14 +37,11 @@ def page_not_found(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
     else:
         if isinstance(message, str):
             exception_repr = message
-    context = {
-        'request_path': quote(request.path),
-        'exception': exception_repr,
-    }
+    context = {'request_path': quote(request.path), 'exception': exception_repr}
     try:
         template = loader.get_template(template_name)
         body = template.render(context, request)
-        content_type = None             # Django will use 'text/html'.
+        content_type = None  # Django will use 'text/html'.
     except TemplateDoesNotExist:
         if template_name != ERROR_404_TEMPLATE_NAME:
             # Reraise if it's a missing custom template.
@@ -55,8 +49,8 @@ def page_not_found(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
         # Render template (even though there are no substitutions) to allow
         # inspecting the context in tests.
         template = Engine().from_string(
-            '<h1>Not Found</h1>'
-            '<p>The requested resource was not found on this server.</p>')
+            '<h1>Not Found</h1>' '<p>The requested resource was not found on this server.</p>'
+        )
         body = template.render(Context(context))
         content_type = 'text/html'
     return HttpResponseNotFound(body, content_type=content_type)
@@ -120,6 +114,4 @@ def permission_denied(request, exception, template_name=ERROR_403_TEMPLATE_NAME)
             # Reraise if it's a missing custom template.
             raise
         return HttpResponseForbidden('<h1>403 Forbidden</h1>', content_type='text/html')
-    return HttpResponseForbidden(
-        template.render(request=request, context={'exception': str(exception)})
-    )
+    return HttpResponseForbidden(template.render(request=request, context={'exception': str(exception)}))

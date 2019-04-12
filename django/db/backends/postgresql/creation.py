@@ -7,7 +7,6 @@ from django.db.backends.utils import strip_quotes
 
 
 class DatabaseCreation(BaseDatabaseCreation):
-
     def _quote_name(self, name):
         return self.connection.ops.quote_name(name)
 
@@ -21,12 +20,11 @@ class DatabaseCreation(BaseDatabaseCreation):
 
     def sql_table_creation_suffix(self):
         test_settings = self.connection.settings_dict['TEST']
-        assert test_settings['COLLATION'] is None, (
-            "PostgreSQL does not support collation setting at database creation time."
-        )
+        assert (
+            test_settings['COLLATION'] is None
+        ), "PostgreSQL does not support collation setting at database creation time."
         return self._get_database_create_suffix(
-            encoding=test_settings['CHARSET'],
-            template=test_settings.get('TEMPLATE'),
+            encoding=test_settings['CHARSET'], template=test_settings.get('TEMPLATE')
         )
 
     def _database_exists(self, cursor, database_name):
@@ -67,9 +65,10 @@ class DatabaseCreation(BaseDatabaseCreation):
             except Exception:
                 try:
                     if verbosity >= 1:
-                        self.log('Destroying old test database for alias %s...' % (
-                            self._get_database_display_str(verbosity, target_database_name),
-                        ))
+                        self.log(
+                            'Destroying old test database for alias %s...'
+                            % (self._get_database_display_str(verbosity, target_database_name),)
+                        )
                     cursor.execute('DROP DATABASE %(dbname)s' % test_db_params)
                     self._execute_create_test_db(cursor, test_db_params, keepdb)
                 except Exception as e:

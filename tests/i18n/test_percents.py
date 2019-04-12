@@ -73,8 +73,7 @@ class RenderingTemplatesWithPercentSigns(FrenchTestCase):
         self.assertEqual(trans_tpl.render(Context({})), expected)
 
         block_tpl = Template(
-            '{% load i18n %}{% blocktrans %}Literal with a percent symbol at '
-            'the end %{% endblocktrans %}'
+            '{% load i18n %}{% blocktrans %}Literal with a percent symbol at ' 'the end %{% endblocktrans %}'
         )
         self.assertEqual(block_tpl.render(Context({})), expected)
 
@@ -85,8 +84,7 @@ class RenderingTemplatesWithPercentSigns(FrenchTestCase):
         self.assertEqual(trans_tpl.render(Context({})), expected)
 
         block_tpl = Template(
-            '{% load i18n %}{% blocktrans %}Literal with a percent % symbol '
-            'in the middle{% endblocktrans %}'
+            '{% load i18n %}{% blocktrans %}Literal with a percent % symbol ' 'in the middle{% endblocktrans %}'
         )
         self.assertEqual(block_tpl.render(Context({})), expected)
 
@@ -103,10 +101,9 @@ class RenderingTemplatesWithPercentSigns(FrenchTestCase):
 
     def test_translates_with_string_that_look_like_fmt_spec_with_trans(self):
         # tests "%s"
-        expected = ('On dirait un spec str fmt %s mais ne devrait pas être interprété comme plus disponible')
+        expected = 'On dirait un spec str fmt %s mais ne devrait pas être interprété comme plus disponible'
         trans_tpl = Template(
-            '{% load i18n %}{% trans "Looks like a str fmt spec %s but '
-            'should not be interpreted as such" %}'
+            '{% load i18n %}{% trans "Looks like a str fmt spec %s but ' 'should not be interpreted as such" %}'
         )
         self.assertEqual(trans_tpl.render(Context({})), expected)
         block_tpl = Template(
@@ -116,10 +113,9 @@ class RenderingTemplatesWithPercentSigns(FrenchTestCase):
         self.assertEqual(block_tpl.render(Context({})), expected)
 
         # tests "% o"
-        expected = ('On dirait un spec str fmt % o mais ne devrait pas être interprété comme plus disponible')
+        expected = 'On dirait un spec str fmt % o mais ne devrait pas être interprété comme plus disponible'
         trans_tpl = Template(
-            '{% load i18n %}{% trans "Looks like a str fmt spec % o but should not be '
-            'interpreted as such" %}'
+            '{% load i18n %}{% trans "Looks like a str fmt spec % o but should not be ' 'interpreted as such" %}'
         )
         self.assertEqual(trans_tpl.render(Context({})), expected)
         block_tpl = Template(
@@ -129,11 +125,10 @@ class RenderingTemplatesWithPercentSigns(FrenchTestCase):
         self.assertEqual(block_tpl.render(Context({})), expected)
 
     def test_translates_multiple_percent_signs(self):
-        expected = ('1 % signe pour cent, signes %% 2 pour cent, trois signes de pourcentage %%%')
+        expected = '1 % signe pour cent, signes %% 2 pour cent, trois signes de pourcentage %%%'
 
         trans_tpl = Template(
-            '{% load i18n %}{% trans "1 percent sign %, 2 percent signs %%, '
-            '3 percent signs %%%" %}'
+            '{% load i18n %}{% trans "1 percent sign %, 2 percent signs %%, ' '3 percent signs %%%" %}'
         )
         self.assertEqual(trans_tpl.render(Context({})), expected)
         block_tpl = Template(
@@ -143,10 +138,9 @@ class RenderingTemplatesWithPercentSigns(FrenchTestCase):
         self.assertEqual(block_tpl.render(Context({})), expected)
 
         block_tpl = Template(
-            '{% load i18n %}{% blocktrans %}{{name}} says: 1 percent sign %, '
-            '2 percent signs %%{% endblocktrans %}'
+            '{% load i18n %}{% blocktrans %}{{name}} says: 1 percent sign %, ' '2 percent signs %%{% endblocktrans %}'
         )
         self.assertEqual(
             block_tpl.render(Context({"name": "Django"})),
-            'Django dit: 1 pour cent signe %, deux signes de pourcentage %%'
+            'Django dit: 1 pour cent signe %, deux signes de pourcentage %%',
         )

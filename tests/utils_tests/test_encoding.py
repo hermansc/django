@@ -5,8 +5,15 @@ from urllib.parse import quote_plus
 
 from django.test import SimpleTestCase
 from django.utils.encoding import (
-    DjangoUnicodeDecodeError, escape_uri_path, filepath_to_uri, force_bytes,
-    force_str, get_system_encoding, iri_to_uri, smart_bytes, smart_str,
+    DjangoUnicodeDecodeError,
+    escape_uri_path,
+    filepath_to_uri,
+    force_bytes,
+    force_str,
+    get_system_encoding,
+    iri_to_uri,
+    smart_bytes,
+    smart_str,
     uri_to_iri,
 )
 from django.utils.functional import SimpleLazyObject
@@ -18,6 +25,7 @@ class TestEncodingUtils(SimpleTestCase):
         """
         Broken __str__ actually raises an error.
         """
+
         class MyString:
             def __str__(self):
                 return b'\xc3\xb6\xc3\xa4\xc3\xbc'
@@ -92,7 +100,6 @@ class TestEncodingUtils(SimpleTestCase):
 
 
 class TestRFC3987IEncodingUtils(unittest.TestCase):
-
     def test_filepath_to_uri(self):
         self.assertEqual(filepath_to_uri(None), None)
         self.assertEqual(filepath_to_uri('upload\\чубака.mp4'), 'upload/%D1%87%D1%83%D0%B1%D0%B0%D0%BA%D0%B0.mp4')
@@ -103,7 +110,6 @@ class TestRFC3987IEncodingUtils(unittest.TestCase):
             ('red%09rosé#red', 'red%09ros%C3%A9#red'),
             ('/blog/for/Jürgen Münster/', '/blog/for/J%C3%BCrgen%20M%C3%BCnster/'),
             ('locations/%s' % quote_plus('Paris & Orléans'), 'locations/Paris+%26+Orl%C3%A9ans'),
-
             # Reserved chars remain unescaped.
             ('%&', '%&'),
             ('red&♥ros%#red', 'red&%E2%99%A5ros%#red'),
@@ -161,7 +167,7 @@ class TestRFC3987IEncodingUtils(unittest.TestCase):
     def test_escape_uri_path(self):
         self.assertEqual(
             escape_uri_path('/;some/=awful/?path/:with/@lots/&of/+awful/chars'),
-            '/%3Bsome/%3Dawful/%3Fpath/:with/@lots/&of/+awful/chars'
+            '/%3Bsome/%3Dawful/%3Fpath/:with/@lots/&of/+awful/chars',
         )
         self.assertEqual(escape_uri_path('/foo#bar'), '/foo%23bar')
         self.assertEqual(escape_uri_path('/foo?bar'), '/foo%3Fbar')

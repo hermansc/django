@@ -6,7 +6,6 @@ from ..utils import TestObj, setup
 
 
 class IfTagTests(SimpleTestCase):
-
     @setup({'if-tag01': '{% if foo %}yes{% else %}no{% endif %}'})
     def test_if_tag01(self):
         output = self.engine.render_to_string('if-tag01', {'foo': True})

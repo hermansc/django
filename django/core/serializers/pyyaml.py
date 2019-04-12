@@ -11,9 +11,7 @@ from io import StringIO
 import yaml
 
 from django.core.serializers.base import DeserializationError
-from django.core.serializers.python import (
-    Deserializer as PythonDeserializer, Serializer as PythonSerializer,
-)
+from django.core.serializers.python import Deserializer as PythonDeserializer, Serializer as PythonSerializer
 from django.db import models
 
 # Use the C (faster) implementation if possible

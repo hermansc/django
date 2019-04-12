@@ -74,6 +74,7 @@ class SafeStringTest(SimpleTestCase):
         mark_safe used as a decorator leaves the result of a function
         unchanged.
         """
+
         def clean_string_provider():
             return '<html><body>dummy</body></html>'
 
@@ -83,6 +84,7 @@ class SafeStringTest(SimpleTestCase):
         """
         mark_safe doesn't affect a callable that has an __html__() method.
         """
+
         class SafeStringContainer:
             def __html__(self):
                 return '<html></html>'
@@ -93,6 +95,7 @@ class SafeStringTest(SimpleTestCase):
         """
         mark_safe doesn't affect lazy strings (Promise objects).
         """
+
         def html_str():
             return '<html></html>'
 

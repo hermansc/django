@@ -19,28 +19,33 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--no-startup', action='store_true',
+            '--no-startup',
+            action='store_true',
             help='When using plain Python, ignore the PYTHONSTARTUP environment variable and ~/.pythonrc.py script.',
         )
         parser.add_argument(
-            '-i', '--interface', choices=self.shells,
+            '-i',
+            '--interface',
+            choices=self.shells,
             help='Specify an interactive interpreter interface. Available options: "ipython", "bpython", and "python"',
         )
         parser.add_argument(
-            '-c', '--command',
-            help='Instead of opening an interactive shell, run a command as Django and exit.',
+            '-c', '--command', help='Instead of opening an interactive shell, run a command as Django and exit.'
         )
 
     def ipython(self, options):
         from IPython import start_ipython
+
         start_ipython(argv=[])
 
     def bpython(self, options):
         import bpython
+
         bpython.embed()
 
     def python(self, options):
         import code
+
         # Set up a dictionary to serve as the environment for the shell, so
         # that tab completion works on objects that are imported at runtime.
         imported_objects = {}
@@ -52,6 +57,7 @@ class Command(BaseCommand):
             # We don't have to wrap the following import in a 'try', because
             # we already know 'readline' was imported successfully.
             import rlcompleter
+
             readline.set_completer(rlcompleter.Completer(imported_objects).complete)
             # Enable tab completion on systems using libedit (e.g. macOS).
             # These lines are copied from Python's Lib/site.py.

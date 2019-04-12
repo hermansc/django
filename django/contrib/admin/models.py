@@ -13,11 +13,7 @@ ADDITION = 1
 CHANGE = 2
 DELETION = 3
 
-ACTION_FLAG_CHOICES = (
-    (ADDITION, _('Addition')),
-    (CHANGE, _('Change')),
-    (DELETION, _('Deletion')),
-)
+ACTION_FLAG_CHOICES = ((ADDITION, _('Addition')), (CHANGE, _('Change')), (DELETION, _('Deletion')))
 
 
 class LogEntryManager(models.Manager):
@@ -37,21 +33,10 @@ class LogEntryManager(models.Manager):
 
 
 class LogEntry(models.Model):
-    action_time = models.DateTimeField(
-        _('action time'),
-        default=timezone.now,
-        editable=False,
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        models.CASCADE,
-        verbose_name=_('user'),
-    )
+    action_time = models.DateTimeField(_('action time'), default=timezone.now, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE, verbose_name=_('user'))
     content_type = models.ForeignKey(
-        ContentType,
-        models.SET_NULL,
-        verbose_name=_('content type'),
-        blank=True, null=True,
+        ContentType, models.SET_NULL, verbose_name=_('content type'), blank=True, null=True
     )
     object_id = models.TextField(_('object id'), blank=True, null=True)
     # Translators: 'repr' means representation (https://docs.python.org/library/functions.html#repr)
@@ -113,14 +98,12 @@ class LogEntry(models.Model):
                         messages.append(gettext('Added.'))
 
                 elif 'changed' in sub_message:
-                    sub_message['changed']['fields'] = get_text_list(
-                        sub_message['changed']['fields'], gettext('and')
-                    )
+                    sub_message['changed']['fields'] = get_text_list(sub_message['changed']['fields'], gettext('and'))
                     if 'name' in sub_message['changed']:
                         sub_message['changed']['name'] = gettext(sub_message['changed']['name'])
-                        messages.append(gettext('Changed {fields} for {name} "{object}".').format(
-                            **sub_message['changed']
-                        ))
+                        messages.append(
+                            gettext('Changed {fields} for {name} "{object}".').format(**sub_message['changed'])
+                        )
                     else:
                         messages.append(gettext('Changed {fields}.').format(**sub_message['changed']))
 

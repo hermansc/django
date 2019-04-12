@@ -54,13 +54,4 @@ class PostGISSchemaEditor(DatabaseSchemaEditor):
             sql_alter = self.sql_alter_column_to_2d
         else:
             sql_alter = self.sql_alter_column_type
-        return (
-            (
-                sql_alter % {
-                    "column": self.quote_name(new_field.column),
-                    "type": new_type,
-                },
-                [],
-            ),
-            [],
-        )
+        return ((sql_alter % {"column": self.quote_name(new_field.column), "type": new_type}, []), [])

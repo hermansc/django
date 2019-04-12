@@ -6,7 +6,6 @@ from ..utils import setup
 
 
 class CutTests(SimpleTestCase):
-
     @setup({'cut01': '{% autoescape off %}{{ a|cut:"x" }} {{ b|cut:"x" }}{% endautoescape %}'})
     def test_cut01(self):
         output = self.engine.render_to_string('cut01', {"a": "x&y", "b": mark_safe("x&amp;y")})
@@ -41,7 +40,6 @@ class CutTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_character(self):
         self.assertEqual(cut('a string to be mangled', 'a'), ' string to be mngled')
 

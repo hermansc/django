@@ -9,9 +9,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import models
 from django.test import SimpleTestCase
-from django.test.utils import (
-    isolate_apps, override_settings, override_system_checks,
-)
+from django.test.utils import isolate_apps, override_settings, override_system_checks
 
 from .models import SimpleModel, my_check
 
@@ -22,9 +20,7 @@ class DummyObj:
 
 
 class SystemCheckFrameworkTests(SimpleTestCase):
-
     def test_register_and_run_checks(self):
-
         def f(**kwargs):
             calls[0] += 1
             return [1, 2, 3]
@@ -68,7 +64,6 @@ class SystemCheckFrameworkTests(SimpleTestCase):
 
 
 class MessageTests(SimpleTestCase):
-
     def test_printing(self):
         e = Error("Message", hint="Hint", obj=DummyObj())
         expected = "obj: Message\n\tHINT: Hint"
@@ -147,7 +142,6 @@ deployment_system_check.tags = ['deploymenttag']
 
 
 class CheckCommandTests(SimpleTestCase):
-
     def setUp(self):
         simple_system_check.kwargs = None
         tagged_system_check.kwargs = None
@@ -229,7 +223,6 @@ def custom_warning_system_check(app_configs, **kwargs):
 
 
 class SilencingCheckTests(SimpleTestCase):
-
     def setUp(self):
         self.old_stdout, self.old_stderr = sys.stdout, sys.stderr
         self.stdout, self.stderr = StringIO(), StringIO()
@@ -272,31 +265,26 @@ class CheckFrameworkReservedNamesTests(SimpleTestCase):
 
         class ModelWithDescriptorCalledCheck(models.Model):
             check = models.ForeignKey(ModelWithRelatedManagerCalledCheck, models.CASCADE)
-            article = models.ForeignKey(
-                ModelWithRelatedManagerCalledCheck,
-                models.CASCADE,
-                related_name='check',
-            )
+            article = models.ForeignKey(ModelWithRelatedManagerCalledCheck, models.CASCADE, related_name='check')
 
         errors = checks.run_checks(app_configs=apps.get_app_configs())
         expected = [
             Error(
-                "The 'ModelWithAttributeCalledCheck.check()' class method is "
-                "currently overridden by 42.",
+                "The 'ModelWithAttributeCalledCheck.check()' class method is " "currently overridden by 42.",
                 obj=ModelWithAttributeCalledCheck,
-                id='models.E020'
+                id='models.E020',
             ),
             Error(
                 "The 'ModelWithRelatedManagerCalledCheck.check()' class method is "
                 "currently overridden by %r." % ModelWithRelatedManagerCalledCheck.check,
                 obj=ModelWithRelatedManagerCalledCheck,
-                id='models.E020'
+                id='models.E020',
             ),
             Error(
                 "The 'ModelWithDescriptorCalledCheck.check()' class method is "
                 "currently overridden by %r." % ModelWithDescriptorCalledCheck.check,
                 obj=ModelWithDescriptorCalledCheck,
-                id='models.E020'
+                id='models.E020',
             ),
         ]
         self.assertEqual(errors, expected)

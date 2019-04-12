@@ -50,11 +50,7 @@ class ArrayField(CheckFieldDefaultMixin, Field):
         errors = super().check(**kwargs)
         if self.base_field.remote_field:
             errors.append(
-                checks.Error(
-                    'Base field for array cannot be a related field.',
-                    obj=self,
-                    id='postgres.E002'
-                )
+                checks.Error('Base field for array cannot be a related field.', obj=self, id='postgres.E002')
             )
         else:
             # Remove the field name checks as they are not needed here.
@@ -62,11 +58,7 @@ class ArrayField(CheckFieldDefaultMixin, Field):
             if base_errors:
                 messages = '\n    '.join('%s (%s)' % (error.msg, error.id) for error in base_errors)
                 errors.append(
-                    checks.Error(
-                        'Base field for array has errors:\n    %s' % messages,
-                        obj=self,
-                        id='postgres.E001'
-                    )
+                    checks.Error('Base field for array has errors:\n    %s' % messages, obj=self, id='postgres.E001')
                 )
         return errors
 
@@ -94,10 +86,7 @@ class ArrayField(CheckFieldDefaultMixin, Field):
         name, path, args, kwargs = super().deconstruct()
         if path == 'django.contrib.postgres.fields.array.ArrayField':
             path = 'django.contrib.postgres.fields.ArrayField'
-        kwargs.update({
-            'base_field': self.base_field.clone(),
-            'size': self.size,
-        })
+        kwargs.update({'base_field': self.base_field.clone(), 'size': self.size})
         return name, path, args, kwargs
 
     def to_python(self, value):
@@ -110,10 +99,7 @@ class ArrayField(CheckFieldDefaultMixin, Field):
     def _from_db_value(self, value, expression, connection):
         if value is None:
             return value
-        return [
-            self.base_field.from_db_value(item, expression, connection)
-            for item in value
-        ]
+        return [self.base_field.from_db_value(item, expression, connection) for item in value]
 
     def value_to_string(self, obj):
         values = []
@@ -156,16 +142,12 @@ class ArrayField(CheckFieldDefaultMixin, Field):
                 self.base_field.validate(part, model_instance)
             except exceptions.ValidationError as error:
                 raise prefix_validation_error(
-                    error,
-                    prefix=self.error_messages['item_invalid'],
-                    code='item_invalid',
-                    params={'nth': index + 1},
+                    error, prefix=self.error_messages['item_invalid'], code='item_invalid', params={'nth': index + 1}
                 )
         if isinstance(self.base_field, ArrayField):
             if len({len(i) for i in value}) > 1:
                 raise exceptions.ValidationError(
-                    self.error_messages['nested_array_mismatch'],
-                    code='nested_array_mismatch',
+                    self.error_messages['nested_array_mismatch'], code='nested_array_mismatch'
                 )
 
     def run_validators(self, value):
@@ -175,19 +157,18 @@ class ArrayField(CheckFieldDefaultMixin, Field):
                 self.base_field.run_validators(part)
             except exceptions.ValidationError as error:
                 raise prefix_validation_error(
-                    error,
-                    prefix=self.error_messages['item_invalid'],
-                    code='item_invalid',
-                    params={'nth': index + 1},
+                    error, prefix=self.error_messages['item_invalid'], code='item_invalid', params={'nth': index + 1}
                 )
 
     def formfield(self, **kwargs):
-        return super().formfield(**{
-            'form_class': SimpleArrayField,
-            'base_field': self.base_field.formfield(),
-            'max_length': self.size,
-            **kwargs,
-        })
+        return super().formfield(
+            **{
+                'form_class': SimpleArrayField,
+                'base_field': self.base_field.formfield(),
+                'max_length': self.size,
+                **kwargs,
+            }
+        )
 
 
 @ArrayField.register_lookup
@@ -231,9 +212,9 @@ class ArrayLenTransform(Transform):
         lhs, params = compiler.compile(self.lhs)
         # Distinguish NULL and empty arrays
         return (
-            'CASE WHEN %(lhs)s IS NULL THEN NULL ELSE '
-            'coalesce(array_length(%(lhs)s, 1), 0) END'
-        ) % {'lhs': lhs}, params
+            ('CASE WHEN %(lhs)s IS NULL THEN NULL ELSE ' 'coalesce(array_length(%(lhs)s, 1), 0) END') % {'lhs': lhs},
+            params,
+        )
 
 
 @ArrayField.register_lookup
@@ -254,7 +235,6 @@ class ArrayInLookup(In):
 
 
 class IndexTransform(Transform):
-
     def __init__(self, index, base_field, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.index = index
@@ -270,7 +250,6 @@ class IndexTransform(Transform):
 
 
 class IndexTransformFactory:
-
     def __init__(self, index, base_field):
         self.index = index
         self.base_field = base_field
@@ -280,7 +259,6 @@ class IndexTransformFactory:
 
 
 class SliceTransform(Transform):
-
     def __init__(self, start, end, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start = start
@@ -292,7 +270,6 @@ class SliceTransform(Transform):
 
 
 class SliceTransformFactory:
-
     def __init__(self, start, end):
         self.start = start
         self.end = end

@@ -13,23 +13,14 @@ class ModelToValidate(models.Model):
     name = models.CharField(max_length=100)
     created = models.DateTimeField(default=datetime.now)
     number = models.IntegerField(db_column='number_val')
-    parent = models.ForeignKey(
-        'self',
-        models.SET_NULL,
-        blank=True, null=True,
-        limit_choices_to={'number': 10},
-    )
+    parent = models.ForeignKey('self', models.SET_NULL, blank=True, null=True, limit_choices_to={'number': 10})
     email = models.EmailField(blank=True)
-    ufm = models.ForeignKey(
-        'UniqueFieldsModel',
-        models.SET_NULL,
-        to_field='unique_charfield',
-        blank=True, null=True,
-    )
+    ufm = models.ForeignKey('UniqueFieldsModel', models.SET_NULL, to_field='unique_charfield', blank=True, null=True)
     url = models.URLField(blank=True)
     f_with_custom_validator = models.IntegerField(blank=True, null=True, validators=[validate_answer_to_universe])
-    f_with_iterable_of_validators = models.IntegerField(blank=True, null=True,
-                                                        validators=(validate_answer_to_universe,))
+    f_with_iterable_of_validators = models.IntegerField(
+        blank=True, null=True, validators=(validate_answer_to_universe,)
+    )
     slug = models.SlugField(blank=True)
 
     def clean(self):
@@ -54,7 +45,7 @@ class UniqueTogetherModel(models.Model):
     efield = models.EmailField()
 
     class Meta:
-        unique_together = (('ifield', 'cfield',), ['ifield', 'efield'])
+        unique_together = (('ifield', 'cfield'), ['ifield', 'efield'])
 
 
 class UniqueForDateModel(models.Model):
@@ -70,7 +61,7 @@ class CustomMessagesModel(models.Model):
     number = models.IntegerField(
         db_column='number_val',
         error_messages={'null': 'NULL', 'not42': 'AAARGH', 'not_equal': '%s != me'},
-        validators=[validate_answer_to_universe]
+        validators=[validate_answer_to_universe],
     )
 
 
@@ -125,9 +116,12 @@ class GenericIPAddrUnpackUniqueTest(models.Model):
 # Refs #12467.
 assertion_error = None
 try:
+
     class MultipleAutoFields(models.Model):
         auto1 = models.AutoField(primary_key=True)
         auto2 = models.AutoField(primary_key=True)
+
+
 except AssertionError as exc:
     assertion_error = exc
 assert str(assertion_error) == "Model validation.MultipleAutoFields can't have more than one AutoField."

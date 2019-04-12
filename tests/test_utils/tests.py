@@ -13,14 +13,14 @@ from django.db import connection, connections, models, router
 from django.forms import EmailField, IntegerField
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.test import (
-    SimpleTestCase, TestCase, TransactionTestCase, skipIfDBFeature,
-    skipUnlessDBFeature,
-)
+from django.test import SimpleTestCase, TestCase, TransactionTestCase, skipIfDBFeature, skipUnlessDBFeature
 from django.test.html import HTMLParseError, parse_html
 from django.test.utils import (
-    CaptureQueriesContext, TestContextDecorator, isolate_apps,
-    override_settings, setup_test_environment,
+    CaptureQueriesContext,
+    TestContextDecorator,
+    isolate_apps,
+    override_settings,
+    setup_test_environment,
 )
 from django.urls import NoReverseMatch, path, reverse, reverse_lazy
 
@@ -75,13 +75,14 @@ class SkippingTestCase(SimpleTestCase):
             "skipUnlessDBFeature cannot be used on test_foo (test_utils.tests."
             "SkippingTestCase.test_skip_unless_db_feature.<locals>.SkipTestCase) "
             "as SkippingTestCase.test_skip_unless_db_feature.<locals>.SkipTestCase "
-            "doesn't allow queries against the 'default' database."
+            "doesn't allow queries against the 'default' database.",
         )
 
     def test_skip_if_db_feature(self):
         """
         Testing the django.test.skipIfDBFeature decorator.
         """
+
         @skipIfDBFeature("__class__")
         def test_func():
             raise ValueError
@@ -119,7 +120,7 @@ class SkippingTestCase(SimpleTestCase):
             "skipIfDBFeature cannot be used on test_foo (test_utils.tests."
             "SkippingTestCase.test_skip_if_db_feature.<locals>.SkipTestCase) "
             "as SkippingTestCase.test_skip_if_db_feature.<locals>.SkipTestCase "
-            "doesn't allow queries against the 'default' database."
+            "doesn't allow queries against the 'default' database.",
         )
 
 
@@ -177,7 +178,6 @@ class SkippingClassTestCase(TestCase):
 
 @override_settings(ROOT_URLCONF='test_utils.urls')
 class AssertNumQueriesTests(TestCase):
-
     def test_assert_num_queries(self):
         def test_func():
             raise ValueError
@@ -188,27 +188,20 @@ class AssertNumQueriesTests(TestCase):
     def test_assert_num_queries_with_client(self):
         person = Person.objects.create(name='test')
 
-        self.assertNumQueries(
-            1,
-            self.client.get,
-            "/test_utils/get_person/%s/" % person.pk
-        )
+        self.assertNumQueries(1, self.client.get, "/test_utils/get_person/%s/" % person.pk)
 
-        self.assertNumQueries(
-            1,
-            self.client.get,
-            "/test_utils/get_person/%s/" % person.pk
-        )
+        self.assertNumQueries(1, self.client.get, "/test_utils/get_person/%s/" % person.pk)
 
         def test_func():
             self.client.get("/test_utils/get_person/%s/" % person.pk)
             self.client.get("/test_utils/get_person/%s/" % person.pk)
+
         self.assertNumQueries(2, test_func)
 
 
 @unittest.skipUnless(
     connection.vendor != 'sqlite' or not connection.is_in_memory_db(),
-    'For SQLite in-memory tests, closing the connection destroys the database.'
+    'For SQLite in-memory tests, closing the connection destroys the database.',
 )
 class AssertNumQueriesUponConnectionTests(TransactionTestCase):
     available_apps = []
@@ -239,23 +232,14 @@ class AssertQuerysetEqualTests(TestCase):
         cls.p2 = Person.objects.create(name='p2')
 
     def test_ordered(self):
-        self.assertQuerysetEqual(
-            Person.objects.all().order_by('name'),
-            [repr(self.p1), repr(self.p2)]
-        )
+        self.assertQuerysetEqual(Person.objects.all().order_by('name'), [repr(self.p1), repr(self.p2)])
 
     def test_unordered(self):
-        self.assertQuerysetEqual(
-            Person.objects.all().order_by('name'),
-            [repr(self.p2), repr(self.p1)],
-            ordered=False
-        )
+        self.assertQuerysetEqual(Person.objects.all().order_by('name'), [repr(self.p2), repr(self.p1)], ordered=False)
 
     def test_transform(self):
         self.assertQuerysetEqual(
-            Person.objects.all().order_by('name'),
-            [self.p1.pk, self.p2.pk],
-            transform=lambda x: x.pk
+            Person.objects.all().order_by('name'), [self.p1.pk, self.p2.pk], transform=lambda x: x.pk
         )
 
     def test_undefined_order(self):
@@ -263,15 +247,9 @@ class AssertQuerysetEqualTests(TestCase):
         # is an error.
         msg = 'Trying to compare non-ordered queryset against more than one ordered values'
         with self.assertRaisesMessage(ValueError, msg):
-            self.assertQuerysetEqual(
-                Person.objects.all(),
-                [repr(self.p1), repr(self.p2)]
-            )
+            self.assertQuerysetEqual(Person.objects.all(), [repr(self.p1), repr(self.p2)])
         # No error for one value.
-        self.assertQuerysetEqual(
-            Person.objects.filter(name='p1'),
-            [repr(self.p1)]
-        )
+        self.assertQuerysetEqual(Person.objects.filter(name='p1'), [repr(self.p1)])
 
     def test_repeated_values(self):
         """
@@ -280,30 +258,23 @@ class AssertQuerysetEqualTests(TestCase):
         """
         batmobile = Car.objects.create(name='Batmobile')
         k2000 = Car.objects.create(name='K 2000')
-        PossessedCar.objects.bulk_create([
-            PossessedCar(car=batmobile, belongs_to=self.p1),
-            PossessedCar(car=batmobile, belongs_to=self.p1),
-            PossessedCar(car=k2000, belongs_to=self.p1),
-            PossessedCar(car=k2000, belongs_to=self.p1),
-            PossessedCar(car=k2000, belongs_to=self.p1),
-            PossessedCar(car=k2000, belongs_to=self.p1),
-        ])
-        with self.assertRaises(AssertionError):
-            self.assertQuerysetEqual(
-                self.p1.cars.all(),
-                [repr(batmobile), repr(k2000)],
-                ordered=False
-            )
-        self.assertQuerysetEqual(
-            self.p1.cars.all(),
-            [repr(batmobile)] * 2 + [repr(k2000)] * 4,
-            ordered=False
+        PossessedCar.objects.bulk_create(
+            [
+                PossessedCar(car=batmobile, belongs_to=self.p1),
+                PossessedCar(car=batmobile, belongs_to=self.p1),
+                PossessedCar(car=k2000, belongs_to=self.p1),
+                PossessedCar(car=k2000, belongs_to=self.p1),
+                PossessedCar(car=k2000, belongs_to=self.p1),
+                PossessedCar(car=k2000, belongs_to=self.p1),
+            ]
         )
+        with self.assertRaises(AssertionError):
+            self.assertQuerysetEqual(self.p1.cars.all(), [repr(batmobile), repr(k2000)], ordered=False)
+        self.assertQuerysetEqual(self.p1.cars.all(), [repr(batmobile)] * 2 + [repr(k2000)] * 4, ordered=False)
 
 
 @override_settings(ROOT_URLCONF='test_utils.urls')
 class CaptureQueriesContextManagerTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.person_pk = str(Person.objects.create(name='test').pk)
@@ -358,7 +329,6 @@ class CaptureQueriesContextManagerTests(TestCase):
 
 @override_settings(ROOT_URLCONF='test_utils.urls')
 class AssertNumQueriesContextManagerTests(TestCase):
-
     def test_simple(self):
         with self.assertNumQueries(0):
             pass
@@ -399,7 +369,6 @@ class AssertNumQueriesContextManagerTests(TestCase):
 
 @override_settings(ROOT_URLCONF='test_utils.urls')
 class AssertTemplateUsedContextManagerTests(SimpleTestCase):
-
     def test_usage(self):
         with self.assertTemplateUsed('template_used/base.html'):
             render_to_string('template_used/base.html')
@@ -521,24 +490,25 @@ class HTMLEqualTests(SimpleTestCase):
 
     def test_parse_html_in_script(self):
         parse_html('<script>var a = "<p" + ">";</script>')
-        parse_html('''
+        parse_html(
+            '''
             <script>
             var js_sha_link='<p>***</p>';
             </script>
-        ''')
+        '''
+        )
 
         # script content will be parsed to text
-        dom = parse_html('''
+        dom = parse_html(
+            '''
             <script><p>foo</p> '</scr'+'ipt>' <span>bar</span></script>
-        ''')
+        '''
+        )
         self.assertEqual(len(dom.children), 1)
         self.assertEqual(dom.children[0], "<p>foo</p> '</scr'+'ipt>' <span>bar</span>")
 
     def test_self_closing_tags(self):
-        self_closing_tags = (
-            'br', 'hr', 'input', 'img', 'meta', 'spacer', 'link', 'frame',
-            'base', 'col',
-        )
+        self_closing_tags = ('br', 'hr', 'input', 'img', 'meta', 'spacer', 'link', 'frame', 'base', 'col')
         for tag in self_closing_tags:
             dom = parse_html('<p>Hello <%s> world</p>' % tag)
             self.assertEqual(len(dom.children), 3)
@@ -556,24 +526,12 @@ class HTMLEqualTests(SimpleTestCase):
         self.assertHTMLEqual('', '')
         self.assertHTMLEqual('<p></p>', '<p></p>')
         self.assertHTMLEqual('<p></p>', ' <p> </p> ')
-        self.assertHTMLEqual(
-            '<div><p>Hello</p></div>',
-            '<div><p>Hello</p></div>')
-        self.assertHTMLEqual(
-            '<div><p>Hello</p></div>',
-            '<div> <p>Hello</p> </div>')
-        self.assertHTMLEqual(
-            '<div>\n<p>Hello</p></div>',
-            '<div><p>Hello</p></div>\n')
-        self.assertHTMLEqual(
-            '<div><p>Hello\nWorld !</p></div>',
-            '<div><p>Hello World\n!</p></div>')
-        self.assertHTMLEqual(
-            '<div><p>Hello\nWorld !</p></div>',
-            '<div><p>Hello World\n!</p></div>')
-        self.assertHTMLEqual(
-            '<p>Hello  World   !</p>',
-            '<p>Hello World\n\n!</p>')
+        self.assertHTMLEqual('<div><p>Hello</p></div>', '<div><p>Hello</p></div>')
+        self.assertHTMLEqual('<div><p>Hello</p></div>', '<div> <p>Hello</p> </div>')
+        self.assertHTMLEqual('<div>\n<p>Hello</p></div>', '<div><p>Hello</p></div>\n')
+        self.assertHTMLEqual('<div><p>Hello\nWorld !</p></div>', '<div><p>Hello World\n!</p></div>')
+        self.assertHTMLEqual('<div><p>Hello\nWorld !</p></div>', '<div><p>Hello World\n!</p></div>')
+        self.assertHTMLEqual('<p>Hello  World   !</p>', '<p>Hello World\n\n!</p>')
         self.assertHTMLEqual('<p> </p>', '<p></p>')
         self.assertHTMLEqual('<p/>', '<p></p>')
         self.assertHTMLEqual('<p />', '<p></p>')
@@ -582,9 +540,7 @@ class HTMLEqualTests(SimpleTestCase):
         self.assertHTMLEqual('<p>Hello</p>World', '<p>Hello</p> World')
 
     def test_ignore_comments(self):
-        self.assertHTMLEqual(
-            '<div>Hello<!-- this is a comment --> World!</div>',
-            '<div>Hello World!</div>')
+        self.assertHTMLEqual('<div>Hello<!-- this is a comment --> World!</div>', '<div>Hello World!</div>')
 
     def test_unequal_html(self):
         self.assertHTMLNotEqual('<p>Hello</p>', '<p>Hello!</p>')
@@ -592,23 +548,13 @@ class HTMLEqualTests(SimpleTestCase):
         self.assertHTMLNotEqual('<p>foo bar</p>', '<p>foo &nbsp;bar</p>')
         self.assertHTMLNotEqual('<p>foo nbsp</p>', '<p>foo &nbsp;</p>')
         self.assertHTMLNotEqual('<p>foo #20</p>', '<p>foo &#20;</p>')
-        self.assertHTMLNotEqual(
-            '<p><span>Hello</span><span>World</span></p>',
-            '<p><span>Hello</span>World</p>')
-        self.assertHTMLNotEqual(
-            '<p><span>Hello</span>World</p>',
-            '<p><span>Hello</span><span>World</span></p>')
+        self.assertHTMLNotEqual('<p><span>Hello</span><span>World</span></p>', '<p><span>Hello</span>World</p>')
+        self.assertHTMLNotEqual('<p><span>Hello</span>World</p>', '<p><span>Hello</span><span>World</span></p>')
 
     def test_attributes(self):
-        self.assertHTMLEqual(
-            '<input type="text" id="id_name" />',
-            '<input id="id_name" type="text" />')
-        self.assertHTMLEqual(
-            '''<input type='text' id="id_name" />''',
-            '<input id="id_name" type="text" />')
-        self.assertHTMLNotEqual(
-            '<input type="text" id="id_name" />',
-            '<input type="password" id="id_name" />')
+        self.assertHTMLEqual('<input type="text" id="id_name" />', '<input id="id_name" type="text" />')
+        self.assertHTMLEqual('''<input type='text' id="id_name" />''', '<input id="id_name" type="text" />')
+        self.assertHTMLNotEqual('<input type="text" id="id_name" />', '<input type="password" id="id_name" />')
 
     def test_complex_examples(self):
         self.assertHTMLEqual(
@@ -631,7 +577,8 @@ class HTMLEqualTests(SimpleTestCase):
             <label for="id_birthday">Birthday:</label></th><td>
             <input type="text" name="birthday" value="1940-10-9" id="id_birthday" />
         </td></tr>
-        """)
+        """,
+        )
 
         self.assertHTMLEqual(
             """<!DOCTYPE html>
@@ -646,7 +593,8 @@ class HTMLEqualTests(SimpleTestCase):
             This is a valid paragraph
             <div> this is a div AFTER the p</div>
         </body>
-        </html>""", """
+        </html>""",
+            """
         <html>
         <head>
             <link rel="stylesheet">
@@ -660,7 +608,8 @@ class HTMLEqualTests(SimpleTestCase):
             </p> <!-- this is invalid HTML parsing, but it should make no
             difference in most cases -->
         </body>
-        </html>""")
+        </html>""",
+        )
 
     def test_html_contain(self):
         # equal html contains each other
@@ -731,20 +680,19 @@ class HTMLEqualTests(SimpleTestCase):
             self.assertHTMLEqual('<p>', '')
         with self.assertRaises(AssertionError):
             self.assertHTMLEqual('', '<p>')
-        error_msg = (
-            "First argument is not valid HTML:\n"
-            "('Unexpected end tag `div` (Line 1, Column 6)', (1, 6))"
-        )
+        error_msg = "First argument is not valid HTML:\n" "('Unexpected end tag `div` (Line 1, Column 6)', (1, 6))"
         with self.assertRaisesMessage(AssertionError, error_msg):
             self.assertHTMLEqual('< div></ div>', '<div></div>')
         with self.assertRaises(HTMLParseError):
             parse_html('</p>')
 
     def test_contains_html(self):
-        response = HttpResponse('''<body>
+        response = HttpResponse(
+            '''<body>
         This is a form: <form method="get">
             <input type="text" name="Hello" />
-        </form></body>''')
+        </form></body>'''
+        )
 
         self.assertNotContains(response, "<input name='Hello' type='text'>")
         self.assertContains(response, '<form method="get">')
@@ -763,9 +711,7 @@ class HTMLEqualTests(SimpleTestCase):
     def test_unicode_handling(self):
         response = HttpResponse('<p class="help">Some help text for the title (with unicode ŠĐĆŽćžšđ)</p>')
         self.assertContains(
-            response,
-            '<p class="help">Some help text for the title (with unicode ŠĐĆŽćžšđ)</p>',
-            html=True
+            response, '<p class="help">Some help text for the title (with unicode ŠĐĆŽćžšđ)</p>', html=True
         )
 
 
@@ -839,7 +785,9 @@ class XMLEqualTests(SimpleTestCase):
 - <elem attr1='a' />
 + <elem attr2='b' attr1='a' />
 ?      ++++++++++
-'''.format(xml1=repr(xml1), xml2=repr(xml2))
+'''.format(
+            xml1=repr(xml1), xml2=repr(xml2)
+        )
 
         with self.assertRaisesMessage(AssertionError, msg):
             self.assertXMLEqual(xml1, xml2)
@@ -892,7 +840,6 @@ class SkippingExtraTests(TestCase):
 
 
 class AssertRaisesMsgTest(SimpleTestCase):
-
     def test_assert_raises_message(self):
         msg = "'Expected message' not found in 'Unexpected message'"
         # context manager form of assertRaisesMessage()
@@ -909,14 +856,15 @@ class AssertRaisesMsgTest(SimpleTestCase):
 
     def test_special_re_chars(self):
         """assertRaisesMessage shouldn't interpret RE special chars."""
+
         def func1():
             raise ValueError("[.*x+]y?")
+
         with self.assertRaisesMessage(ValueError, "[.*x+]y?"):
             func1()
 
 
 class AssertWarnsMessageTests(SimpleTestCase):
-
     def test_context_manager(self):
         with self.assertWarnsMessage(UserWarning, 'Expected message'):
             warnings.warn('Expected message', UserWarning)
@@ -930,17 +878,18 @@ class AssertWarnsMessageTests(SimpleTestCase):
     def test_callable(self):
         def func():
             warnings.warn('Expected message', UserWarning)
+
         self.assertWarnsMessage(UserWarning, 'Expected message', func)
 
     def test_special_re_chars(self):
         def func1():
             warnings.warn('[.*x+]y?', UserWarning)
+
         with self.assertWarnsMessage(UserWarning, '[.*x+]y?'):
             func1()
 
 
 class AssertFieldOutputTests(SimpleTestCase):
-
     def test_assert_field_output(self):
         error_invalid = ['Enter a valid email address.']
         self.assertFieldOutput(EmailField, {'a@a.com': 'a@a.com'}, {'aaa': error_invalid})
@@ -955,9 +904,8 @@ class AssertFieldOutputTests(SimpleTestCase):
 
     def test_custom_required_message(self):
         class MyCustomField(IntegerField):
-            default_error_messages = {
-                'required': 'This is really required.',
-            }
+            default_error_messages = {'required': 'This is really required.'}
+
         self.assertFieldOutput(MyCustomField, {}, {}, empty_value=None)
 
 
@@ -985,30 +933,21 @@ class AssertURLEqualTests(SimpleTestCase):
             ('http://example.com/?x=1&x=2', 'https://example.com/?x=2&x=1'),
             ('http://example.com/?x=1&y=bar&x=2', 'https://example.com/?y=bar&x=2&x=1'),
             # Parameters of the same name must be in the same order.
-            ('/path/to?a=1&a=2', '/path/to/?a=2&a=1')
+            ('/path/to?a=1&a=2', '/path/to/?a=2&a=1'),
         )
         for url1, url2 in invalid_tests:
             with self.subTest(url=url1), self.assertRaises(AssertionError):
                 self.assertURLEqual(url1, url2)
 
     def test_message(self):
-        msg = (
-            "Expected 'http://example.com/?x=1&x=2' to equal "
-            "'https://example.com/?x=2&x=1'"
-        )
+        msg = "Expected 'http://example.com/?x=1&x=2' to equal " "'https://example.com/?x=2&x=1'"
         with self.assertRaisesMessage(AssertionError, msg):
             self.assertURLEqual('http://example.com/?x=1&x=2', 'https://example.com/?x=2&x=1')
 
     def test_msg_prefix(self):
-        msg = (
-            "Prefix: Expected 'http://example.com/?x=1&x=2' to equal "
-            "'https://example.com/?x=2&x=1'"
-        )
+        msg = "Prefix: Expected 'http://example.com/?x=1&x=2' to equal " "'https://example.com/?x=2&x=1'"
         with self.assertRaisesMessage(AssertionError, msg):
-            self.assertURLEqual(
-                'http://example.com/?x=1&x=2', 'https://example.com/?x=2&x=1',
-                msg_prefix='Prefix: ',
-            )
+            self.assertURLEqual('http://example.com/?x=1&x=2', 'https://example.com/?x=2&x=1', msg_prefix='Prefix: ')
 
 
 class FirstUrls:
@@ -1020,7 +959,6 @@ class SecondUrls:
 
 
 class SetupTestEnvironmentTests(SimpleTestCase):
-
     def test_setup_test_environment_calling_more_than_once(self):
         with self.assertRaisesMessage(RuntimeError, "setup_test_environment() was already called"):
             setup_test_environment()
@@ -1180,6 +1118,7 @@ class TestBadSetUpTestData(TestCase):
     An exception in setUpTestData() shouldn't leak a transaction which would
     cascade across the rest of the test suite.
     """
+
     class MyException(Exception):
         pass
 
@@ -1294,30 +1233,39 @@ class IsolatedAppsTests(SimpleTestCase):
     def test_class_decoration(self):
         class ClassDecoration(models.Model):
             pass
+
         self.assertEqual(ClassDecoration._meta.apps, self.class_apps)
 
     @isolate_apps('test_utils', kwarg_name='method_apps')
     def test_method_decoration(self, method_apps):
         class MethodDecoration(models.Model):
             pass
+
         self.assertEqual(MethodDecoration._meta.apps, method_apps)
 
     def test_context_manager(self):
         with isolate_apps('test_utils') as context_apps:
+
             class ContextManager(models.Model):
                 pass
+
         self.assertEqual(ContextManager._meta.apps, context_apps)
 
     @isolate_apps('test_utils', kwarg_name='method_apps')
     def test_nested(self, method_apps):
         class MethodDecoration(models.Model):
             pass
+
         with isolate_apps('test_utils') as context_apps:
+
             class ContextManager(models.Model):
                 pass
+
             with isolate_apps('test_utils') as nested_context_apps:
+
                 class NestedContextManager(models.Model):
                     pass
+
         self.assertEqual(MethodDecoration._meta.apps, method_apps)
         self.assertEqual(ContextManager._meta.apps, context_apps)
         self.assertEqual(NestedContextManager._meta.apps, nested_context_apps)
@@ -1332,10 +1280,10 @@ class DoNothingDecorator(TestContextDecorator):
 
 
 class TestContextDecoratorTests(SimpleTestCase):
-
     @mock.patch.object(DoNothingDecorator, 'disable')
     def test_exception_in_setup(self, mock_disable):
         """An exception is setUp() is reraised after disable() is called."""
+
         class ExceptionInSetUp(unittest.TestCase):
             def setUp(self):
                 raise NotImplementedError('reraised')

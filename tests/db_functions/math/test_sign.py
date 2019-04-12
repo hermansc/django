@@ -9,7 +9,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class SignTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_sign=Sign('normal')).first()
@@ -34,9 +33,7 @@ class SignTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=0, big=20)
         obj = IntegerModel.objects.annotate(
-            small_sign=Sign('small'),
-            normal_sign=Sign('normal'),
-            big_sign=Sign('big'),
+            small_sign=Sign('small'), normal_sign=Sign('normal'), big_sign=Sign('big')
         ).first()
         self.assertIsInstance(obj.small_sign, int)
         self.assertIsInstance(obj.normal_sign, int)

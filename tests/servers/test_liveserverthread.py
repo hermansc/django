@@ -3,7 +3,6 @@ from django.test import LiveServerTestCase, TestCase
 
 
 class LiveServerThreadTest(TestCase):
-
     def run_live_server_thread(self, connections_override=None):
         thread = LiveServerTestCase._create_server_thread(connections_override)
         thread.daemon = True

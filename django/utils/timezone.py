@@ -14,12 +14,21 @@ from django.conf import settings
 from django.utils.deprecation import RemovedInDjango31Warning
 
 __all__ = [
-    'utc', 'get_fixed_timezone',
-    'get_default_timezone', 'get_default_timezone_name',
-    'get_current_timezone', 'get_current_timezone_name',
-    'activate', 'deactivate', 'override',
-    'localtime', 'now',
-    'is_aware', 'is_naive', 'make_aware', 'make_naive',
+    'utc',
+    'get_fixed_timezone',
+    'get_default_timezone',
+    'get_default_timezone_name',
+    'get_current_timezone',
+    'get_current_timezone_name',
+    'activate',
+    'deactivate',
+    'override',
+    'localtime',
+    'now',
+    'is_aware',
+    'is_naive',
+    'make_aware',
+    'make_naive',
 ]
 
 
@@ -39,8 +48,7 @@ class FixedOffset(tzinfo):
 
     def __init__(self, offset=None, name=None):
         warnings.warn(
-            'FixedOffset is deprecated in favor of datetime.timezone',
-            RemovedInDjango31Warning, stacklevel=2,
+            'FixedOffset is deprecated in favor of datetime.timezone', RemovedInDjango31Warning, stacklevel=2
         )
         if offset is not None:
             self.__offset = timedelta(minutes=offset)
@@ -106,6 +114,7 @@ def _get_timezone_name(timezone):
     """Return the name of ``timezone``."""
     return timezone.tzname(None)
 
+
 # Timezone selection functions.
 
 # These functions don't change os.environ['TZ'] and call time.tzset()
@@ -149,6 +158,7 @@ class override(ContextDecorator):
     time zone name, or ``None``. If it is ``None``, Django enables the default
     time zone.
     """
+
     def __init__(self, timezone):
         self.timezone = timezone
 
@@ -168,6 +178,7 @@ class override(ContextDecorator):
 
 # Templates
 
+
 def template_localtime(value, use_tz=None):
     """
     Check if value is a datetime and converts it to local time if necessary.
@@ -178,15 +189,16 @@ def template_localtime(value, use_tz=None):
     This function is designed for use by the template engine.
     """
     should_convert = (
-        isinstance(value, datetime) and
-        (settings.USE_TZ if use_tz is None else use_tz) and
-        not is_naive(value) and
-        getattr(value, 'convert_to_local_time', True)
+        isinstance(value, datetime)
+        and (settings.USE_TZ if use_tz is None else use_tz)
+        and not is_naive(value)
+        and getattr(value, 'convert_to_local_time', True)
     )
     return localtime(value) if should_convert else value
 
 
 # Utilities
+
 
 def localtime(value=None, timezone=None):
     """
@@ -235,6 +247,7 @@ def now():
 # By design, these four functions don't perform any checks on their arguments.
 # The caller should ensure that they don't receive an invalid value like None.
 
+
 def is_aware(value):
     """
     Determine if a given datetime.datetime is aware.
@@ -271,8 +284,7 @@ def make_aware(value, timezone=None, is_dst=None):
     else:
         # Check that we won't overwrite the timezone of an aware datetime.
         if is_aware(value):
-            raise ValueError(
-                "make_aware expects a naive datetime, got %s" % value)
+            raise ValueError("make_aware expects a naive datetime, got %s" % value)
         # This may be wrong around DST changes!
         return value.replace(tzinfo=timezone)
 

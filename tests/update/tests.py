@@ -62,7 +62,6 @@ class SimpleTest(TestCase):
 
 
 class AdvancedTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.d0 = DataPoint.objects.create(name="d0", value="apple")
@@ -103,8 +102,7 @@ class AdvancedTests(TestCase):
         """
         Multiple fields can be updated at once
         """
-        resp = DataPoint.objects.filter(value="apple").update(
-            value="fruit", another_value="peach")
+        resp = DataPoint.objects.filter(value="apple").update(value="fruit", another_value="peach")
         self.assertEqual(resp, 1)
         d = DataPoint.objects.get(name="d0")
         self.assertEqual(d.value, 'fruit')

@@ -6,7 +6,6 @@ from ..utils import setup
 
 
 class FirstTests(SimpleTestCase):
-
     @setup({'first01': '{{ a|first }} {{ b|first }}'})
     def test_first01(self):
         output = self.engine.render_to_string('first01', {"a": ["a&b", "x"], "b": [mark_safe("a&b"), "x"]})
@@ -19,7 +18,6 @@ class FirstTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_list(self):
         self.assertEqual(first([0, 1, 2]), 0)
 

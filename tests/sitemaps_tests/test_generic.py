@@ -9,15 +9,11 @@ from .models import TestModel
 
 @override_settings(ABSOLUTE_URL_OVERRIDES={})
 class GenericViewsSitemapTests(SitemapTestsBase):
-
     def test_generic_sitemap_attributes(self):
         datetime_value = datetime.now()
         queryset = TestModel.objects.all()
         generic_sitemap = GenericSitemap(
-            info_dict={
-                'queryset': queryset,
-                'date_field': datetime_value,
-            },
+            info_dict={'queryset': queryset, 'date_field': datetime_value},
             priority=0.6,
             changefreq='monthly',
             protocol='https',
@@ -39,11 +35,14 @@ class GenericViewsSitemapTests(SitemapTestsBase):
         expected = ''
         for pk in TestModel.objects.values_list("id", flat=True):
             expected += "<url><loc>%s/testmodel/%s/</loc></url>" % (self.base_url, pk)
-        expected_content = """<?xml version="1.0" encoding="UTF-8"?>
+        expected_content = (
+            """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 %s
 </urlset>
-""" % expected
+"""
+            % expected
+        )
         self.assertXMLEqual(response.content.decode(), expected_content)
 
     def test_generic_sitemap_lastmod(self):
@@ -54,6 +53,9 @@ class GenericViewsSitemapTests(SitemapTestsBase):
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>%s/testmodel/%s/</loc><lastmod>2013-03-13</lastmod></url>
 </urlset>
-""" % (self.base_url, test_model.pk)
+""" % (
+            self.base_url,
+            test_model.pk,
+        )
         self.assertXMLEqual(response.content.decode(), expected_content)
         self.assertEqual(response['Last-Modified'], 'Wed, 13 Mar 2013 10:00:00 GMT')

@@ -8,7 +8,6 @@ from .models import Book, ChildModel1, ChildModel2
 
 
 class SimpleIndexesTests(SimpleTestCase):
-
     def test_suffix(self):
         self.assertEqual(models.Index.suffix, 'idx')
 
@@ -117,27 +116,17 @@ class SimpleIndexesTests(SimpleTestCase):
         self.assertEqual(path, 'django.db.models.Index')
         self.assertEqual(args, ())
         self.assertEqual(
-            kwargs,
-            {'fields': ['title'], 'name': 'model_index_title_196f42_idx', 'db_tablespace': 'idx_tbls'}
+            kwargs, {'fields': ['title'], 'name': 'model_index_title_196f42_idx', 'db_tablespace': 'idx_tbls'}
         )
 
     def test_deconstruct_with_condition(self):
-        index = models.Index(
-            name='big_book_index',
-            fields=['title'],
-            condition=Q(pages__gt=400),
-        )
+        index = models.Index(name='big_book_index', fields=['title'], condition=Q(pages__gt=400))
         index.set_name_with_model(Book)
         path, args, kwargs = index.deconstruct()
         self.assertEqual(path, 'django.db.models.Index')
         self.assertEqual(args, ())
         self.assertEqual(
-            kwargs,
-            {
-                'fields': ['title'],
-                'name': 'model_index_title_196f42_idx',
-                'condition': Q(pages__gt=400),
-            }
+            kwargs, {'fields': ['title'], 'name': 'model_index_title_196f42_idx', 'condition': Q(pages__gt=400)}
         )
 
     def test_clone(self):
@@ -158,7 +147,6 @@ class SimpleIndexesTests(SimpleTestCase):
 
 
 class IndexesTests(TestCase):
-
     @skipUnlessDBFeature('supports_tablespaces')
     def test_db_tablespace(self):
         editor = connection.schema_editor()
@@ -185,8 +173,7 @@ class IndexesTests(TestCase):
                 # consequence, @override_settings doesn't work.
                 if settings.DEFAULT_INDEX_TABLESPACE:
                     self.assertIn(
-                        '"%s"' % settings.DEFAULT_INDEX_TABLESPACE,
-                        str(index.create_sql(Book, editor)).lower()
+                        '"%s"' % settings.DEFAULT_INDEX_TABLESPACE, str(index.create_sql(Book, editor)).lower()
                     )
                 else:
                     self.assertNotIn('TABLESPACE', str(index.create_sql(Book, editor)))

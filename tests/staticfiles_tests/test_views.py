@@ -12,6 +12,7 @@ class TestServeStatic(StaticFilesTestCase):
     """
     Test static asset serving view.
     """
+
     def _response(self, filepath):
         return self.client.get(quote(posixpath.join(settings.STATIC_URL, filepath)))
 
@@ -27,6 +28,7 @@ class TestServeDisabled(TestServeStatic):
     """
     Test serving static files disabled when DEBUG is False.
     """
+
     def test_disabled_serving(self):
         self.assertFileNotFound('test.txt')
 

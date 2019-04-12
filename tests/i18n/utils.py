@@ -11,7 +11,6 @@ def copytree(src, dst):
 
 
 class POFileAssertionMixin:
-
     def _assertPoKeyword(self, keyword, expected_value, haystack, use_quotes=True):
         q = '"'
         if use_quotes:
@@ -21,7 +20,7 @@ class POFileAssertionMixin:
         expected_value = re.escape(expected_value)
         return self.assertTrue(
             re.search('^%s %s' % (keyword, expected_value), haystack, re.MULTILINE),
-            'Could not find %(q)s%(n)s%(q)s in generated PO file' % {'n': needle, 'q': q}
+            'Could not find %(q)s%(n)s%(q)s in generated PO file' % {'n': needle, 'q': q},
         )
 
     def assertMsgId(self, msgid, haystack, use_quotes=True):

@@ -19,6 +19,7 @@ def csrf(request):
     Context processor that provides a CSRF token, or the string 'NOTPROVIDED' if
     it has not been provided by either a view decorator or the middleware
     """
+
     def _get_val():
         token = get_token(request)
         if token is None:
@@ -40,17 +41,18 @@ def debug(request):
     if settings.DEBUG and request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS:
         context_extras['debug'] = True
         from django.db import connections
+
         # Return a lazy reference that computes connection.queries on access,
         # to ensure it contains queries triggered after this function runs.
         context_extras['sql_queries'] = lazy(
-            lambda: list(itertools.chain.from_iterable(connections[x].queries for x in connections)),
-            list
+            lambda: list(itertools.chain.from_iterable(connections[x].queries for x in connections)), list
         )
     return context_extras
 
 
 def i18n(request):
     from django.utils import translation
+
     return {
         'LANGUAGES': settings.LANGUAGES,
         'LANGUAGE_CODE': translation.get_language(),
@@ -60,6 +62,7 @@ def i18n(request):
 
 def tz(request):
     from django.utils import timezone
+
     return {'TIME_ZONE': timezone.get_current_timezone_name()}
 
 

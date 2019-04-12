@@ -7,29 +7,26 @@ from ..utils import setup
 
 
 class UrlizeTests(SimpleTestCase):
-
     @setup({'urlize01': '{% autoescape off %}{{ a|urlize }} {{ b|urlize }}{% endautoescape %}'})
     def test_urlize01(self):
         output = self.engine.render_to_string(
-            'urlize01',
-            {'a': 'http://example.com/?x=&y=', 'b': mark_safe('http://example.com?x=&amp;y=&lt;2&gt;')},
+            'urlize01', {'a': 'http://example.com/?x=&y=', 'b': mark_safe('http://example.com?x=&amp;y=&lt;2&gt;')}
         )
         self.assertEqual(
             output,
             '<a href="http://example.com/?x=&amp;y=" rel="nofollow">http://example.com/?x=&y=</a> '
-            '<a href="http://example.com?x=&amp;y=%3C2%3E" rel="nofollow">http://example.com?x=&amp;y=&lt;2&gt;</a>'
+            '<a href="http://example.com?x=&amp;y=%3C2%3E" rel="nofollow">http://example.com?x=&amp;y=&lt;2&gt;</a>',
         )
 
     @setup({'urlize02': '{{ a|urlize }} {{ b|urlize }}'})
     def test_urlize02(self):
         output = self.engine.render_to_string(
-            'urlize02',
-            {'a': "http://example.com/?x=&y=", 'b': mark_safe("http://example.com?x=&amp;y=")},
+            'urlize02', {'a': "http://example.com/?x=&y=", 'b': mark_safe("http://example.com?x=&amp;y=")}
         )
         self.assertEqual(
             output,
             '<a href="http://example.com/?x=&amp;y=" rel="nofollow">http://example.com/?x=&amp;y=</a> '
-            '<a href="http://example.com?x=&amp;y=" rel="nofollow">http://example.com?x=&amp;y=</a>'
+            '<a href="http://example.com?x=&amp;y=" rel="nofollow">http://example.com?x=&amp;y=</a>',
         )
 
     @setup({'urlize03': '{% autoescape off %}{{ a|urlize }}{% endautoescape %}'})
@@ -58,18 +55,12 @@ class UrlizeTests(SimpleTestCase):
     @setup({'urlize07': '{{ a|urlize }}'})
     def test_urlize07(self):
         output = self.engine.render_to_string('urlize07', {'a': "Email me at me@example.com"})
-        self.assertEqual(
-            output,
-            'Email me at <a href="mailto:me@example.com">me@example.com</a>',
-        )
+        self.assertEqual(output, 'Email me at <a href="mailto:me@example.com">me@example.com</a>')
 
     @setup({'urlize08': '{{ a|urlize }}'})
     def test_urlize08(self):
         output = self.engine.render_to_string('urlize08', {'a': "Email me at <me@example.com>"})
-        self.assertEqual(
-            output,
-            'Email me at &lt;<a href="mailto:me@example.com">me@example.com</a>&gt;',
-        )
+        self.assertEqual(output, 'Email me at &lt;<a href="mailto:me@example.com">me@example.com</a>&gt;')
 
     @setup({'urlize09': '{% autoescape off %}{{ a|urlize }}{% endautoescape %}'})
     def test_urlize09(self):
@@ -81,53 +72,40 @@ class UrlizeTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_urls(self):
         self.assertEqual(
-            urlize('http://google.com'),
-            '<a href="http://google.com" rel="nofollow">http://google.com</a>',
+            urlize('http://google.com'), '<a href="http://google.com" rel="nofollow">http://google.com</a>'
         )
         self.assertEqual(
-            urlize('http://google.com/'),
-            '<a href="http://google.com/" rel="nofollow">http://google.com/</a>',
+            urlize('http://google.com/'), '<a href="http://google.com/" rel="nofollow">http://google.com/</a>'
+        )
+        self.assertEqual(urlize('www.google.com'), '<a href="http://www.google.com" rel="nofollow">www.google.com</a>')
+        self.assertEqual(
+            urlize('djangoproject.org'), '<a href="http://djangoproject.org" rel="nofollow">djangoproject.org</a>'
         )
         self.assertEqual(
-            urlize('www.google.com'),
-            '<a href="http://www.google.com" rel="nofollow">www.google.com</a>',
-        )
-        self.assertEqual(
-            urlize('djangoproject.org'),
-            '<a href="http://djangoproject.org" rel="nofollow">djangoproject.org</a>',
-        )
-        self.assertEqual(
-            urlize('djangoproject.org/'),
-            '<a href="http://djangoproject.org/" rel="nofollow">djangoproject.org/</a>',
+            urlize('djangoproject.org/'), '<a href="http://djangoproject.org/" rel="nofollow">djangoproject.org/</a>'
         )
 
     def test_url_split_chars(self):
         # Quotes (single and double) and angle brackets shouldn't be considered
         # part of URLs.
         self.assertEqual(
-            urlize('www.server.com"abc'),
-            '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&quot;abc',
+            urlize('www.server.com"abc'), '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&quot;abc'
         )
         self.assertEqual(
-            urlize('www.server.com\'abc'),
-            '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&#39;abc',
+            urlize('www.server.com\'abc'), '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&#39;abc'
         )
         self.assertEqual(
-            urlize('www.server.com<abc'),
-            '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&lt;abc',
+            urlize('www.server.com<abc'), '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&lt;abc'
         )
         self.assertEqual(
-            urlize('www.server.com>abc'),
-            '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&gt;abc',
+            urlize('www.server.com>abc'), '<a href="http://www.server.com" rel="nofollow">www.server.com</a>&gt;abc'
         )
 
     def test_email(self):
         self.assertEqual(
-            urlize('info@djangoproject.org'),
-            '<a href="mailto:info@djangoproject.org">info@djangoproject.org</a>',
+            urlize('info@djangoproject.org'), '<a href="mailto:info@djangoproject.org">info@djangoproject.org</a>'
         )
 
     def test_word_with_dot(self):
@@ -135,8 +113,7 @@ class FunctionTests(SimpleTestCase):
 
     def test_https(self):
         self.assertEqual(
-            urlize('https://google.com'),
-            '<a href="https://google.com" rel="nofollow">https://google.com</a>',
+            urlize('https://google.com'), '<a href="https://google.com" rel="nofollow">https://google.com</a>'
         )
 
     def test_quoting(self):
@@ -153,8 +130,7 @@ class FunctionTests(SimpleTestCase):
     def test_urlencoded(self):
         self.assertEqual(
             urlize('www.mystore.com/30%OffCoupons!'),
-            '<a href="http://www.mystore.com/30%25OffCoupons" rel="nofollow">'
-            'www.mystore.com/30%OffCoupons</a>!',
+            '<a href="http://www.mystore.com/30%25OffCoupons" rel="nofollow">' 'www.mystore.com/30%OffCoupons</a>!',
         )
         self.assertEqual(
             urlize('https://en.wikipedia.org/wiki/Caf%C3%A9'),
@@ -229,8 +205,7 @@ class FunctionTests(SimpleTestCase):
         #18071 - Check urlize accepts uppercased URL schemes
         """
         self.assertEqual(
-            urlize('HTTPS://github.com/'),
-            '<a href="https://github.com/" rel="nofollow">HTTPS://github.com/</a>',
+            urlize('HTTPS://github.com/'), '<a href="https://github.com/" rel="nofollow">HTTPS://github.com/</a>'
         )
 
     def test_trailing_period(self):
@@ -245,19 +220,19 @@ class FunctionTests(SimpleTestCase):
     def test_trailing_multiple_punctuation(self):
         self.assertEqual(
             urlize('A test http://testing.com/example..'),
-            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>..'
+            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>..',
         )
         self.assertEqual(
             urlize('A test http://testing.com/example!!'),
-            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>!!'
+            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>!!',
         )
         self.assertEqual(
             urlize('A test http://testing.com/example!!!'),
-            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>!!!'
+            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>!!!',
         )
         self.assertEqual(
             urlize('A test http://testing.com/example.,:;)"!'),
-            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>.,:;)&quot;!'
+            'A test <a href="http://testing.com/example" rel="nofollow">http://testing.com/example</a>.,:;)&quot;!',
         )
 
     def test_brackets(self):
@@ -291,9 +266,9 @@ class FunctionTests(SimpleTestCase):
                 start_in, end_in = wrapping_in
                 self.assertEqual(
                     urlize(start_in + 'https://www.example.org/' + end_in),
-                    start_out +
-                    '<a href="https://www.example.org/" rel="nofollow">https://www.example.org/</a>' +
-                    end_out,
+                    start_out
+                    + '<a href="https://www.example.org/" rel="nofollow">https://www.example.org/</a>'
+                    + end_out,
                 )
 
     def test_ipv4(self):
@@ -374,7 +349,7 @@ class FunctionTests(SimpleTestCase):
     def test_autoescape(self):
         self.assertEqual(
             urlize('foo<a href=" google.com ">bar</a>buz'),
-            'foo&lt;a href=&quot; <a href="http://google.com" rel="nofollow">google.com</a> &quot;&gt;bar&lt;/a&gt;buz'
+            'foo&lt;a href=&quot; <a href="http://google.com" rel="nofollow">google.com</a> &quot;&gt;bar&lt;/a&gt;buz',
         )
 
     def test_autoescape_off(self):
@@ -386,6 +361,5 @@ class FunctionTests(SimpleTestCase):
     def test_lazystring(self):
         prepend_www = lazy(lambda url: 'www.' + url, str)
         self.assertEqual(
-            urlize(prepend_www('google.com')),
-            '<a href="http://www.google.com" rel="nofollow">www.google.com</a>',
+            urlize(prepend_www('google.com')), '<a href="http://www.google.com" rel="nofollow">www.google.com</a>'
         )

@@ -8,9 +8,7 @@ from django.contrib.messages.middleware import MessageMiddleware
 from django.core import checks
 from django.test import SimpleTestCase, override_settings
 
-from .models import (
-    Album, Author, Book, City, Influence, Song, State, TwoAlbumFKAndAnE,
-)
+from .models import Album, Author, Book, City, Influence, Song, State, TwoAlbumFKAndAnE
 
 
 class SongForm(forms.ModelForm):
@@ -26,13 +24,10 @@ class ValidFormFieldsets(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         class ExtraFieldForm(SongForm):
             name = forms.CharField(max_length=50)
+
         return ExtraFieldForm
 
-    fieldsets = (
-        (None, {
-            'fields': ('name',),
-        }),
-    )
+    fieldsets = ((None, {'fields': ('name',)}),)
 
 
 class MyAdmin(admin.ModelAdmin):
@@ -64,7 +59,6 @@ class ModelBackendSubclass(ModelBackend):
     ],
 )
 class SystemChecksTestCase(SimpleTestCase):
-
     def test_checks_are_performed(self):
         admin.site.register(Song, MyAdmin)
         try:
@@ -79,48 +73,47 @@ class SystemChecksTestCase(SimpleTestCase):
         errors = admin.checks.check_dependencies()
         expected = [
             checks.Error(
-                "'django.contrib.contenttypes' must be in "
-                "INSTALLED_APPS in order to use the admin application.",
+                "'django.contrib.contenttypes' must be in " "INSTALLED_APPS in order to use the admin application.",
                 id="admin.E401",
             ),
             checks.Error(
-                "'django.contrib.auth' must be in INSTALLED_APPS in order "
-                "to use the admin application.",
+                "'django.contrib.auth' must be in INSTALLED_APPS in order " "to use the admin application.",
                 id='admin.E405',
             ),
             checks.Error(
-                "'django.contrib.messages' must be in INSTALLED_APPS in order "
-                "to use the admin application.",
+                "'django.contrib.messages' must be in INSTALLED_APPS in order " "to use the admin application.",
                 id='admin.E406',
             ),
             checks.Error(
-                "'django.contrib.sessions' must be in INSTALLED_APPS in order "
-                "to use the admin application.",
+                "'django.contrib.sessions' must be in INSTALLED_APPS in order " "to use the admin application.",
                 id='admin.E407',
-            )
+            ),
         ]
         self.assertEqual(errors, expected)
 
     @override_settings(TEMPLATES=[])
     def test_no_template_engines(self):
-        self.assertEqual(admin.checks.check_dependencies(), [
-            checks.Error(
-                "A 'django.template.backends.django.DjangoTemplates' "
-                "instance must be configured in TEMPLATES in order to use "
-                "the admin application.",
-                id='admin.E403',
-            )
-        ])
+        self.assertEqual(
+            admin.checks.check_dependencies(),
+            [
+                checks.Error(
+                    "A 'django.template.backends.django.DjangoTemplates' "
+                    "instance must be configured in TEMPLATES in order to use "
+                    "the admin application.",
+                    id='admin.E403',
+                )
+            ],
+        )
 
     @override_settings(
-        TEMPLATES=[{
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
-            'APP_DIRS': True,
-            'OPTIONS': {
-                'context_processors': [],
-            },
-        }],
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [],
+                'APP_DIRS': True,
+                'OPTIONS': {'context_processors': []},
+            }
+        ]
     )
     def test_context_processor_dependencies(self):
         expected = [
@@ -135,7 +128,7 @@ class SystemChecksTestCase(SimpleTestCase):
                 "be enabled in DjangoTemplates (TEMPLATES) in order to use "
                 "the admin application.",
                 id='admin.E404',
-            )
+            ),
         ]
         self.assertEqual(admin.checks.check_dependencies(), expected)
         # The first error doesn't happen if
@@ -146,32 +139,31 @@ class SystemChecksTestCase(SimpleTestCase):
 
     @override_settings(
         AUTHENTICATION_BACKENDS=['admin_checks.tests.ModelBackendSubclass'],
-        TEMPLATES=[{
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
-            'APP_DIRS': True,
-            'OPTIONS': {
-                'context_processors': ['django.contrib.messages.context_processors.messages'],
-            },
-        }],
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [],
+                'APP_DIRS': True,
+                'OPTIONS': {'context_processors': ['django.contrib.messages.context_processors.messages']},
+            }
+        ],
     )
     def test_context_processor_dependencies_model_backend_subclass(self):
-        self.assertEqual(admin.checks.check_dependencies(), [
-            checks.Error(
-                "'django.contrib.auth.context_processors.auth' must be "
-                "enabled in DjangoTemplates (TEMPLATES) if using the default "
-                "auth backend in order to use the admin application.",
-                id='admin.E402',
-            ),
-        ])
+        self.assertEqual(
+            admin.checks.check_dependencies(),
+            [
+                checks.Error(
+                    "'django.contrib.auth.context_processors.auth' must be "
+                    "enabled in DjangoTemplates (TEMPLATES) if using the default "
+                    "auth backend in order to use the admin application.",
+                    id='admin.E402',
+                )
+            ],
+        )
 
     @override_settings(
         TEMPLATES=[
-            {
-                'BACKEND': 'django.template.backends.dummy.TemplateStrings',
-                'DIRS': [],
-                'APP_DIRS': True,
-            },
+            {'BACKEND': 'django.template.backends.dummy.TemplateStrings', 'DIRS': [], 'APP_DIRS': True},
             {
                 'BACKEND': 'django.template.backends.django.DjangoTemplates',
                 'DIRS': [],
@@ -180,10 +172,10 @@ class SystemChecksTestCase(SimpleTestCase):
                     'context_processors': [
                         'django.contrib.auth.context_processors.auth',
                         'django.contrib.messages.context_processors.messages',
-                    ],
+                    ]
                 },
             },
-        ],
+        ]
     )
     def test_several_templates_backends(self):
         self.assertEqual(admin.checks.check_dependencies(), [])
@@ -201,22 +193,26 @@ class SystemChecksTestCase(SimpleTestCase):
                 "'django.contrib.messages.middleware.MessageMiddleware' "
                 "must be in MIDDLEWARE in order to use the admin application.",
                 id='admin.E409',
-            )
+            ),
         ]
         self.assertEqual(errors, expected)
 
-    @override_settings(MIDDLEWARE=[
-        'admin_checks.tests.AuthenticationMiddlewareSubclass',
-        'admin_checks.tests.MessageMiddlewareSubclass',
-    ])
+    @override_settings(
+        MIDDLEWARE=[
+            'admin_checks.tests.AuthenticationMiddlewareSubclass',
+            'admin_checks.tests.MessageMiddlewareSubclass',
+        ]
+    )
     def test_middleware_subclasses(self):
         self.assertEqual(admin.checks.check_dependencies(), [])
 
-    @override_settings(MIDDLEWARE=[
-        'django.contrib.does.not.Exist',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-    ])
+    @override_settings(
+        MIDDLEWARE=[
+            'django.contrib.does.not.Exist',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+        ]
+    )
     def test_admin_check_ignores_import_error_in_middleware(self):
         self.assertEqual(admin.checks.check_dependencies(), [])
 
@@ -272,37 +268,34 @@ class SystemChecksTestCase(SimpleTestCase):
         class SongAdmin(admin.ModelAdmin):
             list_editable = 'test'
 
-        self.assertEqual(SongAdmin(Song, AdminSite()).check(), [
-            checks.Error(
-                "The value of 'list_editable' must be a list or tuple.",
-                obj=SongAdmin,
-                id='admin.E120',
-            )
-        ])
+        self.assertEqual(
+            SongAdmin(Song, AdminSite()).check(),
+            [checks.Error("The value of 'list_editable' must be a list or tuple.", obj=SongAdmin, id='admin.E120')],
+        )
 
     def test_list_editable_missing_field(self):
         class SongAdmin(admin.ModelAdmin):
             list_editable = ('test',)
 
-        self.assertEqual(SongAdmin(Song, AdminSite()).check(), [
-            checks.Error(
-                "The value of 'list_editable[0]' refers to 'test', which is "
-                "not an attribute of 'admin_checks.Song'.",
-                obj=SongAdmin,
-                id='admin.E121',
-            )
-        ])
+        self.assertEqual(
+            SongAdmin(Song, AdminSite()).check(),
+            [
+                checks.Error(
+                    "The value of 'list_editable[0]' refers to 'test', which is "
+                    "not an attribute of 'admin_checks.Song'.",
+                    obj=SongAdmin,
+                    id='admin.E121',
+                )
+            ],
+        )
 
     def test_readonly_and_editable(self):
         class SongAdmin(admin.ModelAdmin):
             readonly_fields = ["original_release"]
             list_display = ["pk", "original_release"]
             list_editable = ["original_release"]
-            fieldsets = [
-                (None, {
-                    "fields": ["title", "original_release"],
-                }),
-            ]
+            fieldsets = [(None, {"fields": ["title", "original_release"]})]
+
         errors = SongAdmin(Song, AdminSite()).check()
         expected = [
             checks.Error(
@@ -318,11 +311,7 @@ class SystemChecksTestCase(SimpleTestCase):
         class SongAdmin(admin.ModelAdmin):
             list_display = ["pk", "title"]
             list_editable = ["title"]
-            fieldsets = [
-                (None, {
-                    "fields": ["title", "original_release"],
-                }),
-            ]
+            fieldsets = [(None, {"fields": ["title", "original_release"]})]
 
         errors = SongAdmin(Song, AdminSite()).check()
         self.assertEqual(errors, [])
@@ -346,14 +335,11 @@ class SystemChecksTestCase(SimpleTestCase):
         """
         The first fieldset's fields must be a list/tuple.
         """
+
         class NotATupleAdmin(admin.ModelAdmin):
             list_display = ["pk", "title"]
             list_editable = ["title"]
-            fieldsets = [
-                (None, {
-                    "fields": "title"  # not a tuple
-                }),
-            ]
+            fieldsets = [(None, {"fields": "title"})]  # not a tuple
 
         errors = NotATupleAdmin(Song, AdminSite()).check()
         expected = [
@@ -369,15 +355,9 @@ class SystemChecksTestCase(SimpleTestCase):
         """
         The second fieldset's fields must be a list/tuple.
         """
+
         class NotATupleAdmin(admin.ModelAdmin):
-            fieldsets = [
-                (None, {
-                    "fields": ("title",)
-                }),
-                ('foo', {
-                    "fields": "author"  # not a tuple
-                }),
-            ]
+            fieldsets = [(None, {"fields": ("title",)}), ('foo', {"fields": "author"})]  # not a tuple
 
         errors = NotATupleAdmin(Song, AdminSite()).check()
         expected = [
@@ -393,16 +373,13 @@ class SystemChecksTestCase(SimpleTestCase):
         """
         Tests for basic system checks of 'exclude' option values (#12689)
         """
+
         class ExcludedFields1(admin.ModelAdmin):
             exclude = 'foo'
 
         errors = ExcludedFields1(Book, AdminSite()).check()
         expected = [
-            checks.Error(
-                "The value of 'exclude' must be a list or tuple.",
-                obj=ExcludedFields1,
-                id='admin.E014',
-            )
+            checks.Error("The value of 'exclude' must be a list or tuple.", obj=ExcludedFields1, id='admin.E014')
         ]
         self.assertEqual(errors, expected)
 
@@ -412,11 +389,7 @@ class SystemChecksTestCase(SimpleTestCase):
 
         errors = ExcludedFields2(Book, AdminSite()).check()
         expected = [
-            checks.Error(
-                "The value of 'exclude' contains duplicate field(s).",
-                obj=ExcludedFields2,
-                id='admin.E015',
-            )
+            checks.Error("The value of 'exclude' contains duplicate field(s).", obj=ExcludedFields2, id='admin.E015')
         ]
         self.assertEqual(errors, expected)
 
@@ -431,11 +404,7 @@ class SystemChecksTestCase(SimpleTestCase):
 
         errors = ExcludedFieldsAlbumAdmin(Album, AdminSite()).check()
         expected = [
-            checks.Error(
-                "The value of 'exclude' must be a list or tuple.",
-                obj=ExcludedFieldsInline,
-                id='admin.E014',
-            )
+            checks.Error("The value of 'exclude' must be a list or tuple.", obj=ExcludedFieldsInline, id='admin.E014')
         ]
         self.assertEqual(errors, expected)
 
@@ -444,6 +413,7 @@ class SystemChecksTestCase(SimpleTestCase):
         Regression test for #9932 - exclude in InlineModelAdmin should not
         contain the ForeignKey field used in ModelAdmin.model
         """
+
         class SongInline(admin.StackedInline):
             model = Song
             exclude = ['album']
@@ -468,6 +438,7 @@ class SystemChecksTestCase(SimpleTestCase):
         Regression test for #22034 - check that generic inlines don't look for
         normal ForeignKey relations.
         """
+
         class InfluenceInline(GenericStackedInline):
             model = Influence
 
@@ -482,6 +453,7 @@ class SystemChecksTestCase(SimpleTestCase):
         A model without a GenericForeignKey raises problems if it's included
         in a GenericInlineModelAdmin definition.
         """
+
         class BookInline(GenericStackedInline):
             model = Book
 
@@ -489,13 +461,7 @@ class SystemChecksTestCase(SimpleTestCase):
             inlines = [BookInline]
 
         errors = SongAdmin(Song, AdminSite()).check()
-        expected = [
-            checks.Error(
-                "'admin_checks.Book' has no GenericForeignKey.",
-                obj=BookInline,
-                id='admin.E301',
-            )
-        ]
+        expected = [checks.Error("'admin_checks.Book' has no GenericForeignKey.", obj=BookInline, id='admin.E301')]
         self.assertEqual(errors, expected)
 
     def test_generic_inline_model_admin_bad_ct_field(self):
@@ -503,6 +469,7 @@ class SystemChecksTestCase(SimpleTestCase):
         A GenericInlineModelAdmin errors if the ct_field points to a
         nonexistent field.
         """
+
         class InfluenceInline(GenericStackedInline):
             model = Influence
             ct_field = 'nonexistent'
@@ -525,6 +492,7 @@ class SystemChecksTestCase(SimpleTestCase):
         A GenericInlineModelAdmin errors if the ct_fk_field points to a
         nonexistent field.
         """
+
         class InfluenceInline(GenericStackedInline):
             model = Influence
             ct_fk_field = 'nonexistent'
@@ -547,6 +515,7 @@ class SystemChecksTestCase(SimpleTestCase):
         A GenericInlineModelAdmin raises problems if the ct_field points to a
         field that isn't part of a GenericForeignKey.
         """
+
         class InfluenceInline(GenericStackedInline):
             model = Influence
             ct_field = 'name'
@@ -570,6 +539,7 @@ class SystemChecksTestCase(SimpleTestCase):
         A GenericInlineModelAdmin raises problems if the ct_fk_field points to
         a field that isn't part of a GenericForeignKey.
         """
+
         class InfluenceInline(GenericStackedInline):
             model = Influence
             ct_fk_field = 'name'
@@ -609,6 +579,7 @@ class SystemChecksTestCase(SimpleTestCase):
         given) make sure fk_name is honored or things blow up when there is more
         than one fk to the parent model.
         """
+
         class TwoAlbumFKAndAnEInline(admin.TabularInline):
             model = TwoAlbumFKAndAnE
             exclude = ("e",)
@@ -681,8 +652,10 @@ class SystemChecksTestCase(SimpleTestCase):
 
             def __getattr__(self, item):
                 if item == "dynamic_method":
+
                     def method(obj):
                         pass
+
                     return method
                 raise AttributeError
 
@@ -731,13 +704,10 @@ class SystemChecksTestCase(SimpleTestCase):
         class SongAdmin(admin.ModelAdmin):
             readonly_fields = 'test'
 
-        self.assertEqual(SongAdmin(Song, AdminSite()).check(), [
-            checks.Error(
-                "The value of 'readonly_fields' must be a list or tuple.",
-                obj=SongAdmin,
-                id='admin.E034',
-            )
-        ])
+        self.assertEqual(
+            SongAdmin(Song, AdminSite()).check(),
+            [checks.Error("The value of 'readonly_fields' must be a list or tuple.", obj=SongAdmin, id='admin.E034')],
+        )
 
     def test_extra(self):
         class SongAdmin(admin.ModelAdmin):
@@ -762,6 +732,7 @@ class SystemChecksTestCase(SimpleTestCase):
         specifies the 'through' option is included in the 'fields' or the 'fieldsets'
         ModelAdmin options.
         """
+
         class BookAdmin(admin.ModelAdmin):
             fields = ['authors']
 
@@ -778,10 +749,7 @@ class SystemChecksTestCase(SimpleTestCase):
 
     def test_cannot_include_through(self):
         class FieldsetBookAdmin(admin.ModelAdmin):
-            fieldsets = (
-                ('Header 1', {'fields': ('name',)}),
-                ('Header 2', {'fields': ('authors',)}),
-            )
+            fieldsets = (('Header 1', {'fields': ('name',)}), ('Header 2', {'fields': ('authors',)}))
 
         errors = FieldsetBookAdmin(Book, AdminSite()).check()
         expected = [
@@ -803,9 +771,7 @@ class SystemChecksTestCase(SimpleTestCase):
 
     def test_nested_fieldsets(self):
         class NestedFieldsetAdmin(admin.ModelAdmin):
-            fieldsets = (
-                ('Main', {'fields': ('price', ('name', 'subtitle'))}),
-            )
+            fieldsets = (('Main', {'fields': ('price', ('name', 'subtitle'))}),)
 
         errors = NestedFieldsetAdmin(Book, AdminSite()).check()
         self.assertEqual(errors, [])
@@ -816,6 +782,7 @@ class SystemChecksTestCase(SimpleTestCase):
         is specified as a string, the admin should still be able use
         Model.m2m_field.through
         """
+
         class AuthorsInline(admin.TabularInline):
             model = Book.authors.through
 
@@ -830,6 +797,7 @@ class SystemChecksTestCase(SimpleTestCase):
         Regression for ensuring ModelAdmin.fields can contain non-model fields
         that broke with r11737
         """
+
         class SongForm(forms.ModelForm):
             extra_data = forms.CharField()
 
@@ -845,6 +813,7 @@ class SystemChecksTestCase(SimpleTestCase):
         Regression for ensuring ModelAdmin.field can handle first elem being a
         non-model field (test fix for UnboundLocalError introduced with r16225).
         """
+
         class SongForm(forms.ModelForm):
             extra_data = forms.CharField()
 
@@ -865,29 +834,17 @@ class SystemChecksTestCase(SimpleTestCase):
 
         errors = MyModelAdmin(Song, AdminSite()).check()
         expected = [
-            checks.Error(
-                "The value of 'fields' contains duplicate field(s).",
-                obj=MyModelAdmin,
-                id='admin.E006'
-            )
+            checks.Error("The value of 'fields' contains duplicate field(s).", obj=MyModelAdmin, id='admin.E006')
         ]
         self.assertEqual(errors, expected)
 
     def test_check_fieldset_sublists_for_duplicates(self):
         class MyModelAdmin(admin.ModelAdmin):
-            fieldsets = [
-                (None, {
-                    'fields': ['title', 'album', ('title', 'album')]
-                }),
-            ]
+            fieldsets = [(None, {'fields': ['title', 'album', ('title', 'album')]})]
 
         errors = MyModelAdmin(Song, AdminSite()).check()
         expected = [
-            checks.Error(
-                "There are duplicate field(s) in 'fieldsets[0][1]'.",
-                obj=MyModelAdmin,
-                id='admin.E012'
-            )
+            checks.Error("There are duplicate field(s) in 'fieldsets[0][1]'.", obj=MyModelAdmin, id='admin.E012')
         ]
         self.assertEqual(errors, expected)
 
@@ -896,6 +853,7 @@ class SystemChecksTestCase(SimpleTestCase):
         Ensure list_filter can access reverse fields even when the app registry
         is not ready; refs #24146.
         """
+
         class BookAdminWithListFilter(admin.ModelAdmin):
             list_filter = ['authorsbooks__featured']
 

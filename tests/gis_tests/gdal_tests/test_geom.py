@@ -1,9 +1,7 @@
 import json
 import pickle
 
-from django.contrib.gis.gdal import (
-    CoordTransform, GDALException, OGRGeometry, OGRGeomType, SpatialReference,
-)
+from django.contrib.gis.gdal import CoordTransform, GDALException, OGRGeometry, OGRGeomType, SpatialReference
 from django.template import Context
 from django.template.engine import Engine
 from django.test import SimpleTestCase
@@ -527,7 +525,8 @@ class OGRGeomTest(SimpleTestCase, TestDataMixin):
         self.assertIs(
             OGRGeometry('POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0))').overlaps(
                 OGRGeometry('POLYGON ((1 1, 1 5, 5 5, 5 1, 1 1))')
-            ), True
+            ),
+            True,
         )
         self.assertIs(OGRGeometry('POINT(0 0)').overlaps(OGRGeometry('POINT(0 1)')), False)
 
@@ -538,9 +537,7 @@ class OGRGeomTest(SimpleTestCase, TestDataMixin):
         self.assertIs(OGRGeometry('POINT(0 0)').touches(OGRGeometry('POINT(0 1)')), False)
 
     def test_within(self):
-        self.assertIs(
-            OGRGeometry('POINT(0.5 0.5)').within(OGRGeometry('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))')), True
-        )
+        self.assertIs(OGRGeometry('POINT(0.5 0.5)').within(OGRGeometry('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))')), True)
         self.assertIs(OGRGeometry('POINT(0 0)').within(OGRGeometry('POINT(0 1)')), False)
 
     def test_from_gml(self):

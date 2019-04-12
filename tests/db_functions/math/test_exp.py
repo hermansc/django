@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class ExpTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_exp=Exp('normal')).first()
@@ -35,9 +34,7 @@ class ExpTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_exp=Exp('small'),
-            normal_exp=Exp('normal'),
-            big_exp=Exp('big'),
+            small_exp=Exp('small'), normal_exp=Exp('normal'), big_exp=Exp('big')
         ).first()
         self.assertIsInstance(obj.small_exp, float)
         self.assertIsInstance(obj.normal_exp, float)

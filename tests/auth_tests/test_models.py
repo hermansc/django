@@ -4,9 +4,7 @@ from django.conf.global_settings import PASSWORD_HASHERS
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.hashers import get_hasher
-from django.contrib.auth.models import (
-    AbstractUser, AnonymousUser, Group, Permission, User, UserManager,
-)
+from django.contrib.auth.models import AbstractUser, AnonymousUser, Group, Permission, User, UserManager
 from django.contrib.contenttypes.models import ContentType
 from django.core import mail
 from django.db.models.signals import post_save
@@ -17,7 +15,6 @@ from .models.with_custom_email_field import CustomEmailField
 
 
 class NaturalKeysTestCase(TestCase):
-
     def test_user_natural_key(self):
         staff_user = User.objects.create_user(username='staff')
         self.assertEqual(User.objects.get_by_natural_key('staff'), staff_user)
@@ -52,48 +49,26 @@ class LoadDataWithNaturalKeysAndMultipleDatabasesTestCase(TestCase):
     def test_load_data_with_user_permissions(self):
         # Create test contenttypes for both databases
         default_objects = [
-            ContentType.objects.db_manager('default').create(
-                model='examplemodela',
-                app_label='app_a',
-            ),
-            ContentType.objects.db_manager('default').create(
-                model='examplemodelb',
-                app_label='app_b',
-            ),
+            ContentType.objects.db_manager('default').create(model='examplemodela', app_label='app_a'),
+            ContentType.objects.db_manager('default').create(model='examplemodelb', app_label='app_b'),
         ]
         other_objects = [
-            ContentType.objects.db_manager('other').create(
-                model='examplemodelb',
-                app_label='app_b',
-            ),
-            ContentType.objects.db_manager('other').create(
-                model='examplemodela',
-                app_label='app_a',
-            ),
+            ContentType.objects.db_manager('other').create(model='examplemodelb', app_label='app_b'),
+            ContentType.objects.db_manager('other').create(model='examplemodela', app_label='app_a'),
         ]
 
         # Now we create the test UserPermission
         Permission.objects.db_manager("default").create(
-            name="Can delete example model b",
-            codename="delete_examplemodelb",
-            content_type=default_objects[1],
+            name="Can delete example model b", codename="delete_examplemodelb", content_type=default_objects[1]
         )
         Permission.objects.db_manager("other").create(
-            name="Can delete example model b",
-            codename="delete_examplemodelb",
-            content_type=other_objects[0],
+            name="Can delete example model b", codename="delete_examplemodelb", content_type=other_objects[0]
         )
 
-        perm_default = Permission.objects.get_by_natural_key(
-            'delete_examplemodelb',
-            'app_b',
-            'examplemodelb',
-        )
+        perm_default = Permission.objects.get_by_natural_key('delete_examplemodelb', 'app_b', 'examplemodelb')
 
         perm_other = Permission.objects.db_manager('other').get_by_natural_key(
-            'delete_examplemodelb',
-            'app_b',
-            'examplemodelb',
+            'delete_examplemodelb', 'app_b', 'examplemodelb'
         )
 
         self.assertEqual(perm_default.content_type_id, default_objects[1].id)
@@ -101,7 +76,6 @@ class LoadDataWithNaturalKeysAndMultipleDatabasesTestCase(TestCase):
 
 
 class UserManagerTestCase(TestCase):
-
     def test_create_user(self):
         email_lowercase = 'normal@normal.com'
         user = User.objects.create_user('user', email_lowercase)
@@ -136,17 +110,11 @@ class UserManagerTestCase(TestCase):
 
     def test_create_super_user_raises_error_on_false_is_superuser(self):
         with self.assertRaisesMessage(ValueError, 'Superuser must have is_superuser=True.'):
-            User.objects.create_superuser(
-                username='test', email='test@test.com',
-                password='test', is_superuser=False,
-            )
+            User.objects.create_superuser(username='test', email='test@test.com', password='test', is_superuser=False)
 
     def test_create_superuser_raises_error_on_false_is_staff(self):
         with self.assertRaisesMessage(ValueError, 'Superuser must have is_staff=True.'):
-            User.objects.create_superuser(
-                username='test', email='test@test.com',
-                password='test', is_staff=False,
-            )
+            User.objects.create_superuser(username='test', email='test@test.com', password='test', is_staff=False)
 
     def test_make_random_password(self):
         allowed_chars = 'abcdefg'
@@ -157,7 +125,6 @@ class UserManagerTestCase(TestCase):
 
 
 class AbstractBaseUserTests(SimpleTestCase):
-
     def test_has_usable_password(self):
         """
         Passwords are usable even if they don't correspond to a hasher in
@@ -201,10 +168,7 @@ class AbstractUserTestCase(TestCase):
         }
         abstract_user = AbstractUser(email='foo@bar.com')
         abstract_user.email_user(
-            subject="Subject here",
-            message="This is a message",
-            from_email="from@domain.com",
-            **kwargs
+            subject="Subject here", message="This is a message", from_email="from@domain.com", **kwargs
         )
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
@@ -297,6 +261,7 @@ class TestCreateSuperUserSignals(TestCase):
     """
     Simple test case for ticket #20541
     """
+
     def post_save_listener(self, *args, **kwargs):
         self.signals_count += 1
 
@@ -346,10 +311,7 @@ class AnonymousUserTests(SimpleTestCase):
         self.assertEqual(hash(self.user), 1)
 
     def test_int(self):
-        msg = (
-            'Cannot cast AnonymousUser to int. Are you trying to use it in '
-            'place of User?'
-        )
+        msg = 'Cannot cast AnonymousUser to int. Are you trying to use it in ' 'place of User?'
         with self.assertRaisesMessage(TypeError, msg):
             int(self.user)
 

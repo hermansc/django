@@ -31,9 +31,7 @@ def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
     return force_str(s, encoding, strings_only, errors)
 
 
-_PROTECTED_TYPES = (
-    type(None), int, float, Decimal, datetime.datetime, datetime.date, datetime.time,
-)
+_PROTECTED_TYPES = (type(None), int, float, Decimal, datetime.datetime, datetime.date, datetime.time)
 
 
 def is_protected_type(obj):
@@ -100,18 +98,12 @@ def force_bytes(s, encoding='utf-8', strings_only=False, errors='strict'):
 
 
 def smart_text(s, encoding='utf-8', strings_only=False, errors='strict'):
-    warnings.warn(
-        'smart_text() is deprecated in favor of smart_str().',
-        RemovedInDjango40Warning, stacklevel=2,
-    )
+    warnings.warn('smart_text() is deprecated in favor of smart_str().', RemovedInDjango40Warning, stacklevel=2)
     return smart_str(s, encoding, strings_only, errors)
 
 
 def force_text(s, encoding='utf-8', strings_only=False, errors='strict'):
-    warnings.warn(
-        'force_text() is deprecated in favor of force_str().',
-        RemovedInDjango40Warning, stacklevel=2,
-    )
+    warnings.warn('force_text() is deprecated in favor of force_str().', RemovedInDjango40Warning, stacklevel=2)
     return force_str(s, encoding, strings_only, errors)
 
 
@@ -159,10 +151,7 @@ _hextobyte = {
 # And then everything above 128, because bytes ≥ 128 are part of multibyte
 # unicode characters.
 _hexdig = '0123456789ABCDEFabcdef'
-_hextobyte.update({
-    (a + b).encode(): bytes.fromhex(a + b)
-    for a in _hexdig[8:] for b in _hexdig
-})
+_hextobyte.update({(a + b).encode(): bytes.fromhex(a + b) for a in _hexdig[8:] for b in _hexdig})
 
 
 def uri_to_iri(uri):
@@ -227,9 +216,8 @@ def repercent_broken_unicode(path):
     try:
         path.decode()
     except UnicodeDecodeError as e:
-        repercent = quote(path[e.start:e.end], safe=b"/#%[]=:;$&()+,!?*@'~")
-        path = repercent_broken_unicode(
-            path[:e.start] + force_bytes(repercent) + path[e.end:])
+        repercent = quote(path[e.start : e.end], safe=b"/#%[]=:;$&()+,!?*@'~")
+        path = repercent_broken_unicode(path[: e.start] + force_bytes(repercent) + path[e.end :])
     return path
 
 

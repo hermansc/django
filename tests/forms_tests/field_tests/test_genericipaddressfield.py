@@ -3,7 +3,6 @@ from django.test import SimpleTestCase
 
 
 class GenericIPAddressFieldTest(SimpleTestCase):
-
     def test_generic_ipaddress_invalid_arguments(self):
         with self.assertRaises(ValueError):
             GenericIPAddressField(protocol='hamster')

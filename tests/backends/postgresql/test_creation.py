@@ -19,7 +19,6 @@ else:
 
 @unittest.skipUnless(connection.vendor == 'postgresql', 'PostgreSQL tests')
 class DatabaseCreationTests(SimpleTestCase):
-
     @contextmanager
     def changed_test_settings(self, **kwargs):
         settings = connection.settings_dict['TEST']

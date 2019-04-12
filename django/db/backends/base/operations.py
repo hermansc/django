@@ -16,6 +16,7 @@ class BaseDatabaseOperations:
     Encapsulate backend-specific differences, such as the way a backend
     performs ordering or calculates the ID of a recently-inserted row.
     """
+
     compiler_module = "django.db.models.sql.compiler"
 
     # Integer field safe ranges by `internal_type` as documented
@@ -27,11 +28,7 @@ class BaseDatabaseOperations:
         'PositiveSmallIntegerField': (0, 32767),
         'PositiveIntegerField': (0, 2147483647),
     }
-    set_operators = {
-        'union': 'UNION',
-        'intersection': 'INTERSECT',
-        'difference': 'EXCEPT',
-    }
+    set_operators = {'union': 'UNION', 'intersection': 'INTERSECT', 'difference': 'EXCEPT'}
     # Mapping of Field.get_internal_type() (typically the model field's class
     # name) to the data type to use for the Cast() function, if different from
     # DatabaseWrapper.data_types.
@@ -114,8 +111,7 @@ class BaseDatabaseOperations:
         Return the SQL to cast a datetime value to date value.
         """
         raise NotImplementedError(
-            'subclasses of BaseDatabaseOperations may require a '
-            'datetime_cast_date_sql() method.'
+            'subclasses of BaseDatabaseOperations may require a ' 'datetime_cast_date_sql() method.'
         )
 
     def datetime_cast_time_sql(self, field_name, tzname):
@@ -218,10 +214,9 @@ class BaseDatabaseOperations:
     def limit_offset_sql(self, low_mark, high_mark):
         """Return LIMIT/OFFSET SQL clause."""
         limit, offset = self._get_limit_offset_params(low_mark, high_mark)
-        return ' '.join(sql for sql in (
-            ('LIMIT %d' % limit) if limit else None,
-            ('OFFSET %d' % offset) if offset else None,
-        ) if sql)
+        return ' '.join(
+            sql for sql in (('LIMIT %d' % limit) if limit else None, ('OFFSET %d' % offset) if offset else None) if sql
+        )
 
     def last_executed_query(self, cursor, sql, params):
         """
@@ -236,6 +231,7 @@ class BaseDatabaseOperations:
         # Convert params to contain string values.
         def to_string(s):
             return force_str(s, strings_only=True, errors='replace')
+
         if isinstance(params, (list, tuple)):
             u_params = tuple(to_string(val) for val in params)
         elif params is None:
@@ -299,10 +295,7 @@ class BaseDatabaseOperations:
         cursor.execute() call and PEP 249 doesn't talk about this use case,
         the default implementation is conservative.
         """
-        return [
-            sqlparse.format(statement, strip_comments=True)
-            for statement in sqlparse.split(sql) if statement
-        ]
+        return [sqlparse.format(statement, strip_comments=True) for statement in sqlparse.split(sql) if statement]
 
     def process_clob(self, value):
         """
@@ -468,7 +461,7 @@ class BaseDatabaseOperations:
         cases where the target type isn't known, such as .raw() SQL queries.
         As a consequence it may not work perfectly in all circumstances.
         """
-        if isinstance(value, datetime.datetime):   # must be before date
+        if isinstance(value, datetime.datetime):  # must be before date
             return self.adapt_datetimefield_value(value)
         elif isinstance(value, datetime.date):
             return self.adapt_datefield_value(value)

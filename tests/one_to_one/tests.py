@@ -2,14 +2,25 @@ from django.db import IntegrityError, connection, transaction
 from django.test import TestCase
 
 from .models import (
-    Bar, Director, Favorites, HiddenPointer, ManualPrimaryKey, MultiModel,
-    Place, Pointer, RelatedModel, Restaurant, School, Target, ToFieldPointer,
-    UndergroundBar, Waiter,
+    Bar,
+    Director,
+    Favorites,
+    HiddenPointer,
+    ManualPrimaryKey,
+    MultiModel,
+    Place,
+    Pointer,
+    RelatedModel,
+    Restaurant,
+    School,
+    Target,
+    ToFieldPointer,
+    UndergroundBar,
+    Waiter,
 )
 
 
 class OneToOneTests(TestCase):
-
     def setUp(self):
         self.p1 = Place.objects.create(name='Demon Dogs', address='944 W. Fullerton')
         self.p2 = Place.objects.create(name='Ace Hardware', address='1013 N. Ashland')
@@ -45,20 +56,17 @@ class OneToOneTests(TestCase):
 
     def test_manager_all(self):
         # Restaurant.objects.all() just returns the Restaurants, not the Places.
-        self.assertQuerysetEqual(Restaurant.objects.all(), [
-            '<Restaurant: Demon Dogs the restaurant>',
-        ])
+        self.assertQuerysetEqual(Restaurant.objects.all(), ['<Restaurant: Demon Dogs the restaurant>'])
         # Place.objects.all() returns all Places, regardless of whether they
         # have Restaurants.
-        self.assertQuerysetEqual(Place.objects.order_by('name'), [
-            '<Place: Ace Hardware the place>',
-            '<Place: Demon Dogs the place>',
-        ])
+        self.assertQuerysetEqual(
+            Place.objects.order_by('name'), ['<Place: Ace Hardware the place>', '<Place: Demon Dogs the place>']
+        )
 
     def test_manager_get(self):
         def assert_get_restaurant(**params):
-            self.assertEqual(repr(Restaurant.objects.get(**params)),
-                             '<Restaurant: Demon Dogs the restaurant>')
+            self.assertEqual(repr(Restaurant.objects.get(**params)), '<Restaurant: Demon Dogs the restaurant>')
+
         assert_get_restaurant(place__id__exact=self.p1.pk)
         assert_get_restaurant(place__id=self.p1.pk)
         assert_get_restaurant(place__exact=self.p1.pk)
@@ -71,8 +79,8 @@ class OneToOneTests(TestCase):
         assert_get_restaurant(place__name__startswith="Demon")
 
         def assert_get_place(**params):
-            self.assertEqual(repr(Place.objects.get(**params)),
-                             '<Place: Demon Dogs the place>')
+            self.assertEqual(repr(Place.objects.get(**params)), '<Place: Demon Dogs the place>')
+
         assert_get_place(restaurant__place__exact=self.p1.pk)
         assert_get_place(restaurant__place__exact=self.p1)
         assert_get_place(restaurant__place__pk=self.p1.pk)
@@ -91,9 +99,10 @@ class OneToOneTests(TestCase):
 
         # Query the waiters
         def assert_filter_waiters(**params):
-            self.assertQuerysetEqual(Waiter.objects.filter(**params), [
-                '<Waiter: Joe the waiter at Demon Dogs the restaurant>'
-            ])
+            self.assertQuerysetEqual(
+                Waiter.objects.filter(**params), ['<Waiter: Joe the waiter at Demon Dogs the restaurant>']
+            )
+
         assert_filter_waiters(restaurant__place__exact=self.p1.pk)
         assert_filter_waiters(restaurant__place__exact=self.p1)
         assert_filter_waiters(restaurant__place__pk=self.p1.pk)
@@ -168,10 +177,7 @@ class OneToOneTests(TestCase):
         f = Favorites(name='Fred')
         f.save()
         f.restaurants.set([self.r1])
-        self.assertQuerysetEqual(
-            f.restaurants.all(),
-            ['<Restaurant: Demon Dogs the restaurant>']
-        )
+        self.assertQuerysetEqual(f.restaurants.all(), ['<Restaurant: Demon Dogs the restaurant>'])
 
     def test_reverse_object_cache(self):
         """
@@ -235,10 +241,7 @@ class OneToOneTests(TestCase):
         setattr(p, 'restaurant', None)
 
         # You also can't assign an object of the wrong type here
-        msg = (
-            'Cannot assign "<Place: Demon Dogs the place>": '
-            '"Place.restaurant" must be a "Restaurant" instance.'
-        )
+        msg = 'Cannot assign "<Place: Demon Dogs the place>": ' '"Place.restaurant" must be a "Restaurant" instance.'
         with self.assertRaisesMessage(ValueError, msg):
             setattr(p, 'restaurant', p)
 
@@ -412,9 +415,7 @@ class OneToOneTests(TestCase):
         When a '+' ending related name is specified no reverse accessor should
         be added to the related model.
         """
-        self.assertFalse(
-            hasattr(Target, HiddenPointer._meta.get_field('target').remote_field.get_accessor_name())
-        )
+        self.assertFalse(hasattr(Target, HiddenPointer._meta.get_field('target').remote_field.get_accessor_name()))
 
     def test_related_object(self):
         public_school = School.objects.create(is_public=True)
@@ -488,9 +489,7 @@ class OneToOneTests(TestCase):
         q2 = Restaurant.objects.filter(place_id__in=q1)
         self.assertSequenceEqual(q2, [r])
         # Subquery using 'pk__in' instead of 'place_id__in' work, too.
-        q2 = Restaurant.objects.filter(
-            pk__in=Restaurant.objects.filter(place__id=r.place.pk)
-        )
+        q2 = Restaurant.objects.filter(pk__in=Restaurant.objects.filter(place__id=r.place.pk))
         self.assertSequenceEqual(q2, [r])
         q3 = Restaurant.objects.filter(place__in=Place.objects.all())
         self.assertSequenceEqual(q3, [r])

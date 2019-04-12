@@ -9,11 +9,32 @@ from django import forms
 from django.test import TestCase
 
 from .models import (
-    ArticleWithAuthor, BachelorParty, BirthdayParty, BusStation, Child,
-    DerivedM, InternalCertificationAudit, ItalianRestaurant, M2MChild,
-    MessyBachelorParty, ParkingLot, ParkingLot3, ParkingLot4A, ParkingLot4B,
-    Person, Place, Profile, QualityControl, Restaurant, SelfRefChild,
-    SelfRefParent, Senator, Supplier, TrainStation, User, Wholesaler,
+    ArticleWithAuthor,
+    BachelorParty,
+    BirthdayParty,
+    BusStation,
+    Child,
+    DerivedM,
+    InternalCertificationAudit,
+    ItalianRestaurant,
+    M2MChild,
+    MessyBachelorParty,
+    ParkingLot,
+    ParkingLot3,
+    ParkingLot4A,
+    ParkingLot4B,
+    Person,
+    Place,
+    Profile,
+    QualityControl,
+    Restaurant,
+    SelfRefChild,
+    SelfRefParent,
+    Senator,
+    Supplier,
+    TrainStation,
+    User,
+    Wholesaler,
 )
 
 
@@ -29,11 +50,7 @@ class ModelInheritanceTest(TestCase):
         # Create a child-parent-grandparent chain
         place1 = Place(name="Guido's House of Pasta", address='944 W. Fullerton')
         place1.save_base(raw=True)
-        restaurant = Restaurant(
-            place_ptr=place1,
-            serves_hot_dogs=True,
-            serves_pizza=False,
-        )
+        restaurant = Restaurant(place_ptr=place1, serves_hot_dogs=True, serves_pizza=False)
         restaurant.save_base(raw=True)
         italian_restaurant = ItalianRestaurant(restaurant_ptr=restaurant, serves_gnocchi=True)
         italian_restaurant.save_base(raw=True)
@@ -49,24 +66,13 @@ class ModelInheritanceTest(TestCase):
         self.assertEqual(places, [place1, place2])
 
         dicts = list(Restaurant.objects.values('name', 'serves_hot_dogs'))
-        self.assertEqual(dicts, [{
-            'name': "Guido's House of Pasta",
-            'serves_hot_dogs': True
-        }])
+        self.assertEqual(dicts, [{'name': "Guido's House of Pasta", 'serves_hot_dogs': True}])
 
-        dicts = list(ItalianRestaurant.objects.values(
-            'name', 'serves_hot_dogs', 'serves_gnocchi'))
-        self.assertEqual(dicts, [{
-            'name': "Guido's House of Pasta",
-            'serves_gnocchi': True,
-            'serves_hot_dogs': True,
-        }])
+        dicts = list(ItalianRestaurant.objects.values('name', 'serves_hot_dogs', 'serves_gnocchi'))
+        self.assertEqual(dicts, [{'name': "Guido's House of Pasta", 'serves_gnocchi': True, 'serves_hot_dogs': True}])
 
         dicts = list(ParkingLot.objects.values('name', 'capacity'))
-        self.assertEqual(dicts, [{
-            'capacity': 100,
-            'name': 'Main St',
-        }])
+        self.assertEqual(dicts, [{'capacity': 100, 'name': 'Main St'}])
 
         # You can also update objects when using a raw save.
         place1.name = "Guido's All New House of Pasta"
@@ -91,24 +97,15 @@ class ModelInheritanceTest(TestCase):
         self.assertEqual(places[1].name, "Guido's All New House of Pasta")
 
         dicts = list(Restaurant.objects.values('name', 'serves_hot_dogs'))
-        self.assertEqual(dicts, [{
-            'name': "Guido's All New House of Pasta",
-            'serves_hot_dogs': False,
-        }])
+        self.assertEqual(dicts, [{'name': "Guido's All New House of Pasta", 'serves_hot_dogs': False}])
 
-        dicts = list(ItalianRestaurant.objects.values(
-            'name', 'serves_hot_dogs', 'serves_gnocchi'))
-        self.assertEqual(dicts, [{
-            'name': "Guido's All New House of Pasta",
-            'serves_gnocchi': False,
-            'serves_hot_dogs': False,
-        }])
+        dicts = list(ItalianRestaurant.objects.values('name', 'serves_hot_dogs', 'serves_gnocchi'))
+        self.assertEqual(
+            dicts, [{'name': "Guido's All New House of Pasta", 'serves_gnocchi': False, 'serves_hot_dogs': False}]
+        )
 
         dicts = list(ParkingLot.objects.values('name', 'capacity'))
-        self.assertEqual(dicts, [{
-            'capacity': 50,
-            'name': 'Derelict lot',
-        }])
+        self.assertEqual(dicts, [{'capacity': 50, 'name': 'Derelict lot'}])
 
         # If you try to raw_save a parent attribute onto a child object,
         # the attribute will be ignored.
@@ -118,20 +115,15 @@ class ModelInheritanceTest(TestCase):
 
         # Note that the name has not changed
         # - name is an attribute of Place, not ItalianRestaurant
-        dicts = list(ItalianRestaurant.objects.values(
-            'name', 'serves_hot_dogs', 'serves_gnocchi'))
-        self.assertEqual(dicts, [{
-            'name': "Guido's All New House of Pasta",
-            'serves_gnocchi': False,
-            'serves_hot_dogs': False,
-        }])
+        dicts = list(ItalianRestaurant.objects.values('name', 'serves_hot_dogs', 'serves_gnocchi'))
+        self.assertEqual(
+            dicts, [{'name': "Guido's All New House of Pasta", 'serves_gnocchi': False, 'serves_hot_dogs': False}]
+        )
 
     def test_issue_7105(self):
         # Regressions tests for #7105: dates() queries should be able to use
         # fields from the parent model as easily as the child.
-        Child.objects.create(
-            name='child',
-            created=datetime.datetime(2008, 6, 26, 17, 0, 0))
+        Child.objects.create(name='child', created=datetime.datetime(2008, 6, 26, 17, 0, 0))
         datetimes = list(Child.objects.datetimes('created', 'month'))
         self.assertEqual(datetimes, [datetime.datetime(2008, 6, 1, 0, 0)])
 
@@ -141,23 +133,14 @@ class ModelInheritanceTest(TestCase):
         # ancestor tables, as well as any descendent objects.
         place1 = Place(name="Guido's House of Pasta", address='944 W. Fullerton')
         place1.save_base(raw=True)
-        restaurant = Restaurant(
-            place_ptr=place1,
-            serves_hot_dogs=True,
-            serves_pizza=False,
-        )
+        restaurant = Restaurant(place_ptr=place1, serves_hot_dogs=True, serves_pizza=False)
         restaurant.save_base(raw=True)
         italian_restaurant = ItalianRestaurant(restaurant_ptr=restaurant, serves_gnocchi=True)
         italian_restaurant.save_base(raw=True)
 
         ident = ItalianRestaurant.objects.all()[0].id
         self.assertEqual(Place.objects.get(pk=ident), place1)
-        Restaurant.objects.create(
-            name='a',
-            address='xx',
-            serves_hot_dogs=True,
-            serves_pizza=False,
-        )
+        Restaurant.objects.create(name='a', address='xx', serves_hot_dogs=True, serves_pizza=False)
 
         # This should delete both Restaurants, plus the related places, plus
         # the ItalianRestaurant.
@@ -185,8 +168,7 @@ class ModelInheritanceTest(TestCase):
         # Regression test for #7488. This looks a little crazy, but it's the
         # equivalent of what the admin interface has to do for the edit-inline
         # case.
-        suppliers = Supplier.objects.filter(
-            restaurant=Restaurant(name='xx', address='yy'))
+        suppliers = Supplier.objects.filter(restaurant=Restaurant(name='xx', address='yy'))
         suppliers = list(suppliers)
         self.assertEqual(suppliers, [])
 
@@ -212,19 +194,16 @@ class ModelInheritanceTest(TestCase):
         get_(next/previous)_by_date should work
         """
         c1 = ArticleWithAuthor(
-            headline='ArticleWithAuthor 1',
-            author="Person 1",
-            pub_date=datetime.datetime(2005, 8, 1, 3, 0))
+            headline='ArticleWithAuthor 1', author="Person 1", pub_date=datetime.datetime(2005, 8, 1, 3, 0)
+        )
         c1.save()
         c2 = ArticleWithAuthor(
-            headline='ArticleWithAuthor 2',
-            author="Person 2",
-            pub_date=datetime.datetime(2005, 8, 1, 10, 0))
+            headline='ArticleWithAuthor 2', author="Person 2", pub_date=datetime.datetime(2005, 8, 1, 10, 0)
+        )
         c2.save()
         c3 = ArticleWithAuthor(
-            headline='ArticleWithAuthor 3',
-            author="Person 3",
-            pub_date=datetime.datetime(2005, 8, 2))
+            headline='ArticleWithAuthor 3', author="Person 3", pub_date=datetime.datetime(2005, 8, 2)
+        )
         c3.save()
 
         self.assertEqual(c1.get_next_by_pub_date(), c2)
@@ -252,7 +231,7 @@ class ModelInheritanceTest(TestCase):
         # apparent at that late stage.
         qs = ArticleWithAuthor.objects.order_by('pub_date', 'pk')
         sql = qs.query.get_compiler(qs.db).as_sql()[0]
-        fragment = sql[sql.find('ORDER BY'):]
+        fragment = sql[sql.find('ORDER BY') :]
         pos = fragment.find('pub_date')
         self.assertEqual(fragment.find('pub_date', pos + 1), -1)
 
@@ -263,20 +242,14 @@ class ModelInheritanceTest(TestCase):
         an ancestor model.
         """
         article = ArticleWithAuthor.objects.create(
-            author="fred",
-            headline="Hey there!",
-            pub_date=datetime.datetime(2009, 3, 1, 8, 0, 0),
+            author="fred", headline="Hey there!", pub_date=datetime.datetime(2009, 3, 1, 8, 0, 0)
         )
         update = ArticleWithAuthor.objects.filter(author='fred').update(headline='Oh, no!')
         self.assertEqual(update, 1)
         update = ArticleWithAuthor.objects.filter(pk=article.pk).update(headline='Oh, no!')
         self.assertEqual(update, 1)
 
-        derivedm1 = DerivedM.objects.create(
-            customPK=44,
-            base_name="b1",
-            derived_name='d1',
-        )
+        derivedm1 = DerivedM.objects.create(customPK=44, base_name="b1", derived_name='d1')
         self.assertEqual(derivedm1.customPK, 44)
         self.assertEqual(derivedm1.base_name, 'b1')
         self.assertEqual(derivedm1.derived_name, 'd1')
@@ -293,16 +266,10 @@ class ModelInheritanceTest(TestCase):
 
     def test_use_explicit_o2o_to_parent_from_abstract_model(self):
         self.assertEqual(ParkingLot4A._meta.pk.name, "parent")
-        ParkingLot4A.objects.create(
-            name="Parking4A",
-            address='21 Jump Street',
-        )
+        ParkingLot4A.objects.create(name="Parking4A", address='21 Jump Street')
 
         self.assertEqual(ParkingLot4B._meta.pk.name, "parent")
-        ParkingLot4A.objects.create(
-            name="Parking4B",
-            address='21 Jump Street',
-        )
+        ParkingLot4A.objects.create(name="Parking4B", address='21 Jump Street')
 
     def test_all_fields_from_abstract_base_class(self):
         """
@@ -312,10 +279,7 @@ class ModelInheritanceTest(TestCase):
         # should be available on child classes (#7588). Creating this instance
         # should work without error.
         QualityControl.objects.create(
-            headline="Problems in Django",
-            pub_date=datetime.datetime.now(),
-            quality=10,
-            assignee='adrian',
+            headline="Problems in Django", pub_date=datetime.datetime.now(), quality=10, assignee='adrian'
         )
 
     def test_abstract_base_class_m2m_relation_inheritance(self):
@@ -362,25 +326,12 @@ class ModelInheritanceTest(TestCase):
         # from an ABC even when there are one or more intermediate
         # abstract models in the inheritance chain, for consistency with
         # verbose_name.
-        self.assertEqual(
-            InternalCertificationAudit._meta.verbose_name_plural,
-            'Audits'
-        )
+        self.assertEqual(InternalCertificationAudit._meta.verbose_name_plural, 'Audits')
 
     def test_inherited_nullable_exclude(self):
         obj = SelfRefChild.objects.create(child_data=37, parent_data=42)
-        self.assertQuerysetEqual(
-            SelfRefParent.objects.exclude(self_data=72), [
-                obj.pk
-            ],
-            attrgetter("pk")
-        )
-        self.assertQuerysetEqual(
-            SelfRefChild.objects.exclude(self_data=72), [
-                obj.pk
-            ],
-            attrgetter("pk")
-        )
+        self.assertQuerysetEqual(SelfRefParent.objects.exclude(self_data=72), [obj.pk], attrgetter("pk"))
+        self.assertQuerysetEqual(SelfRefChild.objects.exclude(self_data=72), [obj.pk], attrgetter("pk"))
 
     def test_concrete_abstract_concrete_pk(self):
         """
@@ -389,14 +340,8 @@ class ModelInheritanceTest(TestCase):
         # Regression test for #13987: Primary key is incorrectly determined
         # when more than one model has a concrete->abstract->concrete
         # inheritance hierarchy.
-        self.assertEqual(
-            len([field for field in BusStation._meta.local_fields if field.primary_key]),
-            1
-        )
-        self.assertEqual(
-            len([field for field in TrainStation._meta.local_fields if field.primary_key]),
-            1
-        )
+        self.assertEqual(len([field for field in BusStation._meta.local_fields if field.primary_key]), 1)
+        self.assertEqual(len([field for field in TrainStation._meta.local_fields if field.primary_key]), 1)
         self.assertIs(BusStation._meta.pk.model, BusStation)
         self.assertIs(TrainStation._meta.pk.model, TrainStation)
 
@@ -405,6 +350,7 @@ class ModelInheritanceTest(TestCase):
         A model which has different primary key for the parent model passes
         unique field checking correctly (#17615).
         """
+
         class ProfileForm(forms.ModelForm):
             class Meta:
                 model = Profile
@@ -439,28 +385,19 @@ class ModelInheritanceTest(TestCase):
         self.assertEqual(senator.state, 'Y')
 
     def test_inheritance_resolve_columns(self):
-        Restaurant.objects.create(name='Bobs Cafe', address="Somewhere",
-                                  serves_pizza=True, serves_hot_dogs=True)
+        Restaurant.objects.create(name='Bobs Cafe', address="Somewhere", serves_pizza=True, serves_hot_dogs=True)
         p = Place.objects.all().select_related('restaurant')[0]
         self.assertIsInstance(p.restaurant.serves_pizza, bool)
 
     def test_inheritance_select_related(self):
         # Regression test for #7246
-        r1 = Restaurant.objects.create(
-            name="Nobu", serves_hot_dogs=True, serves_pizza=False
-        )
-        r2 = Restaurant.objects.create(
-            name="Craft", serves_hot_dogs=False, serves_pizza=True
-        )
+        r1 = Restaurant.objects.create(name="Nobu", serves_hot_dogs=True, serves_pizza=False)
+        r2 = Restaurant.objects.create(name="Craft", serves_hot_dogs=False, serves_pizza=True)
         Supplier.objects.create(name="John", restaurant=r1)
         Supplier.objects.create(name="Jane", restaurant=r2)
 
         self.assertQuerysetEqual(
-            Supplier.objects.order_by("name").select_related(), [
-                "Jane",
-                "John",
-            ],
-            attrgetter("name")
+            Supplier.objects.order_by("name").select_related(), ["Jane", "John"], attrgetter("name")
         )
 
         jane = Supplier.objects.order_by("name").select_related("restaurant")[0]
@@ -479,10 +416,7 @@ class ModelInheritanceTest(TestCase):
 
     def test_related_filtering_query_efficiency_ticket_15844(self):
         r = Restaurant.objects.create(
-            name="Guido's House of Pasta",
-            address='944 W. Fullerton',
-            serves_hot_dogs=True,
-            serves_pizza=False,
+            name="Guido's House of Pasta", address='944 W. Fullerton', serves_hot_dogs=True, serves_pizza=False
         )
         s = Supplier.objects.create(restaurant=r)
         with self.assertNumQueries(1):
@@ -526,21 +460,10 @@ class ModelInheritanceTest(TestCase):
         place1 = Place.objects.create(name='House of Pasta', address='944 Fullerton')
         place2 = Place.objects.create(name='House of Pizza', address='954 Fullerton')
         place3 = Place.objects.create(name='Burger house', address='964 Fullerton')
-        restaurant1 = Restaurant.objects.create(
-            place_ptr=place1,
-            serves_hot_dogs=True,
-            serves_pizza=False,
-        )
-        restaurant2 = Restaurant.objects.create(
-            place_ptr=place2,
-            serves_hot_dogs=True,
-            serves_pizza=False,
-        )
+        restaurant1 = Restaurant.objects.create(place_ptr=place1, serves_hot_dogs=True, serves_pizza=False)
+        restaurant2 = Restaurant.objects.create(place_ptr=place2, serves_hot_dogs=True, serves_pizza=False)
 
-        italian_restaurant = ItalianRestaurant.objects.create(
-            restaurant_ptr=restaurant1,
-            serves_gnocchi=True,
-        )
+        italian_restaurant = ItalianRestaurant.objects.create(restaurant_ptr=restaurant1, serves_gnocchi=True)
         # Changing the parent of a restaurant changes the restaurant's ID & PK.
         restaurant1.place_ptr = place3
         self.assertEqual(restaurant1.pk, place3.pk)

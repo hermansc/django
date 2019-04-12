@@ -2,8 +2,12 @@ from functools import partial
 
 from django.db import models
 from django.db.models.fields.related import (
-    RECURSIVE_RELATIONSHIP_CONSTANT, ManyToManyDescriptor, ManyToManyField,
-    ManyToManyRel, RelatedField, create_many_to_many_intermediary_model,
+    RECURSIVE_RELATIONSHIP_CONSTANT,
+    ManyToManyDescriptor,
+    ManyToManyField,
+    ManyToManyRel,
+    RelatedField,
+    create_many_to_many_intermediary_model,
 )
 
 
@@ -12,16 +16,30 @@ class CustomManyToManyField(RelatedField):
     Ticket #24104 - Need to have a custom ManyToManyField,
     which is not an inheritor of ManyToManyField.
     """
+
     many_to_many = True
 
-    def __init__(self, to, db_constraint=True, swappable=True, related_name=None, related_query_name=None,
-                 limit_choices_to=None, symmetrical=None, through=None, through_fields=None, db_table=None, **kwargs):
+    def __init__(
+        self,
+        to,
+        db_constraint=True,
+        swappable=True,
+        related_name=None,
+        related_query_name=None,
+        limit_choices_to=None,
+        symmetrical=None,
+        through=None,
+        through_fields=None,
+        db_table=None,
+        **kwargs
+    ):
         try:
             to._meta
         except AttributeError:
             to = str(to)
         kwargs['rel'] = ManyToManyRel(
-            self, to,
+            self,
+            to,
             related_name=related_name,
             related_query_name=related_query_name,
             limit_choices_to=limit_choices_to,
@@ -38,7 +56,8 @@ class CustomManyToManyField(RelatedField):
 
     def contribute_to_class(self, cls, name, **kwargs):
         if self.remote_field.symmetrical and (
-                self.remote_field.model == "self" or self.remote_field.model == cls._meta.object_name):
+            self.remote_field.model == "self" or self.remote_field.model == cls._meta.object_name
+        ):
             self.remote_field.related_name = "%s_rel_+" % name
         super().contribute_to_class(cls, name, **kwargs)
         if not self.remote_field.through and not cls._meta.abstract and not cls._meta.swapped:
@@ -64,5 +83,6 @@ class MediumBlobField(models.BinaryField):
     """
     A MySQL BinaryField that uses a different blob size.
     """
+
     def db_type(self, connection):
         return 'MEDIUMBLOB'

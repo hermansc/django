@@ -20,11 +20,7 @@ class InspectDbTests(TestCase):
         Test the geo-enabled inspectdb command.
         """
         out = StringIO()
-        call_command(
-            'inspectdb',
-            table_name_filter=lambda tn: tn == 'inspectapp_allogrfields',
-            stdout=out
-        )
+        call_command('inspectdb', table_name_filter=lambda tn: tn == 'inspectapp_allogrfields', stdout=out)
         output = out.getvalue()
         if connection.features.supports_geometry_field_introspection:
             self.assertIn('geom = models.PolygonField()', output)
@@ -36,11 +32,7 @@ class InspectDbTests(TestCase):
     @skipUnlessDBFeature("supports_3d_storage")
     def test_3d_columns(self):
         out = StringIO()
-        call_command(
-            'inspectdb',
-            table_name_filter=lambda tn: tn == 'inspectapp_fields3d',
-            stdout=out
-        )
+        call_command('inspectdb', table_name_filter=lambda tn: tn == 'inspectapp_fields3d', stdout=out)
         output = out.getvalue()
         if connection.features.supports_geometry_field_introspection:
             self.assertIn('point = models.PointField(dim=3)', output)
@@ -56,9 +48,7 @@ class InspectDbTests(TestCase):
             self.assertIn('poly = models.GeometryField(', output)
 
 
-@modify_settings(
-    INSTALLED_APPS={'append': 'django.contrib.gis'},
-)
+@modify_settings(INSTALLED_APPS={'append': 'django.contrib.gis'})
 class OGRInspectTest(SimpleTestCase):
     expected_srid = 'srid=-1' if GDAL_VERSION < (2, 2) else ''
     maxDiff = 1024
@@ -120,19 +110,19 @@ class OGRInspectTest(SimpleTestCase):
         try:
             # Writing shapefiles via GDAL currently does not support writing OGRTime
             # fields, so we need to actually use a database
-            model_def = ogrinspect(ogr_db, 'Measurement',
-                                   layer_key=AllOGRFields._meta.db_table,
-                                   decimal=['f_decimal'])
+            model_def = ogrinspect(ogr_db, 'Measurement', layer_key=AllOGRFields._meta.db_table, decimal=['f_decimal'])
         except GDALException:
             self.skipTest("Unable to setup an OGR connection to your database")
 
-        self.assertTrue(model_def.startswith(
-            '# This is an auto-generated Django model module created by ogrinspect.\n'
-            'from django.contrib.gis.db import models\n'
-            '\n'
-            '\n'
-            'class Measurement(models.Model):\n'
-        ))
+        self.assertTrue(
+            model_def.startswith(
+                '# This is an auto-generated Django model module created by ogrinspect.\n'
+                'from django.contrib.gis.db import models\n'
+                '\n'
+                '\n'
+                'class Measurement(models.Model):\n'
+            )
+        )
 
         # The ordering of model fields might vary depending on several factors (version of GDAL, etc.)
         if connection.vendor == 'sqlite':
@@ -175,7 +165,8 @@ class OGRInspectTest(SimpleTestCase):
             "    'density': 'Density',\n"
             "    'created': 'Created',\n"
             "    'geom': 'POINT',\n"
-            "}\n" % self.expected_srid)
+            "}\n" % self.expected_srid
+        )
         shp_file = os.path.join(TEST_DATA, 'cities', 'cities.shp')
         out = StringIO()
         call_command('ogrinspect', shp_file, '--mapping', 'City', stdout=out)
@@ -197,7 +188,7 @@ def get_ogr_db_string():
     drivers = {
         'django.contrib.gis.db.backends.postgis': ('PostgreSQL', "PG:dbname='%(db_name)s'", ' '),
         'django.contrib.gis.db.backends.mysql': ('MySQL', 'MYSQL:"%(db_name)s"', ','),
-        'django.contrib.gis.db.backends.spatialite': ('SQLite', '%(db_name)s', '')
+        'django.contrib.gis.db.backends.spatialite': ('SQLite', '%(db_name)s', ''),
     }
 
     db_engine = db['ENGINE']
@@ -224,6 +215,7 @@ def get_ogr_db_string():
         # Don't add the parameter if it is not in django's settings
         if value:
             params.append(template % value)
+
     add('HOST', "host='%s'")
     add('PORT', "port='%s'")
     add('USER', "user='%s'")

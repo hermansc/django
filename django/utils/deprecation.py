@@ -23,10 +23,13 @@ class warn_about_renamed_method:
     def __call__(self, f):
         def wrapped(*args, **kwargs):
             warnings.warn(
-                "`%s.%s` is deprecated, use `%s` instead." %
-                (self.class_name, self.old_method_name, self.new_method_name),
-                self.deprecation_warning, 2)
+                "`%s.%s` is deprecated, use `%s` instead."
+                % (self.class_name, self.old_method_name, self.new_method_name),
+                self.deprecation_warning,
+                2,
+            )
             return f(*args, **kwargs)
+
         return wrapped
 
 
@@ -60,9 +63,10 @@ class RenameMethodsBase(type):
                 # Define the new method if missing and complain about it
                 if not new_method and old_method:
                     warnings.warn(
-                        "`%s.%s` method should be renamed `%s`." %
-                        (class_name, old_method_name, new_method_name),
-                        deprecation_warning, 2)
+                        "`%s.%s` method should be renamed `%s`." % (class_name, old_method_name, new_method_name),
+                        deprecation_warning,
+                        2,
+                    )
                     setattr(base, new_method_name, old_method)
                     setattr(base, old_method_name, wrapper(old_method))
 
@@ -76,8 +80,7 @@ class RenameMethodsBase(type):
 class DeprecationInstanceCheck(type):
     def __instancecheck__(self, instance):
         warnings.warn(
-            "`%s` is deprecated, use `%s` instead." % (self.__name__, self.alternative),
-            self.deprecation_warning, 2
+            "`%s` is deprecated, use `%s` instead." % (self.__name__, self.alternative), self.deprecation_warning, 2
         )
         return super().__instancecheck__(instance)
 

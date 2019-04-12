@@ -14,14 +14,12 @@ class cached_property:
     The optional ``name`` argument is obsolete as of Python 3.6 and will be
     deprecated in Django 4.0 (#30127).
     """
+
     name = None
 
     @staticmethod
     def func(instance):
-        raise TypeError(
-            'Cannot use cached_property instance without calling '
-            '__set_name__() on it.'
-        )
+        raise TypeError('Cannot use cached_property instance without calling ' '__set_name__() on it.')
 
     def __init__(self, func, name=None):
         self.real_func = func
@@ -33,8 +31,7 @@ class cached_property:
             self.func = self.real_func
         elif name != self.name:
             raise TypeError(
-                "Cannot assign the same cached_property to two different names "
-                "(%r and %r)." % (self.name, name)
+                "Cannot assign the same cached_property to two different names " "(%r and %r)." % (self.name, name)
             )
 
     def __get__(self, instance, cls=None):
@@ -54,6 +51,7 @@ class Promise:
     Base class for the proxy class created in the closure of the lazy function.
     It's used to recognize promises in code.
     """
+
     pass
 
 
@@ -72,6 +70,7 @@ def lazy(func, *resultclasses):
         called on the result of that function. The function is not evaluated
         until one of the methods on the result is called.
         """
+
         __prepared = False
 
         def __init__(self, args, kw):
@@ -82,10 +81,7 @@ def lazy(func, *resultclasses):
             self.__prepared = True
 
         def __reduce__(self):
-            return (
-                _lazy_proxy_unpickle,
-                (func, self.__args, self.__kw) + resultclasses
-            )
+            return (_lazy_proxy_unpickle, (func, self.__args, self.__kw) + resultclasses)
 
         def __repr__(self):
             return repr(self.__cast())
@@ -103,8 +99,9 @@ def lazy(func, *resultclasses):
                         setattr(cls, method_name, meth)
             cls._delegate_bytes = bytes in resultclasses
             cls._delegate_text = str in resultclasses
-            assert not (cls._delegate_bytes and cls._delegate_text), (
-                "Cannot call lazy() with both bytes and text return types.")
+            assert not (
+                cls._delegate_bytes and cls._delegate_text
+            ), "Cannot call lazy() with both bytes and text return types."
             if cls._delegate_text:
                 cls.__str__ = cls.__text_cast
             elif cls._delegate_bytes:
@@ -118,6 +115,7 @@ def lazy(func, *resultclasses):
                 # applies the given magic method of the result type.
                 res = func(*self.__args, **self.__kw)
                 return getattr(res, method_name)(*args, **kw)
+
             return __wrapper__
 
         def __text_cast(self):
@@ -204,7 +202,9 @@ def keep_lazy(*resultclasses):
             if any(isinstance(arg, Promise) for arg in itertools.chain(args, kwargs.values())):
                 return lazy_func(*args, **kwargs)
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -223,6 +223,7 @@ def new_method_proxy(func):
         if self._wrapped is empty:
             self._setup()
         return func(self._wrapped, *args)
+
     return inner
 
 
@@ -344,6 +345,7 @@ class SimpleLazyObject(LazyObject):
     Designed for compound objects of unknown type. For builtins or objects of
     known type, use django.utils.functional.lazy.
     """
+
     def __init__(self, func):
         """
         Pass in a callable that returns the object to be wrapped.

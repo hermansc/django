@@ -70,10 +70,7 @@ class XmlSerializerTestCase(SerializersTestBase, TestCase):
         with self.assertRaisesMessage(ValueError, msg):
             serializers.serialize(self.serializer_name, [self.a1])
         self.a1.headline = "HT \u0009, LF \u000A, and CR \u000D are allowed"
-        self.assertIn(
-            "HT \t, LF \n, and CR \r are allowed",
-            serializers.serialize(self.serializer_name, [self.a1])
-        )
+        self.assertIn("HT \t, LF \n, and CR \r are allowed", serializers.serialize(self.serializer_name, [self.a1]))
 
     def test_no_dtd(self):
         """

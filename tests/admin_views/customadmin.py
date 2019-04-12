@@ -24,9 +24,7 @@ class Admin2(admin.AdminSite):
         return super().index(request, {'foo': '*bar*'})
 
     def get_urls(self):
-        return [
-            path('my_view/', self.admin_view(self.my_view), name='my_view'),
-        ] + super().get_urls()
+        return [path('my_view/', self.admin_view(self.my_view), name='my_view')] + super().get_urls()
 
     def my_view(self, request):
         return HttpResponse("Django is a magical pony!")

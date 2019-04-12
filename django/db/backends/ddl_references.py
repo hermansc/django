@@ -128,16 +128,13 @@ class ForeignKeyName(TableColumns):
         self.to_reference = TableColumns(to_table, to_columns)
         self.suffix_template = suffix_template
         self.create_fk_name = create_fk_name
-        super().__init__(from_table, from_columns,)
+        super().__init__(from_table, from_columns)
 
     def references_table(self, table):
         return super().references_table(table) or self.to_reference.references_table(table)
 
     def references_column(self, table, column):
-        return (
-            super().references_column(table, column) or
-            self.to_reference.references_column(table, column)
-        )
+        return super().references_column(table, column) or self.to_reference.references_column(table, column)
 
     def rename_table_references(self, old_table, new_table):
         super().rename_table_references(old_table, new_table)
@@ -163,15 +160,13 @@ class Statement(Reference):
     that might have to be adjusted if they're referencing a table or column
     that is removed
     """
+
     def __init__(self, template, **parts):
         self.template = template
         self.parts = parts
 
     def references_table(self, table):
-        return any(
-            hasattr(part, 'references_table') and part.references_table(table)
-            for part in self.parts.values()
-        )
+        return any(hasattr(part, 'references_table') and part.references_table(table) for part in self.parts.values())
 
     def references_column(self, table, column):
         return any(

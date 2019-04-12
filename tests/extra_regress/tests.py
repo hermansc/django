@@ -7,23 +7,15 @@ from .models import Order, RevisionableModel, TestObject
 
 
 class ExtraRegressTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
-        cls.u = User.objects.create_user(
-            username="fred",
-            password="secret",
-            email="fred@example.com"
-        )
+        cls.u = User.objects.create_user(username="fred", password="secret", email="fred@example.com")
 
     def test_regression_7314_7372(self):
         """
         Regression tests for #7314 and #7372
         """
-        rm = RevisionableModel.objects.create(
-            title='First Revision',
-            when=datetime.datetime(2008, 9, 28, 10, 30, 0)
-        )
+        rm = RevisionableModel.objects.create(title='First Revision', when=datetime.datetime(2008, 9, 28, 10, 30, 0))
         self.assertEqual(rm.pk, rm.base.pk)
 
         rm2 = rm.new_revision()
@@ -39,25 +31,23 @@ class ExtraRegressTests(TestCase):
 
         # Queryset to match most recent revision:
         qs = RevisionableModel.objects.extra(
-            where=["%(table)s.id IN (SELECT MAX(rev.id) FROM %(table)s rev GROUP BY rev.base_id)" % {
-                'table': RevisionableModel._meta.db_table,
-            }]
+            where=[
+                "%(table)s.id IN (SELECT MAX(rev.id) FROM %(table)s rev GROUP BY rev.base_id)"
+                % {'table': RevisionableModel._meta.db_table}
+            ]
         )
 
         self.assertQuerysetEqual(
-            qs, [('Second Revision', 'First Revision')],
-            transform=lambda r: (r.title, r.base.title)
+            qs, [('Second Revision', 'First Revision')], transform=lambda r: (r.title, r.base.title)
         )
 
         # Queryset to search for string in title:
         qs2 = RevisionableModel.objects.filter(title__contains="Revision")
         self.assertQuerysetEqual(
-            qs2, [
-                ('First Revision', 'First Revision'),
-                ('Second Revision', 'First Revision'),
-            ],
+            qs2,
+            [('First Revision', 'First Revision'), ('Second Revision', 'First Revision')],
             transform=lambda r: (r.title, r.base.title),
-            ordered=False
+            ordered=False,
         )
 
         # Following queryset should return the most recent revision:
@@ -65,7 +55,7 @@ class ExtraRegressTests(TestCase):
             qs & qs2,
             [('Second Revision', 'First Revision')],
             transform=lambda r: (r.title, r.base.title),
-            ordered=False
+            ordered=False,
         )
 
     def test_extra_stay_tied(self):
@@ -76,8 +66,7 @@ class ExtraRegressTests(TestCase):
         qs = qs.extra(select={"beta": 4})
         qs = qs.extra(select={"alpha": "%s"}, select_params=[5])
         self.assertEqual(
-            list(qs.filter(id=self.u.id).values('alpha', 'beta', 'gamma')),
-            [{'alpha': 5, 'beta': 4, 'gamma': 3}]
+            list(qs.filter(id=self.u.id).values('alpha', 'beta', 'gamma')), [{'alpha': 5, 'beta': 4, 'gamma': 3}]
         )
 
     def test_regression_7957(self):
@@ -87,17 +76,21 @@ class ExtraRegressTests(TestCase):
         internal dictionary must remain sorted.
         """
         self.assertEqual(
-            (User.objects
-                .extra(select={"alpha": "%s"}, select_params=(1,))
-                .extra(select={"beta": "%s"}, select_params=(2,))[0].alpha),
-            1
+            (
+                User.objects.extra(select={"alpha": "%s"}, select_params=(1,))
+                .extra(select={"beta": "%s"}, select_params=(2,))[0]
+                .alpha
+            ),
+            1,
         )
 
         self.assertEqual(
-            (User.objects
-                .extra(select={"beta": "%s"}, select_params=(1,))
-                .extra(select={"alpha": "%s"}, select_params=(2,))[0].alpha),
-            2
+            (
+                User.objects.extra(select={"beta": "%s"}, select_params=(1,))
+                .extra(select={"alpha": "%s"}, select_params=(2,))[0]
+                .alpha
+            ),
+            2,
         )
 
     def test_regression_7961(self):
@@ -107,9 +100,12 @@ class ExtraRegressTests(TestCase):
         query as well.
         """
         self.assertEqual(
-            list(User.objects.extra(select={"alpha": "%s"}, select_params=(-6,))
-                 .filter(id=self.u.id).values_list('id', flat=True)),
-            [self.u.id]
+            list(
+                User.objects.extra(select={"alpha": "%s"}, select_params=(-6,))
+                .filter(id=self.u.id)
+                .values_list('id', flat=True)
+            ),
+            [self.u.id],
         )
 
     def test_regression_8063(self):
@@ -129,10 +125,8 @@ class ExtraRegressTests(TestCase):
         should still be present because of the extra() call.
         """
         self.assertQuerysetEqual(
-            (Order.objects
-                .extra(where=["username=%s"], params=["fred"], tables=["auth_user"])
-                .order_by('created_by')),
-            []
+            (Order.objects.extra(where=["username=%s"], params=["fred"], tables=["auth_user"]).order_by('created_by')),
+            [],
         )
 
     def test_regression_8819(self):
@@ -141,16 +135,15 @@ class ExtraRegressTests(TestCase):
         should be available to extra(order_by=...).
         """
         self.assertQuerysetEqual(
-            User.objects.filter(pk=self.u.id).extra(select={'extra_field': 1}).distinct(),
-            ['<User: fred>']
+            User.objects.filter(pk=self.u.id).extra(select={'extra_field': 1}).distinct(), ['<User: fred>']
         )
         self.assertQuerysetEqual(
             User.objects.filter(pk=self.u.id).extra(select={'extra_field': 1}, order_by=['extra_field']),
-            ['<User: fred>']
+            ['<User: fred>'],
         )
         self.assertQuerysetEqual(
             User.objects.filter(pk=self.u.id).extra(select={'extra_field': 1}, order_by=['extra_field']).distinct(),
-            ['<User: fred>']
+            ['<User: fred>'],
         )
 
     def test_dates_query(self):
@@ -159,10 +152,7 @@ class ExtraRegressTests(TestCase):
         columns, we can (and should) ignore those columns. They don't change
         the result and cause incorrect SQL to be produced otherwise.
         """
-        RevisionableModel.objects.create(
-            title='First Revision',
-            when=datetime.datetime(2008, 9, 28, 10, 30, 0)
-        )
+        RevisionableModel.objects.create(title='First Revision', when=datetime.datetime(2008, 9, 28, 10, 30, 0))
 
         self.assertSequenceEqual(
             RevisionableModel.objects.extra(select={"the_answer": 'id'}).datetimes('when', 'month'),
@@ -178,175 +168,173 @@ class ExtraRegressTests(TestCase):
         obj.save()
 
         self.assertEqual(
-            list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values()
-            ),
-            [{
-                'bar': 'second', 'third': 'third', 'second': 'second', 'whiz': 'third', 'foo': 'first',
-                'id': obj.pk, 'first': 'first'
-            }]
+            list(TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values()),
+            [
+                {
+                    'bar': 'second',
+                    'third': 'third',
+                    'second': 'second',
+                    'whiz': 'third',
+                    'foo': 'first',
+                    'id': obj.pk,
+                    'first': 'first',
+                }
+            ],
         )
 
         # Extra clauses after an empty values clause are still included
         self.assertEqual(
-            list(
-                TestObject.objects
-                .values()
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-            ),
-            [{
-                'bar': 'second', 'third': 'third', 'second': 'second', 'whiz': 'third', 'foo': 'first',
-                'id': obj.pk, 'first': 'first'
-            }]
+            list(TestObject.objects.values().extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})),
+            [
+                {
+                    'bar': 'second',
+                    'third': 'third',
+                    'second': 'second',
+                    'whiz': 'third',
+                    'foo': 'first',
+                    'id': obj.pk,
+                    'first': 'first',
+                }
+            ],
         )
 
         # Extra columns are ignored if not mentioned in the values() clause
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values('first', 'second')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values(
+                    'first', 'second'
+                )
             ),
-            [{'second': 'second', 'first': 'first'}]
+            [{'second': 'second', 'first': 'first'}],
         )
 
         # Extra columns after a non-empty values() clause are ignored
         self.assertEqual(
             list(
-                TestObject.objects
-                .values('first', 'second')
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
+                TestObject.objects.values('first', 'second').extra(
+                    select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}
+                )
             ),
-            [{'second': 'second', 'first': 'first'}]
+            [{'second': 'second', 'first': 'first'}],
         )
 
         # Extra columns can be partially returned
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values('first', 'second', 'foo')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values(
+                    'first', 'second', 'foo'
+                )
             ),
-            [{'second': 'second', 'foo': 'first', 'first': 'first'}]
+            [{'second': 'second', 'foo': 'first', 'first': 'first'}],
         )
 
         # Also works if only extra columns are included
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values('foo', 'whiz')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values(
+                    'foo', 'whiz'
+                )
             ),
-            [{'foo': 'first', 'whiz': 'third'}]
+            [{'foo': 'first', 'whiz': 'third'}],
         )
 
         # Values list works the same way
         # All columns are returned for an empty values_list()
         self.assertEqual(
-            list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list()
-            ),
-            [('first', 'second', 'third', obj.pk, 'first', 'second', 'third')]
+            list(TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list()),
+            [('first', 'second', 'third', obj.pk, 'first', 'second', 'third')],
         )
 
         # Extra columns after an empty values_list() are still included
         self.assertEqual(
-            list(
-                TestObject.objects
-                .values_list()
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-            ),
-            [('first', 'second', 'third', obj.pk, 'first', 'second', 'third')]
+            list(TestObject.objects.values_list().extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})),
+            [('first', 'second', 'third', obj.pk, 'first', 'second', 'third')],
         )
 
         # Extra columns ignored completely if not mentioned in values_list()
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('first', 'second')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'first', 'second'
+                )
             ),
-            [('first', 'second')]
+            [('first', 'second')],
         )
 
         # Extra columns after a non-empty values_list() clause are ignored completely
         self.assertEqual(
             list(
-                TestObject.objects
-                .values_list('first', 'second')
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
+                TestObject.objects.values_list('first', 'second').extra(
+                    select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}
+                )
             ),
-            [('first', 'second')]
+            [('first', 'second')],
         )
 
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('second', flat=True)
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'second', flat=True
+                )
             ),
-            ['second']
+            ['second'],
         )
 
         # Only the extra columns specified in the values_list() are returned
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('first', 'second', 'whiz')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'first', 'second', 'whiz'
+                )
             ),
-            [('first', 'second', 'third')]
+            [('first', 'second', 'third')],
         )
 
         # ...also works if only extra columns are included
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('foo', 'whiz')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'foo', 'whiz'
+                )
             ),
-            [('first', 'third')]
+            [('first', 'third')],
         )
 
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('whiz', flat=True)
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'whiz', flat=True
+                )
             ),
-            ['third']
+            ['third'],
         )
 
         # ... and values are returned in the order they are specified
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('whiz', 'foo')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'whiz', 'foo'
+                )
             ),
-            [('third', 'first')]
+            [('third', 'first')],
         )
 
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('first', 'id')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'first', 'id'
+                )
             ),
-            [('first', obj.pk)]
+            [('first', obj.pk)],
         )
 
         self.assertEqual(
             list(
-                TestObject.objects
-                .extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'})
-                .values_list('whiz', 'first', 'bar', 'id')
+                TestObject.objects.extra(select={'foo': 'first', 'bar': 'second', 'whiz': 'third'}).values_list(
+                    'whiz', 'first', 'bar', 'id'
+                )
             ),
-            [('third', 'first', 'second', obj.pk)]
+            [('third', 'first', 'second', obj.pk)],
         )
 
     def test_regression_10847(self):
@@ -359,33 +347,23 @@ class ExtraRegressTests(TestCase):
         obj = TestObject(first='first', second='second', third='third')
         obj.save()
 
-        self.assertEqual(
-            list(TestObject.objects.extra(select={'extra': 1}).values('pk')),
-            [{'pk': obj.pk}]
-        )
+        self.assertEqual(list(TestObject.objects.extra(select={'extra': 1}).values('pk')), [{'pk': obj.pk}])
 
         self.assertQuerysetEqual(
-            TestObject.objects.filter(
-                pk__in=TestObject.objects.extra(select={'extra': 1}).values('pk')
-            ),
-            ['<TestObject: TestObject: first,second,third>']
+            TestObject.objects.filter(pk__in=TestObject.objects.extra(select={'extra': 1}).values('pk')),
+            ['<TestObject: TestObject: first,second,third>'],
         )
 
-        self.assertEqual(
-            list(TestObject.objects.values('pk').extra(select={'extra': 1})),
-            [{'pk': obj.pk}]
-        )
+        self.assertEqual(list(TestObject.objects.values('pk').extra(select={'extra': 1})), [{'pk': obj.pk}])
 
         self.assertQuerysetEqual(
-            TestObject.objects.filter(
-                pk__in=TestObject.objects.values('pk').extra(select={'extra': 1})
-            ),
-            ['<TestObject: TestObject: first,second,third>']
+            TestObject.objects.filter(pk__in=TestObject.objects.values('pk').extra(select={'extra': 1})),
+            ['<TestObject: TestObject: first,second,third>'],
         )
 
         self.assertQuerysetEqual(
             TestObject.objects.filter(pk=obj.pk) | TestObject.objects.extra(where=["id > %s"], params=[obj.pk]),
-            ['<TestObject: TestObject: first,second,third>']
+            ['<TestObject: TestObject: first,second,third>'],
         )
 
     def test_regression_17877(self):
@@ -413,19 +391,15 @@ class ExtraRegressTests(TestCase):
         t.save()
 
         self.assertQuerysetEqual(
-            TestObject.objects.extra(
-                where=["first = 'a' OR second = 'a'", "third = 'a'"],
-            ),
+            TestObject.objects.extra(where=["first = 'a' OR second = 'a'", "third = 'a'"]),
             ['<TestObject: TestObject: a,a,a>', '<TestObject: TestObject: b,a,a>'],
-            ordered=False
+            ordered=False,
         )
 
     def test_extra_values_distinct_ordering(self):
         t1 = TestObject.objects.create(first='a', second='a', third='a')
         t2 = TestObject.objects.create(first='a', second='b', third='b')
-        qs = TestObject.objects.extra(
-            select={'second_extra': 'second'}
-        ).values_list('id', flat=True).distinct()
+        qs = TestObject.objects.extra(select={'second_extra': 'second'}).values_list('id', flat=True).distinct()
         self.assertSequenceEqual(qs.order_by('second_extra'), [t1.pk, t2.pk])
         self.assertSequenceEqual(qs.order_by('-second_extra'), [t2.pk, t1.pk])
         # Note: the extra ordering must appear in select clause, so we get two

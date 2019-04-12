@@ -4,9 +4,7 @@ from django.contrib.gis.db.models.fields import BaseSpatialField, GeometryField
 from django.contrib.gis.db.models.sql import AreaField, DistanceField
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.exceptions import FieldError
-from django.db.models import (
-    BooleanField, FloatField, IntegerField, TextField, Transform,
-)
+from django.db.models import BooleanField, FloatField, IntegerField, TextField, Transform
 from django.db.models.expressions import Func, Value
 from django.db.models.functions import Cast
 from django.db.utils import NotSupportedError
@@ -61,9 +59,8 @@ class GeoFuncMixin:
             field = source_fields[pos]
             if not isinstance(field, GeometryField):
                 raise TypeError(
-                    "%s function requires a GeometryField in position %s, got %s." % (
-                        self.name, pos + 1, type(field).__name__,
-                    )
+                    "%s function requires a GeometryField in position %s, got %s."
+                    % (self.name, pos + 1, type(field).__name__)
                 )
 
         base_srid = res.geo_field.srid
@@ -78,10 +75,7 @@ class GeoFuncMixin:
     def _handle_param(self, value, param_name='', check_types=None):
         if not hasattr(value, 'resolve_expression'):
             if check_types and not isinstance(value, check_types):
-                raise TypeError(
-                    "The %s parameter has the wrong type: should be %s." % (
-                        param_name, check_types)
-                )
+                raise TypeError("The %s parameter has the wrong type: should be %s." % (param_name, check_types))
         return value
 
 
@@ -100,6 +94,7 @@ class SQLiteDecimalToFloatMixin:
     By default, Decimal values are converted to str by the SQLite backend, which
     is not acceptable by the GIS functions expecting numeric values.
     """
+
     def as_sqlite(self, compiler, connection, **extra_context):
         for expr in self.get_source_expressions():
             if hasattr(expr, 'value') and isinstance(expr.value, Decimal):
@@ -112,11 +107,7 @@ class OracleToleranceMixin:
 
     def as_oracle(self, compiler, connection, **extra_context):
         tol = self.extra.get('tolerance', self.tolerance)
-        return self.as_sql(
-            compiler, connection,
-            template="%%(function)s(%%(expressions)s, %s)" % tol,
-            **extra_context
-        )
+        return self.as_sql(compiler, connection, template="%%(function)s(%%(expressions)s, %s)" % tol, **extra_context)
 
 
 class Area(OracleToleranceMixin, GeoFunc):
@@ -195,11 +186,7 @@ class AsSVG(GeoFunc):
 
     def __init__(self, expression, relative=False, precision=8, **extra):
         relative = relative if hasattr(relative, 'resolve_expression') else int(relative)
-        expressions = [
-            expression,
-            relative,
-            self._handle_param(precision, 'precision', int),
-        ]
+        expressions = [expression, relative, self._handle_param(precision, 'precision', int)]
         super().__init__(*expressions, **extra)
 
 
@@ -251,8 +238,7 @@ class Distance(DistanceResultMixin, OracleToleranceMixin, GeoFunc):
                 expr2.output_field.geography = geography
             else:
                 clone.source_expressions[1] = Cast(
-                    expr2,
-                    GeometryField(srid=expr2.output_field.srid, geography=geography),
+                    expr2, GeometryField(srid=expr2.output_field.srid, geography=geography)
                 )
 
         if not geography and self.geo_field.geodetic(connection):
@@ -422,9 +408,7 @@ class SnapToGrid(SQLiteDecimalToFloatMixin, GeomOutputGeoFunc):
         nargs = len(args)
         expressions = [expression]
         if nargs in (1, 2):
-            expressions.extend(
-                [self._handle_param(arg, '', NUMERIC_TYPES) for arg in args]
-            )
+            expressions.extend([self._handle_param(arg, '', NUMERIC_TYPES) for arg in args])
         elif nargs == 4:
             # Reverse origin and size param ordering
             expressions += [
@@ -443,10 +427,7 @@ class SymDifference(OracleToleranceMixin, GeomOutputGeoFunc):
 
 class Transform(GeomOutputGeoFunc):
     def __init__(self, expression, srid, **extra):
-        expressions = [
-            expression,
-            self._handle_param(srid, 'srid', int),
-        ]
+        expressions = [expression, self._handle_param(srid, 'srid', int)]
         if 'output_field' not in extra:
             extra['output_field'] = GeometryField(srid=srid)
         super().__init__(*expressions, **extra)

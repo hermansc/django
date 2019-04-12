@@ -7,7 +7,7 @@ from django.urls import reverse
 from .models import Action, Car, Person
 
 
-@override_settings(ROOT_URLCONF='admin_custom_urls.urls',)
+@override_settings(ROOT_URLCONF='admin_custom_urls.urls')
 class AdminCustomUrlsTest(TestCase):
     """
     Remember that:
@@ -24,12 +24,11 @@ class AdminCustomUrlsTest(TestCase):
         Action.objects.create(name='add', description='Add things.')
         Action.objects.create(name='path/to/file/', description="An action with '/' in its name.")
         Action.objects.create(
-            name='path/to/html/document.html',
-            description='An action with a name similar to a HTML doc path.'
+            name='path/to/html/document.html', description='An action with a name similar to a HTML doc path.'
         )
         Action.objects.create(
             name='javascript:alert(\'Hello world\');">Click here</a>',
-            description='An action with a name suspected of being a XSS attempt'
+            description='An action with a name suspected of being a XSS attempt',
         )
 
     def setUp(self):
@@ -75,8 +74,7 @@ class AdminCustomUrlsTest(TestCase):
         # Should correctly get the change_view for the model instance with the
         # funny-looking PK (the one with a 'path/to/html/document.html' value)
         url = reverse(
-            'admin_custom_urls:%s_action_change' % Action._meta.app_label,
-            args=(quote("path/to/html/document.html"),)
+            'admin_custom_urls:%s_action_change' % Action._meta.app_label, args=(quote("path/to/html/document.html"),)
         )
         response = self.client.get(url)
         self.assertContains(response, 'Change action')

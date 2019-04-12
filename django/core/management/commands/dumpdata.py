@@ -19,50 +19,55 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'args', metavar='app_label[.ModelName]', nargs='*',
+            'args',
+            metavar='app_label[.ModelName]',
+            nargs='*',
             help='Restricts dumped data to the specified app_label or app_label.ModelName.',
         )
+        parser.add_argument('--format', default='json', help='Specifies the output serialization format for fixtures.')
         parser.add_argument(
-            '--format', default='json',
-            help='Specifies the output serialization format for fixtures.',
-        )
-        parser.add_argument(
-            '--indent', type=int,
-            help='Specifies the indent level to use when pretty-printing output.',
+            '--indent', type=int, help='Specifies the indent level to use when pretty-printing output.'
         )
         parser.add_argument(
             '--database',
             default=DEFAULT_DB_ALIAS,
-            help='Nominates a specific database to dump fixtures from. '
-                 'Defaults to the "default" database.',
+            help='Nominates a specific database to dump fixtures from. ' 'Defaults to the "default" database.',
         )
         parser.add_argument(
-            '-e', '--exclude', action='append', default=[],
+            '-e',
+            '--exclude',
+            action='append',
+            default=[],
             help='An app_label or app_label.ModelName to exclude '
-                 '(use multiple --exclude to exclude multiple apps/models).',
+            '(use multiple --exclude to exclude multiple apps/models).',
         )
         parser.add_argument(
-            '--natural-foreign', action='store_true', dest='use_natural_foreign_keys',
+            '--natural-foreign',
+            action='store_true',
+            dest='use_natural_foreign_keys',
             help='Use natural foreign keys if they are available.',
         )
         parser.add_argument(
-            '--natural-primary', action='store_true', dest='use_natural_primary_keys',
+            '--natural-primary',
+            action='store_true',
+            dest='use_natural_primary_keys',
             help='Use natural primary keys if they are available.',
         )
         parser.add_argument(
-            '-a', '--all', action='store_true', dest='use_base_manager',
+            '-a',
+            '--all',
+            action='store_true',
+            dest='use_base_manager',
             help="Use Django's base manager to dump all models stored in the database, "
-                 "including those that would otherwise be filtered or modified by a custom manager.",
+            "including those that would otherwise be filtered or modified by a custom manager.",
         )
         parser.add_argument(
-            '--pks', dest='primary_keys',
+            '--pks',
+            dest='primary_keys',
             help="Only dump objects with given primary keys. Accepts a comma-separated "
-                 "list of keys. This option only works when you specify one model.",
+            "list of keys. This option only works when you specify one model.",
         )
-        parser.add_argument(
-            '-o', '--output',
-            help='Specifies file to which the output is written.'
-        )
+        parser.add_argument('-o', '--output', help='Specifies file to which the output is written.')
 
     def handle(self, *app_labels, **options):
         format = options['format']
@@ -87,7 +92,8 @@ class Command(BaseCommand):
             if primary_keys:
                 raise CommandError("You can only use --pks option with one model")
             app_list = dict.fromkeys(
-                app_config for app_config in apps.get_app_configs()
+                app_config
+                for app_config in apps.get_app_configs()
                 if app_config.models_module is not None and app_config not in excluded_apps
             )
         else:
@@ -150,8 +156,7 @@ class Command(BaseCommand):
                     continue
                 if model._meta.proxy and model._meta.proxy_for_model not in models:
                     warnings.warn(
-                        "%s is a proxy model and won't be serialized." % model._meta.label,
-                        category=ProxyModelWarning,
+                        "%s is a proxy model and won't be serialized." % model._meta.label, category=ProxyModelWarning
                     )
                 if not model._meta.proxy and router.allow_migrate_model(using, model):
                     if use_base_manager:
@@ -178,10 +183,13 @@ class Command(BaseCommand):
             stream = open(output, 'w') if output else None
             try:
                 serializers.serialize(
-                    format, get_objects(), indent=indent,
+                    format,
+                    get_objects(),
+                    indent=indent,
                     use_natural_foreign_keys=use_natural_foreign_keys,
                     use_natural_primary_keys=use_natural_primary_keys,
-                    stream=stream or self.stdout, progress_output=progress_output,
+                    stream=stream or self.stdout,
+                    progress_output=progress_output,
                     object_count=object_count,
                 )
             finally:

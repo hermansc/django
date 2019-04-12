@@ -6,9 +6,7 @@ from importlib import import_module
 from django.conf import settings
 from django.utils import dateformat, datetime_safe, numberformat
 from django.utils.functional import lazy
-from django.utils.translation import (
-    check_for_language, get_language, to_locale,
-)
+from django.utils.translation import check_for_language, get_language, to_locale
 
 # format_cache is a mapping from (format_type, lang) to the format string.
 # By using the cache, it is possible to avoid running get_format_modules
@@ -19,31 +17,28 @@ _format_modules_cache = {}
 ISO_INPUT_FORMATS = {
     'DATE_INPUT_FORMATS': ['%Y-%m-%d'],
     'TIME_INPUT_FORMATS': ['%H:%M:%S', '%H:%M:%S.%f', '%H:%M'],
-    'DATETIME_INPUT_FORMATS': [
-        '%Y-%m-%d %H:%M:%S',
-        '%Y-%m-%d %H:%M:%S.%f',
-        '%Y-%m-%d %H:%M',
-        '%Y-%m-%d'
-    ],
+    'DATETIME_INPUT_FORMATS': ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M', '%Y-%m-%d'],
 }
 
 
-FORMAT_SETTINGS = frozenset([
-    'DECIMAL_SEPARATOR',
-    'THOUSAND_SEPARATOR',
-    'NUMBER_GROUPING',
-    'FIRST_DAY_OF_WEEK',
-    'MONTH_DAY_FORMAT',
-    'TIME_FORMAT',
-    'DATE_FORMAT',
-    'DATETIME_FORMAT',
-    'SHORT_DATE_FORMAT',
-    'SHORT_DATETIME_FORMAT',
-    'YEAR_MONTH_FORMAT',
-    'DATE_INPUT_FORMATS',
-    'TIME_INPUT_FORMATS',
-    'DATETIME_INPUT_FORMATS',
-])
+FORMAT_SETTINGS = frozenset(
+    [
+        'DECIMAL_SEPARATOR',
+        'THOUSAND_SEPARATOR',
+        'NUMBER_GROUPING',
+        'FIRST_DAY_OF_WEEK',
+        'MONTH_DAY_FORMAT',
+        'TIME_FORMAT',
+        'DATE_FORMAT',
+        'DATETIME_FORMAT',
+        'SHORT_DATE_FORMAT',
+        'SHORT_DATETIME_FORMAT',
+        'YEAR_MONTH_FORMAT',
+        'DATE_INPUT_FORMATS',
+        'TIME_INPUT_FORMATS',
+        'DATETIME_INPUT_FORMATS',
+    ]
+)
 
 
 def reset_format_cache():
@@ -249,8 +244,7 @@ def sanitize_separators(value):
                 # Special case where we suspect a dot meant decimal separator (see #22171)
                 pass
             else:
-                for replacement in {
-                        thousand_sep, unicodedata.normalize('NFKD', thousand_sep)}:
+                for replacement in {thousand_sep, unicodedata.normalize('NFKD', thousand_sep)}:
                     value = value.replace(replacement, '')
         parts.append(value)
         value = '.'.join(reversed(parts))

@@ -9,7 +9,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 def fix_os_paths(x):
     if isinstance(x, str):
         if x.startswith(PATH):
-            x = x[len(PATH):]
+            x = x[len(PATH) :]
         return x.replace('\\', '/')
     elif isinstance(x, tuple):
         return tuple(fix_os_paths(list(x)))
@@ -43,9 +43,7 @@ class FilePathFieldTest(SimpleTestCase):
 
     def test_no_options(self):
         f = FilePathField(path=self.path)
-        expected = [
-            ('/filepathfield_test_dir/README', 'README'),
-        ] + self.expected_choices[:4]
+        expected = [('/filepathfield_test_dir/README', 'README')] + self.expected_choices[:4]
         self.assertChoices(f, expected)
 
     def test_clean(self):
@@ -73,17 +71,19 @@ class FilePathFieldTest(SimpleTestCase):
             ('/filepathfield_test_dir/c/f/g.py', 'c/f/g.py'),
             ('/filepathfield_test_dir/h/__init__.py', 'h/__init__.py'),
             ('/filepathfield_test_dir/j/__init__.py', 'j/__init__.py'),
-
         ]
         self.assertChoices(f, expected)
 
     def test_allow_folders(self):
         f = FilePathField(path=self.path, allow_folders=True, allow_files=False)
-        self.assertChoices(f, [
-            ('/filepathfield_test_dir/c', 'c'),
-            ('/filepathfield_test_dir/h', 'h'),
-            ('/filepathfield_test_dir/j', 'j'),
-        ])
+        self.assertChoices(
+            f,
+            [
+                ('/filepathfield_test_dir/c', 'c'),
+                ('/filepathfield_test_dir/h', 'h'),
+                ('/filepathfield_test_dir/j', 'j'),
+            ],
+        )
 
     def test_recursive_no_folders_or_files(self):
         f = FilePathField(path=self.path, recursive=True, allow_folders=False, allow_files=False)
@@ -91,9 +91,12 @@ class FilePathFieldTest(SimpleTestCase):
 
     def test_recursive_folders_without_files(self):
         f = FilePathField(path=self.path, recursive=True, allow_folders=True, allow_files=False)
-        self.assertChoices(f, [
-            ('/filepathfield_test_dir/c', 'c'),
-            ('/filepathfield_test_dir/h', 'h'),
-            ('/filepathfield_test_dir/j', 'j'),
-            ('/filepathfield_test_dir/c/f', 'c/f'),
-        ])
+        self.assertChoices(
+            f,
+            [
+                ('/filepathfield_test_dir/c', 'c'),
+                ('/filepathfield_test_dir/h', 'h'),
+                ('/filepathfield_test_dir/j', 'j'),
+                ('/filepathfield_test_dir/c/f', 'c/f'),
+            ],
+        )

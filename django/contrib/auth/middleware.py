@@ -52,7 +52,8 @@ class RemoteUserMiddleware(MiddlewareMixin):
                 " authentication middleware to be installed.  Edit your"
                 " MIDDLEWARE setting to insert"
                 " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
-                " before the RemoteUserMiddleware class.")
+                " before the RemoteUserMiddleware class."
+            )
         try:
             username = request.META[self.header]
         except KeyError:
@@ -120,4 +121,5 @@ class PersistentRemoteUserMiddleware(RemoteUserMiddleware):
     is only expected to happen on some "logon" URL and the rest of
     the application wants to use Django's authentication mechanism.
     """
+
     force_logout_if_no_header = False

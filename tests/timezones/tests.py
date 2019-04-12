@@ -13,25 +13,22 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, connections
 from django.db.models import F, Max, Min
 from django.http import HttpRequest
-from django.template import (
-    Context, RequestContext, Template, TemplateSyntaxError, context_processors,
-)
+from django.template import Context, RequestContext, Template, TemplateSyntaxError, context_processors
 from django.test import (
-    SimpleTestCase, TestCase, TransactionTestCase, override_settings,
-    skipIfDBFeature, skipUnlessDBFeature,
+    SimpleTestCase,
+    TestCase,
+    TransactionTestCase,
+    override_settings,
+    skipIfDBFeature,
+    skipUnlessDBFeature,
 )
 from django.test.utils import requires_tz_support
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.timezone import timedelta
 
-from .forms import (
-    EventForm, EventLocalizedForm, EventLocalizedModelForm, EventModelForm,
-    EventSplitForm,
-)
-from .models import (
-    AllDayEvent, Event, MaybeEvent, Session, SessionEvent, Timestamp,
-)
+from .forms import EventForm, EventLocalizedForm, EventLocalizedModelForm, EventModelForm, EventSplitForm
+from .models import AllDayEvent, Event, MaybeEvent, Session, SessionEvent, Timestamp
 
 # These tests use the EAT (Eastern Africa Time) and ICT (Indochina Time)
 # who don't have Daylight Saving Time, so we can represent them easily
@@ -43,8 +40,8 @@ from .models import (
 # 10:20:30 in UTC and 17:20:30 in ICT.
 
 UTC = timezone.utc
-EAT = timezone.get_fixed_timezone(180)      # Africa/Nairobi
-ICT = timezone.get_fixed_timezone(420)      # Asia/Bangkok
+EAT = timezone.get_fixed_timezone(180)  # Africa/Nairobi
+ICT = timezone.get_fixed_timezone(420)  # Asia/Bangkok
 
 
 @contextmanager
@@ -69,7 +66,6 @@ def override_database_connection_timezone(timezone):
 
 @override_settings(TIME_ZONE='Africa/Nairobi', USE_TZ=False)
 class LegacyDatabaseTests(TestCase):
-
     def test_naive_datetime(self):
         dt = datetime.datetime(2011, 9, 1, 13, 20, 30)
         Event.objects.create(dt=dt)
@@ -163,10 +159,13 @@ class LegacyDatabaseTests(TestCase):
         Event.objects.create(dt=datetime.datetime(2011, 9, 1, 13, 20, 30))
         Event.objects.create(dt=datetime.datetime(2011, 9, 1, 3, 20, 40))
         result = Event.objects.all().aggregate(Min('dt'), Max('dt'))
-        self.assertEqual(result, {
-            'dt__min': datetime.datetime(2011, 9, 1, 3, 20, 40),
-            'dt__max': datetime.datetime(2011, 9, 1, 23, 20, 20),
-        })
+        self.assertEqual(
+            result,
+            {
+                'dt__min': datetime.datetime(2011, 9, 1, 3, 20, 40),
+                'dt__max': datetime.datetime(2011, 9, 1, 23, 20, 20),
+            },
+        )
 
     def test_query_annotation(self):
         # Only min and max make sense for datetimes.
@@ -201,18 +200,15 @@ class LegacyDatabaseTests(TestCase):
         self.assertSequenceEqual(Event.objects.datetimes('dt', 'day'), [datetime.datetime(2011, 1, 1, 0, 0, 0)])
         self.assertSequenceEqual(
             Event.objects.datetimes('dt', 'hour'),
-            [datetime.datetime(2011, 1, 1, 1, 0, 0),
-             datetime.datetime(2011, 1, 1, 4, 0, 0)]
+            [datetime.datetime(2011, 1, 1, 1, 0, 0), datetime.datetime(2011, 1, 1, 4, 0, 0)],
         )
         self.assertSequenceEqual(
             Event.objects.datetimes('dt', 'minute'),
-            [datetime.datetime(2011, 1, 1, 1, 30, 0),
-             datetime.datetime(2011, 1, 1, 4, 30, 0)]
+            [datetime.datetime(2011, 1, 1, 1, 30, 0), datetime.datetime(2011, 1, 1, 4, 30, 0)],
         )
         self.assertSequenceEqual(
             Event.objects.datetimes('dt', 'second'),
-            [datetime.datetime(2011, 1, 1, 1, 30, 0),
-             datetime.datetime(2011, 1, 1, 4, 30, 0)]
+            [datetime.datetime(2011, 1, 1, 1, 30, 0), datetime.datetime(2011, 1, 1, 4, 30, 0)],
         )
 
     def test_raw_sql(self):
@@ -391,10 +387,13 @@ class NewDatabaseTests(TestCase):
         Event.objects.create(dt=datetime.datetime(2011, 9, 1, 13, 20, 30, tzinfo=EAT))
         Event.objects.create(dt=datetime.datetime(2011, 9, 1, 3, 20, 40, tzinfo=EAT))
         result = Event.objects.all().aggregate(Min('dt'), Max('dt'))
-        self.assertEqual(result, {
-            'dt__min': datetime.datetime(2011, 9, 1, 3, 20, 40, tzinfo=EAT),
-            'dt__max': datetime.datetime(2011, 9, 1, 23, 20, 20, tzinfo=EAT),
-        })
+        self.assertEqual(
+            result,
+            {
+                'dt__min': datetime.datetime(2011, 9, 1, 3, 20, 40, tzinfo=EAT),
+                'dt__max': datetime.datetime(2011, 9, 1, 23, 20, 20, tzinfo=EAT),
+            },
+        )
 
     def test_query_annotation(self):
         # Only min and max make sense for datetimes.
@@ -426,31 +425,25 @@ class NewDatabaseTests(TestCase):
         Event.objects.create(dt=datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=EAT))
         Event.objects.create(dt=datetime.datetime(2011, 1, 1, 4, 30, 0, tzinfo=EAT))
         self.assertSequenceEqual(
-            Event.objects.datetimes('dt', 'year'),
-            [datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=EAT)]
+            Event.objects.datetimes('dt', 'year'), [datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=EAT)]
         )
         self.assertSequenceEqual(
-            Event.objects.datetimes('dt', 'month'),
-            [datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=EAT)]
+            Event.objects.datetimes('dt', 'month'), [datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=EAT)]
         )
         self.assertSequenceEqual(
-            Event.objects.datetimes('dt', 'day'),
-            [datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=EAT)]
+            Event.objects.datetimes('dt', 'day'), [datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=EAT)]
         )
         self.assertSequenceEqual(
             Event.objects.datetimes('dt', 'hour'),
-            [datetime.datetime(2011, 1, 1, 1, 0, 0, tzinfo=EAT),
-             datetime.datetime(2011, 1, 1, 4, 0, 0, tzinfo=EAT)]
+            [datetime.datetime(2011, 1, 1, 1, 0, 0, tzinfo=EAT), datetime.datetime(2011, 1, 1, 4, 0, 0, tzinfo=EAT)],
         )
         self.assertSequenceEqual(
             Event.objects.datetimes('dt', 'minute'),
-            [datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=EAT),
-             datetime.datetime(2011, 1, 1, 4, 30, 0, tzinfo=EAT)]
+            [datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=EAT), datetime.datetime(2011, 1, 1, 4, 30, 0, tzinfo=EAT)],
         )
         self.assertSequenceEqual(
             Event.objects.datetimes('dt', 'second'),
-            [datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=EAT),
-             datetime.datetime(2011, 1, 1, 4, 30, 0, tzinfo=EAT)]
+            [datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=EAT), datetime.datetime(2011, 1, 1, 4, 30, 0, tzinfo=EAT)],
         )
 
     @skipUnlessDBFeature('has_zoneinfo_database')
@@ -460,33 +453,45 @@ class NewDatabaseTests(TestCase):
         with timezone.override(UTC):
             self.assertSequenceEqual(
                 Event.objects.datetimes('dt', 'year'),
-                [datetime.datetime(2010, 1, 1, 0, 0, 0, tzinfo=UTC),
-                 datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=UTC)]
+                [
+                    datetime.datetime(2010, 1, 1, 0, 0, 0, tzinfo=UTC),
+                    datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=UTC),
+                ],
             )
             self.assertSequenceEqual(
                 Event.objects.datetimes('dt', 'month'),
-                [datetime.datetime(2010, 12, 1, 0, 0, 0, tzinfo=UTC),
-                 datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=UTC)]
+                [
+                    datetime.datetime(2010, 12, 1, 0, 0, 0, tzinfo=UTC),
+                    datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=UTC),
+                ],
             )
             self.assertSequenceEqual(
                 Event.objects.datetimes('dt', 'day'),
-                [datetime.datetime(2010, 12, 31, 0, 0, 0, tzinfo=UTC),
-                 datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=UTC)]
+                [
+                    datetime.datetime(2010, 12, 31, 0, 0, 0, tzinfo=UTC),
+                    datetime.datetime(2011, 1, 1, 0, 0, 0, tzinfo=UTC),
+                ],
             )
             self.assertSequenceEqual(
                 Event.objects.datetimes('dt', 'hour'),
-                [datetime.datetime(2010, 12, 31, 22, 0, 0, tzinfo=UTC),
-                 datetime.datetime(2011, 1, 1, 1, 0, 0, tzinfo=UTC)]
+                [
+                    datetime.datetime(2010, 12, 31, 22, 0, 0, tzinfo=UTC),
+                    datetime.datetime(2011, 1, 1, 1, 0, 0, tzinfo=UTC),
+                ],
             )
             self.assertSequenceEqual(
                 Event.objects.datetimes('dt', 'minute'),
-                [datetime.datetime(2010, 12, 31, 22, 30, 0, tzinfo=UTC),
-                 datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=UTC)]
+                [
+                    datetime.datetime(2010, 12, 31, 22, 30, 0, tzinfo=UTC),
+                    datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=UTC),
+                ],
             )
             self.assertSequenceEqual(
                 Event.objects.datetimes('dt', 'second'),
-                [datetime.datetime(2010, 12, 31, 22, 30, 0, tzinfo=UTC),
-                 datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=UTC)]
+                [
+                    datetime.datetime(2010, 12, 31, 22, 30, 0, tzinfo=UTC),
+                    datetime.datetime(2011, 1, 1, 1, 30, 0, tzinfo=UTC),
+                ],
             )
 
     def test_raw_sql(self):
@@ -595,20 +600,16 @@ class ForcedTimeZoneDatabaseTests(TransactionTestCase):
 @skipUnlessDBFeature('supports_timezones')
 @override_settings(TIME_ZONE='Africa/Nairobi', USE_TZ=True)
 class UnsupportedTimeZoneDatabaseTests(TestCase):
-
     def test_time_zone_parameter_not_supported_if_database_supports_timezone(self):
         connections.databases['tz'] = connections.databases['default'].copy()
         connections.databases['tz']['TIME_ZONE'] = 'Asia/Bangkok'
         tz_conn = connections['tz']
         try:
-            msg = (
-                "Connection 'tz' cannot set TIME_ZONE because its engine "
-                "handles time zones conversions natively."
-            )
+            msg = "Connection 'tz' cannot set TIME_ZONE because its engine " "handles time zones conversions natively."
             with self.assertRaisesMessage(ImproperlyConfigured, msg):
                 tz_conn.cursor()
         finally:
-            connections['tz'].close()       # in case the test fails
+            connections['tz'].close()  # in case the test fails
             del connections['tz']
             del connections.databases['tz']
 
@@ -784,7 +785,6 @@ class SerializationTests(SimpleTestCase):
 
 @override_settings(DATETIME_FORMAT='c', TIME_ZONE='Africa/Nairobi', USE_L10N=False, USE_TZ=True)
 class TemplateTests(SimpleTestCase):
-
     @requires_tz_support
     def test_localtime_templatetag_and_filters(self):
         """
@@ -843,7 +843,7 @@ class TemplateTests(SimpleTestCase):
                 'noarg': t('naive', 'eat', 'utc', 'ict'),
                 'on': t('naive', 'eat', 'utc', 'ict'),
                 'off': t('naive', 'eat', 'utc', 'ict'),
-            }
+            },
         }
 
         for k1, dt in datetimes.items():
@@ -879,18 +879,12 @@ class TemplateTests(SimpleTestCase):
 
         # Use a pytz timezone as argument
         tpl = Template("{% load tz %}{{ dt|timezone:tz }}")
-        ctx = Context({
-            'dt': datetime.datetime(2011, 9, 1, 13, 20, 30),
-            'tz': pytz.timezone('Europe/Paris'),
-        })
+        ctx = Context({'dt': datetime.datetime(2011, 9, 1, 13, 20, 30), 'tz': pytz.timezone('Europe/Paris')})
         self.assertEqual(tpl.render(ctx), "2011-09-01T12:20:30+02:00")
 
         # Use a pytz timezone name as argument
         tpl = Template("{% load tz %}{{ dt|timezone:'Europe/Paris' }}")
-        ctx = Context({
-            'dt': datetime.datetime(2011, 9, 1, 13, 20, 30),
-            'tz': pytz.timezone('Europe/Paris'),
-        })
+        ctx = Context({'dt': datetime.datetime(2011, 9, 1, 13, 20, 30), 'tz': pytz.timezone('Europe/Paris')})
         self.assertEqual(tpl.render(ctx), "2011-09-01T12:20:30+02:00")
 
     def test_localtime_templatetag_invalid_argument(self):
@@ -930,14 +924,9 @@ class TemplateTests(SimpleTestCase):
             "{% endtimezone %}"
             "{% endtimezone %}"
         )
-        ctx = Context({
-            'dt': datetime.datetime(2011, 9, 1, 10, 20, 30, tzinfo=UTC),
-            'tz1': ICT,
-            'tz2': None,
-        })
+        ctx = Context({'dt': datetime.datetime(2011, 9, 1, 10, 20, 30, tzinfo=UTC), 'tz1': ICT, 'tz2': None})
         self.assertEqual(
-            tpl.render(ctx),
-            "2011-09-01T13:20:30+03:00|2011-09-01T17:20:30+07:00|2011-09-01T13:20:30+03:00"
+            tpl.render(ctx), "2011-09-01T13:20:30+03:00|2011-09-01T17:20:30+07:00|2011-09-01T13:20:30+03:00"
         )
 
     def test_timezone_templatetag_with_pytz(self):
@@ -947,17 +936,13 @@ class TemplateTests(SimpleTestCase):
         tpl = Template("{% load tz %}{% timezone tz %}{{ dt }}{% endtimezone %}")
 
         # Use a pytz timezone as argument
-        ctx = Context({
-            'dt': datetime.datetime(2011, 9, 1, 13, 20, 30, tzinfo=EAT),
-            'tz': pytz.timezone('Europe/Paris'),
-        })
+        ctx = Context(
+            {'dt': datetime.datetime(2011, 9, 1, 13, 20, 30, tzinfo=EAT), 'tz': pytz.timezone('Europe/Paris')}
+        )
         self.assertEqual(tpl.render(ctx), "2011-09-01T12:20:30+02:00")
 
         # Use a pytz timezone name as argument
-        ctx = Context({
-            'dt': datetime.datetime(2011, 9, 1, 13, 20, 30, tzinfo=EAT),
-            'tz': 'Europe/Paris',
-        })
+        ctx = Context({'dt': datetime.datetime(2011, 9, 1, 13, 20, 30, tzinfo=EAT), 'tz': 'Europe/Paris'})
         self.assertEqual(tpl.render(ctx), "2011-09-01T12:20:30+02:00")
 
     def test_timezone_templatetag_invalid_argument(self):
@@ -978,8 +963,7 @@ class TemplateTests(SimpleTestCase):
             self.assertEqual(tpl.render(Context()), "UTC")
 
         tpl = Template(
-            "{% load tz %}{% timezone tz %}{% get_current_timezone as time_zone %}"
-            "{% endtimezone %}{{ time_zone }}"
+            "{% load tz %}{% timezone tz %}{% get_current_timezone as time_zone %}" "{% endtimezone %}{{ time_zone }}"
         )
 
         self.assertEqual(tpl.render(Context({'tz': ICT})), "+0700")
@@ -1027,8 +1011,7 @@ class TemplateTests(SimpleTestCase):
 
     def test_date_and_time_template_filters_honor_localtime(self):
         tpl = Template(
-            "{% load tz %}{% localtime off %}{{ dt|date:'Y-m-d' }} at "
-            "{{ dt|time:'H:i:s' }}{% endlocaltime %}"
+            "{% load tz %}{% localtime off %}{{ dt|date:'Y-m-d' }} at " "{{ dt|time:'H:i:s' }}{% endlocaltime %}"
         )
         ctx = Context({'dt': datetime.datetime(2011, 9, 1, 20, 20, 20, tzinfo=UTC)})
         self.assertEqual(tpl.render(ctx), "2011-09-01 at 20:20:20")
@@ -1046,7 +1029,6 @@ class TemplateTests(SimpleTestCase):
 
 @override_settings(DATETIME_FORMAT='c', TIME_ZONE='Africa/Nairobi', USE_L10N=False, USE_TZ=False)
 class LegacyFormsTests(TestCase):
-
     def test_form(self):
         form = EventForm({'dt': '2011-09-01 13:20:30'})
         self.assertTrue(form.is_valid())
@@ -1079,7 +1061,6 @@ class LegacyFormsTests(TestCase):
 
 @override_settings(DATETIME_FORMAT='c', TIME_ZONE='Africa/Nairobi', USE_L10N=False, USE_TZ=True)
 class NewFormsTests(TestCase):
-
     @requires_tz_support
     def test_form(self):
         form = EventForm({'dt': '2011-09-01 13:20:30'})
@@ -1102,10 +1083,11 @@ class NewFormsTests(TestCase):
             form = EventForm({'dt': '2011-03-27 02:30:00'})
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['dt'], [
+                form.errors['dt'],
+                [
                     "2011-03-27 02:30:00 couldn't be interpreted in time zone "
                     "Europe/Paris; it may be ambiguous or it may not exist."
-                ]
+                ],
             )
 
     def test_form_with_ambiguous_time(self):
@@ -1113,10 +1095,11 @@ class NewFormsTests(TestCase):
             form = EventForm({'dt': '2011-10-30 02:30:00'})
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['dt'], [
+                form.errors['dt'],
+                [
                     "2011-10-30 02:30:00 couldn't be interpreted in time zone "
                     "Europe/Paris; it may be ambiguous or it may not exist."
-                ]
+                ],
             )
 
     @requires_tz_support
@@ -1145,21 +1128,21 @@ class NewFormsTests(TestCase):
 
 
 @override_settings(
-    DATETIME_FORMAT='c',
-    TIME_ZONE='Africa/Nairobi',
-    USE_L10N=False,
-    USE_TZ=True,
-    ROOT_URLCONF='timezones.urls',
+    DATETIME_FORMAT='c', TIME_ZONE='Africa/Nairobi', USE_L10N=False, USE_TZ=True, ROOT_URLCONF='timezones.urls'
 )
 class AdminTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.u1 = User.objects.create_user(
             password='secret',
             last_login=datetime.datetime(2007, 5, 30, 13, 20, 10, tzinfo=UTC),
-            is_superuser=True, username='super', first_name='Super', last_name='User',
-            email='super@example.com', is_staff=True, is_active=True,
+            is_superuser=True,
+            username='super',
+            first_name='Super',
+            last_name='User',
+            email='super@example.com',
+            is_staff=True,
+            is_active=True,
             date_joined=datetime.datetime(2007, 5, 30, 13, 20, 10, tzinfo=UTC),
         )
 

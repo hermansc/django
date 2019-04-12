@@ -3,16 +3,11 @@ import json
 from os import path
 
 from django.conf import settings
-from django.test import (
-    RequestFactory, SimpleTestCase, TestCase, ignore_warnings, modify_settings,
-    override_settings,
-)
+from django.test import RequestFactory, SimpleTestCase, TestCase, ignore_warnings, modify_settings, override_settings
 from django.test.selenium import SeleniumTestCase
 from django.urls import reverse
 from django.utils.deprecation import RemovedInDjango40Warning
-from django.utils.translation import (
-    LANGUAGE_SESSION_KEY, get_language, override,
-)
+from django.utils.translation import LANGUAGE_SESSION_KEY, get_language, override
 from django.views.i18n import JavaScriptCatalog, get_formats
 
 from ..urls import locale_dir
@@ -208,13 +203,10 @@ class SetLanguageTests(TestCase):
         with ignore_warnings(category=RemovedInDjango40Warning):
             self.assertEqual(self.client.session[LANGUAGE_SESSION_KEY], lang_code)
 
-    @modify_settings(MIDDLEWARE={
-        'append': 'django.middleware.locale.LocaleMiddleware',
-    })
+    @modify_settings(MIDDLEWARE={'append': 'django.middleware.locale.LocaleMiddleware'})
     def test_lang_from_translated_i18n_pattern(self):
         response = self.client.post(
-            '/i18n/setlang/', data={'language': 'nl'},
-            follow=True, HTTP_REFERER='/en/translated/'
+            '/i18n/setlang/', data={'language': 'nl'}, follow=True, HTTP_REFERER='/en/translated/'
         )
         self.assertEqual(self.client.cookies[settings.LANGUAGE_COOKIE_NAME].value, 'nl')
         with ignore_warnings(category=RemovedInDjango40Warning):
@@ -222,8 +214,7 @@ class SetLanguageTests(TestCase):
         self.assertRedirects(response, '/nl/vertaald/')
         # And reverse
         response = self.client.post(
-            '/i18n/setlang/', data={'language': 'en'},
-            follow=True, HTTP_REFERER='/nl/vertaald/'
+            '/i18n/setlang/', data={'language': 'en'}, follow=True, HTTP_REFERER='/nl/vertaald/'
         )
         self.assertRedirects(response, '/en/translated/')
 
@@ -231,6 +222,7 @@ class SetLanguageTests(TestCase):
 @override_settings(ROOT_URLCONF='view_tests.urls')
 class I18NViewTests(SimpleTestCase):
     """Test django.views.i18n views other than set_language."""
+
     @override_settings(LANGUAGE_CODE='de')
     def test_get_formats(self):
         formats = get_formats()
@@ -326,29 +318,21 @@ class I18NViewTests(SimpleTestCase):
             response = self.client.get('/jsi18n/')
             self.assertEqual(
                 response.context['catalog']['{count} plural3'],
-                ['{count} plural3 p3', '{count} plural3 p3s', '{count} plural3 p3t']
+                ['{count} plural3 p3', '{count} plural3 p3s', '{count} plural3 p3t'],
             )
             self.assertEqual(
-                response.context['catalog']['{count} plural2'],
-                ['{count} plural2', '{count} plural2s', '']
+                response.context['catalog']['{count} plural2'], ['{count} plural2', '{count} plural2s', '']
             )
         with self.settings(LANGUAGE_CODE='ru'), override('pt'):
             response = self.client.get('/jsi18n/')
-            self.assertEqual(
-                response.context['catalog']['{count} plural3'],
-                ['{count} plural3', '{count} plural3s']
-            )
-            self.assertEqual(
-                response.context['catalog']['{count} plural2'],
-                ['{count} plural2', '{count} plural2s']
-            )
+            self.assertEqual(response.context['catalog']['{count} plural3'], ['{count} plural3', '{count} plural3s'])
+            self.assertEqual(response.context['catalog']['{count} plural2'], ['{count} plural2', '{count} plural2s'])
 
     def test_i18n_english_variant(self):
         with override('en-gb'):
             response = self.client.get('/jsi18n/')
             self.assertIn(
-                '"this color is to be translated": "this colour is to be translated"',
-                response.context['catalog_str']
+                '"this color is to be translated": "this colour is to be translated"', response.context['catalog_str']
             )
 
     def test_i18n_language_non_english_default(self):
@@ -434,11 +418,7 @@ class I18NViewTests(SimpleTestCase):
 
     def test_i18n_with_locale_paths(self):
         extended_locale_paths = settings.LOCALE_PATHS + [
-            path.join(
-                path.dirname(path.dirname(path.abspath(__file__))),
-                'app3',
-                'locale',
-            ),
+            path.join(path.dirname(path.dirname(path.abspath(__file__))), 'app3', 'locale')
         ]
         with self.settings(LANGUAGE_CODE='es-ar', LOCALE_PATHS=extended_locale_paths):
             with override('es-ar'):
@@ -460,10 +440,7 @@ class I18NViewTests(SimpleTestCase):
 class I18nSeleniumTests(SeleniumTestCase):
 
     # The test cases use fixtures & translations from these apps.
-    available_apps = [
-        'django.contrib.admin', 'django.contrib.auth',
-        'django.contrib.contenttypes', 'view_tests',
-    ]
+    available_apps = ['django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes', 'view_tests']
 
     @override_settings(LANGUAGE_CODE='de')
     def test_javascript_gettext(self):
@@ -485,8 +462,7 @@ class I18nSeleniumTests(SeleniumTestCase):
         self.assertEqual(elem.text, "455 Resultate")
         elem = self.selenium.find_element_by_id("formats")
         self.assertEqual(
-            elem.text,
-            "DATE_INPUT_FORMATS is an object; DECIMAL_SEPARATOR is a string; FIRST_DAY_OF_WEEK is a number;"
+            elem.text, "DATE_INPUT_FORMATS is an object; DECIMAL_SEPARATOR is a string; FIRST_DAY_OF_WEEK is a number;"
         )
 
     @modify_settings(INSTALLED_APPS={'append': ['view_tests.app1', 'view_tests.app2']})

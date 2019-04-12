@@ -3,15 +3,11 @@ from django.test import SimpleTestCase
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_truncate_zero(self):
         self.assertEqual(truncatechars_html('<p>one <a href="#">two - three <br>four</a> five</p>', 0), '…')
 
     def test_truncate(self):
-        self.assertEqual(
-            truncatechars_html('<p>one <a href="#">two - three <br>four</a> five</p>', 4),
-            '<p>one…</p>',
-        )
+        self.assertEqual(truncatechars_html('<p>one <a href="#">two - three <br>four</a> five</p>', 4), '<p>one…</p>')
 
     def test_truncate2(self):
         self.assertEqual(

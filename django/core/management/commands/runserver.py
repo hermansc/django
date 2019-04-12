@@ -7,17 +7,18 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.core.servers.basehttp import (
-    WSGIServer, get_internal_wsgi_application, run,
-)
+from django.core.servers.basehttp import WSGIServer, get_internal_wsgi_application, run
 from django.utils import autoreload
 
-naiveip_re = re.compile(r"""^(?:
+naiveip_re = re.compile(
+    r"""^(?:
 (?P<addr>
     (?P<ipv4>\d{1,3}(?:\.\d{1,3}){3}) |         # IPv4 address
     (?P<ipv6>\[[a-fA-F0-9:]+\]) |               # IPv6 address
     (?P<fqdn>[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*) # FQDN
-):)?(?P<port>\d+)$""", re.X)
+):)?(?P<port>\d+)$""",
+    re.X,
+)
 
 
 class Command(BaseCommand):
@@ -34,21 +35,15 @@ class Command(BaseCommand):
     server_cls = WSGIServer
 
     def add_arguments(self, parser):
+        parser.add_argument('addrport', nargs='?', help='Optional port number, or ipaddr:port')
         parser.add_argument(
-            'addrport', nargs='?',
-            help='Optional port number, or ipaddr:port'
+            '--ipv6', '-6', action='store_true', dest='use_ipv6', help='Tells Django to use an IPv6 address.'
         )
         parser.add_argument(
-            '--ipv6', '-6', action='store_true', dest='use_ipv6',
-            help='Tells Django to use an IPv6 address.',
+            '--nothreading', action='store_false', dest='use_threading', help='Tells Django to NOT use threading.'
         )
         parser.add_argument(
-            '--nothreading', action='store_false', dest='use_threading',
-            help='Tells Django to NOT use threading.',
-        )
-        parser.add_argument(
-            '--noreload', action='store_false', dest='use_reloader',
-            help='Tells Django to NOT use the auto-reloader.',
+            '--noreload', action='store_false', dest='use_reloader', help='Tells Django to NOT use the auto-reloader.'
         )
 
     def execute(self, *args, **options):
@@ -77,8 +72,7 @@ class Command(BaseCommand):
         else:
             m = re.match(naiveip_re, options['addrport'])
             if m is None:
-                raise CommandError('"%s" is not a valid port number '
-                                   'or address:port pair.' % options['addrport'])
+                raise CommandError('"%s" is not a valid port number ' 'or address:port pair.' % options['addrport'])
             self.addr, _ipv4, _ipv6, _fqdn, self.port = m.groups()
             if not self.port.isdigit():
                 raise CommandError("%r is not a valid port number." % self.port)
@@ -120,23 +114,27 @@ class Command(BaseCommand):
         self.check_migrations()
         now = datetime.now().strftime('%B %d, %Y - %X')
         self.stdout.write(now)
-        self.stdout.write((
-            "Django version %(version)s, using settings %(settings)r\n"
-            "Starting development server at %(protocol)s://%(addr)s:%(port)s/\n"
-            "Quit the server with %(quit_command)s.\n"
-        ) % {
-            "version": self.get_version(),
-            "settings": settings.SETTINGS_MODULE,
-            "protocol": self.protocol,
-            "addr": '[%s]' % self.addr if self._raw_ipv6 else self.addr,
-            "port": self.port,
-            "quit_command": quit_command,
-        })
+        self.stdout.write(
+            (
+                "Django version %(version)s, using settings %(settings)r\n"
+                "Starting development server at %(protocol)s://%(addr)s:%(port)s/\n"
+                "Quit the server with %(quit_command)s.\n"
+            )
+            % {
+                "version": self.get_version(),
+                "settings": settings.SETTINGS_MODULE,
+                "protocol": self.protocol,
+                "addr": '[%s]' % self.addr if self._raw_ipv6 else self.addr,
+                "port": self.port,
+                "quit_command": quit_command,
+            }
+        )
 
         try:
             handler = self.get_handler(*args, **options)
-            run(self.addr, int(self.port), handler,
-                ipv6=self.use_ipv6, threading=threading, server_cls=self.server_cls)
+            run(
+                self.addr, int(self.port), handler, ipv6=self.use_ipv6, threading=threading, server_cls=self.server_cls
+            )
         except OSError as e:
             # Use helpful error messages instead of ugly tracebacks.
             ERRORS = {

@@ -5,14 +5,10 @@ from django.db.models.query import RawQuerySet
 from django.db.models.query_utils import InvalidQuery
 from django.test import TestCase, skipUnlessDBFeature
 
-from .models import (
-    Author, Book, BookFkAsPk, Coffee, FriendlyAuthor, MixedCaseIDColumn,
-    Reviewer,
-)
+from .models import Author, Book, BookFkAsPk, Coffee, FriendlyAuthor, MixedCaseIDColumn, Reviewer
 
 
 class RawQueryTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.a1 = Author.objects.create(first_name='Joe', last_name='Smith', dob=date(1950, 9, 20))
@@ -20,11 +16,15 @@ class RawQueryTests(TestCase):
         cls.a3 = Author.objects.create(first_name='Bob', last_name='Smith', dob=date(1986, 1, 25))
         cls.a4 = Author.objects.create(first_name='Bill', last_name='Jones', dob=date(1932, 5, 10))
         cls.b1 = Book.objects.create(
-            title='The awesome book', author=cls.a1, paperback=False,
+            title='The awesome book',
+            author=cls.a1,
+            paperback=False,
             opening_line='It was a bright cold day in April and the clocks were striking thirteen.',
         )
         cls.b2 = Book.objects.create(
-            title='The horrible book', author=cls.a1, paperback=True,
+            title='The horrible book',
+            author=cls.a1,
+            paperback=True,
             opening_line=(
                 'On an evening in the latter part of May a middle-aged man '
                 'was walking homeward from Shaston to the village of Marlott, '
@@ -32,11 +32,15 @@ class RawQueryTests(TestCase):
             ),
         )
         cls.b3 = Book.objects.create(
-            title='Another awesome book', author=cls.a1, paperback=False,
+            title='Another awesome book',
+            author=cls.a1,
+            paperback=False,
             opening_line='A squat grey building of only thirty-four stories.',
         )
         cls.b4 = Book.objects.create(
-            title='Some other book', author=cls.a3, paperback=True,
+            title='Some other book',
+            author=cls.a3,
+            paperback=True,
             opening_line='It was the day my grandmother exploded.',
         )
         cls.c1 = Coffee.objects.create(brand='dunkin doughnuts')
@@ -45,8 +49,9 @@ class RawQueryTests(TestCase):
         cls.r2 = Reviewer.objects.create()
         cls.r1.reviewed.add(cls.b2, cls.b3, cls.b4)
 
-    def assertSuccessfulRawQuery(self, model, query, expected_results,
-                                 expected_annotations=(), params=[], translations=None):
+    def assertSuccessfulRawQuery(
+        self, model, query, expected_results, expected_annotations=(), params=[], translations=None
+    ):
         """
         Execute the passed query against the passed model and check the output
         """
@@ -66,15 +71,9 @@ class RawQueryTests(TestCase):
 
             for field in model._meta.fields:
                 # All values on the model are equal
-                self.assertEqual(
-                    getattr(item, field.attname),
-                    getattr(orig_item, field.attname)
-                )
+                self.assertEqual(getattr(item, field.attname), getattr(orig_item, field.attname))
                 # This includes checking that they are the same type
-                self.assertEqual(
-                    type(getattr(item, field.attname)),
-                    type(getattr(orig_item, field.attname))
-                )
+                self.assertEqual(type(getattr(item, field.attname)), type(getattr(orig_item, field.attname)))
 
     def assertNoAnnotations(self, results):
         """
@@ -245,12 +244,7 @@ class RawQueryTests(TestCase):
             "LEFT JOIN raw_query_book b ON a.id = b.author_id "
             "GROUP BY a.id, a.first_name, a.last_name, a.dob ORDER BY a.id"
         )
-        expected_annotations = (
-            ('book_count', 3),
-            ('book_count', 0),
-            ('book_count', 1),
-            ('book_count', 0),
-        )
+        expected_annotations = (('book_count', 3), ('book_count', 0), ('book_count', 1), ('book_count', 0))
         authors = Author.objects.all()
         self.assertSuccessfulRawQuery(Author, query, authors, expected_annotations)
 
@@ -293,9 +287,7 @@ class RawQueryTests(TestCase):
     def test_inheritance(self):
         f = FriendlyAuthor.objects.create(first_name="Wesley", last_name="Chun", dob=date(1962, 10, 28))
         query = "SELECT * FROM raw_query_friendlyauthor"
-        self.assertEqual(
-            [o.pk for o in FriendlyAuthor.objects.raw(query)], [f.pk]
-        )
+        self.assertEqual([o.pk for o in FriendlyAuthor.objects.raw(query)], [f.pk])
 
     def test_query_count(self):
         self.assertNumQueries(1, list, Author.objects.raw("SELECT * FROM raw_query_author"))

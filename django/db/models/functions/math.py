@@ -3,9 +3,7 @@ import math
 from django.db.models.expressions import Func
 from django.db.models.fields import FloatField, IntegerField
 from django.db.models.functions import Cast
-from django.db.models.functions.mixins import (
-    FixDecimalInputMixin, NumericOutputFieldMixin,
-)
+from django.db.models.functions.mixins import FixDecimalInputMixin, NumericOutputFieldMixin
 from django.db.models.lookups import Transform
 
 
@@ -42,10 +40,12 @@ class ATan2(NumericOutputFieldMixin, Func):
         # arguments are mixed between integer and float or decimal.
         # https://www.gaia-gis.it/fossil/libspatialite/tktview?name=0f72cca3a2
         clone = self.copy()
-        clone.set_source_expressions([
-            Cast(expression, FloatField()) if isinstance(expression.output_field, IntegerField)
-            else expression for expression in self.get_source_expressions()[::-1]
-        ])
+        clone.set_source_expressions(
+            [
+                Cast(expression, FloatField()) if isinstance(expression.output_field, IntegerField) else expression
+                for expression in self.get_source_expressions()[::-1]
+            ]
+        )
         return clone.as_sql(compiler, connection, **extra_context)
 
 
@@ -76,9 +76,7 @@ class Degrees(NumericOutputFieldMixin, Transform):
 
     def as_oracle(self, compiler, connection, **extra_context):
         return super().as_sql(
-            compiler, connection,
-            template='((%%(expressions)s) * 180 / %s)' % math.pi,
-            **extra_context
+            compiler, connection, template='((%%(expressions)s) * 180 / %s)' % math.pi, **extra_context
         )
 
 
@@ -135,9 +133,7 @@ class Radians(NumericOutputFieldMixin, Transform):
 
     def as_oracle(self, compiler, connection, **extra_context):
         return super().as_sql(
-            compiler, connection,
-            template='((%%(expressions)s) * %s / 180)' % math.pi,
-            **extra_context
+            compiler, connection, template='((%%(expressions)s) * %s / 180)' % math.pi, **extra_context
         )
 
 

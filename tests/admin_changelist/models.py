@@ -93,6 +93,7 @@ class UnorderedObject(models.Model):
     Model without any defined `Meta.ordering`.
     Refs #17198.
     """
+
     bool = models.BooleanField(default=True)
 
 
@@ -106,6 +107,7 @@ class OrderedObject(models.Model):
     Model with Manager that defines a default order.
     Refs #17198.
     """
+
     name = models.CharField(max_length=255)
     bool = models.BooleanField(default=True)
     number = models.IntegerField(default=0, db_column='number_val')

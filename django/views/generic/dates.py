@@ -8,16 +8,13 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
 from django.views.generic.base import View
-from django.views.generic.detail import (
-    BaseDetailView, SingleObjectTemplateResponseMixin,
-)
-from django.views.generic.list import (
-    MultipleObjectMixin, MultipleObjectTemplateResponseMixin,
-)
+from django.views.generic.detail import BaseDetailView, SingleObjectTemplateResponseMixin
+from django.views.generic.list import MultipleObjectMixin, MultipleObjectTemplateResponseMixin
 
 
 class YearMixin:
     """Mixin for views manipulating year-based data."""
+
     year_format = '%Y'
     year = None
 
@@ -67,6 +64,7 @@ class YearMixin:
 
 class MonthMixin:
     """Mixin for views manipulating month-based data."""
+
     month_format = '%b'
     month = None
 
@@ -119,6 +117,7 @@ class MonthMixin:
 
 class DayMixin:
     """Mixin for views manipulating day-based data."""
+
     day_format = '%d'
     day = None
 
@@ -165,6 +164,7 @@ class DayMixin:
 
 class WeekMixin:
     """Mixin for views manipulating week-based data."""
+
     week_format = '%U'
     week = None
 
@@ -218,9 +218,9 @@ class WeekMixin:
         The first day according to the week format is 0 and the last day is 6.
         """
         week_format = self.get_week_format()
-        if week_format == '%W':                 # week starts on Monday
+        if week_format == '%W':  # week starts on Monday
             return date.weekday()
-        elif week_format == '%U':               # week starts on Sunday
+        elif week_format == '%U':  # week starts on Sunday
             return (date.weekday() + 1) % 7
         else:
             raise ValueError("unknown week format: %s" % week_format)
@@ -228,6 +228,7 @@ class WeekMixin:
 
 class DateMixin:
     """Mixin class for views manipulating date-based data."""
+
     date_field = None
     allow_future = False
 
@@ -281,10 +282,7 @@ class DateMixin:
         if self.uses_datetime_field:
             since = self._make_date_lookup_arg(date)
             until = self._make_date_lookup_arg(date + datetime.timedelta(days=1))
-            return {
-                '%s__gte' % date_field: since,
-                '%s__lt' % date_field: until,
-            }
+            return {'%s__gte' % date_field: since, '%s__lt' % date_field: until}
         else:
             # Skip self._make_date_lookup_arg, it's a no-op in this branch.
             return {date_field: date}
@@ -292,16 +290,13 @@ class DateMixin:
 
 class BaseDateListView(MultipleObjectMixin, DateMixin, View):
     """Abstract base class for date-based views displaying a list of objects."""
+
     allow_empty = False
     date_list_period = 'year'
 
     def get(self, request, *args, **kwargs):
         self.date_list, self.object_list, extra_context = self.get_dated_items()
-        context = self.get_context_data(
-            object_list=self.object_list,
-            date_list=self.date_list,
-            **extra_context
-        )
+        context = self.get_context_data(object_list=self.object_list, date_list=self.date_list, **extra_context)
         return self.render_to_response(context)
 
     def get_dated_items(self):
@@ -335,9 +330,10 @@ class BaseDateListView(MultipleObjectMixin, DateMixin, View):
             # than to load the unpaginated queryset in memory.
             is_empty = not qs if paginate_by is None else not qs.exists()
             if is_empty:
-                raise Http404(_("No %(verbose_name_plural)s available") % {
-                    'verbose_name_plural': qs.model._meta.verbose_name_plural,
-                })
+                raise Http404(
+                    _("No %(verbose_name_plural)s available")
+                    % {'verbose_name_plural': qs.model._meta.verbose_name_plural}
+                )
 
         return qs
 
@@ -364,9 +360,8 @@ class BaseDateListView(MultipleObjectMixin, DateMixin, View):
             date_list = queryset.dates(date_field, date_type, ordering)
         if date_list is not None and not date_list and not allow_empty:
             raise Http404(
-                _("No %(verbose_name_plural)s available") % {
-                    'verbose_name_plural': queryset.model._meta.verbose_name_plural,
-                }
+                _("No %(verbose_name_plural)s available")
+                % {'verbose_name_plural': queryset.model._meta.verbose_name_plural}
             )
 
         return date_list
@@ -376,6 +371,7 @@ class BaseArchiveIndexView(BaseDateListView):
     """
     Base class for archives of date-based items. Requires a response mixin.
     """
+
     context_object_name = 'latest'
 
     def get_dated_items(self):
@@ -391,11 +387,13 @@ class BaseArchiveIndexView(BaseDateListView):
 
 class ArchiveIndexView(MultipleObjectTemplateResponseMixin, BaseArchiveIndexView):
     """Top-level archive of date-based items."""
+
     template_name_suffix = '_archive'
 
 
 class BaseYearArchiveView(YearMixin, BaseDateListView):
     """List of objects published in a given year."""
+
     date_list_period = 'month'
     make_object_list = False
 
@@ -408,10 +406,7 @@ class BaseYearArchiveView(YearMixin, BaseDateListView):
 
         since = self._make_date_lookup_arg(date)
         until = self._make_date_lookup_arg(self._get_next_year(date))
-        lookup_kwargs = {
-            '%s__gte' % date_field: since,
-            '%s__lt' % date_field: until,
-        }
+        lookup_kwargs = {'%s__gte' % date_field: since, '%s__lt' % date_field: until}
 
         qs = self.get_dated_queryset(**lookup_kwargs)
         date_list = self.get_date_list(qs)
@@ -421,11 +416,11 @@ class BaseYearArchiveView(YearMixin, BaseDateListView):
             # to find information about the model.
             qs = qs.none()
 
-        return (date_list, qs, {
-            'year': date,
-            'next_year': self.get_next_year(date),
-            'previous_year': self.get_previous_year(date),
-        })
+        return (
+            date_list,
+            qs,
+            {'year': date, 'next_year': self.get_next_year(date), 'previous_year': self.get_previous_year(date)},
+        )
 
     def get_make_object_list(self):
         """
@@ -437,11 +432,13 @@ class BaseYearArchiveView(YearMixin, BaseDateListView):
 
 class YearArchiveView(MultipleObjectTemplateResponseMixin, BaseYearArchiveView):
     """List of objects published in a given year."""
+
     template_name_suffix = '_archive_year'
 
 
 class BaseMonthArchiveView(YearMixin, MonthMixin, BaseDateListView):
     """List of objects published in a given month."""
+
     date_list_period = 'day'
 
     def get_dated_items(self):
@@ -450,28 +447,25 @@ class BaseMonthArchiveView(YearMixin, MonthMixin, BaseDateListView):
         month = self.get_month()
 
         date_field = self.get_date_field()
-        date = _date_from_string(year, self.get_year_format(),
-                                 month, self.get_month_format())
+        date = _date_from_string(year, self.get_year_format(), month, self.get_month_format())
 
         since = self._make_date_lookup_arg(date)
         until = self._make_date_lookup_arg(self._get_next_month(date))
-        lookup_kwargs = {
-            '%s__gte' % date_field: since,
-            '%s__lt' % date_field: until,
-        }
+        lookup_kwargs = {'%s__gte' % date_field: since, '%s__lt' % date_field: until}
 
         qs = self.get_dated_queryset(**lookup_kwargs)
         date_list = self.get_date_list(qs)
 
-        return (date_list, qs, {
-            'month': date,
-            'next_month': self.get_next_month(date),
-            'previous_month': self.get_previous_month(date),
-        })
+        return (
+            date_list,
+            qs,
+            {'month': date, 'next_month': self.get_next_month(date), 'previous_month': self.get_previous_month(date)},
+        )
 
 
 class MonthArchiveView(MultipleObjectTemplateResponseMixin, BaseMonthArchiveView):
     """List of objects published in a given month."""
+
     template_name_suffix = '_archive_month'
 
 
@@ -489,46 +483,42 @@ class BaseWeekArchiveView(YearMixin, WeekMixin, BaseDateListView):
         try:
             week_start = week_choices[week_format]
         except KeyError:
-            raise ValueError('Unknown week format %r. Choices are: %s' % (
-                week_format,
-                ', '.join(sorted(week_choices)),
-            ))
-        date = _date_from_string(year, self.get_year_format(),
-                                 week_start, '%w',
-                                 week, week_format)
+            raise ValueError(
+                'Unknown week format %r. Choices are: %s' % (week_format, ', '.join(sorted(week_choices)))
+            )
+        date = _date_from_string(year, self.get_year_format(), week_start, '%w', week, week_format)
 
         since = self._make_date_lookup_arg(date)
         until = self._make_date_lookup_arg(self._get_next_week(date))
-        lookup_kwargs = {
-            '%s__gte' % date_field: since,
-            '%s__lt' % date_field: until,
-        }
+        lookup_kwargs = {'%s__gte' % date_field: since, '%s__lt' % date_field: until}
 
         qs = self.get_dated_queryset(**lookup_kwargs)
 
-        return (None, qs, {
-            'week': date,
-            'next_week': self.get_next_week(date),
-            'previous_week': self.get_previous_week(date),
-        })
+        return (
+            None,
+            qs,
+            {'week': date, 'next_week': self.get_next_week(date), 'previous_week': self.get_previous_week(date)},
+        )
 
 
 class WeekArchiveView(MultipleObjectTemplateResponseMixin, BaseWeekArchiveView):
     """List of objects published in a given week."""
+
     template_name_suffix = '_archive_week'
 
 
 class BaseDayArchiveView(YearMixin, MonthMixin, DayMixin, BaseDateListView):
     """List of objects published on a given day."""
+
     def get_dated_items(self):
         """Return (date_list, items, extra_context) for this request."""
         year = self.get_year()
         month = self.get_month()
         day = self.get_day()
 
-        date = _date_from_string(year, self.get_year_format(),
-                                 month, self.get_month_format(),
-                                 day, self.get_day_format())
+        date = _date_from_string(
+            year, self.get_year_format(), month, self.get_month_format(), day, self.get_day_format()
+        )
 
         return self._get_dated_items(date)
 
@@ -540,17 +530,22 @@ class BaseDayArchiveView(YearMixin, MonthMixin, DayMixin, BaseDateListView):
         lookup_kwargs = self._make_single_date_lookup(date)
         qs = self.get_dated_queryset(**lookup_kwargs)
 
-        return (None, qs, {
-            'day': date,
-            'previous_day': self.get_previous_day(date),
-            'next_day': self.get_next_day(date),
-            'previous_month': self.get_previous_month(date),
-            'next_month': self.get_next_month(date)
-        })
+        return (
+            None,
+            qs,
+            {
+                'day': date,
+                'previous_day': self.get_previous_day(date),
+                'next_day': self.get_next_day(date),
+                'previous_month': self.get_previous_month(date),
+                'next_month': self.get_next_month(date),
+            },
+        )
 
 
 class DayArchiveView(MultipleObjectTemplateResponseMixin, BaseDayArchiveView):
     """List of objects published on a given day."""
+
     template_name_suffix = "_archive_day"
 
 
@@ -564,6 +559,7 @@ class BaseTodayArchiveView(BaseDayArchiveView):
 
 class TodayArchiveView(MultipleObjectTemplateResponseMixin, BaseTodayArchiveView):
     """List of objects published today."""
+
     template_name_suffix = "_archive_day"
 
 
@@ -572,26 +568,24 @@ class BaseDateDetailView(YearMixin, MonthMixin, DayMixin, DateMixin, BaseDetailV
     Detail view of a single object on a single date; this differs from the
     standard DetailView by accepting a year/month/day in the URL.
     """
+
     def get_object(self, queryset=None):
         """Get the object this request displays."""
         year = self.get_year()
         month = self.get_month()
         day = self.get_day()
-        date = _date_from_string(year, self.get_year_format(),
-                                 month, self.get_month_format(),
-                                 day, self.get_day_format())
+        date = _date_from_string(
+            year, self.get_year_format(), month, self.get_month_format(), day, self.get_day_format()
+        )
 
         # Use a custom queryset if provided
         qs = self.get_queryset() if queryset is None else queryset
 
         if not self.get_allow_future() and date > datetime.date.today():
-            raise Http404(_(
-                "Future %(verbose_name_plural)s not available because "
-                "%(class_name)s.allow_future is False."
-            ) % {
-                'verbose_name_plural': qs.model._meta.verbose_name_plural,
-                'class_name': self.__class__.__name__,
-            })
+            raise Http404(
+                _("Future %(verbose_name_plural)s not available because " "%(class_name)s.allow_future is False.")
+                % {'verbose_name_plural': qs.model._meta.verbose_name_plural, 'class_name': self.__class__.__name__}
+            )
 
         # Filter down a queryset from self.queryset using the date from the
         # URL. This'll get passed as the queryset to DetailView.get_object,
@@ -607,6 +601,7 @@ class DateDetailView(SingleObjectTemplateResponseMixin, BaseDateDetailView):
     Detail view of a single object on a single date; this differs from the
     standard DetailView by accepting a year/month/day in the URL.
     """
+
     template_name_suffix = '_detail'
 
 
@@ -620,10 +615,9 @@ def _date_from_string(year, year_format, month='', month_format='', day='', day_
     try:
         return datetime.datetime.strptime(datestr, format).date()
     except ValueError:
-        raise Http404(_("Invalid date string '%(datestr)s' given format '%(format)s'") % {
-            'datestr': datestr,
-            'format': format,
-        })
+        raise Http404(
+            _("Invalid date string '%(datestr)s' given format '%(format)s'") % {'datestr': datestr, 'format': format}
+        )
 
 
 def _get_next_prev(generic_view, date, is_previous, period):

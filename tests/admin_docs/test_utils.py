@@ -1,8 +1,6 @@
 import unittest
 
-from django.contrib.admindocs.utils import (
-    docutils_is_available, parse_docstring, parse_rst, trim_docstring,
-)
+from django.contrib.admindocs.utils import docutils_is_available, parse_docstring, parse_rst, trim_docstring
 
 from .tests import AdminDocsSimpleTestCase
 
@@ -28,6 +26,7 @@ class TestUtils(AdminDocsSimpleTestCase):
 
     some_metadata: some data
     """
+
     def setUp(self):
         self.docstring = self.__doc__
 
@@ -113,6 +112,7 @@ class TestUtils(AdminDocsSimpleTestCase):
         ``cmsreference`` (#6681).
         """
         import docutils
+
         self.assertNotEqual(docutils.parsers.rst.roles.DEFAULT_INTERPRETED_ROLE, 'cmsreference')
         source = 'reST, `interpreted text`, default role.'
         markup = '<p>reST, <cite>interpreted text</cite>, default role.</p>\n'

@@ -8,7 +8,6 @@ from .settings import FLATPAGES_TEMPLATES
 
 
 class TestDataMixin:
-
     @classmethod
     def setUpTestData(cls):
         # don't use the manager because we want to ensure the site exists
@@ -16,20 +15,36 @@ class TestDataMixin:
         cls.site1 = Site(pk=1, domain='example.com', name='example.com')
         cls.site1.save()
         cls.fp1 = FlatPage.objects.create(
-            url='/flatpage/', title='A Flatpage', content="Isn't it flat!",
-            enable_comments=False, template_name='', registration_required=False
+            url='/flatpage/',
+            title='A Flatpage',
+            content="Isn't it flat!",
+            enable_comments=False,
+            template_name='',
+            registration_required=False,
         )
         cls.fp2 = FlatPage.objects.create(
-            url='/location/flatpage/', title='A Nested Flatpage', content="Isn't it flat and deep!",
-            enable_comments=False, template_name='', registration_required=False
+            url='/location/flatpage/',
+            title='A Nested Flatpage',
+            content="Isn't it flat and deep!",
+            enable_comments=False,
+            template_name='',
+            registration_required=False,
         )
         cls.fp3 = FlatPage.objects.create(
-            url='/sekrit/', title='Sekrit Flatpage', content="Isn't it sekrit!",
-            enable_comments=False, template_name='', registration_required=True
+            url='/sekrit/',
+            title='Sekrit Flatpage',
+            content="Isn't it sekrit!",
+            enable_comments=False,
+            template_name='',
+            registration_required=True,
         )
         cls.fp4 = FlatPage.objects.create(
-            url='/location/sekrit/', title='Sekrit Nested Flatpage', content="Isn't it sekrit and deep!",
-            enable_comments=False, template_name='', registration_required=True
+            url='/location/sekrit/',
+            title='Sekrit Nested Flatpage',
+            content="Isn't it sekrit and deep!",
+            enable_comments=False,
+            template_name='',
+            registration_required=True,
         )
         cls.fp1.sites.add(cls.site1)
         cls.fp2.sites.add(cls.site1)
@@ -53,7 +68,6 @@ class TestDataMixin:
     SITE_ID=1,
 )
 class FlatpageMiddlewareTests(TestDataMixin, TestCase):
-
     def test_view_flatpage(self):
         "A flatpage can be served through a view, even when the middleware is in use"
         response = self.client.get('/flatpage_root/flatpage/')
@@ -130,7 +144,6 @@ class FlatpageMiddlewareTests(TestDataMixin, TestCase):
     SITE_ID=1,
 )
 class FlatpageMiddlewareAppendSlashTests(TestDataMixin, TestCase):
-
     def test_redirect_view_flatpage(self):
         "A flatpage can be served through a view and should add a slash"
         response = self.client.get('/flatpage_root/flatpage')
@@ -174,11 +187,7 @@ class FlatpageMiddlewareAppendSlashTests(TestDataMixin, TestCase):
     def test_redirect_fallback_flatpage_root(self):
         "A flatpage at / should not cause a redirect loop when APPEND_SLASH is set"
         fp = FlatPage.objects.create(
-            url="/",
-            title="Root",
-            content="Root",
-            enable_comments=False,
-            registration_required=False,
+            url="/", title="Root", content="Root", enable_comments=False, registration_required=False
         )
         fp.sites.add(settings.SITE_ID)
 

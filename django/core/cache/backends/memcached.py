@@ -144,8 +144,10 @@ class BaseMemcachedCache(BaseCache):
 
 class MemcachedCache(BaseMemcachedCache):
     "An implementation of a cache binding using python-memcached"
+
     def __init__(self, server, params):
         import memcache
+
         super().__init__(server, params, library=memcache, value_not_found_exception=ValueError)
 
     @property
@@ -173,8 +175,10 @@ class MemcachedCache(BaseMemcachedCache):
 
 class PyLibMCCache(BaseMemcachedCache):
     "An implementation of a cache binding using pylibmc"
+
     def __init__(self, server, params):
         import pylibmc
+
         super().__init__(server, params, library=pylibmc, value_not_found_exception=pylibmc.NotFound)
 
     @cached_property

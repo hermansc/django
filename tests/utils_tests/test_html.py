@@ -4,14 +4,22 @@ from datetime import datetime
 from django.test import SimpleTestCase
 from django.utils.functional import lazystr
 from django.utils.html import (
-    conditional_escape, escape, escapejs, format_html, html_safe, json_script,
-    linebreaks, smart_urlquote, strip_spaces_between_tags, strip_tags, urlize,
+    conditional_escape,
+    escape,
+    escapejs,
+    format_html,
+    html_safe,
+    json_script,
+    linebreaks,
+    smart_urlquote,
+    strip_spaces_between_tags,
+    strip_tags,
+    urlize,
 )
 from django.utils.safestring import mark_safe
 
 
 class TestUtilsHtml(SimpleTestCase):
-
     def check_output(self, function, value, output=None):
         """
         function(value) equals output. If output is None, function(value)
@@ -22,13 +30,7 @@ class TestUtilsHtml(SimpleTestCase):
         self.assertEqual(function(value), output)
 
     def test_escape(self):
-        items = (
-            ('&', '&amp;'),
-            ('<', '&lt;'),
-            ('>', '&gt;'),
-            ('"', '&quot;'),
-            ("'", '&#39;'),
-        )
+        items = (('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'), ('"', '&quot;'), ("'", '&#39;'))
         # Substitution patterns for testing the above items.
         patterns = ("%s", "asdf%sfdsa", "%s1", "1%sb")
         for value, output in items:
@@ -51,7 +53,7 @@ class TestUtilsHtml(SimpleTestCase):
                 third="< dangerous again",
                 fourth=mark_safe("<i>safe again</i>"),
             ),
-            "&lt; Dangerous &gt; <b>safe</b> &lt; dangerous again <i>safe again</i>"
+            "&lt; Dangerous &gt; <b>safe</b> &lt; dangerous again <i>safe again</i>",
         )
 
     def test_linebreaks(self):
@@ -68,8 +70,10 @@ class TestUtilsHtml(SimpleTestCase):
 
     def test_strip_tags(self):
         items = (
-            ('<p>See: &#39;&eacute; is an apostrophe followed by e acute</p>',
-             'See: &#39;&eacute; is an apostrophe followed by e acute'),
+            (
+                '<p>See: &#39;&eacute; is an apostrophe followed by e acute</p>',
+                'See: &#39;&eacute; is an apostrophe followed by e acute',
+            ),
             ('<adf>a', 'a'),
             ('</adf>a', 'a'),
             ('<asdf><asdf>e', 'e'),
@@ -133,12 +137,12 @@ class TestUtilsHtml(SimpleTestCase):
             (r'\ : backslashes, too', '\\u005C : backslashes, too'),
             (
                 'and lots of whitespace: \r\n\t\v\f\b',
-                'and lots of whitespace: \\u000D\\u000A\\u0009\\u000B\\u000C\\u0008'
+                'and lots of whitespace: \\u000D\\u000A\\u0009\\u000B\\u000C\\u0008',
             ),
             (r'<script>and this</script>', '\\u003Cscript\\u003Eand this\\u003C/script\\u003E'),
             (
                 'paragraph separator:\u2029and line separator:\u2028',
-                'paragraph separator:\\u2029and line separator:\\u2028'
+                'paragraph separator:\\u2029and line separator:\\u2028',
             ),
             ('`', '\\u0060'),
         )
@@ -155,14 +159,14 @@ class TestUtilsHtml(SimpleTestCase):
             (
                 {'a': '<script>test&ing</script>'},
                 '<script id="test_id" type="application/json">'
-                '{"a": "\\u003Cscript\\u003Etest\\u0026ing\\u003C/script\\u003E"}</script>'
+                '{"a": "\\u003Cscript\\u003Etest\\u0026ing\\u003C/script\\u003E"}</script>',
             ),
             # Lazy strings are quoted
             (lazystr('&<>'), '<script id="test_id" type="application/json">"\\u0026\\u003C\\u003E"</script>'),
             (
                 {'a': lazystr('<script>test&ing</script>')},
                 '<script id="test_id" type="application/json">'
-                '{"a": "\\u003Cscript\\u003Etest\\u0026ing\\u003C/script\\u003E"}</script>'
+                '{"a": "\\u003Cscript\\u003Etest\\u0026ing\\u003C/script\\u003E"}</script>',
             ),
         )
         for arg, expected in tests:
@@ -179,10 +183,14 @@ class TestUtilsHtml(SimpleTestCase):
             ('http://example.com/%C3%B6/ä/', 'http://example.com/%C3%B6/%C3%A4/'),
             ('http://example.com/?x=1&y=2+3&z=', 'http://example.com/?x=1&y=2+3&z='),
             ('http://example.com/?x=<>"\'', 'http://example.com/?x=%3C%3E%22%27'),
-            ('http://example.com/?q=http://example.com/?x=1%26q=django',
-             'http://example.com/?q=http%3A%2F%2Fexample.com%2F%3Fx%3D1%26q%3Ddjango'),
-            ('http://example.com/?q=http%3A%2F%2Fexample.com%2F%3Fx%3D1%26q%3Ddjango',
-             'http://example.com/?q=http%3A%2F%2Fexample.com%2F%3Fx%3D1%26q%3Ddjango'),
+            (
+                'http://example.com/?q=http://example.com/?x=1%26q=django',
+                'http://example.com/?q=http%3A%2F%2Fexample.com%2F%3Fx%3D1%26q%3Ddjango',
+            ),
+            (
+                'http://example.com/?q=http%3A%2F%2Fexample.com%2F%3Fx%3D1%26q%3Ddjango',
+                'http://example.com/?q=http%3A%2F%2Fexample.com%2F%3Fx%3D1%26q%3Ddjango',
+            ),
             ('http://.www.f oo.bar/', 'http://.www.f%20oo.bar/'),
         )
         # IDNs are properly quoted
@@ -228,6 +236,7 @@ class TestUtilsHtml(SimpleTestCase):
     def test_html_safe_defines_html_error(self):
         msg = "can't apply @html_safe to HtmlClass because it defines __html__()."
         with self.assertRaisesMessage(ValueError, msg):
+
             @html_safe
             class HtmlClass:
                 def __html__(self):
@@ -236,6 +245,7 @@ class TestUtilsHtml(SimpleTestCase):
     def test_html_safe_doesnt_define_str(self):
         msg = "can't apply @html_safe to HtmlClass because it doesn't define __str__()."
         with self.assertRaisesMessage(ValueError, msg):
+
             @html_safe
             class HtmlClass:
                 pass
@@ -244,12 +254,9 @@ class TestUtilsHtml(SimpleTestCase):
         tests = (
             (
                 'Search for google.com/?q=! and see.',
-                'Search for <a href="http://google.com/?q=">google.com/?q=</a>! and see.'
+                'Search for <a href="http://google.com/?q=">google.com/?q=</a>! and see.',
             ),
-            (
-                lazystr('Search for google.com/?q=!'),
-                'Search for <a href="http://google.com/?q=">google.com/?q=</a>!'
-            ),
+            (lazystr('Search for google.com/?q=!'), 'Search for <a href="http://google.com/?q=">google.com/?q=</a>!'),
             ('foo@example.com', '<a href="mailto:foo@example.com">foo@example.com</a>'),
         )
         for value, output in tests:

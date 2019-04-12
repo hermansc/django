@@ -7,9 +7,22 @@ from django.db.models import Count
 from django.test import TestCase, override_settings
 
 from .models import (
-    Base, Child, Derived, Feature, Item, ItemAndSimpleItem, Leaf, Location,
-    OneToOneItem, Proxy, ProxyRelated, RelatedItem, Request, ResolveThis,
-    SimpleItem, SpecialFeature,
+    Base,
+    Child,
+    Derived,
+    Feature,
+    Item,
+    ItemAndSimpleItem,
+    Leaf,
+    Location,
+    OneToOneItem,
+    Proxy,
+    ProxyRelated,
+    RelatedItem,
+    Request,
+    ResolveThis,
+    SimpleItem,
+    SpecialFeature,
 )
 
 
@@ -57,10 +70,7 @@ class DeferRegressionTest(TestCase):
         self.assertEqual(obj.child.name, "c1")
 
         self.assertQuerysetEqual(
-            Leaf.objects.select_related().only("child__name", "second_child__name"), [
-                "l1",
-            ],
-            attrgetter("name")
+            Leaf.objects.select_related().only("child__name", "second_child__name"), ["l1"], attrgetter("name")
         )
 
         # Models instances with deferred fields should still return the same
@@ -84,12 +94,8 @@ class DeferRegressionTest(TestCase):
         self.assertEqual(results[0].second_child.name, "c2")
 
         # Regression for #16409 - make sure defer() and only() work with annotate()
-        self.assertIsInstance(
-            list(SimpleItem.objects.annotate(Count('feature')).defer('name')),
-            list)
-        self.assertIsInstance(
-            list(SimpleItem.objects.annotate(Count('feature')).only('name')),
-            list)
+        self.assertIsInstance(list(SimpleItem.objects.annotate(Count('feature')).defer('name')), list)
+        self.assertIsInstance(list(SimpleItem.objects.annotate(Count('feature')).only('name')), list)
 
     @override_settings(SESSION_SERIALIZER='django.contrib.sessions.serializers.PickleSerializer')
     def test_ticket_12163(self):
@@ -113,12 +119,8 @@ class DeferRegressionTest(TestCase):
 
     def test_ticket_16409(self):
         # Regression for #16409 - make sure defer() and only() work with annotate()
-        self.assertIsInstance(
-            list(SimpleItem.objects.annotate(Count('feature')).defer('name')),
-            list)
-        self.assertIsInstance(
-            list(SimpleItem.objects.annotate(Count('feature')).only('name')),
-            list)
+        self.assertIsInstance(list(SimpleItem.objects.annotate(Count('feature')).defer('name')), list)
+        self.assertIsInstance(list(SimpleItem.objects.annotate(Count('feature')).only('name')), list)
 
     def test_ticket_23270(self):
         Derived.objects.create(text="foo", other_text="bar")
@@ -157,8 +159,7 @@ class DeferRegressionTest(TestCase):
         o2o = OneToOneItem.objects.create(item=item, name="second")
         self.assertEqual(len(Item.objects.defer('one_to_one_item__name')), 1)
         self.assertEqual(len(Item.objects.select_related('one_to_one_item')), 1)
-        self.assertEqual(len(Item.objects.select_related(
-            'one_to_one_item').defer('one_to_one_item__name')), 1)
+        self.assertEqual(len(Item.objects.select_related('one_to_one_item').defer('one_to_one_item__name')), 1)
         self.assertEqual(len(Item.objects.select_related('one_to_one_item').defer('value')), 1)
         # Make sure that `only()` doesn't break when we pass in a unique relation,
         # rather than a field on the relation.
@@ -168,8 +169,7 @@ class DeferRegressionTest(TestCase):
             self.assertEqual(i.one_to_one_item.pk, o2o.pk)
             self.assertEqual(i.one_to_one_item.name, "second")
         with self.assertNumQueries(1):
-            i = Item.objects.select_related('one_to_one_item').defer(
-                'value', 'one_to_one_item__name')[0]
+            i = Item.objects.select_related('one_to_one_item').defer('value', 'one_to_one_item__name')[0]
             self.assertEqual(i.one_to_one_item.pk, o2o.pk)
             self.assertEqual(i.name, "first")
         with self.assertNumQueries(1):
@@ -223,19 +223,28 @@ class DeferAnnotateSelectRelatedTest(TestCase):
         location = Location.objects.create()
         Request.objects.create(location=location)
         self.assertIsInstance(
-            list(Request.objects.annotate(Count('items')).select_related('profile', 'location')
-                 .only('profile', 'location')),
-            list
+            list(
+                Request.objects.annotate(Count('items'))
+                .select_related('profile', 'location')
+                .only('profile', 'location')
+            ),
+            list,
         )
         self.assertIsInstance(
-            list(Request.objects.annotate(Count('items')).select_related('profile', 'location')
-                 .only('profile__profile1', 'location__location1')),
-            list
+            list(
+                Request.objects.annotate(Count('items'))
+                .select_related('profile', 'location')
+                .only('profile__profile1', 'location__location1')
+            ),
+            list,
         )
         self.assertIsInstance(
-            list(Request.objects.annotate(Count('items')).select_related('profile', 'location')
-                 .defer('request1', 'request2', 'request3', 'request4')),
-            list
+            list(
+                Request.objects.annotate(Count('items'))
+                .select_related('profile', 'location')
+                .defer('request1', 'request2', 'request3', 'request4')
+            ),
+            list,
         )
 
 

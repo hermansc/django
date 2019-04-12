@@ -19,12 +19,8 @@ DEFAULT_LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
+        'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'},
+        'require_debug_true': {'()': 'django.utils.log.RequireDebugTrue'},
     },
     'formatters': {
         'django.server': {
@@ -34,33 +30,18 @@ DEFAULT_LOGGING = {
         }
     },
     'handlers': {
-        'console': {
-            'level': 'INFO',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-        },
-        'django.server': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'django.server',
-        },
+        'console': {'level': 'INFO', 'filters': ['require_debug_true'], 'class': 'logging.StreamHandler'},
+        'django.server': {'level': 'INFO', 'class': 'logging.StreamHandler', 'formatter': 'django.server'},
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console', 'mail_admins'],
-            'level': 'INFO',
-        },
-        'django.server': {
-            'handlers': ['django.server'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    }
+        'django': {'handlers': ['console', 'mail_admins'], 'level': 'INFO'},
+        'django.server': {'handlers': ['django.server'], 'level': 'INFO', 'propagate': False},
+    },
 }
 
 
@@ -93,15 +74,11 @@ class AdminEmailHandler(logging.Handler):
             request = record.request
             subject = '%s (%s IP): %s' % (
                 record.levelname,
-                ('internal' if request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS
-                 else 'EXTERNAL'),
-                record.getMessage()
+                ('internal' if request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS else 'EXTERNAL'),
+                record.getMessage(),
             )
         except Exception:
-            subject = '%s: %s' % (
-                record.levelname,
-                record.getMessage()
-            )
+            subject = '%s: %s' % (record.levelname, record.getMessage())
             request = None
         subject = self.format_subject(subject)
 
@@ -140,6 +117,7 @@ class CallbackFilter(logging.Filter):
     takes the record-to-be-logged as its only parameter) to decide whether to
     log a record.
     """
+
     def __init__(self, callback):
         self.callback = callback
 
@@ -220,11 +198,6 @@ def log_response(message, *args, response=None, request=None, logger=request_log
             level = 'info'
 
     getattr(logger, level)(
-        message, *args,
-        extra={
-            'status_code': response.status_code,
-            'request': request,
-        },
-        exc_info=exc_info,
+        message, *args, extra={'status_code': response.status_code, 'request': request}, exc_info=exc_info
     )
     response._has_been_logged = True

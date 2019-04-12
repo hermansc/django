@@ -17,8 +17,7 @@ class TemplateStrings(BaseEngine):
         params = params.copy()
         options = params.pop('OPTIONS').copy()
         if options:
-            raise ImproperlyConfigured(
-                "Unknown options: {}".format(", ".join(options)))
+            raise ImproperlyConfigured("Unknown options: {}".format(", ".join(options)))
         super().__init__(params)
 
     def from_string(self, template_code):
@@ -31,17 +30,13 @@ class TemplateStrings(BaseEngine):
                 with open(template_file, encoding=settings.FILE_CHARSET) as fp:
                     template_code = fp.read()
             except FileNotFoundError:
-                tried.append((
-                    Origin(template_file, template_name, self),
-                    'Source does not exist',
-                ))
+                tried.append((Origin(template_file, template_name, self), 'Source does not exist'))
             else:
                 return Template(template_code)
         raise TemplateDoesNotExist(template_name, tried=tried, backend=self)
 
 
 class Template(string.Template):
-
     def render(self, context=None, request=None):
         if context is None:
             context = {}

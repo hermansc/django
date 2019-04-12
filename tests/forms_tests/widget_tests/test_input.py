@@ -4,7 +4,6 @@ from .base import WidgetTest
 
 
 class InputTests(WidgetTest):
-
     def test_attrs_with_type(self):
         attrs = {'type': 'date'}
         widget = Input(attrs)

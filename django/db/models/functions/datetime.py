@@ -2,12 +2,8 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db.models.expressions import Func
-from django.db.models.fields import (
-    DateField, DateTimeField, DurationField, Field, IntegerField, TimeField,
-)
-from django.db.models.lookups import (
-    Transform, YearExact, YearGt, YearGte, YearLt, YearLte,
-)
+from django.db.models.fields import DateField, DateTimeField, DurationField, Field, IntegerField, TimeField
+from django.db.models.lookups import Transform, YearExact, YearGt, YearGte, YearLt, YearLte
 from django.utils import timezone
 
 
@@ -65,8 +61,7 @@ class Extract(TimezoneMixin, Transform):
         field = copy.lhs.output_field
         if not isinstance(field, (DateField, DateTimeField, TimeField, DurationField)):
             raise ValueError(
-                'Extract input expression must be DateField, DateTimeField, '
-                'TimeField, or DurationField.'
+                'Extract input expression must be DateField, DateTimeField, ' 'TimeField, or DurationField.'
             )
         # Passing dates to functions expecting datetimes is most likely a mistake.
         if type(field) == DateField and copy.lookup_name in ('hour', 'minute', 'second'):
@@ -82,6 +77,7 @@ class ExtractYear(Extract):
 
 class ExtractIsoYear(Extract):
     """Return the ISO-8601 week-numbering year."""
+
     lookup_name = 'iso_year'
 
 
@@ -98,6 +94,7 @@ class ExtractWeek(Extract):
     Return 1-52 or 53, based on ISO-8601, i.e., Monday is the first of the
     week.
     """
+
     lookup_name = 'week'
 
 
@@ -107,6 +104,7 @@ class ExtractWeekDay(Extract):
 
     To replicate this in Python: (mydatetime.isoweekday() % 7) + 1
     """
+
     lookup_name = 'week_day'
 
 
@@ -205,16 +203,19 @@ class TruncBase(TimezoneMixin, Transform):
         output_field = class_output_field or copy.output_field
         has_explicit_output_field = class_output_field or field.__class__ is not copy.output_field.__class__
         if type(field) == DateField and (
-                isinstance(output_field, DateTimeField) or copy.kind in ('hour', 'minute', 'second', 'time')):
-            raise ValueError("Cannot truncate DateField '%s' to %s. " % (
-                field.name, output_field.__class__.__name__ if has_explicit_output_field else 'DateTimeField'
-            ))
+            isinstance(output_field, DateTimeField) or copy.kind in ('hour', 'minute', 'second', 'time')
+        ):
+            raise ValueError(
+                "Cannot truncate DateField '%s' to %s. "
+                % (field.name, output_field.__class__.__name__ if has_explicit_output_field else 'DateTimeField')
+            )
         elif isinstance(field, TimeField) and (
-                isinstance(output_field, DateTimeField) or
-                copy.kind in ('year', 'quarter', 'month', 'week', 'day', 'date')):
-            raise ValueError("Cannot truncate TimeField '%s' to %s. " % (
-                field.name, output_field.__class__.__name__ if has_explicit_output_field else 'DateTimeField'
-            ))
+            isinstance(output_field, DateTimeField) or copy.kind in ('year', 'quarter', 'month', 'week', 'day', 'date')
+        ):
+            raise ValueError(
+                "Cannot truncate TimeField '%s' to %s. "
+                % (field.name, output_field.__class__.__name__ if has_explicit_output_field else 'DateTimeField')
+            )
         return copy
 
     def convert_value(self, value, expression, connection):
@@ -240,13 +241,9 @@ class TruncBase(TimezoneMixin, Transform):
 
 
 class Trunc(TruncBase):
-
     def __init__(self, expression, kind, output_field=None, tzinfo=None, is_dst=None, **extra):
         self.kind = kind
-        super().__init__(
-            expression, output_field=output_field, tzinfo=tzinfo,
-            is_dst=is_dst, **extra
-        )
+        super().__init__(expression, output_field=output_field, tzinfo=tzinfo, is_dst=is_dst, **extra)
 
 
 class TruncYear(TruncBase):
@@ -263,6 +260,7 @@ class TruncMonth(TruncBase):
 
 class TruncWeek(TruncBase):
     """Truncate to midnight on the Monday of the week."""
+
     kind = 'week'
 
 

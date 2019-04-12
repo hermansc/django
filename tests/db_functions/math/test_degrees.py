@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class DegreesTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_degrees=Degrees('normal')).first()
@@ -35,9 +34,7 @@ class DegreesTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_degrees=Degrees('small'),
-            normal_degrees=Degrees('normal'),
-            big_degrees=Degrees('big'),
+            small_degrees=Degrees('small'), normal_degrees=Degrees('normal'), big_degrees=Degrees('big')
         ).first()
         self.assertIsInstance(obj.small_degrees, float)
         self.assertIsInstance(obj.normal_degrees, float)

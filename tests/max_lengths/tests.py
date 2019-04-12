@@ -6,7 +6,6 @@ from .models import PersonWithCustomMaxLengths, PersonWithDefaultMaxLengths
 
 
 class MaxLengthArgumentsTests(unittest.TestCase):
-
     def verify_max_length(self, model, field, length):
         self.assertEqual(model._meta.get_field(field).max_length, length)
 
@@ -24,13 +23,12 @@ class MaxLengthArgumentsTests(unittest.TestCase):
 
 
 class MaxLengthORMTests(TestCase):
-
     def test_custom_max_lengths(self):
         args = {
             "email": "someone@example.com",
             "vcard": "vcard",
             "homepage": "http://example.com/",
-            "avatar": "me.jpg"
+            "avatar": "me.jpg",
         }
 
         for field in ("email", "vcard", "homepage", "avatar"):

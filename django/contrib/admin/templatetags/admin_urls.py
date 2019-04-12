@@ -45,9 +45,11 @@ def add_preserved_filters(context, url, popup=False, to_field=None):
 
     if popup:
         from django.contrib.admin.options import IS_POPUP_VAR
+
         merged_qs[IS_POPUP_VAR] = 1
     if to_field:
         from django.contrib.admin.options import TO_FIELD_VAR
+
         merged_qs[TO_FIELD_VAR] = to_field
 
     merged_qs.update(parsed_qs)

@@ -2,18 +2,10 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.admin import FieldListFilter
-from django.contrib.admin.exceptions import (
-    DisallowedModelAdminLookup, DisallowedModelAdminToField,
-)
-from django.contrib.admin.options import (
-    IS_POPUP_VAR, TO_FIELD_VAR, IncorrectLookupParameters,
-)
-from django.contrib.admin.utils import (
-    get_fields_from_path, lookup_needs_distinct, prepare_lookup_value, quote,
-)
-from django.core.exceptions import (
-    FieldDoesNotExist, ImproperlyConfigured, SuspiciousOperation,
-)
+from django.contrib.admin.exceptions import DisallowedModelAdminLookup, DisallowedModelAdminToField
+from django.contrib.admin.options import IS_POPUP_VAR, TO_FIELD_VAR, IncorrectLookupParameters
+from django.contrib.admin.utils import get_fields_from_path, lookup_needs_distinct, prepare_lookup_value, quote
+from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured, SuspiciousOperation
 from django.core.paginator import InvalidPage
 from django.db import models
 from django.db.models.expressions import Combinable, F, OrderBy
@@ -30,14 +22,26 @@ PAGE_VAR = 'p'
 SEARCH_VAR = 'q'
 ERROR_FLAG = 'e'
 
-IGNORED_PARAMS = (
-    ALL_VAR, ORDER_VAR, ORDER_TYPE_VAR, SEARCH_VAR, IS_POPUP_VAR, TO_FIELD_VAR)
+IGNORED_PARAMS = (ALL_VAR, ORDER_VAR, ORDER_TYPE_VAR, SEARCH_VAR, IS_POPUP_VAR, TO_FIELD_VAR)
 
 
 class ChangeList:
-    def __init__(self, request, model, list_display, list_display_links,
-                 list_filter, date_hierarchy, search_fields, list_select_related,
-                 list_per_page, list_max_show_all, list_editable, model_admin, sortable_by):
+    def __init__(
+        self,
+        request,
+        model,
+        list_display,
+        list_display_links,
+        list_filter,
+        date_hierarchy,
+        search_fields,
+        list_select_related,
+        list_per_page,
+        list_max_show_all,
+        list_editable,
+        model_admin,
+        sortable_by,
+    ):
         self.model = model
         self.opts = model._meta
         self.lookup_opts = self.opts
@@ -130,8 +134,7 @@ class ChangeList:
 
                 lookup_params_count = len(lookup_params)
                 spec = field_list_filter_class(
-                    field, request, lookup_params,
-                    self.model, self.model_admin, field_path=field_path,
+                    field, request, lookup_params, self.model, self.model_admin, field_path=field_path
                 )
                 # field_list_filter_class removes any lookup_params it
                 # processes. If that happened, check if distinct() is needed to
@@ -150,9 +153,7 @@ class ChangeList:
                 day = lookup_params.pop('%s__day' % self.date_hierarchy, None)
                 try:
                     from_date = datetime(
-                        int(year),
-                        int(month if month is not None else 1),
-                        int(day if day is not None else 1),
+                        int(year), int(month if month is not None else 1), int(day if day is not None else 1)
                     )
                 except ValueError as e:
                     raise IncorrectLookupParameters(e) from e
@@ -166,10 +167,9 @@ class ChangeList:
                     to_date = (from_date + timedelta(days=32)).replace(day=1)
                 else:
                     to_date = from_date.replace(year=from_date.year + 1)
-                lookup_params.update({
-                    '%s__gte' % self.date_hierarchy: from_date,
-                    '%s__lt' % self.date_hierarchy: to_date,
-                })
+                lookup_params.update(
+                    {'%s__gte' % self.date_hierarchy: from_date, '%s__lt' % self.date_hierarchy: to_date}
+                )
 
         # At this point, all the parameters used by the various ListFilters
         # have been removed from lookup_params, which now only contains other
@@ -316,8 +316,7 @@ class ChangeList:
         ordering = list(ordering)
         ordering_fields = set()
         total_ordering_fields = {'pk'} | {
-            field.attname for field in self.lookup_opts.fields
-            if field.unique and not field.null
+            field.attname for field in self.lookup_opts.fields if field.unique and not field.null
         }
         for part in ordering:
             # Search for single field providing a total ordering.
@@ -402,8 +401,9 @@ class ChangeList:
 
     def get_queryset(self, request):
         # First, we collect all the declared list filters.
-        (self.filter_specs, self.has_filters, remaining_lookup_params,
-         filters_use_distinct) = self.get_filters(request)
+        (self.filter_specs, self.has_filters, remaining_lookup_params, filters_use_distinct) = self.get_filters(
+            request
+        )
 
         # Then, we let every list filter modify the queryset to its liking.
         qs = self.root_queryset
@@ -472,7 +472,8 @@ class ChangeList:
 
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
-        return reverse('admin:%s_%s_change' % (self.opts.app_label,
-                                               self.opts.model_name),
-                       args=(quote(pk),),
-                       current_app=self.model_admin.admin_site.name)
+        return reverse(
+            'admin:%s_%s_change' % (self.opts.app_label, self.opts.model_name),
+            args=(quote(pk),),
+            current_app=self.model_admin.admin_site.name,
+        )

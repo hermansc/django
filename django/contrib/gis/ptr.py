@@ -6,6 +6,7 @@ class CPointerBase:
     Base class for objects that have a pointer access property
     that controls access to the underlying C pointer.
     """
+
     _ptr = None  # Initially the pointer is NULL.
     ptr_type = c_void_p
     destructor = None

@@ -2,7 +2,6 @@ from django.template import Template, TemplateDoesNotExist
 
 
 class Loader:
-
     def __init__(self, engine):
         self.engine = engine
 
@@ -26,9 +25,7 @@ class Loader:
                 tried.append((origin, 'Source does not exist'))
                 continue
             else:
-                return Template(
-                    contents, origin, origin.template_name, self.engine,
-                )
+                return Template(contents, origin, origin.template_name, self.engine)
 
         raise TemplateDoesNotExist(template_name, tried=tried)
 
@@ -37,9 +34,7 @@ class Loader:
         An iterator that yields possible matching template paths for a
         template name.
         """
-        raise NotImplementedError(
-            'subclasses of Loader must provide a get_template_sources() method'
-        )
+        raise NotImplementedError('subclasses of Loader must provide a get_template_sources() method')
 
     def reset(self):
         """

@@ -10,7 +10,4 @@ class Command(BaseCommand):
         parser.add_argument('--sitemap-uses-http', action='store_true')
 
     def handle(self, *args, **options):
-        ping_google(
-            sitemap_url=options['sitemap_url'],
-            sitemap_uses_https=not options['sitemap_uses_http'],
-        )
+        ping_google(sitemap_url=options['sitemap_url'], sitemap_uses_https=not options['sitemap_uses_http'])

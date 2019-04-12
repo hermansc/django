@@ -1,7 +1,5 @@
 from django.contrib.messages import constants
-from django.contrib.messages.storage.fallback import (
-    CookieStorage, FallbackStorage,
-)
+from django.contrib.messages.storage.fallback import CookieStorage, FallbackStorage
 from django.test import SimpleTestCase
 
 from .base import BaseTests
@@ -34,9 +32,8 @@ class FallbackTests(BaseTests, SimpleTestCase):
         """
         Return the storage totals from both cookie and session backends.
         """
-        return (
-            self.stored_cookie_messages_count(storage, response) +
-            self.stored_session_messages_count(storage, response)
+        return self.stored_cookie_messages_count(storage, response) + self.stored_session_messages_count(
+            storage, response
         )
 
     def test_get(self):

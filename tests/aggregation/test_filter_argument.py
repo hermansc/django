@@ -15,18 +15,33 @@ class FilteredAggregateTests(TestCase):
         cls.a3 = Author.objects.create(name='test3', age=100)
         cls.p1 = Publisher.objects.create(name='Apress', num_awards=3, duration=datetime.timedelta(days=1))
         cls.b1 = Book.objects.create(
-            isbn='159059725', name='The Definitive Guide to Django: Web Development Done Right',
-            pages=447, rating=4.5, price=Decimal('30.00'), contact=cls.a1, publisher=cls.p1,
+            isbn='159059725',
+            name='The Definitive Guide to Django: Web Development Done Right',
+            pages=447,
+            rating=4.5,
+            price=Decimal('30.00'),
+            contact=cls.a1,
+            publisher=cls.p1,
             pubdate=datetime.date(2007, 12, 6),
         )
         cls.b2 = Book.objects.create(
-            isbn='067232959', name='Sams Teach Yourself Django in 24 Hours',
-            pages=528, rating=3.0, price=Decimal('23.09'), contact=cls.a2, publisher=cls.p1,
+            isbn='067232959',
+            name='Sams Teach Yourself Django in 24 Hours',
+            pages=528,
+            rating=3.0,
+            price=Decimal('23.09'),
+            contact=cls.a2,
+            publisher=cls.p1,
             pubdate=datetime.date(2008, 3, 3),
         )
         cls.b3 = Book.objects.create(
-            isbn='159059996', name='Practical Django Projects',
-            pages=600, rating=4.5, price=Decimal('29.69'), contact=cls.a3, publisher=cls.p1,
+            isbn='159059996',
+            name='Practical Django Projects',
+            pages=600,
+            rating=4.5,
+            price=Decimal('29.69'),
+            contact=cls.a3,
+            publisher=cls.p1,
             pubdate=datetime.date(2008, 6, 23),
         )
         cls.a1.friends.add(cls.a2)
@@ -69,10 +84,7 @@ class FilteredAggregateTests(TestCase):
         self.assertEqual(aggregated, {'summed_age': 140})
 
     def test_case_aggregate(self):
-        agg = Sum(
-            Case(When(friends__age=40, then=F('friends__age'))),
-            filter=Q(friends__name__startswith='test'),
-        )
+        agg = Sum(Case(When(friends__age=40, then=F('friends__age'))), filter=Q(friends__name__startswith='test'))
         self.assertEqual(Author.objects.aggregate(age=agg)['age'], 80)
 
     def test_sum_star_exception(self):
@@ -81,17 +93,13 @@ class FilteredAggregateTests(TestCase):
             Count('*', filter=Q(age=40))
 
     def test_filtered_reused_subquery(self):
-        qs = Author.objects.annotate(
-            older_friends_count=Count('friends', filter=Q(friends__age__gt=F('age'))),
-        ).filter(
-            older_friends_count__gte=2,
+        qs = Author.objects.annotate(older_friends_count=Count('friends', filter=Q(friends__age__gt=F('age')))).filter(
+            older_friends_count__gte=2
         )
         self.assertEqual(qs.get(pk__in=qs.values('pk')), self.a1)
 
     def test_filtered_aggregate_ref_annotation(self):
-        aggs = Author.objects.annotate(
-            double_age=F('age') * 2,
-        ).aggregate(
-            cnt=Count('pk', filter=Q(double_age__gt=100)),
+        aggs = Author.objects.annotate(double_age=F('age') * 2).aggregate(
+            cnt=Count('pk', filter=Q(double_age__gt=100))
         )
         self.assertEqual(aggs['cnt'], 2)

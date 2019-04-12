@@ -38,15 +38,10 @@ class EngineHandler:
                 invalid_backend = tpl.get('BACKEND', '<not defined>')
                 raise ImproperlyConfigured(
                     "Invalid BACKEND for a template engine: {}. Check "
-                    "your TEMPLATES setting.".format(invalid_backend))
+                    "your TEMPLATES setting.".format(invalid_backend)
+                )
 
-            tpl = {
-                'NAME': default_name,
-                'DIRS': [],
-                'APP_DIRS': False,
-                'OPTIONS': {},
-                **tpl,
-            }
+            tpl = {'NAME': default_name, 'DIRS': [], 'APP_DIRS': False, 'OPTIONS': {}, **tpl}
 
             templates[tpl['NAME']] = tpl
             backend_names.append(tpl['NAME'])
@@ -56,8 +51,8 @@ class EngineHandler:
         if duplicates:
             raise ImproperlyConfigured(
                 "Template engine aliases aren't unique, duplicates: {}. "
-                "Set a unique NAME for each engine in settings.TEMPLATES."
-                .format(", ".join(duplicates)))
+                "Set a unique NAME for each engine in settings.TEMPLATES.".format(", ".join(duplicates))
+            )
 
         return templates
 
@@ -69,8 +64,8 @@ class EngineHandler:
                 params = self.templates[alias]
             except KeyError:
                 raise InvalidTemplateEngineError(
-                    "Could not find config for '{}' "
-                    "in settings.TEMPLATES".format(alias))
+                    "Could not find config for '{}' " "in settings.TEMPLATES".format(alias)
+                )
 
             # If importing or initializing the backend raises an exception,
             # self._engines[alias] isn't set and this code may get executed

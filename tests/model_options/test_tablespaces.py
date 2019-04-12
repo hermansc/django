@@ -1,13 +1,9 @@
 from django.apps import apps
 from django.conf import settings
 from django.db import connection
-from django.test import (
-    TransactionTestCase, skipIfDBFeature, skipUnlessDBFeature,
-)
+from django.test import TransactionTestCase, skipIfDBFeature, skipUnlessDBFeature
 
-from .models.tablespaces import (
-    Article, ArticleRef, Authors, Reviewers, Scientist, ScientistRef,
-)
+from .models.tablespaces import Article, ArticleRef, Authors, Reviewers, Scientist, ScientistRef
 
 
 def sql_for_table(model):
@@ -61,8 +57,7 @@ class TablespacesTests(TransactionTestCase):
     @skipIfDBFeature('supports_tablespaces')
     def test_tablespace_ignored_for_model(self):
         # No tablespace-related SQL
-        self.assertEqual(sql_for_table(Scientist),
-                         sql_for_table(ScientistRef))
+        self.assertEqual(sql_for_table(Scientist), sql_for_table(ScientistRef))
 
     @skipUnlessDBFeature('supports_tablespaces')
     def test_tablespace_for_indexed_field(self):
@@ -82,8 +77,7 @@ class TablespacesTests(TransactionTestCase):
     @skipIfDBFeature('supports_tablespaces')
     def test_tablespace_ignored_for_indexed_field(self):
         # No tablespace-related SQL
-        self.assertEqual(sql_for_table(Article),
-                         sql_for_table(ArticleRef))
+        self.assertEqual(sql_for_table(Article), sql_for_table(ArticleRef))
 
     @skipUnlessDBFeature('supports_tablespaces')
     def test_tablespace_for_many_to_many_field(self):

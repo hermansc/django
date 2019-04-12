@@ -75,8 +75,4 @@ class UniqueTogether(models.Model):
     non_unique_0 = models.IntegerField(db_column='non_unique__column')
 
     class Meta:
-        unique_together = [
-            ('field1', 'field2'),
-            ('from_field', 'field1'),
-            ('non_unique', 'non_unique_0'),
-        ]
+        unique_together = [('field1', 'field2'), ('from_field', 'field1'), ('non_unique', 'non_unique_0')]

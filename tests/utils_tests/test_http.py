@@ -5,17 +5,28 @@ from django.test import SimpleTestCase, ignore_warnings
 from django.utils.datastructures import MultiValueDict
 from django.utils.deprecation import RemovedInDjango40Warning
 from django.utils.http import (
-    base36_to_int, escape_leading_slashes, http_date, int_to_base36,
-    is_safe_url, is_same_domain, parse_etags, parse_http_date, quote_etag,
-    urlencode, urlquote, urlquote_plus, urlsafe_base64_decode,
-    urlsafe_base64_encode, urlunquote, urlunquote_plus,
+    base36_to_int,
+    escape_leading_slashes,
+    http_date,
+    int_to_base36,
+    is_safe_url,
+    is_same_domain,
+    parse_etags,
+    parse_http_date,
+    quote_etag,
+    urlencode,
+    urlquote,
+    urlquote_plus,
+    urlsafe_base64_decode,
+    urlsafe_base64_encode,
+    urlunquote,
+    urlunquote_plus,
 )
 
 
 class URLEncodeTests(SimpleTestCase):
     cannot_encode_none_msg = (
-        'Cannot encode None in a query string. Did you mean to pass an '
-        'empty string or omit the value?'
+        'Cannot encode None in a query string. Did you mean to pass an ' 'empty string or omit the value?'
     )
 
     def test_tuples(self):
@@ -24,14 +35,9 @@ class URLEncodeTests(SimpleTestCase):
     def test_dict(self):
         result = urlencode({'a': 1, 'b': 2, 'c': 3})
         # Dictionaries are treated as unordered.
-        self.assertIn(result, [
-            'a=1&b=2&c=3',
-            'a=1&c=3&b=2',
-            'b=2&a=1&c=3',
-            'b=2&c=3&a=1',
-            'c=3&a=1&b=2',
-            'c=3&b=2&a=1',
-        ])
+        self.assertIn(
+            result, ['a=1&b=2&c=3', 'a=1&c=3&b=2', 'b=2&a=1&c=3', 'b=2&c=3&a=1', 'c=3&a=1&b=2', 'c=3&b=2&a=1']
+        )
 
     def test_dict_containing_sequence_not_doseq(self):
         self.assertEqual(urlencode({'a': [1, 2]}, doseq=False), 'a=%5B%271%27%2C+%272%27%5D')
@@ -43,15 +49,11 @@ class URLEncodeTests(SimpleTestCase):
         self.assertEqual(urlencode({'a': []}, doseq=True), '')
 
     def test_multivaluedict(self):
-        result = urlencode(MultiValueDict({
-            'name': ['Adrian', 'Simon'],
-            'position': ['Developer'],
-        }), doseq=True)
+        result = urlencode(MultiValueDict({'name': ['Adrian', 'Simon'], 'position': ['Developer']}), doseq=True)
         # MultiValueDicts are similarly unordered.
-        self.assertIn(result, [
-            'name=Adrian&name=Simon&position=Developer',
-            'position=Developer&name=Adrian&name=Simon',
-        ])
+        self.assertIn(
+            result, ['name=Adrian&name=Simon&position=Developer', 'position=Developer&name=Adrian&name=Simon']
+        )
 
     def test_dict_with_bytes_values(self):
         self.assertEqual(urlencode({'a': b'abc'}, doseq=True), 'a=abc')
@@ -81,6 +83,7 @@ class URLEncodeTests(SimpleTestCase):
     def test_none_in_generator(self):
         def gen():
             yield None
+
         with self.assertRaisesMessage(TypeError, self.cannot_encode_none_msg):
             urlencode({'a': gen()}, doseq=True)
 
@@ -189,21 +192,13 @@ class IsSafeURLTests(unittest.TestCase):
         self.assertIs(is_safe_url('http://good.co/evil', allowed_hosts='good.com'), False)
 
     def test_secure_param_https_urls(self):
-        secure_urls = (
-            'https://example.com/p',
-            'HTTPS://example.com/p',
-            '/view/?param=http://example.com',
-        )
+        secure_urls = ('https://example.com/p', 'HTTPS://example.com/p', '/view/?param=http://example.com')
         for url in secure_urls:
             with self.subTest(url=url):
                 self.assertIs(is_safe_url(url, allowed_hosts={'example.com'}, require_https=True), True)
 
     def test_secure_param_non_https_urls(self):
-        insecure_urls = (
-            'http://example.com/p',
-            'ftp://example.com/p',
-            '//example.com/p',
-        )
+        insecure_urls = ('http://example.com/p', 'ftp://example.com/p', '//example.com/p')
         for url in insecure_urls:
             with self.subTest(url=url):
                 self.assertIs(is_safe_url(url, allowed_hosts={'example.com'}, require_https=True), False)
@@ -260,10 +255,7 @@ class IsSameDomainTests(unittest.TestCase):
 
 class ETagProcessingTests(unittest.TestCase):
     def test_parsing(self):
-        self.assertEqual(
-            parse_etags(r'"" ,  "etag", "e\\tag", W/"weak"'),
-            ['""', '"etag"', r'"e\\tag"', 'W/"weak"']
-        )
+        self.assertEqual(parse_etags(r'"" ,  "etag", "e\\tag", W/"weak"'), ['""', '"etag"', r'"e\\tag"', 'W/"weak"'])
         self.assertEqual(parse_etags('*'), ['*'])
 
         # Ignore RFC 2616 ETags that are invalid according to RFC 7232.
@@ -299,10 +291,7 @@ class HttpDateProcessingTests(unittest.TestCase):
 
 class EscapeLeadingSlashesTests(unittest.TestCase):
     def test(self):
-        tests = (
-            ('//example.com', '/%2Fexample.com'),
-            ('//', '/%2F'),
-        )
+        tests = (('//example.com', '/%2Fexample.com'), ('//', '/%2F'))
         for url, expected in tests:
             with self.subTest(url=url):
                 self.assertEqual(escape_leading_slashes(url), expected)

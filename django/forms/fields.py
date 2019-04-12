@@ -15,15 +15,29 @@ from urllib.parse import urlsplit, urlunsplit
 
 from django.core import validators
 from django.core.exceptions import ValidationError
+
 # Provide this import for backwards compatibility.
 from django.core.validators import EMPTY_VALUES  # NOQA
 from django.forms.boundfield import BoundField
 from django.forms.utils import from_current_timezone, to_current_timezone
 from django.forms.widgets import (
-    FILE_INPUT_CONTRADICTION, CheckboxInput, ClearableFileInput, DateInput,
-    DateTimeInput, EmailInput, FileInput, HiddenInput, MultipleHiddenInput,
-    NullBooleanSelect, NumberInput, Select, SelectMultiple,
-    SplitDateTimeWidget, SplitHiddenDateTimeWidget, TextInput, TimeInput,
+    FILE_INPUT_CONTRADICTION,
+    CheckboxInput,
+    ClearableFileInput,
+    DateInput,
+    DateTimeInput,
+    EmailInput,
+    FileInput,
+    HiddenInput,
+    MultipleHiddenInput,
+    NullBooleanSelect,
+    NumberInput,
+    Select,
+    SelectMultiple,
+    SplitDateTimeWidget,
+    SplitHiddenDateTimeWidget,
+    TextInput,
+    TimeInput,
     URLInput,
 )
 from django.utils import formats
@@ -33,13 +47,33 @@ from django.utils.ipv6 import clean_ipv6_address
 from django.utils.translation import gettext_lazy as _, ngettext_lazy
 
 __all__ = (
-    'Field', 'CharField', 'IntegerField',
-    'DateField', 'TimeField', 'DateTimeField', 'DurationField',
-    'RegexField', 'EmailField', 'FileField', 'ImageField', 'URLField',
-    'BooleanField', 'NullBooleanField', 'ChoiceField', 'MultipleChoiceField',
-    'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
-    'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
-    'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
+    'Field',
+    'CharField',
+    'IntegerField',
+    'DateField',
+    'TimeField',
+    'DateTimeField',
+    'DurationField',
+    'RegexField',
+    'EmailField',
+    'FileField',
+    'ImageField',
+    'URLField',
+    'BooleanField',
+    'NullBooleanField',
+    'ChoiceField',
+    'MultipleChoiceField',
+    'ComboField',
+    'MultiValueField',
+    'FloatField',
+    'DecimalField',
+    'SplitDateTimeField',
+    'GenericIPAddressField',
+    'FilePathField',
+    'SlugField',
+    'TypedChoiceField',
+    'TypedMultipleChoiceField',
+    'UUIDField',
 )
 
 
@@ -49,14 +83,24 @@ class Field:
     default_validators = []  # Default set of validators
     # Add an 'invalid' entry to default_error_message if you want a specific
     # field error message not raised by the field validators.
-    default_error_messages = {
-        'required': _('This field is required.'),
-    }
+    default_error_messages = {'required': _('This field is required.')}
     empty_values = list(validators.EMPTY_VALUES)
 
-    def __init__(self, *, required=True, widget=None, label=None, initial=None,
-                 help_text='', error_messages=None, show_hidden_initial=False,
-                 validators=(), localize=False, disabled=False, label_suffix=None):
+    def __init__(
+        self,
+        *,
+        required=True,
+        widget=None,
+        label=None,
+        initial=None,
+        help_text='',
+        error_messages=None,
+        show_hidden_initial=False,
+        validators=(),
+        localize=False,
+        disabled=False,
+        label_suffix=None
+    ):
         # required -- Boolean that specifies whether the field is required.
         #             True by default.
         # widget -- A Widget class, or instance of a Widget class, that should
@@ -241,9 +285,7 @@ class CharField(Field):
 
 class IntegerField(Field):
     widget = NumberInput
-    default_error_messages = {
-        'invalid': _('Enter a whole number.'),
-    }
+    default_error_messages = {'invalid': _('Enter a whole number.')}
     re_decimal = re.compile(r'\.0*\s*$')
 
     def __init__(self, *, max_value=None, min_value=None, **kwargs):
@@ -286,9 +328,7 @@ class IntegerField(Field):
 
 
 class FloatField(IntegerField):
-    default_error_messages = {
-        'invalid': _('Enter a number.'),
-    }
+    default_error_messages = {'invalid': _('Enter a number.')}
 
     def to_python(self, value):
         """
@@ -321,9 +361,7 @@ class FloatField(IntegerField):
 
 
 class DecimalField(IntegerField):
-    default_error_messages = {
-        'invalid': _('Enter a number.'),
-    }
+    default_error_messages = {'invalid': _('Enter a number.')}
 
     def __init__(self, *, max_value=None, min_value=None, max_digits=None, decimal_places=None, **kwargs):
         self.max_digits, self.decimal_places = max_digits, decimal_places
@@ -369,7 +407,6 @@ class DecimalField(IntegerField):
 
 
 class BaseTemporalField(Field):
-
     def __init__(self, *, input_formats=None, **kwargs):
         super().__init__(**kwargs)
         if input_formats is not None:
@@ -392,9 +429,7 @@ class BaseTemporalField(Field):
 class DateField(BaseTemporalField):
     widget = DateInput
     input_formats = formats.get_format_lazy('DATE_INPUT_FORMATS')
-    default_error_messages = {
-        'invalid': _('Enter a valid date.'),
-    }
+    default_error_messages = {'invalid': _('Enter a valid date.')}
 
     def to_python(self, value):
         """
@@ -416,9 +451,7 @@ class DateField(BaseTemporalField):
 class TimeField(BaseTemporalField):
     widget = TimeInput
     input_formats = formats.get_format_lazy('TIME_INPUT_FORMATS')
-    default_error_messages = {
-        'invalid': _('Enter a valid time.')
-    }
+    default_error_messages = {'invalid': _('Enter a valid time.')}
 
     def to_python(self, value):
         """
@@ -438,9 +471,7 @@ class TimeField(BaseTemporalField):
 class DateTimeField(BaseTemporalField):
     widget = DateTimeInput
     input_formats = formats.get_format_lazy('DATETIME_INPUT_FORMATS')
-    default_error_messages = {
-        'invalid': _('Enter a valid date/time.'),
-    }
+    default_error_messages = {'invalid': _('Enter a valid date/time.')}
 
     def prepare_value(self, value):
         if isinstance(value, datetime.datetime):
@@ -469,7 +500,7 @@ class DateTimeField(BaseTemporalField):
 class DurationField(Field):
     default_error_messages = {
         'invalid': _('Enter a valid duration.'),
-        'overflow': _('The number of days must be between {min_days} and {max_days}.')
+        'overflow': _('The number of days must be between {min_days} and {max_days}.'),
     }
 
     def prepare_value(self, value):
@@ -485,10 +516,12 @@ class DurationField(Field):
         try:
             value = parse_duration(str(value))
         except OverflowError:
-            raise ValidationError(self.error_messages['overflow'].format(
-                min_days=datetime.timedelta.min.days,
-                max_days=datetime.timedelta.max.days,
-            ), code='overflow')
+            raise ValidationError(
+                self.error_messages['overflow'].format(
+                    min_days=datetime.timedelta.min.days, max_days=datetime.timedelta.max.days
+                ),
+                code='overflow',
+            )
         if value is None:
             raise ValidationError(self.error_messages['invalid'], code='invalid')
         return value
@@ -535,8 +568,9 @@ class FileField(Field):
         'max_length': ngettext_lazy(
             'Ensure this filename has at most %(max)d character (it has %(length)d).',
             'Ensure this filename has at most %(max)d characters (it has %(length)d).',
-            'max'),
-        'contradiction': _('Please either submit a file or check the clear checkbox, not both.')
+            'max',
+        ),
+        'contradiction': _('Please either submit a file or check the clear checkbox, not both.'),
     }
 
     def __init__(self, *, max_length=None, allow_empty_file=False, **kwargs):
@@ -597,9 +631,8 @@ class ImageField(FileField):
     default_validators = [validators.validate_image_file_extension]
     default_error_messages = {
         'invalid_image': _(
-            "Upload a valid image. The file you uploaded was either not an "
-            "image or a corrupted image."
-        ),
+            "Upload a valid image. The file you uploaded was either not an " "image or a corrupted image."
+        )
     }
 
     def to_python(self, data):
@@ -637,10 +670,7 @@ class ImageField(FileField):
             f.content_type = Image.MIME.get(image.format)
         except Exception as exc:
             # Pillow doesn't recognize it as an image.
-            raise ValidationError(
-                self.error_messages['invalid_image'],
-                code='invalid_image',
-            ) from exc
+            raise ValidationError(self.error_messages['invalid_image'], code='invalid_image') from exc
         if hasattr(f, 'seek') and callable(f.seek):
             f.seek(0)
         return f
@@ -654,16 +684,13 @@ class ImageField(FileField):
 
 class URLField(CharField):
     widget = URLInput
-    default_error_messages = {
-        'invalid': _('Enter a valid URL.'),
-    }
+    default_error_messages = {'invalid': _('Enter a valid URL.')}
     default_validators = [validators.URLValidator()]
 
     def __init__(self, **kwargs):
         super().__init__(strip=True, **kwargs)
 
     def to_python(self, value):
-
         def split_url(url):
             """
             Return a list of url parts via urlparse.urlsplit(), or raise
@@ -726,6 +753,7 @@ class NullBooleanField(BooleanField):
     A field whose valid values are None, True, and False. Clean invalid values
     to None.
     """
+
     widget = NullBooleanSelect
 
     def to_python(self, value):
@@ -759,7 +787,7 @@ class CallableChoiceIterator:
 class ChoiceField(Field):
     widget = Select
     default_error_messages = {
-        'invalid_choice': _('Select a valid choice. %(value)s is not one of the available choices.'),
+        'invalid_choice': _('Select a valid choice. %(value)s is not one of the available choices.')
     }
 
     def __init__(self, *, choices=(), **kwargs):
@@ -798,9 +826,7 @@ class ChoiceField(Field):
         super().validate(value)
         if value and not self.valid_value(value):
             raise ValidationError(
-                self.error_messages['invalid_choice'],
-                code='invalid_choice',
-                params={'value': value},
+                self.error_messages['invalid_choice'], code='invalid_choice', params={'value': value}
             )
 
     def valid_value(self, value):
@@ -834,9 +860,7 @@ class TypedChoiceField(ChoiceField):
             value = self.coerce(value)
         except (ValueError, TypeError, ValidationError):
             raise ValidationError(
-                self.error_messages['invalid_choice'],
-                code='invalid_choice',
-                params={'value': value},
+                self.error_messages['invalid_choice'], code='invalid_choice', params={'value': value}
             )
         return value
 
@@ -868,9 +892,7 @@ class MultipleChoiceField(ChoiceField):
         for val in value:
             if not self.valid_value(val):
                 raise ValidationError(
-                    self.error_messages['invalid_choice'],
-                    code='invalid_choice',
-                    params={'value': val},
+                    self.error_messages['invalid_choice'], code='invalid_choice', params={'value': val}
                 )
 
     def has_changed(self, initial, data):
@@ -906,9 +928,7 @@ class TypedMultipleChoiceField(MultipleChoiceField):
                 new_value.append(self.coerce(choice))
             except (ValueError, TypeError, ValidationError):
                 raise ValidationError(
-                    self.error_messages['invalid_choice'],
-                    code='invalid_choice',
-                    params={'value': choice},
+                    self.error_messages['invalid_choice'], code='invalid_choice', params={'value': choice}
                 )
         return new_value
 
@@ -927,6 +947,7 @@ class ComboField(Field):
     """
     A Field whose clean() method calls multiple Field clean() methods.
     """
+
     def __init__(self, fields, **kwargs):
         super().__init__(**kwargs)
         # Set 'required' to False on the individual fields, because the
@@ -964,17 +985,14 @@ class MultiValueField(Field):
 
     You'll probably want to use this with MultiWidget.
     """
-    default_error_messages = {
-        'invalid': _('Enter a list of values.'),
-        'incomplete': _('Enter a complete value.'),
-    }
+
+    default_error_messages = {'invalid': _('Enter a list of values.'), 'incomplete': _('Enter a complete value.')}
 
     def __init__(self, fields, *, require_all_fields=True, **kwargs):
         self.require_all_fields = require_all_fields
         super().__init__(**kwargs)
         for f in fields:
-            f.error_messages.setdefault('incomplete',
-                                        self.error_messages['incomplete'])
+            f.error_messages.setdefault('incomplete', self.error_messages['incomplete'])
             if self.disabled:
                 f.disabled = True
             if self.require_all_fields:
@@ -1076,8 +1094,7 @@ class MultiValueField(Field):
 
 
 class FilePathField(ChoiceField):
-    def __init__(self, path, *, match=None, recursive=False, allow_files=True,
-                 allow_folders=False, **kwargs):
+    def __init__(self, path, *, match=None, recursive=False, allow_files=True, allow_folders=False, **kwargs):
         self.path, self.match, self.recursive = path, match, recursive
         self.allow_files, self.allow_folders = allow_files, allow_folders
         super().__init__(choices=(), **kwargs)
@@ -1109,9 +1126,9 @@ class FilePathField(ChoiceField):
             for f in os.scandir(self.path):
                 if f.name == '__pycache__':
                     continue
-                if (((self.allow_files and f.is_file()) or
-                        (self.allow_folders and f.is_dir())) and
-                        (self.match is None or self.match_re.search(f.name))):
+                if ((self.allow_files and f.is_file()) or (self.allow_folders and f.is_dir())) and (
+                    self.match is None or self.match_re.search(f.name)
+                ):
                     choices.append((f.path, f.name))
             choices.sort(key=operator.itemgetter(1))
             self.choices.extend(choices)
@@ -1122,10 +1139,7 @@ class FilePathField(ChoiceField):
 class SplitDateTimeField(MultiValueField):
     widget = SplitDateTimeWidget
     hidden_widget = SplitHiddenDateTimeWidget
-    default_error_messages = {
-        'invalid_date': _('Enter a valid date.'),
-        'invalid_time': _('Enter a valid time.'),
-    }
+    default_error_messages = {'invalid_date': _('Enter a valid date.'), 'invalid_time': _('Enter a valid time.')}
 
     def __init__(self, *, input_date_formats=None, input_time_formats=None, **kwargs):
         errors = self.default_error_messages.copy()
@@ -1133,12 +1147,12 @@ class SplitDateTimeField(MultiValueField):
             errors.update(kwargs['error_messages'])
         localize = kwargs.get('localize', False)
         fields = (
-            DateField(input_formats=input_date_formats,
-                      error_messages={'invalid': errors['invalid_date']},
-                      localize=localize),
-            TimeField(input_formats=input_time_formats,
-                      error_messages={'invalid': errors['invalid_time']},
-                      localize=localize),
+            DateField(
+                input_formats=input_date_formats, error_messages={'invalid': errors['invalid_date']}, localize=localize
+            ),
+            TimeField(
+                input_formats=input_time_formats, error_messages={'invalid': errors['invalid_time']}, localize=localize
+            ),
         )
         super().__init__(fields, **kwargs)
 
@@ -1181,9 +1195,7 @@ class SlugField(CharField):
 
 
 class UUIDField(CharField):
-    default_error_messages = {
-        'invalid': _('Enter a valid UUID.'),
-    }
+    default_error_messages = {'invalid': _('Enter a valid UUID.')}
 
     def prepare_value(self, value):
         if isinstance(value, uuid.UUID):

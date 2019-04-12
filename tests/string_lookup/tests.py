@@ -4,7 +4,6 @@ from .models import Article, Bar, Base, Child, Foo, Whiz
 
 
 class StringLookupTests(TestCase):
-
     def test_string_form_referencing(self):
         """
         Regression test for #1661 and #1662

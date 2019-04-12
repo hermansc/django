@@ -22,13 +22,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'username', nargs='?',
-            help='Username to change password for; by default, it\'s the current username.',
+            'username', nargs='?', help='Username to change password for; by default, it\'s the current username.'
         )
         parser.add_argument(
-            '--database',
-            default=DEFAULT_DB_ALIAS,
-            help='Specifies the database to use. Default is "default".',
+            '--database', default=DEFAULT_DB_ALIAS, help='Specifies the database to use. Default is "default".'
         )
 
     def handle(self, *args, **options):
@@ -38,9 +35,7 @@ class Command(BaseCommand):
             username = getpass.getuser()
 
         try:
-            u = UserModel._default_manager.using(options['database']).get(**{
-                UserModel.USERNAME_FIELD: username
-            })
+            u = UserModel._default_manager.using(options['database']).get(**{UserModel.USERNAME_FIELD: username})
         except UserModel.DoesNotExist:
             raise CommandError("user '%s' does not exist" % username)
 

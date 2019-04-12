@@ -24,19 +24,20 @@ def prepopulated_fields_js(context):
 
     prepopulated_fields_json = []
     for field in prepopulated_fields:
-        prepopulated_fields_json.append({
-            "id": "#%s" % field["field"].auto_id,
-            "name": field["field"].name,
-            "dependency_ids": ["#%s" % dependency.auto_id for dependency in field["dependencies"]],
-            "dependency_list": [dependency.name for dependency in field["dependencies"]],
-            "maxLength": field["field"].field.max_length or 50,
-            "allowUnicode": getattr(field["field"].field, "allow_unicode", False)
-        })
+        prepopulated_fields_json.append(
+            {
+                "id": "#%s" % field["field"].auto_id,
+                "name": field["field"].name,
+                "dependency_ids": ["#%s" % dependency.auto_id for dependency in field["dependencies"]],
+                "dependency_list": [dependency.name for dependency in field["dependencies"]],
+                "maxLength": field["field"].field.max_length or 50,
+                "allowUnicode": getattr(field["field"].field, "allow_unicode", False),
+            }
+        )
 
-    context.update({
-        'prepopulated_fields': prepopulated_fields,
-        'prepopulated_fields_json': json.dumps(prepopulated_fields_json),
-    })
+    context.update(
+        {'prepopulated_fields': prepopulated_fields, 'prepopulated_fields_json': json.dumps(prepopulated_fields_json)}
+    )
     return context
 
 
@@ -63,21 +64,19 @@ def submit_row(context):
     can_save_and_continue = not is_popup and can_save and has_view_permission and show_save_and_continue
     can_change = has_change_permission or has_editable_inline_admin_formsets
     ctx = Context(context)
-    ctx.update({
-        'can_change': can_change,
-        'show_delete_link': (
-            not is_popup and context['has_delete_permission'] and
-            change and context.get('show_delete', True)
-        ),
-        'show_save_as_new': not is_popup and has_change_permission and change and save_as,
-        'show_save_and_add_another': (
-            has_add_permission and not is_popup and
-            (not save_as or add) and can_save
-        ),
-        'show_save_and_continue': can_save_and_continue,
-        'show_save': show_save and can_save,
-        'show_close': not(show_save and can_save)
-    })
+    ctx.update(
+        {
+            'can_change': can_change,
+            'show_delete_link': (
+                not is_popup and context['has_delete_permission'] and change and context.get('show_delete', True)
+            ),
+            'show_save_as_new': not is_popup and has_change_permission and change and save_as,
+            'show_save_and_add_another': (has_add_permission and not is_popup and (not save_as or add) and can_save),
+            'show_save_and_continue': can_save_and_continue,
+            'show_save': show_save and can_save,
+            'show_close': not (show_save and can_save),
+        }
+    )
     return ctx
 
 
@@ -90,9 +89,7 @@ def submit_row_tag(parser, token):
 def change_form_object_tools_tag(parser, token):
     """Display the row of change form object tools."""
     return InclusionAdminNode(
-        parser, token,
-        func=lambda context: context,
-        template_name='change_form_object_tools.html',
+        parser, token, func=lambda context: context, template_name='change_form_object_tools.html'
     )
 
 

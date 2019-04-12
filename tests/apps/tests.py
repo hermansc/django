@@ -23,16 +23,12 @@ SOME_INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-SOME_INSTALLED_APPS_NAMES = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-] + SOME_INSTALLED_APPS[2:]
+SOME_INSTALLED_APPS_NAMES = ['django.contrib.admin', 'django.contrib.auth'] + SOME_INSTALLED_APPS[2:]
 
 HERE = os.path.dirname(__file__)
 
 
 class AppsTests(SimpleTestCase):
-
     def test_singleton_master(self):
         """
         Only one master registry can exist.
@@ -216,10 +212,7 @@ class AppsTests(SimpleTestCase):
         # Construct a new model in a new app registry
         body = {}
         new_apps = Apps(["apps"])
-        meta_contents = {
-            'app_label': "apps",
-            'apps': new_apps,
-        }
+        meta_contents = {'app_label': "apps", 'apps': new_apps}
         meta = type("Meta", (), meta_contents)
         body['Meta'] = meta
         body['__module__'] = TotallyNormal.__module__
@@ -235,10 +228,7 @@ class AppsTests(SimpleTestCase):
         Test for behavior when two models clash in the app registry.
         """
         new_apps = Apps(["apps"])
-        meta_contents = {
-            'app_label': "apps",
-            'apps': new_apps,
-        }
+        meta_contents = {'app_label': "apps", 'apps': new_apps}
 
         body = {}
         body['Meta'] = type("Meta", (), meta_contents)
@@ -326,8 +316,10 @@ class Stub:
 
 class AppConfigTests(SimpleTestCase):
     """Unit tests for AppConfig class."""
+
     def test_path_set_explicitly(self):
         """If subclass sets path as class attr, no module attributes needed."""
+
         class MyAppConfig(AppConfig):
             path = 'foo'
 
@@ -337,6 +329,7 @@ class AppConfigTests(SimpleTestCase):
 
     def test_explicit_path_overrides(self):
         """If path set as class attr, overrides __path__ and __file__."""
+
         class MyAppConfig(AppConfig):
             path = 'foo'
 

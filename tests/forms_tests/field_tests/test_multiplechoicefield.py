@@ -3,7 +3,6 @@ from django.test import SimpleTestCase
 
 
 class MultipleChoiceFieldTest(SimpleTestCase):
-
     def test_multiplechoicefield_1(self):
         f = MultipleChoiceField(choices=[('1', 'One'), ('2', 'Two')])
         with self.assertRaisesMessage(ValidationError, "'This field is required.'"):

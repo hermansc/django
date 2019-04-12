@@ -73,7 +73,10 @@ class Company(models.Model):
 
     def __str__(self):
         return 'Company(name=%s, motto=%s, ticker_name=%s, description=%s)' % (
-            self.name, self.motto, self.ticker_name, self.description,
+            self.name,
+            self.motto,
+            self.ticker_name,
+            self.description,
         )
 
 

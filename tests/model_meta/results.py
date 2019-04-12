@@ -1,6 +1,4 @@
-from .models import (
-    AbstractPerson, BasePerson, Person, ProxyPerson, Relating, Relation,
-)
+from .models import AbstractPerson, BasePerson, Person, ProxyPerson, Relating, Relation
 
 TEST_RESULTS = {
     'get_all_field_names': {
@@ -77,7 +75,7 @@ TEST_RESULTS = {
             'object_id_base',
             'person',
             'relating_basepeople',
-            'relating_baseperson'
+            'relating_baseperson',
         ],
         AbstractPerson: [
             'content_type_abstract',
@@ -220,12 +218,7 @@ TEST_RESULTS = {
             'content_type_base_id',
             'object_id_base',
         ],
-        AbstractPerson: [
-            'data_abstract',
-            'fk_abstract_id',
-            'content_type_abstract_id',
-            'object_id_abstract',
-        ],
+        AbstractPerson: ['data_abstract', 'fk_abstract_id', 'content_type_abstract_id', 'object_id_abstract'],
         Relating: [
             'id',
             'baseperson_id',
@@ -256,59 +249,18 @@ TEST_RESULTS = {
             'friends_base',
             'following_base',
         ],
-        AbstractPerson: [
-            'm2m_abstract',
-            'friends_abstract',
-            'following_abstract',
-        ],
-        Relating: [
-            'basepeople',
-            'basepeople_hidden',
-            'people',
-            'people_hidden',
-        ],
+        AbstractPerson: ['m2m_abstract', 'friends_abstract', 'following_abstract'],
+        Relating: ['basepeople', 'basepeople_hidden', 'people', 'people_hidden'],
     },
     'many_to_many_with_model': {
-        Person: [
-            BasePerson,
-            BasePerson,
-            BasePerson,
-            BasePerson,
-            BasePerson,
-            BasePerson,
-            None,
-            None,
-            None,
-        ],
-        BasePerson: [
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ],
-        AbstractPerson: [
-            None,
-            None,
-            None,
-        ],
-        Relating: [
-            None,
-            None,
-            None,
-            None,
-        ],
+        Person: [BasePerson, BasePerson, BasePerson, BasePerson, BasePerson, BasePerson, None, None, None],
+        BasePerson: [None, None, None, None, None, None],
+        AbstractPerson: [None, None, None],
+        Relating: [None, None, None, None],
     },
     'get_all_related_objects_with_model_legacy': {
-        Person: (
-            ('relating_baseperson', BasePerson),
-            ('relating_person', None),
-        ),
-        BasePerson: (
-            ('person', None),
-            ('relating_baseperson', None),
-        ),
+        Person: (('relating_baseperson', BasePerson), ('relating_person', None)),
+        BasePerson: (('person', None), ('relating_baseperson', None)),
         Relation: (
             ('fk_abstract_rel', None),
             ('fo_abstract_rel', None),
@@ -607,13 +559,8 @@ TEST_RESULTS = {
         ),
     },
     'get_all_related_objects_with_model_local_legacy': {
-        Person: (
-            ('relating_person', None),
-        ),
-        BasePerson: (
-            ('person', None),
-            ('relating_baseperson', None)
-        ),
+        Person: (('relating_person', None),),
+        BasePerson: (('person', None), ('relating_baseperson', None)),
         Relation: (
             ('fk_abstract_rel', None),
             ('fo_abstract_rel', None),
@@ -736,18 +683,15 @@ TEST_RESULTS = {
         ),
     },
     'get_all_related_objects_with_model_proxy_legacy': {
-        BasePerson: (
-            ('person', None),
-            ('relating_baseperson', None),
-        ),
-        Person: (
-            ('relating_baseperson', BasePerson),
-            ('relating_person', None), ('relating_proxyperson', None),
-        ),
+        BasePerson: (('person', None), ('relating_baseperson', None)),
+        Person: (('relating_baseperson', BasePerson), ('relating_person', None), ('relating_proxyperson', None)),
         Relation: (
-            ('fk_abstract_rel', None), ('fo_abstract_rel', None),
-            ('fk_base_rel', None), ('fo_base_rel', None),
-            ('fk_concrete_rel', None), ('fo_concrete_rel', None),
+            ('fk_abstract_rel', None),
+            ('fo_abstract_rel', None),
+            ('fk_base_rel', None),
+            ('fo_base_rel', None),
+            ('fk_concrete_rel', None),
+            ('fo_concrete_rel', None),
         ),
     },
     'get_all_related_objects_with_model_proxy_hidden_legacy': {
@@ -836,11 +780,7 @@ TEST_RESULTS = {
             ('relating_people', None),
             ('_relating_people_hidden_+', None),
         ),
-        Relation: (
-            ('m2m_abstract_rel', None),
-            ('m2m_base_rel', None),
-            ('m2m_concrete_rel', None),
-        ),
+        Relation: (('m2m_abstract_rel', None), ('m2m_base_rel', None), ('m2m_concrete_rel', None)),
     },
     'get_all_related_many_to_many_local_legacy': {
         BasePerson: [
@@ -851,23 +791,11 @@ TEST_RESULTS = {
             'relating_basepeople',
             '_relating_basepeople_hidden_+',
         ],
-        Person: [
-            'friends_inherited_rel_+',
-            'followers_concrete',
-            'relating_people',
-            '_relating_people_hidden_+',
-        ],
-        Relation: [
-            'm2m_abstract_rel',
-            'm2m_base_rel',
-            'm2m_concrete_rel',
-        ],
+        Person: ['friends_inherited_rel_+', 'followers_concrete', 'relating_people', '_relating_people_hidden_+'],
+        Relation: ['m2m_abstract_rel', 'm2m_base_rel', 'm2m_concrete_rel'],
     },
     'private_fields': {
-        AbstractPerson: [
-            'generic_relation_abstract',
-            'content_object_abstract',
-        ],
+        AbstractPerson: ['generic_relation_abstract', 'content_object_abstract'],
         BasePerson: [
             'generic_relation_base',
             'content_object_base',

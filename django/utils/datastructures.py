@@ -61,6 +61,7 @@ class MultiValueDict(dict):
     which returns a list for every key, even though most Web forms submit
     single name-value pairs.
     """
+
     def __init__(self, key_to_list_mapping=()):
         super().__init__(key_to_list_mapping)
 
@@ -85,17 +86,13 @@ class MultiValueDict(dict):
         super().__setitem__(key, [value])
 
     def __copy__(self):
-        return self.__class__([
-            (k, v[:])
-            for k, v in self.lists()
-        ])
+        return self.__class__([(k, v[:]) for k, v in self.lists()])
 
     def __deepcopy__(self, memo):
         result = self.__class__()
         memo[id(self)] = result
         for key, value in dict.items(self):
-            dict.__setitem__(result, copy.deepcopy(key, memo),
-                             copy.deepcopy(value, memo))
+            dict.__setitem__(result, copy.deepcopy(key, memo), copy.deepcopy(value, memo))
         return result
 
     def __getstate__(self):
@@ -261,6 +258,7 @@ class DictWrapper(dict):
     Used by the SQL construction code to ensure that values are correctly
     quoted before being used.
     """
+
     def __init__(self, data, func, prefix):
         super().__init__(data)
         self.func = func
@@ -274,7 +272,7 @@ class DictWrapper(dict):
         """
         use_func = key.startswith(self.prefix)
         if use_func:
-            key = key[len(self.prefix):]
+            key = key[len(self.prefix) :]
         value = super().__getitem__(key)
         if use_func:
             return self.func(value)
@@ -285,8 +283,7 @@ def _destruct_iterable_mapping_values(data):
     for i, elem in enumerate(data):
         if len(elem) != 2:
             raise ValueError(
-                'dictionary update sequence element #{} has '
-                'length {}; 2 is required.'.format(i, len(elem))
+                'dictionary update sequence element #{} has ' 'length {}; 2 is required.'.format(i, len(elem))
             )
         if not isinstance(elem[0], str):
             raise ValueError('Element key %r invalid, only strings are allowed' % elem[0])
@@ -323,9 +320,7 @@ class CaseInsensitiveMapping(Mapping):
         return len(self._store)
 
     def __eq__(self, other):
-        return isinstance(other, Mapping) and {
-            k.lower(): v for k, v in self.items()
-        } == {
+        return isinstance(other, Mapping) and {k.lower(): v for k, v in self.items()} == {
             k.lower(): v for k, v in other.items()
         }
 

@@ -31,10 +31,10 @@ class GeoFeedTest(TestCase):
         feed1, feed2 = doc1.firstChild, doc2.firstChild
 
         # Making sure the box got added to the second GeoRSS feed.
-        self.assertChildNodes(feed2.getElementsByTagName('channel')[0],
-                              ['title', 'link', 'description', 'language',
-                               'lastBuildDate', 'item', 'georss:box', 'atom:link']
-                              )
+        self.assertChildNodes(
+            feed2.getElementsByTagName('channel')[0],
+            ['title', 'link', 'description', 'language', 'lastBuildDate', 'item', 'georss:box', 'atom:link'],
+        )
 
         # Incrementing through the feeds.
         for feed in [feed1, feed2]:

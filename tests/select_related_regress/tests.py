@@ -1,14 +1,32 @@
 from django.test import TestCase
 
 from .models import (
-    A, B, Building, C, Chick, Child, Class, Client, ClientStatus, Connection,
-    Country, Device, Enrollment, Hen, Item, Organizer, Person, Port,
-    SpecialClient, State, Student, TUser,
+    A,
+    B,
+    Building,
+    C,
+    Chick,
+    Child,
+    Class,
+    Client,
+    ClientStatus,
+    Connection,
+    Country,
+    Device,
+    Enrollment,
+    Hen,
+    Item,
+    Organizer,
+    Person,
+    Port,
+    SpecialClient,
+    State,
+    Student,
+    TUser,
 )
 
 
 class SelectRelatedRegressTests(TestCase):
-
     def test_regression_7110(self):
         """
         Regression test for bug #7110.
@@ -35,18 +53,17 @@ class SelectRelatedRegressTests(TestCase):
         connections = Connection.objects.filter(start__device__building=b, end__device__building=b).order_by('id')
         self.assertEqual(
             [(c.id, str(c.start), str(c.end)) for c in connections],
-            [(c1.id, 'router/4', 'switch/7'), (c2.id, 'switch/7', 'server/1')]
+            [(c1.id, 'router/4', 'switch/7'), (c2.id, 'switch/7', 'server/1')],
         )
 
         connections = (
-            Connection.objects
-            .filter(start__device__building=b, end__device__building=b)
+            Connection.objects.filter(start__device__building=b, end__device__building=b)
             .select_related()
             .order_by('id')
         )
         self.assertEqual(
             [(c.id, str(c.start), str(c.end)) for c in connections],
-            [(c1.id, 'router/4', 'switch/7'), (c2.id, 'switch/7', 'server/1')]
+            [(c1.id, 'router/4', 'switch/7'), (c2.id, 'switch/7', 'server/1')],
         )
 
         # This final query should only have seven tables (port, device and building
@@ -104,8 +121,7 @@ class SelectRelatedRegressTests(TestCase):
         Item.objects.create(name="item2")
 
         self.assertQuerysetEqual(
-            Item.objects.select_related("child").order_by("name"),
-            ["<Item: item1>", "<Item: item2>"]
+            Item.objects.select_related("child").order_by("name"), ["<Item: item1>", "<Item: item2>"]
         )
 
     def test_regression_12851(self):
@@ -180,10 +196,12 @@ class SelectRelatedRegressTests(TestCase):
     def test_regression_10733(self):
         a = A.objects.create(name='a', lots_of_text='lots_of_text_a', a_field='a_field')
         b = B.objects.create(name='b', lots_of_text='lots_of_text_b', b_field='b_field')
-        c = C.objects.create(name='c', lots_of_text='lots_of_text_c', is_published=True,
-                             c_a=a, c_b=b)
-        results = C.objects.all().only('name', 'lots_of_text', 'c_a', 'c_b', 'c_b__lots_of_text',
-                                       'c_a__name', 'c_b__name').select_related()
+        c = C.objects.create(name='c', lots_of_text='lots_of_text_c', is_published=True, c_a=a, c_b=b)
+        results = (
+            C.objects.all()
+            .only('name', 'lots_of_text', 'c_a', 'c_b', 'c_b__lots_of_text', 'c_a__name', 'c_b__name')
+            .select_related()
+        )
         self.assertSequenceEqual(results, [c])
         with self.assertNumQueries(0):
             qs_c = results[0]

@@ -104,8 +104,6 @@ class DateHierarchyTests(TestCase):
                 changelist = modeladmin.get_changelist_instance(request)
                 spec = date_hierarchy(changelist)
                 choices = [choice['link'] for choice in spec['choices']]
-                expected_choices = [
-                    '&'.join('posted__%s' % c for c in choice) for choice in expected_choices
-                ]
+                expected_choices = ['&'.join('posted__%s' % c for c in choice) for choice in expected_choices]
                 expected_choices = [('?' + choice) if choice else '' for choice in expected_choices]
                 self.assertEqual(choices, expected_choices)

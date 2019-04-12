@@ -4,8 +4,18 @@ from django.test import SimpleTestCase, TestCase, override_settings
 from django.test.utils import isolate_apps
 
 from .models import (
-    AbstractBase1, AbstractBase2, AbstractBase3, Child1, Child2, Child3,
-    Child4, Child5, Child6, Child7, RelatedModel, RelationModel,
+    AbstractBase1,
+    AbstractBase2,
+    AbstractBase3,
+    Child1,
+    Child2,
+    Child3,
+    Child4,
+    Child5,
+    Child6,
+    Child7,
+    RelatedModel,
+    RelationModel,
 )
 
 
@@ -39,19 +49,13 @@ class ManagersRegressionTests(TestCase):
 
         # Since Child6 inherits from Child4, the corresponding rows from f1 and
         # f2 also appear here. This is the expected result.
-        self.assertQuerysetEqual(Child4._default_manager.order_by('data'), [
-            "<Child4: d1>",
-            "<Child4: d2>",
-            "<Child4: f1>",
-            "<Child4: f2>",
-        ])
+        self.assertQuerysetEqual(
+            Child4._default_manager.order_by('data'), ["<Child4: d1>", "<Child4: d2>", "<Child4: f1>", "<Child4: f2>"]
+        )
         self.assertQuerysetEqual(Child4.manager1.all(), ["<Child4: d1>", "<Child4: f1>"], ordered=False)
         self.assertQuerysetEqual(Child5._default_manager.all(), ["<Child5: fred>"])
         self.assertQuerysetEqual(Child6._default_manager.all(), ["<Child6: f1>", "<Child6: f2>"], ordered=False)
-        self.assertQuerysetEqual(
-            Child7._default_manager.order_by('name'),
-            ["<Child7: barney>", "<Child7: fred>"]
-        )
+        self.assertQuerysetEqual(Child7._default_manager.order_by('name'), ["<Child7: barney>", "<Child7: fred>"])
 
     def test_abstract_manager(self):
         # Accessing the manager on an abstract model should
@@ -145,10 +149,7 @@ class ManagersRegressionTests(TestCase):
 
         t = Template('{{ related.test_fk.all.0 }}{{ related.test_gfk.all.0 }}{{ related.test_m2m.all.0 }}')
 
-        self.assertEqual(
-            t.render(Context({'related': related})),
-            ''.join([str(relation.pk)] * 3),
-        )
+        self.assertEqual(t.render(Context({'related': related})), ''.join([str(relation.pk)] * 3))
 
     def test_field_can_be_called_exact(self):
         # Make sure related managers core filters don't include an

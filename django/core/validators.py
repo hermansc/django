@@ -15,6 +15,7 @@ EMPTY_VALUES = (None, '', [], (), {})
 
 def _lazy_re_compile(regex, flags=0):
     """Lazily compile a regex with flags."""
+
     def _compile():
         # Compile the regex if it was not passed pre-compiled.
         if isinstance(regex, str):
@@ -22,6 +23,7 @@ def _lazy_re_compile(regex, flags=0):
         else:
             assert not flags, "flags must be empty if regex is passed pre-compiled"
             return regex
+
     return SimpleLazyObject(_compile)
 
 
@@ -61,12 +63,12 @@ class RegexValidator:
 
     def __eq__(self, other):
         return (
-            isinstance(other, RegexValidator) and
-            self.regex.pattern == other.regex.pattern and
-            self.regex.flags == other.regex.flags and
-            (self.message == other.message) and
-            (self.code == other.code) and
-            (self.inverse_match == other.inverse_match)
+            isinstance(other, RegexValidator)
+            and self.regex.pattern == other.regex.pattern
+            and self.regex.flags == other.regex.flags
+            and (self.message == other.message)
+            and (self.code == other.code)
+            and (self.inverse_match == other.inverse_match)
         )
 
 
@@ -83,12 +85,12 @@ class URLValidator(RegexValidator):
     # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
     domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'
     tld_re = (
-        r'\.'                                # dot
-        r'(?!-)'                             # can't start with a dash
-        r'(?:[a-z' + ul + '-]{2,63}'         # domain label
-        r'|xn--[a-z0-9]{1,59})'              # or punycode label
-        r'(?<!-)'                            # can't end with a dash
-        r'\.?'                               # may have a trailing dot
+        r'\.'  # dot
+        r'(?!-)'  # can't start with a dash
+        r'(?:[a-z' + ul + '-]{2,63}'  # domain label
+        r'|xn--[a-z0-9]{1,59})'  # or punycode label
+        r'(?<!-)'  # can't end with a dash
+        r'\.?'  # may have a trailing dot
     )
     host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
@@ -98,7 +100,9 @@ class URLValidator(RegexValidator):
         r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
         r'(?::\d{2,5})?'  # port
         r'(?:[/?#][^\s]*)?'  # resource path
-        r'\Z', re.IGNORECASE)
+        r'\Z',
+        re.IGNORECASE,
+    )
     message = _('Enter a valid URL.')
     schemes = ['http', 'https', 'ftp', 'ftps']
 
@@ -149,11 +153,7 @@ class URLValidator(RegexValidator):
             raise ValidationError(self.message, code=self.code)
 
 
-integer_validator = RegexValidator(
-    _lazy_re_compile(r'^-?\d+\Z'),
-    message=_('Enter a valid integer.'),
-    code='invalid',
-)
+integer_validator = RegexValidator(_lazy_re_compile(r'^-?\d+\Z'), message=_('Enter a valid integer.'), code='invalid')
 
 
 def validate_integer(value):
@@ -167,15 +167,18 @@ class EmailValidator:
     user_regex = _lazy_re_compile(
         r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*\Z"  # dot-atom
         r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-\011\013\014\016-\177])*"\Z)',  # quoted-string
-        re.IGNORECASE)
+        re.IGNORECASE,
+    )
     domain_regex = _lazy_re_compile(
         # max length for domain name labels is 63 characters per RFC 1034
         r'((?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+)(?:[A-Z0-9-]{2,63}(?<!-))\Z',
-        re.IGNORECASE)
+        re.IGNORECASE,
+    )
     literal_regex = _lazy_re_compile(
         # literal form, ipv4 or ipv6 address (SMTP 4.1.3)
         r'\[([A-f0-9:\.]+)\]\Z',
-        re.IGNORECASE)
+        re.IGNORECASE,
+    )
     domain_whitelist = ['localhost']
 
     def __init__(self, message=None, code=None, whitelist=None):
@@ -195,8 +198,7 @@ class EmailValidator:
         if not self.user_regex.match(user_part):
             raise ValidationError(self.message, code=self.code)
 
-        if (domain_part not in self.domain_whitelist and
-                not self.validate_domain_part(domain_part)):
+        if domain_part not in self.domain_whitelist and not self.validate_domain_part(domain_part):
             # Try for possible IDN domain-part
             try:
                 domain_part = domain_part.encode('idna').decode('ascii')
@@ -223,10 +225,10 @@ class EmailValidator:
 
     def __eq__(self, other):
         return (
-            isinstance(other, EmailValidator) and
-            (self.domain_whitelist == other.domain_whitelist) and
-            (self.message == other.message) and
-            (self.code == other.code)
+            isinstance(other, EmailValidator)
+            and (self.domain_whitelist == other.domain_whitelist)
+            and (self.message == other.message)
+            and (self.code == other.code)
         )
 
 
@@ -237,14 +239,14 @@ validate_slug = RegexValidator(
     slug_re,
     # Translators: "letters" means latin letters: a-z and A-Z.
     _("Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens."),
-    'invalid'
+    'invalid',
 )
 
 slug_unicode_re = _lazy_re_compile(r'^[-\w]+\Z')
 validate_unicode_slug = RegexValidator(
     slug_unicode_re,
     _("Enter a valid 'slug' consisting of Unicode letters, numbers, underscores, or hyphens."),
-    'invalid'
+    'invalid',
 )
 
 
@@ -283,26 +285,21 @@ def ip_address_validators(protocol, unpack_ipv4):
     the GenericIPAddressField.
     """
     if protocol != 'both' and unpack_ipv4:
-        raise ValueError(
-            "You can only use `unpack_ipv4` if `protocol` is set to 'both'")
+        raise ValueError("You can only use `unpack_ipv4` if `protocol` is set to 'both'")
     try:
         return ip_address_validator_map[protocol.lower()]
     except KeyError:
-        raise ValueError("The protocol '%s' is unknown. Supported: %s"
-                         % (protocol, list(ip_address_validator_map)))
+        raise ValueError("The protocol '%s' is unknown. Supported: %s" % (protocol, list(ip_address_validator_map)))
 
 
 def int_list_validator(sep=',', message=None, code='invalid', allow_negative=False):
-    regexp = _lazy_re_compile(r'^%(neg)s\d+(?:%(sep)s%(neg)s\d+)*\Z' % {
-        'neg': '(-)?' if allow_negative else '',
-        'sep': re.escape(sep),
-    })
+    regexp = _lazy_re_compile(
+        r'^%(neg)s\d+(?:%(sep)s%(neg)s\d+)*\Z' % {'neg': '(-)?' if allow_negative else '', 'sep': re.escape(sep)}
+    )
     return RegexValidator(regexp, message=message, code=code)
 
 
-validate_comma_separated_integer_list = int_list_validator(
-    message=_('Enter only digits separated by commas.'),
-)
+validate_comma_separated_integer_list = int_list_validator(message=_('Enter only digits separated by commas.'))
 
 
 @deconstructible
@@ -324,10 +321,10 @@ class BaseValidator:
 
     def __eq__(self, other):
         return (
-            isinstance(other, self.__class__) and
-            self.limit_value == other.limit_value and
-            self.message == other.message and
-            self.code == other.code
+            isinstance(other, self.__class__)
+            and self.limit_value == other.limit_value
+            and self.message == other.message
+            and self.code == other.code
         )
 
     def compare(self, a, b):
@@ -360,7 +357,8 @@ class MinLengthValidator(BaseValidator):
     message = ngettext_lazy(
         'Ensure this value has at least %(limit_value)d character (it has %(show_value)d).',
         'Ensure this value has at least %(limit_value)d characters (it has %(show_value)d).',
-        'limit_value')
+        'limit_value',
+    )
     code = 'min_length'
 
     def compare(self, a, b):
@@ -375,7 +373,8 @@ class MaxLengthValidator(BaseValidator):
     message = ngettext_lazy(
         'Ensure this value has at most %(limit_value)d character (it has %(show_value)d).',
         'Ensure this value has at most %(limit_value)d characters (it has %(show_value)d).',
-        'limit_value')
+        'limit_value',
+    )
     code = 'max_length'
 
     def compare(self, a, b):
@@ -391,22 +390,23 @@ class DecimalValidator:
     Validate that the input does not exceed the maximum number of digits
     expected, otherwise raise ValidationError.
     """
+
     messages = {
         'invalid': _('Enter a number.'),
         'max_digits': ngettext_lazy(
             'Ensure that there are no more than %(max)s digit in total.',
             'Ensure that there are no more than %(max)s digits in total.',
-            'max'
+            'max',
         ),
         'max_decimal_places': ngettext_lazy(
             'Ensure that there are no more than %(max)s decimal place.',
             'Ensure that there are no more than %(max)s decimal places.',
-            'max'
+            'max',
         ),
         'max_whole_digits': ngettext_lazy(
             'Ensure that there are no more than %(max)s digit before the decimal point.',
             'Ensure that there are no more than %(max)s digits before the decimal point.',
-            'max'
+            'max',
         ),
     }
 
@@ -436,19 +436,16 @@ class DecimalValidator:
         whole_digits = digits - decimals
 
         if self.max_digits is not None and digits > self.max_digits:
-            raise ValidationError(
-                self.messages['max_digits'],
-                code='max_digits',
-                params={'max': self.max_digits},
-            )
+            raise ValidationError(self.messages['max_digits'], code='max_digits', params={'max': self.max_digits})
         if self.decimal_places is not None and decimals > self.decimal_places:
             raise ValidationError(
-                self.messages['max_decimal_places'],
-                code='max_decimal_places',
-                params={'max': self.decimal_places},
+                self.messages['max_decimal_places'], code='max_decimal_places', params={'max': self.decimal_places}
             )
-        if (self.max_digits is not None and self.decimal_places is not None and
-                whole_digits > (self.max_digits - self.decimal_places)):
+        if (
+            self.max_digits is not None
+            and self.decimal_places is not None
+            and whole_digits > (self.max_digits - self.decimal_places)
+        ):
             raise ValidationError(
                 self.messages['max_whole_digits'],
                 code='max_whole_digits',
@@ -457,18 +454,15 @@ class DecimalValidator:
 
     def __eq__(self, other):
         return (
-            isinstance(other, self.__class__) and
-            self.max_digits == other.max_digits and
-            self.decimal_places == other.decimal_places
+            isinstance(other, self.__class__)
+            and self.max_digits == other.max_digits
+            and self.decimal_places == other.decimal_places
         )
 
 
 @deconstructible
 class FileExtensionValidator:
-    message = _(
-        "File extension '%(extension)s' is not allowed. "
-        "Allowed extensions are: '%(allowed_extensions)s'."
-    )
+    message = _("File extension '%(extension)s' is not allowed. " "Allowed extensions are: '%(allowed_extensions)s'.")
     code = 'invalid_extension'
 
     def __init__(self, allowed_extensions=None, message=None, code=None):
@@ -486,18 +480,15 @@ class FileExtensionValidator:
             raise ValidationError(
                 self.message,
                 code=self.code,
-                params={
-                    'extension': extension,
-                    'allowed_extensions': ', '.join(self.allowed_extensions)
-                }
+                params={'extension': extension, 'allowed_extensions': ', '.join(self.allowed_extensions)},
             )
 
     def __eq__(self, other):
         return (
-            isinstance(other, self.__class__) and
-            self.allowed_extensions == other.allowed_extensions and
-            self.message == other.message and
-            self.code == other.code
+            isinstance(other, self.__class__)
+            and self.allowed_extensions == other.allowed_extensions
+            and self.message == other.message
+            and self.code == other.code
         )
 
 
@@ -518,6 +509,7 @@ def validate_image_file_extension(value):
 @deconstructible
 class ProhibitNullCharactersValidator:
     """Validate that the string doesn't contain the null character."""
+
     message = _('Null characters are not allowed.')
     code = 'null_characters_not_allowed'
 
@@ -532,8 +524,4 @@ class ProhibitNullCharactersValidator:
             raise ValidationError(self.message, code=self.code)
 
     def __eq__(self, other):
-        return (
-            isinstance(other, self.__class__) and
-            self.message == other.message and
-            self.code == other.code
-        )
+        return isinstance(other, self.__class__) and self.message == other.message and self.code == other.code

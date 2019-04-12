@@ -5,17 +5,18 @@ from django.contrib.sessions.backends.cache import SessionStore
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.middleware.csrf import (
-    CSRF_SESSION_KEY, CSRF_TOKEN_LENGTH, REASON_BAD_TOKEN,
-    REASON_NO_CSRF_COOKIE, CsrfViewMiddleware,
-    _compare_salted_tokens as equivalent_tokens, get_token,
+    CSRF_SESSION_KEY,
+    CSRF_TOKEN_LENGTH,
+    REASON_BAD_TOKEN,
+    REASON_NO_CSRF_COOKIE,
+    CsrfViewMiddleware,
+    _compare_salted_tokens as equivalent_tokens,
+    get_token,
 )
 from django.test import SimpleTestCase, override_settings
 from django.views.decorators.csrf import csrf_exempt, requires_csrf_token
 
-from .views import (
-    ensure_csrf_cookie_view, non_token_view_using_request_processor,
-    post_form_view, token_view,
-)
+from .views import ensure_csrf_cookie_view, non_token_view_using_request_processor, post_form_view, token_view
 
 
 class TestingHttpRequest(HttpRequest):
@@ -23,6 +24,7 @@ class TestingHttpRequest(HttpRequest):
     A version of HttpRequest that allows us to change some things
     more easily
     """
+
     def __init__(self):
         super().__init__()
         self.session = SessionStore()
@@ -66,7 +68,7 @@ class CsrfViewMiddlewareTestMixin:
         csrf_token = csrf_id or self._csrf_id
         self.assertTrue(
             match and equivalent_tokens(csrf_token, match.group(1)),
-            "Could not find csrfmiddlewaretoken to match %s" % csrf_token
+            "Could not find csrfmiddlewaretoken to match %s" % csrf_token,
         )
 
     def test_process_response_get_token_not_used(self):
@@ -269,10 +271,7 @@ class CsrfViewMiddlewareTestMixin:
         resp = self.mw.process_response(req, resp)
         csrf_cookie = resp.cookies.get(settings.CSRF_COOKIE_NAME, None)
         if csrf_cookie:
-            self.assertEqual(
-                csrf_cookie.value, self._csrf_id_cookie,
-                "CSRF cookie was changed on an accepted request"
-            )
+            self.assertEqual(csrf_cookie.value, self._csrf_id_cookie, "CSRF cookie was changed on an accepted request")
 
     @override_settings(DEBUG=True, ALLOWED_HOSTS=['www.example.com'])
     def test_https_bad_referer(self):
@@ -287,8 +286,7 @@ class CsrfViewMiddlewareTestMixin:
         response = self.mw.process_view(req, post_form_view, (), {})
         self.assertContains(
             response,
-            'Referer checking failed - https://www.evil.org/somepage does not '
-            'match any trusted origins.',
+            'Referer checking failed - https://www.evil.org/somepage does not ' 'match any trusted origins.',
             status_code=403,
         )
 
@@ -316,9 +314,7 @@ class CsrfViewMiddlewareTestMixin:
         req.META['HTTP_REFERER'] = 'http://http://www.example.com/'
         response = self.mw.process_view(req, post_form_view, (), {})
         self.assertContains(
-            response,
-            'Referer checking failed - Referer is insecure while host is secure.',
-            status_code=403,
+            response, 'Referer checking failed - Referer is insecure while host is secure.', status_code=403
         )
         # Empty
         req.META['HTTP_REFERER'] = ''
@@ -372,13 +368,15 @@ class CsrfViewMiddlewareTestMixin:
     def _test_https_good_referer_behind_proxy(self):
         req = self._get_POST_request_with_token()
         req._is_secure_override = True
-        req.META.update({
-            'HTTP_HOST': '10.0.0.2',
-            'HTTP_REFERER': 'https://www.example.com/somepage',
-            'SERVER_PORT': '8080',
-            'HTTP_X_FORWARDED_HOST': 'www.example.com',
-            'HTTP_X_FORWARDED_PORT': '443',
-        })
+        req.META.update(
+            {
+                'HTTP_HOST': '10.0.0.2',
+                'HTTP_REFERER': 'https://www.example.com/somepage',
+                'SERVER_PORT': '8080',
+                'HTTP_X_FORWARDED_HOST': 'www.example.com',
+                'HTTP_X_FORWARDED_PORT': '443',
+            }
+        )
         self.mw.process_request(req)
         req2 = self.mw.process_view(req, post_form_view, (), {})
         self.assertIsNone(req2)
@@ -444,10 +442,12 @@ class CsrfViewMiddlewareTestMixin:
         OSErrors during POST data reading are caught and treated as if the
         POST data wasn't there (#20128).
         """
+
         class CsrfPostRequest(HttpRequest):
             """
             HttpRequest that can raise an OSError when accessing POST data
             """
+
             def __init__(self, token, raise_error):
                 super().__init__()
                 self.method = 'POST'
@@ -492,7 +492,6 @@ class CsrfViewMiddlewareTestMixin:
 
 
 class CsrfViewMiddlewareTests(CsrfViewMiddlewareTestMixin, SimpleTestCase):
-
     def _get_GET_csrf_cookie_request(self):
         req = TestingHttpRequest()
         req.COOKIES[settings.CSRF_COOKIE_NAME] = self._csrf_id_cookie
@@ -536,12 +535,14 @@ class CsrfViewMiddlewareTests(CsrfViewMiddlewareTestMixin, SimpleTestCase):
         req = self._get_GET_no_csrf_cookie_request()
 
         MAX_AGE = 123
-        with self.settings(CSRF_COOKIE_NAME='csrfcookie',
-                           CSRF_COOKIE_DOMAIN='.example.com',
-                           CSRF_COOKIE_AGE=MAX_AGE,
-                           CSRF_COOKIE_PATH='/test/',
-                           CSRF_COOKIE_SECURE=True,
-                           CSRF_COOKIE_HTTPONLY=True):
+        with self.settings(
+            CSRF_COOKIE_NAME='csrfcookie',
+            CSRF_COOKIE_DOMAIN='.example.com',
+            CSRF_COOKIE_AGE=MAX_AGE,
+            CSRF_COOKIE_PATH='/test/',
+            CSRF_COOKIE_SECURE=True,
+            CSRF_COOKIE_HTTPONLY=True,
+        ):
             # token_view calls get_token() indirectly
             self.mw.process_view(req, token_view, (), {})
             resp = token_view(req)
@@ -558,12 +559,14 @@ class CsrfViewMiddlewareTests(CsrfViewMiddlewareTestMixin, SimpleTestCase):
         req = self._get_GET_no_csrf_cookie_request()
 
         MAX_AGE = None
-        with self.settings(CSRF_COOKIE_NAME='csrfcookie',
-                           CSRF_COOKIE_DOMAIN='.example.com',
-                           CSRF_COOKIE_AGE=MAX_AGE,
-                           CSRF_COOKIE_PATH='/test/',
-                           CSRF_COOKIE_SECURE=True,
-                           CSRF_COOKIE_HTTPONLY=True):
+        with self.settings(
+            CSRF_COOKIE_NAME='csrfcookie',
+            CSRF_COOKIE_DOMAIN='.example.com',
+            CSRF_COOKIE_AGE=MAX_AGE,
+            CSRF_COOKIE_PATH='/test/',
+            CSRF_COOKIE_SECURE=True,
+            CSRF_COOKIE_HTTPONLY=True,
+        ):
             # token_view calls get_token() indirectly
             self.mw.process_view(req, token_view, (), {})
             resp = token_view(req)
@@ -657,9 +660,7 @@ class CsrfViewMiddlewareTests(CsrfViewMiddlewareTestMixin, SimpleTestCase):
         req.META['SERVER_PORT'] = '443'
         response = self.mw.process_view(req, post_form_view, (), {})
         self.assertContains(
-            response,
-            'Referer checking failed - Referer is insecure while host is secure.',
-            status_code=403,
+            response, 'Referer checking failed - Referer is insecure while host is secure.', status_code=403
         )
 
 
@@ -730,10 +731,7 @@ class CsrfViewMiddlewareUseSessionsTests(CsrfViewMiddlewareTestMixin, SimpleTest
         self._check_token_present(resp, csrf_id=csrf_cookie)
 
     @override_settings(
-        ALLOWED_HOSTS=['www.example.com'],
-        SESSION_COOKIE_DOMAIN='.example.com',
-        USE_X_FORWARDED_PORT=True,
-        DEBUG=True,
+        ALLOWED_HOSTS=['www.example.com'], SESSION_COOKIE_DOMAIN='.example.com', USE_X_FORWARDED_PORT=True, DEBUG=True
     )
     def test_https_good_referer_behind_proxy(self):
         """
@@ -768,9 +766,7 @@ class CsrfViewMiddlewareUseSessionsTests(CsrfViewMiddlewareTestMixin, SimpleTest
         req.META['SERVER_PORT'] = '443'
         response = self.mw.process_view(req, post_form_view, (), {})
         self.assertContains(
-            response,
-            'Referer checking failed - Referer is insecure while host is secure.',
-            status_code=403,
+            response, 'Referer checking failed - Referer is insecure while host is secure.', status_code=403
         )
 
 

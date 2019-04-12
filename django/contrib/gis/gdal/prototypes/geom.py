@@ -4,8 +4,13 @@ from django.contrib.gis.gdal.envelope import OGREnvelope
 from django.contrib.gis.gdal.libgdal import lgdal
 from django.contrib.gis.gdal.prototypes.errcheck import check_envelope
 from django.contrib.gis.gdal.prototypes.generation import (
-    const_string_output, double_output, geom_output, int_output, srs_output,
-    string_output, void_output,
+    const_string_output,
+    double_output,
+    geom_output,
+    int_output,
+    srs_output,
+    string_output,
+    void_output,
 )
 
 
@@ -86,8 +91,7 @@ get_geom_name = const_string_output(lgdal.OGR_G_GetGeometryName, [c_void_p], dec
 get_geom_type = int_output(lgdal.OGR_G_GetGeometryType, [c_void_p])
 get_point_count = int_output(lgdal.OGR_G_GetPointCount, [c_void_p])
 get_point = void_output(
-    lgdal.OGR_G_GetPoint,
-    [c_void_p, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double)], errcheck=False
+    lgdal.OGR_G_GetPoint, [c_void_p, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double)], errcheck=False
 )
 geom_close_rings = void_output(lgdal.OGR_G_CloseRings, [c_void_p], errcheck=False)
 

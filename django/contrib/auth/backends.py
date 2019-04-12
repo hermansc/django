@@ -79,10 +79,7 @@ class ModelBackend:
         if not user_obj.is_active or user_obj.is_anonymous or obj is not None:
             return set()
         if not hasattr(user_obj, '_perm_cache'):
-            user_obj._perm_cache = {
-                *self.get_user_permissions(user_obj),
-                *self.get_group_permissions(user_obj),
-            }
+            user_obj._perm_cache = {*self.get_user_permissions(user_obj), *self.get_group_permissions(user_obj)}
         return user_obj._perm_cache
 
     def has_perm(self, user_obj, perm, obj=None):
@@ -93,8 +90,7 @@ class ModelBackend:
         Return True if user_obj has any permissions in the given app_label.
         """
         return user_obj.is_active and any(
-            perm[:perm.index('.')] == app_label
-            for perm in self.get_all_permissions(user_obj)
+            perm[: perm.index('.')] == app_label for perm in self.get_all_permissions(user_obj)
         )
 
     def get_user(self, user_id):
@@ -143,9 +139,7 @@ class RemoteUserBackend(ModelBackend):
         # instead we use get_or_create when creating unknown users since it has
         # built-in safeguards for multiple threads.
         if self.create_unknown_user:
-            user, created = UserModel._default_manager.get_or_create(**{
-                UserModel.USERNAME_FIELD: username
-            })
+            user, created = UserModel._default_manager.get_or_create(**{UserModel.USERNAME_FIELD: username})
             if created:
                 args = (request, user)
                 try:
@@ -154,8 +148,8 @@ class RemoteUserBackend(ModelBackend):
                     args = (user,)
                     warnings.warn(
                         'Update %s.configure_user() to accept `request` as '
-                        'the first argument.'
-                        % self.__class__.__name__, RemovedInDjango31Warning
+                        'the first argument.' % self.__class__.__name__,
+                        RemovedInDjango31Warning,
                     )
                 user = self.configure_user(*args)
         else:

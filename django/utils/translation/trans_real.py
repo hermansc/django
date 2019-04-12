@@ -30,16 +30,16 @@ CONTEXT_SEPARATOR = "\x04"
 
 # Format of Accept-Language header values. From RFC 2616, section 14.4 and 3.9
 # and RFC 3066, section 2.1
-accept_language_re = re.compile(r'''
+accept_language_re = re.compile(
+    r'''
         ([A-Za-z]{1,8}(?:-[A-Za-z0-9]{1,8})*|\*)      # "en", "en-au", "x-y-z", "es-419", "*"
         (?:\s*;\s*q=(0(?:\.\d{,3})?|1(?:\.0{,3})?))?  # Optional "q=1.00", "q=0.8"
         (?:\s*,\s*|$)                                 # Multiple accepts per header.
-        ''', re.VERBOSE)
-
-language_code_re = re.compile(
-    r'^[a-z]{1,8}(?:-[a-z0-9]{1,8})*(?:@[a-z0-9]{1,20})?$',
-    re.IGNORECASE
+        ''',
+    re.VERBOSE,
 )
+
+language_code_re = re.compile(r'^[a-z]{1,8}(?:-[a-z0-9]{1,8})*(?:@[a-z0-9]{1,20})?$', re.IGNORECASE)
 
 language_code_prefix_re = re.compile(r'^/(\w+([@-]\w+)?)(/|$)')
 
@@ -65,6 +65,7 @@ class DjangoTranslation(gettext_module.GNUTranslations):
     requested language and add a fallback to the default language, if it's
     different from the requested language.
     """
+
     domain = 'django'
 
     def __init__(self, language, domain=None, localedirs=None):
@@ -116,10 +117,7 @@ class DjangoTranslation(gettext_module.GNUTranslations):
         references to 'fallback'.
         """
         return gettext_module.translation(
-            domain=self.domain,
-            localedir=localedir,
-            languages=[self.__locale],
-            fallback=use_null_fallback,
+            domain=self.domain, localedir=localedir, languages=[self.__locale], fallback=use_null_fallback
         )
 
     def _init_translation_catalog(self):
@@ -137,7 +135,8 @@ class DjangoTranslation(gettext_module.GNUTranslations):
             raise AppRegistryNotReady(
                 "The translation infrastructure cannot be initialized before the "
                 "apps registry is ready. Check that you don't make non-lazy "
-                "gettext calls at import time.")
+                "gettext calls at import time."
+            )
         for app_config in app_configs:
             localedir = os.path.join(app_config.path, 'locale')
             if os.path.exists(localedir):
@@ -160,9 +159,7 @@ class DjangoTranslation(gettext_module.GNUTranslations):
             # Get from cache
             default_translation = translation(settings.LANGUAGE_CODE)
         else:
-            default_translation = DjangoTranslation(
-                settings.LANGUAGE_CODE, domain=self.domain, localedirs=localedirs
-            )
+            default_translation = DjangoTranslation(settings.LANGUAGE_CODE, domain=self.domain, localedirs=localedirs)
         self.add_fallback(default_translation)
 
     def merge(self, other):
@@ -337,9 +334,11 @@ def ngettext(singular, plural, number):
 
 
 def npgettext(context, singular, plural, number):
-    msgs_with_ctxt = ("%s%s%s" % (context, CONTEXT_SEPARATOR, singular),
-                      "%s%s%s" % (context, CONTEXT_SEPARATOR, plural),
-                      number)
+    msgs_with_ctxt = (
+        "%s%s%s" % (context, CONTEXT_SEPARATOR, singular),
+        "%s%s%s" % (context, CONTEXT_SEPARATOR, plural),
+        number,
+    )
     result = ngettext(*msgs_with_ctxt)
     if CONTEXT_SEPARATOR in result:
         # Translation not found
@@ -351,8 +350,7 @@ def all_locale_paths():
     """
     Return a list of paths to user-provides languages files.
     """
-    globalpath = os.path.join(
-        os.path.dirname(sys.modules[settings.__module__].__file__), 'locale')
+    globalpath = os.path.join(os.path.dirname(sys.modules[settings.__module__].__file__), 'locale')
     app_paths = []
     for app_config in apps.get_app_configs():
         locale_path = os.path.join(app_config.path, 'locale')
@@ -375,10 +373,7 @@ def check_for_language(lang_code):
     # First, a quick check to make sure lang_code is well-formed (#21458)
     if lang_code is None or not language_code_re.search(lang_code):
         return False
-    return any(
-        gettext_module.find('django', path, [to_locale(lang_code)]) is not None
-        for path in all_locale_paths()
-    )
+    return any(gettext_module.find('django', path, [to_locale(lang_code)]) is not None for path in all_locale_paths())
 
 
 @functools.lru_cache()
@@ -497,7 +492,7 @@ def parse_accept_lang_header(lang_string):
     if pieces[-1]:
         return ()
     for i in range(0, len(pieces) - 1, 3):
-        first, lang, priority = pieces[i:i + 3]
+        first, lang, priority = pieces[i : i + 3]
         if first:
             return ()
         if priority:

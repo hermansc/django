@@ -14,13 +14,10 @@ class TestDeprecatedField(SimpleTestCase):
             name = MyField()
 
         model = Model()
-        self.assertEqual(model.check(), [
-            checks.Warning(
-                msg='MyField has been deprecated.',
-                obj=Model._meta.get_field('name'),
-                id='fields.WXXX',
-            )
-        ])
+        self.assertEqual(
+            model.check(),
+            [checks.Warning(msg='MyField has been deprecated.', obj=Model._meta.get_field('name'), id='fields.WXXX')],
+        )
 
     def test_user_specified_details(self):
         class MyField(models.Field):
@@ -34,14 +31,17 @@ class TestDeprecatedField(SimpleTestCase):
             name = MyField()
 
         model = Model()
-        self.assertEqual(model.check(), [
-            checks.Warning(
-                msg='This field is deprecated and will be removed soon.',
-                hint='Use something else.',
-                obj=Model._meta.get_field('name'),
-                id='fields.W999',
-            )
-        ])
+        self.assertEqual(
+            model.check(),
+            [
+                checks.Warning(
+                    msg='This field is deprecated and will be removed soon.',
+                    hint='Use something else.',
+                    obj=Model._meta.get_field('name'),
+                    id='fields.W999',
+                )
+            ],
+        )
 
 
 @isolate_apps('check_framework')
@@ -54,13 +54,16 @@ class TestRemovedField(SimpleTestCase):
             name = MyField()
 
         model = Model()
-        self.assertEqual(model.check(), [
-            checks.Error(
-                msg='MyField has been removed except for support in historical migrations.',
-                obj=Model._meta.get_field('name'),
-                id='fields.EXXX',
-            )
-        ])
+        self.assertEqual(
+            model.check(),
+            [
+                checks.Error(
+                    msg='MyField has been removed except for support in historical migrations.',
+                    obj=Model._meta.get_field('name'),
+                    id='fields.EXXX',
+                )
+            ],
+        )
 
     def test_user_specified_details(self):
         class MyField(models.Field):
@@ -74,11 +77,14 @@ class TestRemovedField(SimpleTestCase):
             name = MyField()
 
         model = Model()
-        self.assertEqual(model.check(), [
-            checks.Error(
-                msg='Support for this field is gone.',
-                hint='Use something else.',
-                obj=Model._meta.get_field('name'),
-                id='fields.E999',
-            )
-        ])
+        self.assertEqual(
+            model.check(),
+            [
+                checks.Error(
+                    msg='Support for this field is gone.',
+                    hint='Use something else.',
+                    obj=Model._meta.get_field('name'),
+                    id='fields.E999',
+                )
+            ],
+        )

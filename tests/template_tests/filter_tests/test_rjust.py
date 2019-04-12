@@ -6,7 +6,6 @@ from ..utils import setup
 
 
 class RjustTests(SimpleTestCase):
-
     @setup({'rjust01': '{% autoescape off %}.{{ a|rjust:"5" }}. .{{ b|rjust:"5" }}.{% endautoescape %}'})
     def test_rjust01(self):
         output = self.engine.render_to_string('rjust01', {"a": "a&b", "b": mark_safe("a&b")})
@@ -19,7 +18,6 @@ class RjustTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_rjust(self):
         self.assertEqual(rjust('test', 10), '      test')
 

@@ -1,7 +1,5 @@
 import mimetypes
-from email import (
-    charset as Charset, encoders as Encoders, generator, message_from_string,
-)
+from email import charset as Charset, encoders as Encoders, generator, message_from_string
 from email.errors import InvalidHeaderDefect, NonASCIILocalPartDefect
 from email.header import Header
 from email.headerregistry import Address
@@ -152,7 +150,6 @@ class MIMEMixin:
 
 
 class SafeMIMEMessage(MIMEMixin, MIMEMessage):
-
     def __setitem__(self, name, val):
         # message/rfc822 attachments must be ASCII
         name, val = forbid_multi_line_headers(name, val, 'ascii')
@@ -160,7 +157,6 @@ class SafeMIMEMessage(MIMEMixin, MIMEMessage):
 
 
 class SafeMIMEText(MIMEMixin, MIMEText):
-
     def __init__(self, _text, _subtype='plain', _charset=None):
         self.encoding = _charset
         MIMEText.__init__(self, _text, _subtype=_subtype, _charset=_charset)
@@ -171,10 +167,7 @@ class SafeMIMEText(MIMEMixin, MIMEText):
 
     def set_payload(self, payload, charset=None):
         if charset == 'utf-8' and not isinstance(charset, Charset.Charset):
-            has_long_lines = any(
-                len(l.encode()) > RFC5322_EMAIL_LINE_LENGTH_LIMIT
-                for l in payload.splitlines()
-            )
+            has_long_lines = any(len(l.encode()) > RFC5322_EMAIL_LINE_LENGTH_LIMIT for l in payload.splitlines())
             # Quoted-Printable encoding has the side effect of shortening long
             # lines, if any (#22561).
             charset = utf8_charset_qp if has_long_lines else utf8_charset
@@ -182,7 +175,6 @@ class SafeMIMEText(MIMEMixin, MIMEText):
 
 
 class SafeMIMEMultipart(MIMEMixin, MIMEMultipart):
-
     def __init__(self, _subtype='mixed', boundary=None, _subparts=None, encoding=None, **_params):
         self.encoding = encoding
         MIMEMultipart.__init__(self, _subtype, boundary, _subparts, **_params)
@@ -194,13 +186,24 @@ class SafeMIMEMultipart(MIMEMixin, MIMEMultipart):
 
 class EmailMessage:
     """A container for email information."""
+
     content_subtype = 'plain'
     mixed_subtype = 'mixed'
-    encoding = None     # None => use settings default
+    encoding = None  # None => use settings default
 
-    def __init__(self, subject='', body='', from_email=None, to=None, bcc=None,
-                 connection=None, attachments=None, headers=None, cc=None,
-                 reply_to=None):
+    def __init__(
+        self,
+        subject='',
+        body='',
+        from_email=None,
+        to=None,
+        bcc=None,
+        connection=None,
+        attachments=None,
+        headers=None,
+        cc=None,
+        reply_to=None,
+    ):
         """
         Initialize a single email message (which can be sent to multiple
         recipients).
@@ -244,6 +247,7 @@ class EmailMessage:
 
     def get_connection(self, fail_silently=False):
         from django.core.mail import get_connection
+
         if not self.connection:
             self.connection = get_connection(fail_silently=fail_silently)
         return self.connection
@@ -418,19 +422,28 @@ class EmailMultiAlternatives(EmailMessage):
     messages. For example, including text and HTML versions of the text is
     made easier.
     """
+
     alternative_subtype = 'alternative'
 
-    def __init__(self, subject='', body='', from_email=None, to=None, bcc=None,
-                 connection=None, attachments=None, headers=None, alternatives=None,
-                 cc=None, reply_to=None):
+    def __init__(
+        self,
+        subject='',
+        body='',
+        from_email=None,
+        to=None,
+        bcc=None,
+        connection=None,
+        attachments=None,
+        headers=None,
+        alternatives=None,
+        cc=None,
+        reply_to=None,
+    ):
         """
         Initialize a single email message (which can be sent to multiple
         recipients).
         """
-        super().__init__(
-            subject, body, from_email, to, bcc, connection, attachments,
-            headers, cc, reply_to,
-        )
+        super().__init__(subject, body, from_email, to, bcc, connection, attachments, headers, cc, reply_to)
         self.alternatives = alternatives or []
 
     def attach_alternative(self, content, mimetype):

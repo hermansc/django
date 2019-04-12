@@ -7,7 +7,6 @@ from .models import Donut, RumBaba
 
 
 class DataTypesTestCase(TestCase):
-
     def test_boolean_type(self):
         d = Donut(name='Apple Fritter')
         self.assertFalse(d.is_frosted)
@@ -68,7 +67,7 @@ class DataTypesTestCase(TestCase):
 
         self.assertEqual(
             ['Apple Fritter', 'Date Test 2007'],
-            list(Donut.objects.filter(consumed_at__year=2007).order_by('name').values_list('name', flat=True))
+            list(Donut.objects.filter(consumed_at__year=2007).order_by('name').values_list('name', flat=True)),
         )
         self.assertEqual(0, Donut.objects.filter(consumed_at__year=2005).count())
         self.assertEqual(0, Donut.objects.filter(consumed_at__year=2008).count())

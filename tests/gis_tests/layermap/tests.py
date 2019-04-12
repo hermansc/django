@@ -7,16 +7,31 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils.layermapping import (
-    InvalidDecimal, InvalidString, LayerMapError, LayerMapping,
+    InvalidDecimal,
+    InvalidString,
+    LayerMapError,
+    LayerMapping,
     MissingForeignKey,
 )
 from django.db import connection
 from django.test import TestCase, override_settings
 
 from .models import (
-    City, County, CountyFeat, DoesNotAllowNulls, HasNulls, ICity1, ICity2,
-    Interstate, Invalid, State, city_mapping, co_mapping, cofeat_mapping,
-    has_nulls_mapping, inter_mapping,
+    City,
+    County,
+    CountyFeat,
+    DoesNotAllowNulls,
+    HasNulls,
+    ICity1,
+    ICity2,
+    Interstate,
+    Invalid,
+    State,
+    city_mapping,
+    co_mapping,
+    cofeat_mapping,
+    has_nulls_mapping,
+    inter_mapping,
 )
 
 shp_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, 'data'))
@@ -33,7 +48,6 @@ STATES = ['Texas', 'Texas', 'Texas', 'Hawaii', 'Colorado']
 
 
 class LayerMapTest(TestCase):
-
     def test_init(self):
         "Testing LayerMapping initialization."
 
@@ -177,9 +191,7 @@ class LayerMapTest(TestCase):
             lm.save(silent=True, strict=True)
 
         # Now creating the state models so the ForeignKey mapping may work.
-        State.objects.bulk_create([
-            State(name='Colorado'), State(name='Hawaii'), State(name='Texas')
-        ])
+        State.objects.bulk_create([State(name='Colorado'), State(name='Hawaii'), State(name='Texas')])
 
         # If a mapping is specified as a collection, all OGR fields that
         # are not collections will be converted into them.  For example,
@@ -211,9 +223,7 @@ class LayerMapTest(TestCase):
         def clear_counties():
             County.objects.all().delete()
 
-        State.objects.bulk_create([
-            State(name='Colorado'), State(name='Hawaii'), State(name='Texas')
-        ])
+        State.objects.bulk_create([State(name='Colorado'), State(name='Hawaii'), State(name='Texas')])
 
         # Initializing the LayerMapping object to use in these tests.
         lm = LayerMapping(County, co_shp, co_mapping, transform=False, unique='name')
@@ -285,8 +295,7 @@ class LayerMapTest(TestCase):
     def test_invalid_layer(self):
         "Tests LayerMapping on invalid geometries.  See #15378."
         invalid_mapping = {'point': 'POINT'}
-        lm = LayerMapping(Invalid, invalid_shp, invalid_mapping,
-                          source_srs=4326)
+        lm = LayerMapping(Invalid, invalid_shp, invalid_mapping, source_srs=4326)
         lm.save(silent=True)
 
     def test_charfield_too_short(self):

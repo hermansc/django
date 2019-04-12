@@ -22,28 +22,119 @@ from django.utils.safestring import mark_safe
 
 from .forms import MediaActionForm
 from .models import (
-    Actor, AdminOrderedAdminMethod, AdminOrderedCallable, AdminOrderedField,
-    AdminOrderedModelMethod, Album, Answer, Answer2, Article, BarAccount, Book,
-    Bookmark, Category, Chapter, ChapterXtra1, Child, ChildOfReferer, Choice,
-    City, Collector, Color, Color2, ComplexSortedPerson, CoverLetter,
-    CustomArticle, CyclicOne, CyclicTwo, DependentChild, DooHickey, EmptyModel,
-    EmptyModelHidden, EmptyModelMixin, EmptyModelVisible, ExplicitlyProvidedPK,
-    ExternalSubscriber, Fabric, FancyDoodad, FieldOverridePost,
-    FilteredManager, FooAccount, FoodDelivery, FunkyTag, Gadget, Gallery,
-    GenRelReference, Grommet, ImplicitlyGeneratedPK, Ingredient,
-    InlineReference, InlineReferer, Inquisition, Language, Link,
-    MainPrepopulated, ModelWithStringPrimaryKey, NotReferenced, OldSubscriber,
-    OtherStory, Paper, Parent, ParentWithDependentChildren, ParentWithUUIDPK,
-    Person, Persona, Picture, Pizza, Plot, PlotDetails, PlotProxy,
-    PluggableSearchPerson, Podcast, Post, PrePopulatedPost,
-    PrePopulatedPostLargeSlug, PrePopulatedSubPost, Promo, Question,
-    ReadablePizza, ReadOnlyPizza, Recipe, Recommendation, Recommender,
-    ReferencedByGenRel, ReferencedByInline, ReferencedByParent,
-    RelatedPrepopulated, RelatedWithUUIDPKModel, Report, Reservation,
-    Restaurant, RowLevelChangePermissionModel, Section, ShortMessage, Simple,
-    Sketch, State, Story, StumpJoke, Subscriber, SuperVillain, Telegram, Thing,
-    Topping, UnchangeableObject, UndeletableObject, UnorderedObject,
-    UserMessenger, UserProxy, Villain, Vodcast, Whatsit, Widget, Worker,
+    Actor,
+    AdminOrderedAdminMethod,
+    AdminOrderedCallable,
+    AdminOrderedField,
+    AdminOrderedModelMethod,
+    Album,
+    Answer,
+    Answer2,
+    Article,
+    BarAccount,
+    Book,
+    Bookmark,
+    Category,
+    Chapter,
+    ChapterXtra1,
+    Child,
+    ChildOfReferer,
+    Choice,
+    City,
+    Collector,
+    Color,
+    Color2,
+    ComplexSortedPerson,
+    CoverLetter,
+    CustomArticle,
+    CyclicOne,
+    CyclicTwo,
+    DependentChild,
+    DooHickey,
+    EmptyModel,
+    EmptyModelHidden,
+    EmptyModelMixin,
+    EmptyModelVisible,
+    ExplicitlyProvidedPK,
+    ExternalSubscriber,
+    Fabric,
+    FancyDoodad,
+    FieldOverridePost,
+    FilteredManager,
+    FooAccount,
+    FoodDelivery,
+    FunkyTag,
+    Gadget,
+    Gallery,
+    GenRelReference,
+    Grommet,
+    ImplicitlyGeneratedPK,
+    Ingredient,
+    InlineReference,
+    InlineReferer,
+    Inquisition,
+    Language,
+    Link,
+    MainPrepopulated,
+    ModelWithStringPrimaryKey,
+    NotReferenced,
+    OldSubscriber,
+    OtherStory,
+    Paper,
+    Parent,
+    ParentWithDependentChildren,
+    ParentWithUUIDPK,
+    Person,
+    Persona,
+    Picture,
+    Pizza,
+    Plot,
+    PlotDetails,
+    PlotProxy,
+    PluggableSearchPerson,
+    Podcast,
+    Post,
+    PrePopulatedPost,
+    PrePopulatedPostLargeSlug,
+    PrePopulatedSubPost,
+    Promo,
+    Question,
+    ReadablePizza,
+    ReadOnlyPizza,
+    Recipe,
+    Recommendation,
+    Recommender,
+    ReferencedByGenRel,
+    ReferencedByInline,
+    ReferencedByParent,
+    RelatedPrepopulated,
+    RelatedWithUUIDPKModel,
+    Report,
+    Reservation,
+    Restaurant,
+    RowLevelChangePermissionModel,
+    Section,
+    ShortMessage,
+    Simple,
+    Sketch,
+    State,
+    Story,
+    StumpJoke,
+    Subscriber,
+    SuperVillain,
+    Telegram,
+    Thing,
+    Topping,
+    UnchangeableObject,
+    UndeletableObject,
+    UnorderedObject,
+    UserMessenger,
+    UserProxy,
+    Villain,
+    Vodcast,
+    Whatsit,
+    Widget,
+    Worker,
     WorkHour,
 )
 
@@ -61,18 +152,10 @@ callable_year.admin_order_field = 'date'
 class ArticleInline(admin.TabularInline):
     model = Article
     fk_name = 'section'
-    prepopulated_fields = {
-        'title': ('content',)
-    }
+    prepopulated_fields = {'title': ('content',)}
     fieldsets = (
-        ('Some fields', {
-            'classes': ('collapse',),
-            'fields': ('title', 'content')
-        }),
-        ('Some other fields', {
-            'classes': ('wide',),
-            'fields': ('date', 'section')
-        })
+        ('Some fields', {'classes': ('collapse',), 'fields': ('title', 'content')}),
+        ('Some other fields', {'classes': ('wide',), 'fields': ('date', 'section')}),
     )
 
 
@@ -102,9 +185,17 @@ class ArticleForm(forms.ModelForm):
 
 class ArticleAdmin(admin.ModelAdmin):
     list_display = (
-        'content', 'date', callable_year, 'model_year', 'modeladmin_year',
-        'model_year_reversed', 'section', lambda obj: obj.title,
-        'order_by_expression', 'model_property_year', 'model_month',
+        'content',
+        'date',
+        callable_year,
+        'model_year',
+        'modeladmin_year',
+        'model_year_reversed',
+        'section',
+        lambda obj: obj.title,
+        'order_by_expression',
+        'model_property_year',
+        'model_month',
     )
     list_editable = ('section',)
     list_filter = ('date', 'section')
@@ -112,18 +203,13 @@ class ArticleAdmin(admin.ModelAdmin):
     view_on_site = False
     form = ArticleForm
     fieldsets = (
-        ('Some fields', {
-            'classes': ('collapse',),
-            'fields': ('title', 'content', 'extra_form_field'),
-        }),
-        ('Some other fields', {
-            'classes': ('wide',),
-            'fields': ('date', 'section', 'sub_section')
-        })
+        ('Some fields', {'classes': ('collapse',), 'fields': ('title', 'content', 'extra_form_field')}),
+        ('Some other fields', {'classes': ('wide',), 'fields': ('date', 'section', 'sub_section')}),
     )
 
     def order_by_expression(self, obj):
         return obj.model_year
+
     # This ordering isn't particularly useful but shows that expressions can
     # be used for admin_order_field.
     order_by_expression.admin_order_field = models.F('date') + datetime.timedelta(days=3)
@@ -133,6 +219,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
     def modeladmin_year(self, obj):
         return obj.date.year
+
     modeladmin_year.admin_order_field = 'date'
     modeladmin_year.short_description = None
 
@@ -141,7 +228,7 @@ class ArticleAdmin(admin.ModelAdmin):
             'Greetings from a deleted object',
             'I hereby inform you that some user deleted me',
             'from@example.com',
-            ['to@example.com']
+            ['to@example.com'],
         ).send()
         return super().delete_model(request, obj)
 
@@ -150,13 +237,12 @@ class ArticleAdmin(admin.ModelAdmin):
             'Greetings from a created object',
             'I hereby inform you that some user created me',
             'from@example.com',
-            ['to@example.com']
+            ['to@example.com'],
         ).send()
         return super().save_model(request, obj, form, change)
 
 
 class ArticleAdmin2(admin.ModelAdmin):
-
     def has_module_permission(self, request):
         return False
 
@@ -175,6 +261,7 @@ class CustomArticleAdmin(admin.ModelAdmin):
     """
     Tests various hooks for using custom templates and contexts.
     """
+
     change_list_template = 'custom_admin/change_list.html'
     change_form_template = 'custom_admin/change_form.html'
     add_form_template = 'custom_admin/add_form.html'
@@ -244,10 +331,7 @@ class BarAccountAdmin(admin.StackedInline):
 
 
 class PersonaAdmin(admin.ModelAdmin):
-    inlines = (
-        FooAccountAdmin,
-        BarAccountAdmin
-    )
+    inlines = (FooAccountAdmin, BarAccountAdmin)
 
 
 class SubscriberAdmin(admin.ModelAdmin):
@@ -263,7 +347,7 @@ class SubscriberAdmin(admin.ModelAdmin):
             'Greetings from a ModelAdmin action',
             'This is the test email from an admin action',
             'from@example.com',
-            ['to@example.com']
+            ['to@example.com'],
         ).send()
 
 
@@ -272,7 +356,7 @@ def external_mail(modeladmin, request, selected):
         'Greetings from a function action',
         'This is the test email from a function action',
         'from@example.com',
-        ['to@example.com']
+        ['to@example.com'],
     ).send()
 
 
@@ -281,6 +365,7 @@ external_mail.short_description = 'External mail (Another awesome action)'
 
 def redirect_to(modeladmin, request, selected):
     from django.http import HttpResponseRedirect
+
     return HttpResponseRedirect('/some-where-else/')
 
 
@@ -328,7 +413,7 @@ class ParentAdmin(admin.ModelAdmin):
     model = Parent
     inlines = [ChildInline]
     save_as = True
-    list_display = ('id', 'name',)
+    list_display = ('id', 'name')
     list_display_links = ('id',)
     list_editable = ('name',)
 
@@ -374,7 +459,7 @@ class LanguageAdmin(admin.ModelAdmin):
 
 class RecommendationAdmin(admin.ModelAdmin):
     show_full_result_count = False
-    search_fields = ('=titletranslation__text', '=the_recommender__titletranslation__text',)
+    search_fields = ('=titletranslation__text', '=the_recommender__titletranslation__text')
 
 
 class WidgetInline(admin.StackedInline):
@@ -407,10 +492,7 @@ class CategoryInline(admin.StackedInline):
 
 
 class CollectorAdmin(admin.ModelAdmin):
-    inlines = [
-        WidgetInline, DooHickeyInline, GrommetInline, WhatsitInline,
-        FancyDoodadInline, CategoryInline
-    ]
+    inlines = [WidgetInline, DooHickeyInline, GrommetInline, WhatsitInline, FancyDoodadInline, CategoryInline]
 
 
 class LinkInline(admin.TabularInline):
@@ -426,9 +508,7 @@ class LinkInline(admin.TabularInline):
 class SubPostInline(admin.TabularInline):
     model = PrePopulatedSubPost
 
-    prepopulated_fields = {
-        'subslug': ('subtitle',)
-    }
+    prepopulated_fields = {'subslug': ('subtitle',)}
 
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.published:
@@ -443,9 +523,7 @@ class SubPostInline(admin.TabularInline):
 
 class PrePopulatedPostAdmin(admin.ModelAdmin):
     list_display = ['title', 'slug']
-    prepopulated_fields = {
-        'slug': ('title',)
-    }
+    prepopulated_fields = {'slug': ('title',)}
 
     inlines = [SubPostInline]
 
@@ -470,14 +548,17 @@ class PrePopulatedPostReadOnlyAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     list_display = ['title', 'public']
     readonly_fields = (
-        'posted', 'awesomeness_level', 'coolness', 'value',
-        'multiline', 'multiline_html', lambda obj: "foo",
+        'posted',
+        'awesomeness_level',
+        'coolness',
+        'value',
+        'multiline',
+        'multiline_html',
+        lambda obj: "foo",
         'readonly_content',
     )
 
-    inlines = [
-        LinkInline
-    ]
+    inlines = [LinkInline]
 
     def coolness(self, instance):
         if instance.pk:
@@ -487,6 +568,7 @@ class PostAdmin(admin.ModelAdmin):
 
     def value(self, instance):
         return 1000
+
     value.short_description = 'Value in $US'
 
     def multiline(self, instance):
@@ -500,12 +582,8 @@ class FieldOverridePostForm(forms.ModelForm):
     model = FieldOverridePost
 
     class Meta:
-        help_texts = {
-            'posted': 'Overridden help text for the date',
-        }
-        labels = {
-            'public': 'Overridden public label',
-        }
+        help_texts = {'posted': 'Overridden help text for the date'}
+        labels = {'public': 'Overridden public label'}
 
 
 class FieldOverridePostAdmin(PostAdmin):
@@ -631,6 +709,7 @@ class ComplexSortedPersonAdmin(admin.ModelAdmin):
 
     def colored_name(self, obj):
         return format_html('<span style="color: #ff00ff;">{}</span>', obj.name)
+
     colored_name.admin_order_field = 'name'
 
 
@@ -664,9 +743,7 @@ class AnswerAdmin(admin.ModelAdmin):
 
 
 class PrePopulatedPostLargeSlugAdmin(admin.ModelAdmin):
-    prepopulated_fields = {
-        'slug': ('title',)
-    }
+    prepopulated_fields = {'slug': ('title',)}
 
 
 class AdminOrderedFieldAdmin(admin.ModelAdmin):
@@ -682,6 +759,7 @@ class AdminOrderedModelMethodAdmin(admin.ModelAdmin):
 class AdminOrderedAdminMethodAdmin(admin.ModelAdmin):
     def some_admin_order(self, obj):
         return obj.order
+
     some_admin_order.admin_order_field = 'order'
     ordering = ('order',)
     list_display = ('stuff', 'some_admin_order')
@@ -718,33 +796,19 @@ class CustomTemplateFilterColorAdmin(admin.ModelAdmin):
 
 # For Selenium Prepopulated tests -------------------------------------
 class RelatedPrepopulatedInline1(admin.StackedInline):
-    fieldsets = (
-        (None, {
-            'fields': (
-                ('fk', 'm2m'),
-                ('pubdate', 'status'),
-                ('name', 'slug1', 'slug2',),
-            ),
-        }),
-    )
+    fieldsets = ((None, {'fields': (('fk', 'm2m'), ('pubdate', 'status'), ('name', 'slug1', 'slug2'))}),)
     formfield_overrides = {models.CharField: {'strip': False}}
     model = RelatedPrepopulated
     extra = 1
     autocomplete_fields = ['fk', 'm2m']
-    prepopulated_fields = {
-        'slug1': ['name', 'pubdate'],
-        'slug2': ['status', 'name'],
-    }
+    prepopulated_fields = {'slug1': ['name', 'pubdate'], 'slug2': ['status', 'name']}
 
 
 class RelatedPrepopulatedInline2(admin.TabularInline):
     model = RelatedPrepopulated
     extra = 1
     autocomplete_fields = ['fk', 'm2m']
-    prepopulated_fields = {
-        'slug1': ['name', 'pubdate'],
-        'slug2': ['status', 'name'],
-    }
+    prepopulated_fields = {'slug1': ['name', 'pubdate'], 'slug2': ['status', 'name']}
 
 
 class RelatedPrepopulatedInline3(admin.TabularInline):
@@ -755,17 +819,9 @@ class RelatedPrepopulatedInline3(admin.TabularInline):
 
 class MainPrepopulatedAdmin(admin.ModelAdmin):
     inlines = [RelatedPrepopulatedInline1, RelatedPrepopulatedInline2, RelatedPrepopulatedInline3]
-    fieldsets = (
-        (None, {
-            'fields': (('pubdate', 'status'), ('name', 'slug1', 'slug2', 'slug3'))
-        }),
-    )
+    fieldsets = ((None, {'fields': (('pubdate', 'status'), ('name', 'slug1', 'slug2', 'slug3'))}),)
     formfield_overrides = {models.CharField: {'strip': False}}
-    prepopulated_fields = {
-        'slug1': ['name', 'pubdate'],
-        'slug2': ['status', 'name'],
-        'slug3': ['name'],
-    }
+    prepopulated_fields = {'slug1': ['name', 'pubdate'], 'slug2': ['status', 'name'], 'slug3': ['name']}
 
 
 class UnorderedObjectAdmin(admin.ModelAdmin):
@@ -802,8 +858,14 @@ class CustomManagerAdmin(admin.ModelAdmin):
 
 
 class MessageTestingAdmin(admin.ModelAdmin):
-    actions = ["message_debug", "message_info", "message_success",
-               "message_warning", "message_error", "message_extra_tags"]
+    actions = [
+        "message_debug",
+        "message_info",
+        "message_success",
+        "message_warning",
+        "message_error",
+        "message_extra_tags",
+    ]
 
     def message_debug(self, request, selected):
         self.message_user(request, "Test debug", level="debug")
@@ -835,11 +897,13 @@ class DependentChildAdminForm(forms.ModelForm):
     Issue #20522
     Form to test child dependency on parent object's validation
     """
+
     def clean(self):
         parent = self.cleaned_data.get('parent')
         if parent.family_name and parent.family_name != self.cleaned_data.get('family_name'):
-            raise ValidationError("Children must share a family name with their parents " +
-                                  "in this contrived test case")
+            raise ValidationError(
+                "Children must share a family name with their parents " + "in this contrived test case"
+            )
         return super().clean()
 
 
@@ -853,6 +917,7 @@ class ParentWithDependentChildrenAdmin(admin.ModelAdmin):
 
 
 # Tests for ticket 11277 ----------------------------------
+
 
 class FormWithoutHiddenField(forms.ModelForm):
     first = forms.CharField()
@@ -871,11 +936,7 @@ class FormWithVisibleAndHiddenField(forms.ModelForm):
 
 class EmptyModelVisibleAdmin(admin.ModelAdmin):
     form = FormWithoutHiddenField
-    fieldsets = (
-        (None, {
-            'fields': (('first', 'second'),),
-        }),
-    )
+    fieldsets = ((None, {'fields': (('first', 'second'),)}),)
 
 
 class EmptyModelHiddenAdmin(admin.ModelAdmin):
@@ -967,8 +1028,7 @@ site.site_url = '/my-site-url/'
 site.register(Article, ArticleAdmin)
 site.register(CustomArticle, CustomArticleAdmin)
 site.register(
-    Section, save_as=True, inlines=[ArticleInline],
-    readonly_fields=['name_property'], search_fields=['name'],
+    Section, save_as=True, inlines=[ArticleInline], readonly_fields=['name_property'], search_fields=['name']
 )
 site.register(ModelWithStringPrimaryKey)
 site.register(Color)
@@ -1088,10 +1148,7 @@ site2.register(User, UserAdmin)
 site2.register(Group, GroupAdmin)
 site2.register(ParentWithUUIDPK)
 site2.register(
-    RelatedWithUUIDPKModel,
-    list_display=['pk', 'parent'],
-    list_editable=['parent'],
-    raw_id_fields=['parent'],
+    RelatedWithUUIDPKModel, list_display=['pk', 'parent'], list_editable=['parent'], raw_id_fields=['parent']
 )
 site2.register(Person, save_as_continue=False)
 
@@ -1104,13 +1161,19 @@ site7.register(PrePopulatedPost, PrePopulatedPostReadOnlyAdmin)
 # Used to test ModelAdmin.sortable_by and get_sortable_by().
 class ArticleAdmin6(admin.ModelAdmin):
     list_display = (
-        'content', 'date', callable_year, 'model_year', 'modeladmin_year',
-        'model_year_reversed', 'section',
+        'content',
+        'date',
+        callable_year,
+        'model_year',
+        'modeladmin_year',
+        'model_year_reversed',
+        'section',
     )
     sortable_by = ('date', callable_year)
 
     def modeladmin_year(self, obj):
         return obj.date.year
+
     modeladmin_year.admin_order_field = 'date'
 
 

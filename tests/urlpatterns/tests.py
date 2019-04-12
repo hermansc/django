@@ -20,7 +20,6 @@ converter_test_data = (
 
 @override_settings(ROOT_URLCONF='urlpatterns.path_urls')
 class SimplifiedURLTests(SimpleTestCase):
-
     def test_path_lookup_without_parameters(self):
         match = resolve('/articles/2003/')
         self.assertEqual(match.url_name, 'articles-2003')
@@ -119,7 +118,6 @@ class SimplifiedURLTests(SimpleTestCase):
 
 @override_settings(ROOT_URLCONF='urlpatterns.converter_urls')
 class ConverterTests(SimpleTestCase):
-
     def test_matching_urls(self):
         def no_converter(x):
             return x
@@ -155,14 +153,17 @@ class ConverterTests(SimpleTestCase):
             ('str', {'', '/'}),
             ('path', {''}),
             ('slug', {'', 'stars*notallowed'}),
-            ('uuid', {
-                '',
-                '9da9369-838e-4750-91a5-f7805cd82839',
-                '39da9369-838-4750-91a5-f7805cd82839',
-                '39da9369-838e-475-91a5-f7805cd82839',
-                '39da9369-838e-4750-91a-f7805cd82839',
-                '39da9369-838e-4750-91a5-f7805cd8283',
-            }),
+            (
+                'uuid',
+                {
+                    '',
+                    '9da9369-838e-4750-91a5-f7805cd82839',
+                    '39da9369-838-4750-91a5-f7805cd82839',
+                    '39da9369-838e-475-91a5-f7805cd82839',
+                    '39da9369-838e-4750-91a-f7805cd82839',
+                    '39da9369-838e-4750-91a5-f7805cd8283',
+                },
+            ),
         )
         for url_name, url_suffixes in test_data:
             for url_suffix in url_suffixes:
@@ -173,10 +174,7 @@ class ConverterTests(SimpleTestCase):
 
 class ParameterRestrictionTests(SimpleTestCase):
     def test_non_identifier_parameter_name_causes_exception(self):
-        msg = (
-            "URL route 'hello/<int:1>/' uses parameter name '1' which isn't "
-            "a valid Python identifier."
-        )
+        msg = "URL route 'hello/<int:1>/' uses parameter name '1' which isn't " "a valid Python identifier."
         with self.assertRaisesMessage(ImproperlyConfigured, msg):
             path(r'hello/<int:1>/', lambda r: None)
 
@@ -195,6 +193,7 @@ class ConversionExceptionTests(SimpleTestCase):
         @DynamicConverter.register_to_python
         def raises_value_error(value):
             raise ValueError()
+
         with self.assertRaises(Resolver404):
             resolve('/dynamic/abc/')
 
@@ -202,6 +201,7 @@ class ConversionExceptionTests(SimpleTestCase):
         @DynamicConverter.register_to_python
         def raises_type_error(value):
             raise TypeError('This type error propagates.')
+
         with self.assertRaisesMessage(TypeError, 'This type error propagates.'):
             resolve('/dynamic/abc/')
 
@@ -209,5 +209,6 @@ class ConversionExceptionTests(SimpleTestCase):
         @DynamicConverter.register_to_url
         def raises_value_error(value):
             raise ValueError('This value error propagates.')
+
         with self.assertRaisesMessage(ValueError, 'This value error propagates.'):
             reverse('dynamic', kwargs={'value': object()})

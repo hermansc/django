@@ -6,7 +6,6 @@ from ..utils import setup
 
 
 class LowerTests(SimpleTestCase):
-
     @setup({'lower01': '{% autoescape off %}{{ a|lower }} {{ b|lower }}{% endautoescape %}'})
     def test_lower01(self):
         output = self.engine.render_to_string('lower01', {"a": "Apple & banana", "b": mark_safe("Apple &amp; banana")})
@@ -19,7 +18,6 @@ class LowerTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_lower(self):
         self.assertEqual(lower('TEST'), 'test')
 

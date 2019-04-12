@@ -7,7 +7,6 @@ from .base import MultipleLocaleActivationTestCase
 
 
 class MultipleLocaleActivationTests(MultipleLocaleActivationTestCase):
-
     def test_single_locale_activation(self):
         """
         Simple baseline behavior with one locale for all the supported i18n
@@ -79,6 +78,7 @@ class MultipleLocaleActivationTests(MultipleLocaleActivationTestCase):
 
 class I18nStringLiteralTests(SimpleTestCase):
     """translation of constant strings"""
+
     libraries = {'i18n': 'django.templatetags.i18n'}
 
     @setup({'i18n13': '{{ _("Password") }}'})

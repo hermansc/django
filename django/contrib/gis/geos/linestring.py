@@ -42,11 +42,7 @@ class LineString(LinearGeometryMixin, GEOSGeometry):
 
         if ncoords < self._minlength:
             raise ValueError(
-                '%s requires at least %d points, got %s.' % (
-                    self.__class__.__name__,
-                    self._minlength,
-                    ncoords,
-                )
+                '%s requires at least %d points, got %s.' % (self.__class__.__name__, self._minlength, ncoords)
             )
 
         numpy_coords = not isinstance(coords, (tuple, list))
@@ -132,6 +128,7 @@ class LineString(LinearGeometryMixin, GEOSGeometry):
     def tuple(self):
         "Return a tuple version of the geometry from the coordinate sequence."
         return self._cs.tuple
+
     coords = tuple
 
     def _listarr(self, func):

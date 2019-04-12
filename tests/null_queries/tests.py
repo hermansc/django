@@ -5,7 +5,6 @@ from .models import Choice, Inner, OuterA, OuterB, Poll
 
 
 class NullQueriesTests(TestCase):
-
     def test_none_as_null(self):
         """
         Regression test for the use of None as a query value.

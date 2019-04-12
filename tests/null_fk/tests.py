@@ -1,13 +1,10 @@
 from django.db.models import Q
 from django.test import TestCase
 
-from .models import (
-    Comment, Forum, Item, Post, PropertyValue, SystemDetails, SystemInfo,
-)
+from .models import Comment, Forum, Item, Post, PropertyValue, SystemDetails, SystemInfo
 
 
 class NullFkTests(TestCase):
-
     def test_null_fk(self):
         d = SystemDetails.objects.create(details='First details')
         s = SystemInfo.objects.create(system_name='First forum', system_details=d)
@@ -26,11 +23,8 @@ class NullFkTests(TestCase):
 
         self.assertQuerysetEqual(
             Comment.objects.select_related('post__forum__system_info').all(),
-            [
-                (c1.id, 'My first comment', '<Post: First Post>'),
-                (c2.id, 'My second comment', 'None')
-            ],
-            transform=lambda c: (c.id, c.comment_text, repr(c.post))
+            [(c1.id, 'My first comment', '<Post: First Post>'), (c2.id, 'My second comment', 'None')],
+            transform=lambda c: (c.id, c.comment_text, repr(c.post)),
         )
 
         # Regression test for #7530, #7716.
@@ -38,11 +32,8 @@ class NullFkTests(TestCase):
 
         self.assertQuerysetEqual(
             Comment.objects.select_related('post__forum__system_info__system_details'),
-            [
-                (c1.id, 'My first comment', '<Post: First Post>'),
-                (c2.id, 'My second comment', 'None')
-            ],
-            transform=lambda c: (c.id, c.comment_text, repr(c.post))
+            [(c1.id, 'My first comment', '<Post: First Post>'), (c2.id, 'My second comment', 'None')],
+            transform=lambda c: (c.id, c.comment_text, repr(c.post)),
         )
 
     def test_combine_isnull(self):

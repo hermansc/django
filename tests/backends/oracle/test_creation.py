@@ -13,7 +13,6 @@ from django.test import TestCase
 @mock.patch('sys.stdout', new_callable=StringIO)
 @mock.patch('sys.stderr', new_callable=StringIO)
 class DatabaseCreationTests(TestCase):
-
     def _execute_raise_user_already_exists(self, cursor, statements, parameters, verbosity, allow_quiet_fail=False):
         # Raise "user already exists" only in test user creation
         if statements and statements[0].startswith('CREATE USER'):

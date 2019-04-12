@@ -72,9 +72,7 @@ class Event(models.Model):
     name = models.CharField(max_length=50, unique=True)
     people = models.ManyToManyField('Person', through='IndividualCompetitor')
     special_people = models.ManyToManyField(
-        'Person',
-        through='ProxiedIndividualCompetitor',
-        related_name='special_event_set',
+        'Person', through='ProxiedIndividualCompetitor', related_name='special_event_set'
     )
     teams = models.ManyToManyField('Group', through='CompetingTeam')
 

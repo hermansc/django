@@ -12,7 +12,9 @@ from django.core.files.base import ContentFile
 from django.core.files.move import file_move_safe
 from django.core.files.temp import NamedTemporaryFile
 from django.core.files.uploadedfile import (
-    InMemoryUploadedFile, SimpleUploadedFile, TemporaryUploadedFile,
+    InMemoryUploadedFile,
+    SimpleUploadedFile,
+    TemporaryUploadedFile,
     UploadedFile,
 )
 
@@ -173,6 +175,7 @@ class NoNameFileTestCase(unittest.TestCase):
     Other examples of unnamed files may be tempfile.SpooledTemporaryFile or
     urllib.urlopen()
     """
+
     def test_noname_file_default_name(self):
         self.assertIsNone(File(BytesIO(b'A file with no name')).name)
 
@@ -236,6 +239,7 @@ class DimensionClosingBug(unittest.TestCase):
     """
     get_image_dimensions() properly closes files (#8817)
     """
+
     @unittest.skipUnless(Image, "Pillow not installed")
     def test_not_closing_of_files(self):
         """
@@ -287,6 +291,7 @@ class InconsistentGetImageDimensionsBug(unittest.TestCase):
     get_image_dimensions() works properly after various calls
     using a file handler (#11158)
     """
+
     @unittest.skipUnless(Image, "Pillow not installed")
     def test_multiple_calls(self):
         """
@@ -315,7 +320,6 @@ class InconsistentGetImageDimensionsBug(unittest.TestCase):
 
 @unittest.skipUnless(Image, "Pillow not installed")
 class GetImageDimensionsTests(unittest.TestCase):
-
     def test_invalid_image(self):
         """
         get_image_dimensions() should return (None, None) for the dimensions of

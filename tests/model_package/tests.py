@@ -12,7 +12,6 @@ class Advertisement(models.Model):
 
 
 class ModelPackageTests(TestCase):
-
     def test_m2m_tables_in_subpackage_models(self):
         """
         Regression for #12168: models split into subpackages still get M2M
@@ -47,19 +46,13 @@ class ModelPackageTests(TestCase):
         class that are specified as dotted strings don't retain any path
         component for the field or column name.
         """
+        self.assertEqual(Article.publications.through._meta.fields[1].name, 'article')
         self.assertEqual(
-            Article.publications.through._meta.fields[1].name, 'article'
+            Article.publications.through._meta.fields[1].get_attname_column(), ('article_id', 'article_id')
         )
+        self.assertEqual(Article.publications.through._meta.fields[2].name, 'publication')
         self.assertEqual(
-            Article.publications.through._meta.fields[1].get_attname_column(),
-            ('article_id', 'article_id')
-        )
-        self.assertEqual(
-            Article.publications.through._meta.fields[2].name, 'publication'
-        )
-        self.assertEqual(
-            Article.publications.through._meta.fields[2].get_attname_column(),
-            ('publication_id', 'publication_id')
+            Article.publications.through._meta.fields[2].get_attname_column(), ('publication_id', 'publication_id')
         )
 
         self.assertEqual(
@@ -67,10 +60,5 @@ class ModelPackageTests(TestCase):
             truncate_name('model_package_article_publications', connection.ops.max_name_length()),
         )
 
-        self.assertEqual(
-            Article._meta.get_field('publications').m2m_column_name(), 'article_id'
-        )
-        self.assertEqual(
-            Article._meta.get_field('publications').m2m_reverse_name(),
-            'publication_id'
-        )
+        self.assertEqual(Article._meta.get_field('publications').m2m_column_name(), 'article_id')
+        self.assertEqual(Article._meta.get_field('publications').m2m_reverse_name(), 'publication_id')

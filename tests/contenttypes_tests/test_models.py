@@ -7,7 +7,6 @@ from .models import Author, ConcreteModel, FooWithUrl, ProxyModel
 
 
 class ContentTypesTests(TestCase):
-
     def setUp(self):
         ContentType.objects.clear_cache()
 
@@ -50,33 +49,42 @@ class ContentTypesTests(TestCase):
         ContentType.objects.all().delete()
         with self.assertNumQueries(4):
             cts = ContentType.objects.get_for_models(ContentType, FooWithUrl, ProxyModel, ConcreteModel)
-        self.assertEqual(cts, {
-            ContentType: ContentType.objects.get_for_model(ContentType),
-            FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
-            ProxyModel: ContentType.objects.get_for_model(ProxyModel),
-            ConcreteModel: ContentType.objects.get_for_model(ConcreteModel),
-        })
+        self.assertEqual(
+            cts,
+            {
+                ContentType: ContentType.objects.get_for_model(ContentType),
+                FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
+                ProxyModel: ContentType.objects.get_for_model(ProxyModel),
+                ConcreteModel: ContentType.objects.get_for_model(ConcreteModel),
+            },
+        )
 
     def test_get_for_models_empty_cache(self):
         # Empty cache.
         with self.assertNumQueries(1):
             cts = ContentType.objects.get_for_models(ContentType, FooWithUrl, ProxyModel, ConcreteModel)
-        self.assertEqual(cts, {
-            ContentType: ContentType.objects.get_for_model(ContentType),
-            FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
-            ProxyModel: ContentType.objects.get_for_model(ProxyModel),
-            ConcreteModel: ContentType.objects.get_for_model(ConcreteModel),
-        })
+        self.assertEqual(
+            cts,
+            {
+                ContentType: ContentType.objects.get_for_model(ContentType),
+                FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
+                ProxyModel: ContentType.objects.get_for_model(ProxyModel),
+                ConcreteModel: ContentType.objects.get_for_model(ConcreteModel),
+            },
+        )
 
     def test_get_for_models_partial_cache(self):
         # Partial cache
         ContentType.objects.get_for_model(ContentType)
         with self.assertNumQueries(1):
             cts = ContentType.objects.get_for_models(ContentType, FooWithUrl)
-        self.assertEqual(cts, {
-            ContentType: ContentType.objects.get_for_model(ContentType),
-            FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
-        })
+        self.assertEqual(
+            cts,
+            {
+                ContentType: ContentType.objects.get_for_model(ContentType),
+                FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
+            },
+        )
 
     def test_get_for_models_full_cache(self):
         # Full cache
@@ -84,10 +92,13 @@ class ContentTypesTests(TestCase):
         ContentType.objects.get_for_model(FooWithUrl)
         with self.assertNumQueries(0):
             cts = ContentType.objects.get_for_models(ContentType, FooWithUrl)
-        self.assertEqual(cts, {
-            ContentType: ContentType.objects.get_for_model(ContentType),
-            FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
-        })
+        self.assertEqual(
+            cts,
+            {
+                ContentType: ContentType.objects.get_for_model(ContentType),
+                FooWithUrl: ContentType.objects.get_for_model(FooWithUrl),
+            },
+        )
 
     @isolate_apps('contenttypes_tests')
     def test_get_for_model_create_contenttype(self):
@@ -95,6 +106,7 @@ class ContentTypesTests(TestCase):
         ContentTypeManager.get_for_model() creates the corresponding content
         type if it doesn't exist in the database.
         """
+
         class ModelCreatedOnTheFly(models.Model):
             name = models.CharField()
 
@@ -122,13 +134,11 @@ class ContentTypesTests(TestCase):
 
         self.assertEqual(concrete_model_ct, ContentType.objects.get_for_model(DeferredConcreteModel))
         self.assertEqual(
-            concrete_model_ct,
-            ContentType.objects.get_for_model(DeferredConcreteModel, for_concrete_model=False)
+            concrete_model_ct, ContentType.objects.get_for_model(DeferredConcreteModel, for_concrete_model=False)
         )
         self.assertEqual(concrete_model_ct, ContentType.objects.get_for_model(DeferredProxyModel))
         self.assertEqual(
-            proxy_model_ct,
-            ContentType.objects.get_for_model(DeferredProxyModel, for_concrete_model=False)
+            proxy_model_ct, ContentType.objects.get_for_model(DeferredProxyModel, for_concrete_model=False)
         )
 
     def test_get_for_concrete_models(self):
@@ -139,17 +149,11 @@ class ContentTypesTests(TestCase):
         concrete_model_ct = ContentType.objects.get_for_model(ConcreteModel)
 
         cts = ContentType.objects.get_for_models(ConcreteModel, ProxyModel)
-        self.assertEqual(cts, {
-            ConcreteModel: concrete_model_ct,
-            ProxyModel: concrete_model_ct,
-        })
+        self.assertEqual(cts, {ConcreteModel: concrete_model_ct, ProxyModel: concrete_model_ct})
 
         proxy_model_ct = ContentType.objects.get_for_model(ProxyModel, for_concrete_model=False)
         cts = ContentType.objects.get_for_models(ConcreteModel, ProxyModel, for_concrete_models=False)
-        self.assertEqual(cts, {
-            ConcreteModel: concrete_model_ct,
-            ProxyModel: proxy_model_ct,
-        })
+        self.assertEqual(cts, {ConcreteModel: concrete_model_ct, ProxyModel: proxy_model_ct})
 
         # Make sure deferred model are correctly handled
         ConcreteModel.objects.create(name="Concrete")
@@ -157,18 +161,10 @@ class ContentTypesTests(TestCase):
         DeferredProxyModel = ProxyModel.objects.only('pk').get().__class__
 
         cts = ContentType.objects.get_for_models(DeferredConcreteModel, DeferredProxyModel)
-        self.assertEqual(cts, {
-            DeferredConcreteModel: concrete_model_ct,
-            DeferredProxyModel: concrete_model_ct,
-        })
+        self.assertEqual(cts, {DeferredConcreteModel: concrete_model_ct, DeferredProxyModel: concrete_model_ct})
 
-        cts = ContentType.objects.get_for_models(
-            DeferredConcreteModel, DeferredProxyModel, for_concrete_models=False
-        )
-        self.assertEqual(cts, {
-            DeferredConcreteModel: concrete_model_ct,
-            DeferredProxyModel: proxy_model_ct,
-        })
+        cts = ContentType.objects.get_for_models(DeferredConcreteModel, DeferredProxyModel, for_concrete_models=False)
+        self.assertEqual(cts, {DeferredConcreteModel: concrete_model_ct, DeferredProxyModel: proxy_model_ct})
 
     def test_cache_not_shared_between_managers(self):
         with self.assertNumQueries(1):
@@ -188,10 +184,7 @@ class ContentTypesTests(TestCase):
         leftover content type records in the DB for which no model is defined
         anymore.
         """
-        ct = ContentType.objects.create(
-            app_label='contenttypes',
-            model='OldModel',
-        )
+        ct = ContentType.objects.create(app_label='contenttypes', model='OldModel')
         self.assertEqual(str(ct), 'OldModel')
         self.assertIsNone(ct.model_class())
 

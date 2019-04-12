@@ -5,7 +5,6 @@ from ..utils import SomeClass, SomeOtherException, UTF8Class, setup
 
 
 class FilterSyntaxTests(SimpleTestCase):
-
     @setup({'filter-syntax01': '{{ var|upper }}'})
     def test_filter_syntax01(self):
         """
@@ -61,10 +60,7 @@ class FilterSyntaxTests(SimpleTestCase):
         """
         Raise TemplateSyntaxError for invalid block tags
         """
-        msg = (
-            "Invalid block tag on line 1: 'nothing_to_see_here'. Did you "
-            "forget to register or load this tag?"
-        )
+        msg = "Invalid block tag on line 1: 'nothing_to_see_here'. Did you " "forget to register or load this tag?"
         with self.assertRaisesMessage(TemplateSyntaxError, msg):
             self.engine.get_template('filter-syntax07')
 

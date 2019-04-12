@@ -15,6 +15,7 @@ class BaseGeometryWidget(Widget):
     The base class for rich geometry widgets.
     Render a map using the WKT of the geometry.
     """
+
     geom_type = 'GEOMETRY'
     map_srid = 4326
     map_width = 600
@@ -57,19 +58,23 @@ class BaseGeometryWidget(Widget):
                     value = ogr
                 except gdal.GDALException as err:
                     logger.error(
-                        "Error transforming geometry from srid '%s' to srid '%s' (%s)",
-                        value.srid, self.map_srid, err
+                        "Error transforming geometry from srid '%s' to srid '%s' (%s)", value.srid, self.map_srid, err
                     )
 
-        context.update(self.build_attrs(self.attrs, {
-            'name': name,
-            'module': 'geodjango_%s' % name.replace('-', '_'),  # JS-safe
-            'serialized': self.serialize(value),
-            'geom_type': gdal.OGRGeomType(self.attrs['geom_type']),
-            'STATIC_URL': settings.STATIC_URL,
-            'LANGUAGE_BIDI': translation.get_language_bidi(),
-            **(attrs or {}),
-        }))
+        context.update(
+            self.build_attrs(
+                self.attrs,
+                {
+                    'name': name,
+                    'module': 'geodjango_%s' % name.replace('-', '_'),  # JS-safe
+                    'serialized': self.serialize(value),
+                    'geom_type': gdal.OGRGeomType(self.attrs['geom_type']),
+                    'STATIC_URL': settings.STATIC_URL,
+                    'LANGUAGE_BIDI': translation.get_language_bidi(),
+                    **(attrs or {}),
+                },
+            )
+        )
         return context
 
 
@@ -78,16 +83,8 @@ class OpenLayersWidget(BaseGeometryWidget):
     map_srid = 3857
 
     class Media:
-        css = {
-            'all': (
-                'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css',
-                'gis/css/ol3.css',
-            )
-        }
-        js = (
-            'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.js',
-            'gis/js/OLMapWidget.js',
-        )
+        css = {'all': ('https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css', 'gis/css/ol3.css')}
+        js = ('https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.js', 'gis/js/OLMapWidget.js')
 
     def serialize(self, value):
         return value.json if value else ''
@@ -104,6 +101,7 @@ class OSMWidget(OpenLayersWidget):
     """
     An OpenLayers/OpenStreetMap-based widget.
     """
+
     template_name = 'gis/openlayers-osm.html'
     default_lon = 5
     default_lat = 47

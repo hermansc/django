@@ -8,14 +8,14 @@ class HTTPSSitemap(SimpleSitemap):
     protocol = 'https'
 
 
-secure_sitemaps = {
-    'simple': HTTPSSitemap,
-}
+secure_sitemaps = {'simple': HTTPSSitemap}
 
 urlpatterns = [
     path('secure/index.xml', views.index, {'sitemaps': secure_sitemaps}),
     path(
-        'secure/sitemap-<section>.xml', views.sitemap,
+        'secure/sitemap-<section>.xml',
+        views.sitemap,
         {'sitemaps': secure_sitemaps},
-        name='django.contrib.sitemaps.views.sitemap'),
+        name='django.contrib.sitemaps.views.sitemap',
+    ),
 ]

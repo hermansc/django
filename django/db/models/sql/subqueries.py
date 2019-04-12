@@ -5,9 +5,7 @@ Query subclasses which provide extra functionality beyond simple data retrieval.
 from django.core.exceptions import FieldError
 from django.db import connections
 from django.db.models.query_utils import Q
-from django.db.models.sql.constants import (
-    CURSOR, GET_ITERATOR_CHUNK_SIZE, NO_RESULTS,
-)
+from django.db.models.sql.constants import CURSOR, GET_ITERATOR_CHUNK_SIZE, NO_RESULTS
 from django.db.models.sql.query import Query
 
 __all__ = ['DeleteQuery', 'UpdateQuery', 'InsertQuery', 'AggregateQuery']
@@ -36,8 +34,7 @@ class DeleteQuery(Query):
         field = self.get_meta().pk
         for offset in range(0, len(pk_list), GET_ITERATOR_CHUNK_SIZE):
             self.where = self.where_class()
-            self.add_q(Q(
-                **{field.attname + '__in': pk_list[offset:offset + GET_ITERATOR_CHUNK_SIZE]}))
+            self.add_q(Q(**{field.attname + '__in': pk_list[offset : offset + GET_ITERATOR_CHUNK_SIZE]}))
             num_deleted += self.do_query(self.get_meta().db_table, self.where, using=using)
         return num_deleted
 
@@ -66,9 +63,7 @@ class DeleteQuery(Query):
                 return self.delete_batch(values, using)
             else:
                 innerq.clear_select_clause()
-                innerq.select = [
-                    pk.get_col(self.get_initial_alias())
-                ]
+                innerq.select = [pk.get_col(self.get_initial_alias())]
                 values = innerq
             self.where = self.where_class()
             self.add_q(Q(pk__in=values))
@@ -103,7 +98,7 @@ class UpdateQuery(Query):
         self.add_update_values(values)
         for offset in range(0, len(pk_list), GET_ITERATOR_CHUNK_SIZE):
             self.where = self.where_class()
-            self.add_q(Q(pk__in=pk_list[offset: offset + GET_ITERATOR_CHUNK_SIZE]))
+            self.add_q(Q(pk__in=pk_list[offset : offset + GET_ITERATOR_CHUNK_SIZE]))
             self.get_compiler(using).execute_sql(NO_RESULTS)
 
     def add_update_values(self, values):
@@ -119,8 +114,7 @@ class UpdateQuery(Query):
             model = field.model._meta.concrete_model
             if not direct or (field.is_relation and field.many_to_many):
                 raise FieldError(
-                    'Cannot update model field %r (only non-relations and '
-                    'foreign keys permitted).' % field
+                    'Cannot update model field %r (only non-relations and ' 'foreign keys permitted).' % field
                 )
             if model is not self.get_meta().concrete_model:
                 self.add_related_update(model, field, val)

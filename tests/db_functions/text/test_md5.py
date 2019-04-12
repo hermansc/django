@@ -10,18 +10,18 @@ from ..models import Author
 class MD5Tests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        Author.objects.bulk_create([
-            Author(alias='John Smith'),
-            Author(alias='Jordan Élena'),
-            Author(alias='皇帝'),
-            Author(alias=''),
-            Author(alias=None),
-        ])
+        Author.objects.bulk_create(
+            [
+                Author(alias='John Smith'),
+                Author(alias='Jordan Élena'),
+                Author(alias='皇帝'),
+                Author(alias=''),
+                Author(alias=None),
+            ]
+        )
 
     def test_basic(self):
-        authors = Author.objects.annotate(
-            md5_alias=MD5('alias'),
-        ).values_list('md5_alias', flat=True).order_by('pk')
+        authors = Author.objects.annotate(md5_alias=MD5('alias')).values_list('md5_alias', flat=True).order_by('pk')
         self.assertSequenceEqual(
             authors,
             [
@@ -35,7 +35,7 @@ class MD5Tests(TestCase):
 
     def test_transform(self):
         with register_lookup(CharField, MD5):
-            authors = Author.objects.filter(
-                alias__md5='6117323d2cabbc17d44c2b44587f682c',
-            ).values_list('alias', flat=True)
+            authors = Author.objects.filter(alias__md5='6117323d2cabbc17d44c2b44587f682c').values_list(
+                'alias', flat=True
+            )
             self.assertSequenceEqual(authors, ['John Smith'])

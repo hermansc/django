@@ -1,15 +1,17 @@
 from urllib.parse import urlparse, urlunparse
 
 from django.conf import settings
+
 # Avoid shadowing the login() and logout() views below.
 from django.contrib.auth import (
-    REDIRECT_FIELD_NAME, get_user_model, login as auth_login,
-    logout as auth_logout, update_session_auth_hash,
+    REDIRECT_FIELD_NAME,
+    get_user_model,
+    login as auth_login,
+    logout as auth_logout,
+    update_session_auth_hash,
 )
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import (
-    AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm,
-)
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError
@@ -39,6 +41,7 @@ class LoginView(SuccessURLAllowedHostsMixin, FormView):
     """
     Display the login form and handle the login action.
     """
+
     form_class = AuthenticationForm
     authentication_form = None
     redirect_field_name = REDIRECT_FIELD_NAME
@@ -67,13 +70,10 @@ class LoginView(SuccessURLAllowedHostsMixin, FormView):
     def get_redirect_url(self):
         """Return the user-originating redirect URL if it's safe."""
         redirect_to = self.request.POST.get(
-            self.redirect_field_name,
-            self.request.GET.get(self.redirect_field_name, '')
+            self.redirect_field_name, self.request.GET.get(self.redirect_field_name, '')
         )
         url_is_safe = is_safe_url(
-            url=redirect_to,
-            allowed_hosts=self.get_success_url_allowed_hosts(),
-            require_https=self.request.is_secure(),
+            url=redirect_to, allowed_hosts=self.get_success_url_allowed_hosts(), require_https=self.request.is_secure()
         )
         return redirect_to if url_is_safe else ''
 
@@ -93,12 +93,14 @@ class LoginView(SuccessURLAllowedHostsMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         current_site = get_current_site(self.request)
-        context.update({
-            self.redirect_field_name: self.get_redirect_url(),
-            'site': current_site,
-            'site_name': current_site.name,
-            **(self.extra_context or {})
-        })
+        context.update(
+            {
+                self.redirect_field_name: self.get_redirect_url(),
+                'site': current_site,
+                'site_name': current_site.name,
+                **(self.extra_context or {}),
+            }
+        )
         return context
 
 
@@ -106,6 +108,7 @@ class LogoutView(SuccessURLAllowedHostsMixin, TemplateView):
     """
     Log out the user and display the 'You are logged out' message.
     """
+
     next_page = None
     redirect_field_name = REDIRECT_FIELD_NAME
     template_name = 'registration/logged_out.html'
@@ -132,12 +135,8 @@ class LogoutView(SuccessURLAllowedHostsMixin, TemplateView):
         else:
             next_page = self.next_page
 
-        if (self.redirect_field_name in self.request.POST or
-                self.redirect_field_name in self.request.GET):
-            next_page = self.request.POST.get(
-                self.redirect_field_name,
-                self.request.GET.get(self.redirect_field_name)
-            )
+        if self.redirect_field_name in self.request.POST or self.redirect_field_name in self.request.GET:
+            next_page = self.request.POST.get(self.redirect_field_name, self.request.GET.get(self.redirect_field_name))
             url_is_safe = is_safe_url(
                 url=next_page,
                 allowed_hosts=self.get_success_url_allowed_hosts(),
@@ -152,12 +151,14 @@ class LogoutView(SuccessURLAllowedHostsMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         current_site = get_current_site(self.request)
-        context.update({
-            'site': current_site,
-            'site_name': current_site.name,
-            'title': _('Logged out'),
-            **(self.extra_context or {})
-        })
+        context.update(
+            {
+                'site': current_site,
+                'site_name': current_site.name,
+                'title': _('Logged out'),
+                **(self.extra_context or {}),
+            }
+        )
         return context
 
 
@@ -191,15 +192,13 @@ def redirect_to_login(next, login_url=None, redirect_field_name=REDIRECT_FIELD_N
 #   prompts for a new password
 # - PasswordResetCompleteView shows a success message for the above
 
+
 class PasswordContextMixin:
     extra_context = None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({
-            'title': self.title,
-            **(self.extra_context or {})
-        })
+        context.update({'title': self.title, **(self.extra_context or {})})
         return context
 
 
@@ -307,11 +306,7 @@ class PasswordResetConfirmView(PasswordContextMixin, FormView):
         if self.validlink:
             context['validlink'] = True
         else:
-            context.update({
-                'form': None,
-                'title': _('Password reset unsuccessful'),
-                'validlink': False,
-            })
+            context.update({'form': None, 'title': _('Password reset unsuccessful'), 'validlink': False})
         return context
 
 

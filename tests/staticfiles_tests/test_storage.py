@@ -7,9 +7,7 @@ from io import StringIO
 
 from django.conf import settings
 from django.contrib.staticfiles import finders, storage
-from django.contrib.staticfiles.management.commands.collectstatic import (
-    Command as CollectstaticCommand,
-)
+from django.contrib.staticfiles.management.commands.collectstatic import Command as CollectstaticCommand
 from django.core.cache.backends.base import BaseCache
 from django.core.management import call_command
 from django.test import SimpleTestCase, ignore_warnings, override_settings
@@ -231,13 +229,12 @@ class TestHashedFiles:
 
 
 @ignore_warnings(category=RemovedInDjango31Warning)
-@override_settings(
-    STATICFILES_STORAGE='django.contrib.staticfiles.storage.CachedStaticFilesStorage',
-)
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.CachedStaticFilesStorage')
 class TestCollectionCachedStorage(TestHashedFiles, CollectionTestCase):
     """
     Tests for the Cache busting storage
     """
+
     def test_cache_invalidation(self):
         name = "cached/styles.css"
         hashed_name = "cached/styles.5e0040571e1a.css"
@@ -302,17 +299,14 @@ class TestCachedStaticFilesStorageDeprecation(SimpleTestCase):
     def test_warning(self):
         from django.contrib.staticfiles.storage import CachedStaticFilesStorage
         from django.utils.deprecation import RemovedInDjango31Warning
-        msg = (
-            'CachedStaticFilesStorage is deprecated in favor of '
-            'ManifestStaticFilesStorage.'
-        )
+
+        msg = 'CachedStaticFilesStorage is deprecated in favor of ' 'ManifestStaticFilesStorage.'
         with self.assertRaisesMessage(RemovedInDjango31Warning, msg):
             CachedStaticFilesStorage()
 
 
 @override_settings(STATICFILES_STORAGE='staticfiles_tests.storage.ExtraPatternsStorage')
 class TestExtraPatternsStorage(CollectionTestCase):
-
     def setUp(self):
         storage.staticfiles_storage.hashed_files.clear()  # avoid cache interference
         super().setUp()
@@ -340,13 +334,12 @@ class TestExtraPatternsStorage(CollectionTestCase):
             self.assertIn(b'JS_URL("import.f53576679e5a.css")', relfile.read())
 
 
-@override_settings(
-    STATICFILES_STORAGE='django.contrib.staticfiles.storage.ManifestStaticFilesStorage',
-)
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.ManifestStaticFilesStorage')
 class TestCollectionManifestStorage(TestHashedFiles, CollectionTestCase):
     """
     Tests for the Cache busting storage
     """
+
     def setUp(self):
         super().setUp()
 
@@ -356,9 +349,7 @@ class TestCollectionManifestStorage(TestHashedFiles, CollectionTestCase):
         with open(self._clear_filename, 'w') as f:
             f.write('to be deleted in one test')
 
-        self.patched_settings = self.settings(
-            STATICFILES_DIRS=settings.STATICFILES_DIRS + [temp_dir],
-        )
+        self.patched_settings = self.settings(STATICFILES_DIRS=settings.STATICFILES_DIRS + [temp_dir])
         self.patched_settings.enable()
         self.addCleanup(shutil.rmtree, temp_dir)
         self._manifest_strict = storage.staticfiles_storage.manifest_strict
@@ -388,10 +379,7 @@ class TestCollectionManifestStorage(TestHashedFiles, CollectionTestCase):
     def test_loaded_cache(self):
         self.assertNotEqual(storage.staticfiles_storage.hashed_files, {})
         manifest_content = storage.staticfiles_storage.read_manifest()
-        self.assertIn(
-            '"version": "%s"' % storage.staticfiles_storage.manifest_version,
-            manifest_content
-        )
+        self.assertIn('"version": "%s"' % storage.staticfiles_storage.manifest_version, manifest_content)
 
     def test_parse_cache(self):
         hashed_files = storage.staticfiles_storage.hashed_files
@@ -474,6 +462,7 @@ class CustomStaticFilesStorage(storage.StaticFilesStorage):
     """
     Used in TestStaticFilePermissions
     """
+
     def __init__(self, *args, **kwargs):
         kwargs['file_permissions_mode'] = 0o640
         kwargs['directory_permissions_mode'] = 0o740
@@ -483,11 +472,7 @@ class CustomStaticFilesStorage(storage.StaticFilesStorage):
 @unittest.skipIf(sys.platform.startswith('win'), "Windows only partially supports chmod.")
 class TestStaticFilePermissions(CollectionTestCase):
 
-    command_params = {
-        'interactive': False,
-        'verbosity': 0,
-        'ignore_patterns': ['*.ignoreme'],
-    }
+    command_params = {'interactive': False, 'verbosity': 0, 'ignore_patterns': ['*.ignoreme']}
 
     def setUp(self):
         self.umask = 0o027
@@ -502,10 +487,7 @@ class TestStaticFilePermissions(CollectionTestCase):
     def run_collectstatic(self, **kwargs):
         pass
 
-    @override_settings(
-        FILE_UPLOAD_PERMISSIONS=0o655,
-        FILE_UPLOAD_DIRECTORY_PERMISSIONS=0o765,
-    )
+    @override_settings(FILE_UPLOAD_PERMISSIONS=0o655, FILE_UPLOAD_DIRECTORY_PERMISSIONS=0o765)
     def test_collect_static_files_permissions(self):
         call_command('collectstatic', **self.command_params)
         test_file = os.path.join(settings.STATIC_ROOT, "test.txt")
@@ -515,10 +497,7 @@ class TestStaticFilePermissions(CollectionTestCase):
         self.assertEqual(file_mode, 0o655)
         self.assertEqual(dir_mode, 0o765)
 
-    @override_settings(
-        FILE_UPLOAD_PERMISSIONS=None,
-        FILE_UPLOAD_DIRECTORY_PERMISSIONS=None,
-    )
+    @override_settings(FILE_UPLOAD_PERMISSIONS=None, FILE_UPLOAD_DIRECTORY_PERMISSIONS=None)
     def test_collect_static_files_default_permissions(self):
         call_command('collectstatic', **self.command_params)
         test_file = os.path.join(settings.STATIC_ROOT, "test.txt")
@@ -543,14 +522,13 @@ class TestStaticFilePermissions(CollectionTestCase):
         self.assertEqual(dir_mode, 0o740)
 
 
-@override_settings(
-    STATICFILES_STORAGE='django.contrib.staticfiles.storage.ManifestStaticFilesStorage',
-)
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.ManifestStaticFilesStorage')
 class TestCollectionHashedFilesCache(CollectionTestCase):
     """
     Files referenced from CSS use the correct final hashed name regardless of
     the order in which the files are post-processed.
     """
+
     hashed_file_path = hashed_file_path
 
     def setUp(self):
@@ -564,11 +542,7 @@ class TestCollectionHashedFilesCache(CollectionTestCase):
 
     def test_file_change_after_collectstatic(self):
         # Create initial static files.
-        file_contents = (
-            ('foo.png', 'foo'),
-            ('bar.css', 'url("foo.png")\nurl("xyz.png")'),
-            ('xyz.png', 'xyz'),
-        )
+        file_contents = (('foo.png', 'foo'), ('bar.css', 'url("foo.png")\nurl("xyz.png")'), ('xyz.png', 'xyz'))
         for filename, content in file_contents:
             with open(self._get_filename_path(filename), 'w') as f:
                 f.write(content)

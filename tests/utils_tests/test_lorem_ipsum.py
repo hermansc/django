@@ -8,9 +8,7 @@ class LoremIpsumTests(unittest.TestCase):
     def test_negative_words(self):
         """words(n) returns n + 19 words, even if n is negative."""
         self.assertEqual(
-            words(-5),
-            'lorem ipsum dolor sit amet consectetur adipisicing elit sed do '
-            'eiusmod tempor incididunt ut'
+            words(-5), 'lorem ipsum dolor sit amet consectetur adipisicing elit sed do ' 'eiusmod tempor incididunt ut'
         )
 
     def test_same_or_less_common_words(self):
@@ -79,10 +77,13 @@ class LoremIpsumTests(unittest.TestCase):
         mock_choice.return_value = '.'
         value = paragraph()
         self.assertEqual(mock_paragraph_randint.call_count, 7)
-        self.assertEqual(value, (
-            'Exercitationem perferendis, exercitationem perferendis. '
-            'Exercitationem perferendis, exercitationem perferendis.'
-        ))
+        self.assertEqual(
+            value,
+            (
+                'Exercitationem perferendis, exercitationem perferendis. '
+                'Exercitationem perferendis, exercitationem perferendis.'
+            ),
+        )
 
     @mock.patch('django.utils.lorem_ipsum.random.sample')
     @mock.patch('django.utils.lorem_ipsum.random.choice')
@@ -101,14 +102,15 @@ class LoremIpsumTests(unittest.TestCase):
             [
                 'Exercitationem perferendis, exercitationem perferendis. '
                 'Exercitationem perferendis, exercitationem perferendis.'
-            ]
+            ],
         )
         self.assertEqual(mock_randint.call_count, 7)
 
     def test_paragraphs(self):
         """paragraphs(1) uses the COMMON_P paragraph."""
         self.assertEqual(
-            paragraphs(1), [
+            paragraphs(1),
+            [
                 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, '
                 'sed do eiusmod tempor incididunt ut labore et dolore magna '
                 'aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
@@ -117,5 +119,5 @@ class LoremIpsumTests(unittest.TestCase):
                 'esse cillum dolore eu fugiat nulla pariatur. Excepteur sint '
                 'occaecat cupidatat non proident, sunt in culpa qui officia '
                 'deserunt mollit anim id est laborum.'
-            ]
+            ],
         )

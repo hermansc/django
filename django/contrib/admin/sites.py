@@ -216,6 +216,7 @@ class AdminSite:
         ``never_cache`` decorator. If the view can be safely cached, set
         cacheable=True.
         """
+
         def inner(request, *args, **kwargs):
             if not self.has_permission(request):
                 if request.path == reverse('admin:logout', current_app=self.name):
@@ -224,11 +225,10 @@ class AdminSite:
                 # Inner import to prevent django.contrib.admin (app) from
                 # importing django.contrib.auth.models.User (unrelated model).
                 from django.contrib.auth.views import redirect_to_login
-                return redirect_to_login(
-                    request.get_full_path(),
-                    reverse('admin:login', current_app=self.name)
-                )
+
+                return redirect_to_login(request.get_full_path(), reverse('admin:login', current_app=self.name))
             return view(request, *args, **kwargs)
+
         if not cacheable:
             inner = never_cache(inner)
         # We add csrf_protect here so this function can be used as a utility
@@ -239,6 +239,7 @@ class AdminSite:
 
     def get_urls(self):
         from django.urls import include, path, re_path
+
         # Since this module gets imported in the application's root package,
         # it cannot import models from other applications at the module level,
         # and django.contrib.contenttypes.views imports ContentType.
@@ -247,6 +248,7 @@ class AdminSite:
         def wrap(view, cacheable=False):
             def wrapper(*args, **kwargs):
                 return self.admin_view(view, cacheable)(*args, **kwargs)
+
             wrapper.admin_site = self
             return update_wrapper(wrapper, view)
 
@@ -257,16 +259,10 @@ class AdminSite:
             path('logout/', wrap(self.logout), name='logout'),
             path('password_change/', wrap(self.password_change, cacheable=True), name='password_change'),
             path(
-                'password_change/done/',
-                wrap(self.password_change_done, cacheable=True),
-                name='password_change_done',
+                'password_change/done/', wrap(self.password_change_done, cacheable=True), name='password_change_done'
             ),
             path('jsi18n/', wrap(self.i18n_javascript, cacheable=True), name='jsi18n'),
-            path(
-                'r/<int:content_type_id>/<path:object_id>/',
-                wrap(contenttype_views.shortcut),
-                name='view_on_site',
-            ),
+            path('r/<int:content_type_id>/<path:object_id>/', wrap(contenttype_views.shortcut), name='view_on_site'),
         ]
 
         # Add in each model's views, and create a list of valid URLS for the
@@ -274,7 +270,7 @@ class AdminSite:
         valid_app_labels = []
         for model, model_admin in self._registry.items():
             urlpatterns += [
-                path('%s/%s/' % (model._meta.app_label, model._meta.model_name), include(model_admin.urls)),
+                path('%s/%s/' % (model._meta.app_label, model._meta.model_name), include(model_admin.urls))
             ]
             if model._meta.app_label not in valid_app_labels:
                 valid_app_labels.append(model._meta.app_label)
@@ -283,9 +279,7 @@ class AdminSite:
         # labels for which we need to allow access to the app_index view,
         if valid_app_labels:
             regex = r'^(?P<app_label>' + '|'.join(valid_app_labels) + ')/$'
-            urlpatterns += [
-                re_path(regex, wrap(self.app_index), name='app_list'),
-            ]
+            urlpatterns += [re_path(regex, wrap(self.app_index), name='app_list')]
         return urlpatterns
 
     @property
@@ -317,6 +311,7 @@ class AdminSite:
         """
         from django.contrib.admin.forms import AdminPasswordChangeForm
         from django.contrib.auth.views import PasswordChangeView
+
         url = reverse('admin:password_change_done', current_app=self.name)
         defaults = {
             'form_class': AdminPasswordChangeForm,
@@ -333,9 +328,8 @@ class AdminSite:
         Display the "success" page after a password change.
         """
         from django.contrib.auth.views import PasswordChangeDoneView
-        defaults = {
-            'extra_context': {**self.each_context(request), **(extra_context or {})},
-        }
+
+        defaults = {'extra_context': {**self.each_context(request), **(extra_context or {})}}
         if self.password_change_done_template is not None:
             defaults['template_name'] = self.password_change_done_template
         request.current_app = self.name
@@ -358,14 +352,15 @@ class AdminSite:
         This should *not* assume the user is already logged in.
         """
         from django.contrib.auth.views import LogoutView
+
         defaults = {
             'extra_context': {
                 **self.each_context(request),
                 # Since the user isn't logged out at this point, the value of
                 # has_permission must be overridden.
                 'has_permission': False,
-                **(extra_context or {})
-            },
+                **(extra_context or {}),
+            }
         }
         if self.logout_template is not None:
             defaults['template_name'] = self.logout_template
@@ -383,18 +378,19 @@ class AdminSite:
             return HttpResponseRedirect(index_path)
 
         from django.contrib.auth.views import LoginView
+
         # Since this module gets imported in the application's root package,
         # it cannot import models from other applications at the module level,
         # and django.contrib.admin.forms eventually imports User.
         from django.contrib.admin.forms import AdminAuthenticationForm
+
         context = {
             **self.each_context(request),
             'title': _('Log in'),
             'app_path': request.get_full_path(),
             'username': request.user.get_username(),
         }
-        if (REDIRECT_FIELD_NAME not in request.GET and
-                REDIRECT_FIELD_NAME not in request.POST):
+        if REDIRECT_FIELD_NAME not in request.GET and REDIRECT_FIELD_NAME not in request.POST:
             context[REDIRECT_FIELD_NAME] = reverse('admin:index', current_app=self.name)
         context.update(extra_context or {})
 
@@ -414,10 +410,7 @@ class AdminSite:
         app_dict = {}
 
         if label:
-            models = {
-                m: m_a for m, m_a in self._registry.items()
-                if m._meta.app_label == label
-            }
+            models = {m: m_a for m, m_a in self._registry.items() if m._meta.app_label == label}
         else:
             models = self._registry
 
@@ -461,11 +454,7 @@ class AdminSite:
                 app_dict[app_label] = {
                     'name': apps.get_app_config(app_label).verbose_name,
                     'app_label': app_label,
-                    'app_url': reverse(
-                        'admin:app_list',
-                        kwargs={'app_label': app_label},
-                        current_app=self.name,
-                    ),
+                    'app_url': reverse('admin:app_list', kwargs={'app_label': app_label}, current_app=self.name),
                     'has_module_perms': has_module_perms,
                     'models': [model_dict],
                 }
@@ -526,10 +515,11 @@ class AdminSite:
 
         request.current_app = self.name
 
-        return TemplateResponse(request, self.app_index_template or [
-            'admin/%s/app_index.html' % app_label,
-            'admin/app_index.html'
-        ], context)
+        return TemplateResponse(
+            request,
+            self.app_index_template or ['admin/%s/app_index.html' % app_label, 'admin/app_index.html'],
+            context,
+        )
 
 
 class DefaultAdminSite(LazyObject):

@@ -27,8 +27,7 @@ def _get_backends(return_tuples=False):
         backends.append((backend, backend_path) if return_tuples else backend)
     if not backends:
         raise ImproperlyConfigured(
-            'No authentication backends have been defined. Does '
-            'AUTHENTICATION_BACKENDS contain anything?'
+            'No authentication backends have been defined. Does ' 'AUTHENTICATION_BACKENDS contain anything?'
         )
     return backends
 
@@ -97,8 +96,9 @@ def login(request, user, backend=None):
 
     if SESSION_KEY in request.session:
         if _get_user_session_key(request) != user.pk or (
-                session_auth_hash and
-                not constant_time_compare(request.session.get(HASH_SESSION_KEY, ''), session_auth_hash)):
+            session_auth_hash
+            and not constant_time_compare(request.session.get(HASH_SESSION_KEY, ''), session_auth_hash)
+        ):
             # To avoid reusing another user's session, create a new, empty
             # session if the existing session corresponds to a different
             # authenticated user.
@@ -145,6 +145,7 @@ def logout(request):
     request.session.flush()
     if hasattr(request, 'user'):
         from django.contrib.auth.models import AnonymousUser
+
         request.user = AnonymousUser()
 
 
@@ -168,6 +169,7 @@ def get_user(request):
     If no user is retrieved, return an instance of `AnonymousUser`.
     """
     from .models import AnonymousUser
+
     user = None
     try:
         user_id = _get_user_session_key(request)
@@ -182,8 +184,7 @@ def get_user(request):
             if hasattr(user, 'get_session_auth_hash'):
                 session_hash = request.session.get(HASH_SESSION_KEY)
                 session_hash_verified = session_hash and constant_time_compare(
-                    session_hash,
-                    user.get_session_auth_hash()
+                    session_hash, user.get_session_auth_hash()
                 )
                 if not session_hash_verified:
                     request.session.flush()

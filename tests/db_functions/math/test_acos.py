@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class ACosTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_acos=ACos('normal')).first()
@@ -35,9 +34,7 @@ class ACosTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=0, normal=1, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_acos=ACos('small'),
-            normal_acos=ACos('normal'),
-            big_acos=ACos('big'),
+            small_acos=ACos('small'), normal_acos=ACos('normal'), big_acos=ACos('big')
         ).first()
         self.assertIsInstance(obj.small_acos, float)
         self.assertIsInstance(obj.normal_acos, float)

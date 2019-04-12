@@ -21,6 +21,7 @@ PathInfo = namedtuple('PathInfo', 'from_opts to_opts target_fields join_field m2
 
 class InvalidQuery(Exception):
     """The query passed to raw() isn't a safe query to use with raw()."""
+
     pass
 
 
@@ -35,6 +36,7 @@ class QueryWrapper:
     A type that indicates the contents are an SQL fragment and the associate
     parameters. Can be used to pass opaque data to a where-clause, for example.
     """
+
     contains_aggregate = False
 
     def __init__(self, sql, params):
@@ -49,6 +51,7 @@ class Q(tree.Node):
     Encapsulate filters as objects that can then be combined logically (using
     `&` and `|`).
     """
+
     # Connection types
     AND = 'AND'
     OR = 'OR'
@@ -116,6 +119,7 @@ class DeferredAttribute:
     A wrapper for a deferred-loading field. When the value is read from this
     object the first time, the query is executed.
     """
+
     def __init__(self, field_name):
         self.field_name = field_name
 
@@ -152,7 +156,6 @@ class DeferredAttribute:
 
 
 class RegisterLookupMixin:
-
     @classmethod
     def _get_lookup(cls, lookup_name):
         return cls.get_lookups().get(lookup_name, None)
@@ -165,6 +168,7 @@ class RegisterLookupMixin:
 
     def get_lookup(self, lookup_name):
         from django.db.models.lookups import Lookup
+
         found = self._get_lookup(lookup_name)
         if found is None and hasattr(self, 'output_field'):
             return self.output_field.get_lookup(lookup_name)
@@ -174,6 +178,7 @@ class RegisterLookupMixin:
 
     def get_transform(self, lookup_name):
         from django.db.models.lookups import Transform
+
         found = self._get_lookup(lookup_name)
         if found is None and hasattr(self, 'output_field'):
             return self.output_field.get_transform(lookup_name)
@@ -247,10 +252,11 @@ def select_related_descend(field, restricted, requested, load_fields, reverse=Fa
     if load_fields:
         if field.attname not in load_fields:
             if restricted and field.name in requested:
-                raise InvalidQuery("Field %s.%s cannot be both deferred"
-                                   " and traversed using select_related"
-                                   " at the same time." %
-                                   (field.model._meta.object_name, field.name))
+                raise InvalidQuery(
+                    "Field %s.%s cannot be both deferred"
+                    " and traversed using select_related"
+                    " at the same time." % (field.model._meta.object_name, field.name)
+                )
     return True
 
 
@@ -274,12 +280,14 @@ def check_rel_lookup_compatibility(model, target_opts, field):
       1) model and opts match (where proxy inheritance is removed)
       2) model is parent of opts' model or the other way around
     """
+
     def check(opts):
         return (
-            model._meta.concrete_model == opts.concrete_model or
-            opts.concrete_model in model._meta.get_parent_list() or
-            model in opts.get_parent_list()
+            model._meta.concrete_model == opts.concrete_model
+            or opts.concrete_model in model._meta.get_parent_list()
+            or model in opts.get_parent_list()
         )
+
     # If the field is a primary key, then doing a query against the field's
     # model is ok, too. Consider the case:
     # class Restaurant(models.Model):
@@ -289,10 +297,7 @@ def check_rel_lookup_compatibility(model, target_opts, field):
     # give Place's opts as the target opts, but Restaurant isn't compatible
     # with that. This logic applies only to primary keys, as when doing __in=qs,
     # we are going to turn this into __in=qs.values('pk') later on.
-    return (
-        check(target_opts) or
-        (getattr(field, 'primary_key', False) and check(field.model._meta))
-    )
+    return check(target_opts) or (getattr(field, 'primary_key', False) and check(field.model._meta))
 
 
 class FilteredRelation:
@@ -310,10 +315,10 @@ class FilteredRelation:
 
     def __eq__(self, other):
         return (
-            isinstance(other, self.__class__) and
-            self.relation_name == other.relation_name and
-            self.alias == other.alias and
-            self.condition == other.condition
+            isinstance(other, self.__class__)
+            and self.relation_name == other.relation_name
+            and self.alias == other.alias
+            and self.condition == other.condition
         )
 
     def clone(self):

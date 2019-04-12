@@ -10,9 +10,7 @@ from admin_scripts.tests import AdminScriptTestCase
 
 from django.conf import settings
 from django.contrib.staticfiles import storage
-from django.contrib.staticfiles.management.commands import (
-    collectstatic, runserver,
-)
+from django.contrib.staticfiles.management.commands import collectstatic, runserver
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import CommandError, call_command
 from django.test import RequestFactory, override_settings
@@ -27,7 +25,6 @@ from .storage import DummyStorage
 
 
 class TestNoFilesCreated:
-
     def test_no_files_created(self):
         """
         Make sure no files were create in the destination directory.
@@ -60,6 +57,7 @@ class TestFindStatic(TestDefaults, CollectionTestCase):
     """
     Test ``findstatic`` management command.
     """
+
     def _get_file(self, filepath):
         path = call_command('findstatic', filepath, all=False, verbosity=0, stdout=StringIO())
         with open(path, encoding='utf-8') as f:
@@ -103,10 +101,7 @@ class TestFindStatic(TestDefaults, CollectionTestCase):
         self.assertIn(TEST_SETTINGS['STATICFILES_DIRS'][1][1], searched_locations)
         self.assertIn(TEST_SETTINGS['STATICFILES_DIRS'][0], searched_locations)
         # DefaultStorageFinder searched locations
-        self.assertIn(
-            os.path.join('staticfiles_tests', 'project', 'site_media', 'media'),
-            searched_locations
-        )
+        self.assertIn(os.path.join('staticfiles_tests', 'project', 'site_media', 'media'), searched_locations)
 
 
 class TestConfiguration(StaticFilesTestCase):
@@ -160,6 +155,7 @@ class TestCollection(TestDefaults, CollectionTestCase):
     """
     Test ``collectstatic`` management command.
     """
+
     def test_ignore(self):
         """
         -i patterns are ignored.
@@ -217,6 +213,7 @@ class TestCollectionClear(CollectionTestCase):
     """
     Test the ``--clear`` option of the ``collectstatic`` management command.
     """
+
     def run_collectstatic(self, **kwargs):
         clear_filepath = os.path.join(settings.STATIC_ROOT, 'cleared.txt')
         with open(clear_filepath, 'w') as f:
@@ -246,6 +243,7 @@ class TestInteractiveMessages(CollectionTestCase):
         def _input(msg):
             stdout.write(msg)
             return 'yes'
+
         return _input
 
     def test_warning_when_clearing_staticdir(self):
@@ -298,6 +296,7 @@ class TestCollectionExcludeNoDefaultIgnore(TestDefaults, CollectionTestCase):
     Test ``--exclude-dirs`` and ``--no-default-ignore`` options of the
     ``collectstatic`` management command.
     """
+
     def run_collectstatic(self):
         super().run_collectstatic(use_default_ignore_patterns=False)
 
@@ -311,10 +310,9 @@ class TestCollectionExcludeNoDefaultIgnore(TestDefaults, CollectionTestCase):
         self.assertFileContains('test/CVS', 'should be ignored')
 
 
-@override_settings(INSTALLED_APPS=[
-    'staticfiles_tests.apps.staticfiles_config.IgnorePatternsAppConfig',
-    'staticfiles_tests.apps.test',
-])
+@override_settings(
+    INSTALLED_APPS=['staticfiles_tests.apps.staticfiles_config.IgnorePatternsAppConfig', 'staticfiles_tests.apps.test']
+)
 class TestCollectionCustomIgnorePatterns(CollectionTestCase):
     def test_custom_ignore_patterns(self):
         """
@@ -330,6 +328,7 @@ class TestCollectionDryRun(TestNoFilesCreated, CollectionTestCase):
     """
     Test ``--dry-run`` option for ``collectstatic`` management command.
     """
+
     def run_collectstatic(self):
         super().run_collectstatic(dry_run=True)
 
@@ -342,6 +341,7 @@ class TestCollectionFilesOverride(CollectionTestCase):
         'staticfiles_test_app',
         'staticfiles_tests.apps.no_label',
     """
+
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.temp_dir)
@@ -368,9 +368,7 @@ class TestCollectionFilesOverride(CollectionTestCase):
 
         os.utime(self.testfile_path, (self.orig_atime - 1, self.orig_mtime - 1))
 
-        self.settings_with_test_app = self.modify_settings(
-            INSTALLED_APPS={'prepend': 'staticfiles_test_app'},
-        )
+        self.settings_with_test_app = self.modify_settings(INSTALLED_APPS={'prepend': 'staticfiles_test_app'})
         with extend_sys_path(self.temp_dir):
             self.settings_with_test_app.enable()
 
@@ -402,6 +400,7 @@ class TestCollectionOverwriteWarning(CollectionTestCase):
     Test warning in ``collectstatic`` output when a file is skipped because a
     previous file was already written to the same path.
     """
+
     # If this string is in the collectstatic output, it means the warning we're
     # looking for was emitted.
     warning_string = 'Found another file'
@@ -451,6 +450,7 @@ class TestCollectionNonLocalStorage(TestNoFilesCreated, CollectionTestCase):
     Tests for a Storage that implements get_modified_time() but not path()
     (#15035).
     """
+
     def test_storage_properties(self):
         # Properties of the Storage as described in the ticket.
         storage = DummyStorage()
@@ -460,7 +460,6 @@ class TestCollectionNonLocalStorage(TestNoFilesCreated, CollectionTestCase):
 
 
 class TestCollectionNeverCopyStorage(CollectionTestCase):
-
     @override_settings(STATICFILES_STORAGE='staticfiles_tests.storage.NeverCopyRemoteStorage')
     def test_skips_newer_files_in_remote_storage(self):
         """
@@ -485,6 +484,7 @@ class TestCollectionLinks(TestDefaults, CollectionTestCase):
     the standard file resolving tests here, to make sure using
     ``--link`` does not change the file-selection semantics.
     """
+
     def run_collectstatic(self, clear=False, link=True, **kwargs):
         super().run_collectstatic(link=link, clear=clear, **kwargs)
 

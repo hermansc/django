@@ -6,6 +6,7 @@ class URLHandling(SimpleTestCase):
     """
     Tests for URL handling in views and responses.
     """
+
     redirect_target = "/%E4%B8%AD%E6%96%87/target/"
 
     def test_nonascii_redirect(self):

@@ -8,7 +8,6 @@ from ..utils import setup
 
 
 class FloatformatTests(SimpleTestCase):
-
     @setup({'floatformat01': '{% autoescape off %}{{ a|floatformat }} {{ b|floatformat }}{% endautoescape %}'})
     def test_floatformat01(self):
         output = self.engine.render_to_string('floatformat01', {"a": "1.42", "b": mark_safe("1.42")})
@@ -21,7 +20,6 @@ class FloatformatTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_inputs(self):
         self.assertEqual(floatformat(7.7), '7.7')
         self.assertEqual(floatformat(7.0), '7')
@@ -50,8 +48,8 @@ class FunctionTests(SimpleTestCase):
         self.assertEqual(floatformat('foo', 'bar'), '')
         self.assertEqual(floatformat('¿Cómo esta usted?'), '')
         self.assertEqual(floatformat(None), '')
-        self.assertEqual(floatformat(-1.323297138040798e+35, 2), '-132329713804079800000000000000000000.00')
-        self.assertEqual(floatformat(-1.323297138040798e+35, -2), '-132329713804079800000000000000000000')
+        self.assertEqual(floatformat(-1.323297138040798e35, 2), '-132329713804079800000000000000000000.00')
+        self.assertEqual(floatformat(-1.323297138040798e35, -2), '-132329713804079800000000000000000000')
         self.assertEqual(floatformat(1.5e-15, 20), '0.00000000000000150000')
         self.assertEqual(floatformat(1.5e-15, -20), '0.00000000000000150000')
         self.assertEqual(floatformat(1.00000000000000015, 16), '1.0000000000000002')

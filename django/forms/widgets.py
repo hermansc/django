@@ -18,21 +18,38 @@ from django.utils.dates import MONTHS
 from django.utils.formats import get_format
 from django.utils.html import format_html, html_safe
 from django.utils.safestring import mark_safe
-from django.utils.topological_sort import (
-    CyclicDependencyError, stable_topological_sort,
-)
+from django.utils.topological_sort import CyclicDependencyError, stable_topological_sort
 from django.utils.translation import gettext_lazy as _
 
 from .renderers import get_default_renderer
 
 __all__ = (
-    'Media', 'MediaDefiningClass', 'Widget', 'TextInput', 'NumberInput',
-    'EmailInput', 'URLInput', 'PasswordInput', 'HiddenInput',
-    'MultipleHiddenInput', 'FileInput', 'ClearableFileInput', 'Textarea',
-    'DateInput', 'DateTimeInput', 'TimeInput', 'CheckboxInput', 'Select',
-    'NullBooleanSelect', 'SelectMultiple', 'RadioSelect',
-    'CheckboxSelectMultiple', 'MultiWidget', 'SplitDateTimeWidget',
-    'SplitHiddenDateTimeWidget', 'SelectDateWidget',
+    'Media',
+    'MediaDefiningClass',
+    'Widget',
+    'TextInput',
+    'NumberInput',
+    'EmailInput',
+    'URLInput',
+    'PasswordInput',
+    'HiddenInput',
+    'MultipleHiddenInput',
+    'FileInput',
+    'ClearableFileInput',
+    'Textarea',
+    'DateInput',
+    'DateTimeInput',
+    'TimeInput',
+    'CheckboxInput',
+    'Select',
+    'NullBooleanSelect',
+    'SelectMultiple',
+    'RadioSelect',
+    'CheckboxSelectMultiple',
+    'MultiWidget',
+    'SplitDateTimeWidget',
+    'SplitHiddenDateTimeWidget',
+    'SelectDateWidget',
 )
 
 MEDIA_TYPES = ('css', 'js')
@@ -79,22 +96,23 @@ class Media:
 
     def render_js(self):
         return [
-            format_html(
-                '<script type="text/javascript" src="{}"></script>',
-                self.absolute_path(path)
-            ) for path in self._js
+            format_html('<script type="text/javascript" src="{}"></script>', self.absolute_path(path))
+            for path in self._js
         ]
 
     def render_css(self):
         # To keep rendering order consistent, we can't just iterate over items().
         # We need to sort the keys, and iterate over the sorted list.
         media = sorted(self._css)
-        return chain.from_iterable([
-            format_html(
-                '<link href="{}" type="text/css" media="{}" rel="stylesheet">',
-                self.absolute_path(path), medium
-            ) for path in self._css[medium]
-        ] for medium in media)
+        return chain.from_iterable(
+            [
+                format_html(
+                    '<link href="{}" type="text/css" media="{}" rel="stylesheet">', self.absolute_path(path), medium
+                )
+                for path in self._css[medium]
+            ]
+            for medium in media
+        )
 
     def absolute_path(self, path):
         """
@@ -139,9 +157,8 @@ class Media:
             return stable_topological_sort(all_items, dependency_graph)
         except CyclicDependencyError:
             warnings.warn(
-                'Detected duplicate Media files in an opposite order: {}'.format(
-                    ', '.join(repr(l) for l in lists)
-                ), MediaOrderConflictWarning,
+                'Detected duplicate Media files in an opposite order: {}'.format(', '.join(repr(l) for l in lists)),
+                MediaOrderConflictWarning,
             )
             return list(all_items)
 
@@ -175,6 +192,7 @@ def media_property(cls):
                 return m + Media(definition)
             return Media(definition)
         return base
+
     return property(_media)
 
 
@@ -182,6 +200,7 @@ class MediaDefiningClass(type):
     """
     Metaclass for classes that can have media definitions.
     """
+
     def __new__(mcs, name, bases, attrs):
         new_class = super(MediaDefiningClass, mcs).__new__(mcs, name, bases, attrs)
 
@@ -280,6 +299,7 @@ class Input(Widget):
     """
     Base class for all <input> widgets.
     """
+
     input_type = None  # Subclasses must define this.
     template_name = 'django/forms/widgets/input.html'
 
@@ -339,6 +359,7 @@ class MultipleHiddenInput(HiddenInput):
     Handle <input type="hidden"> for fields that have a list
     of values.
     """
+
     template_name = 'django/forms/widgets/multiple_hidden.html'
 
     def get_context(self, name, value, attrs):
@@ -427,20 +448,21 @@ class ClearableFileInput(FileInput):
         context = super().get_context(name, value, attrs)
         checkbox_name = self.clear_checkbox_name(name)
         checkbox_id = self.clear_checkbox_id(checkbox_name)
-        context['widget'].update({
-            'checkbox_name': checkbox_name,
-            'checkbox_id': checkbox_id,
-            'is_initial': self.is_initial(value),
-            'input_text': self.input_text,
-            'initial_text': self.initial_text,
-            'clear_checkbox_label': self.clear_checkbox_label,
-        })
+        context['widget'].update(
+            {
+                'checkbox_name': checkbox_name,
+                'checkbox_id': checkbox_id,
+                'is_initial': self.is_initial(value),
+                'input_text': self.input_text,
+                'initial_text': self.initial_text,
+                'clear_checkbox_label': self.clear_checkbox_label,
+            }
+        )
         return context
 
     def value_from_datadict(self, data, files, name):
         upload = super().value_from_datadict(data, files, name)
-        if not self.is_required and CheckboxInput().value_from_datadict(
-                data, files, self.clear_checkbox_name(name)):
+        if not self.is_required and CheckboxInput().value_from_datadict(data, files, self.clear_checkbox_name(name)):
 
             if upload:
                 # If the user contradicts themselves (uploads a new file AND
@@ -455,10 +477,7 @@ class ClearableFileInput(FileInput):
         return super().use_required_attribute(initial) and not initial
 
     def value_omitted_from_data(self, data, files, name):
-        return (
-            super().value_omitted_from_data(data, files, name) and
-            self.clear_checkbox_name(name) not in data
-        )
+        return super().value_omitted_from_data(data, files, name) and self.clear_checkbox_name(name) not in data
 
 
 class Textarea(Widget):
@@ -602,15 +621,11 @@ class ChoiceWidget(Widget):
             groups.append((group_name, subgroup, index))
 
             for subvalue, sublabel in choices:
-                selected = (
-                    str(subvalue) in value and
-                    (not has_selected or self.allow_multiple_selected)
-                )
+                selected = str(subvalue) in value and (not has_selected or self.allow_multiple_selected)
                 has_selected |= selected
-                subgroup.append(self.create_option(
-                    name, subvalue, sublabel, selected, index,
-                    subindex=subindex, attrs=attrs,
-                ))
+                subgroup.append(
+                    self.create_option(name, subvalue, sublabel, selected, index, subindex=subindex, attrs=attrs)
+                )
                 if subindex is not None:
                     subindex += 1
         return groups
@@ -706,21 +721,21 @@ class NullBooleanSelect(Select):
     """
     A Select Widget intended to be used with NullBooleanField.
     """
+
     def __init__(self, attrs=None):
-        choices = (
-            ('unknown', _('Unknown')),
-            ('true', _('Yes')),
-            ('false', _('No')),
-        )
+        choices = (('unknown', _('Unknown')), ('true', _('Yes')), ('false', _('No')))
         super().__init__(attrs, choices)
 
     def format_value(self, value):
         try:
             return {
-                True: 'true', False: 'false',
-                'true': 'true', 'false': 'false',
+                True: 'true',
+                False: 'false',
+                'true': 'true',
+                'false': 'false',
                 # For backwards compatibility with Django < 2.2.
-                '2': 'true', '3': 'false',
+                '2': 'true',
+                '3': 'false',
             }[value]
         except KeyError:
             return 'unknown'
@@ -798,6 +813,7 @@ class MultiWidget(Widget):
 
     You'll probably want to use this class with MultiValueField.
     """
+
     template_name = 'django/forms/widgets/multiwidget.html'
 
     def __init__(self, widgets, attrs=None):
@@ -849,8 +865,7 @@ class MultiWidget(Widget):
 
     def value_omitted_from_data(self, data, files, name):
         return all(
-            widget.value_omitted_from_data(data, files, name + '_%s' % i)
-            for i, widget in enumerate(self.widgets)
+            widget.value_omitted_from_data(data, files, name + '_%s' % i) for i, widget in enumerate(self.widgets)
         )
 
     def decompress(self, value):
@@ -870,6 +885,7 @@ class MultiWidget(Widget):
         for w in self.widgets:
             media = media + w.media
         return media
+
     media = property(_get_media)
 
     def __deepcopy__(self, memo):
@@ -886,19 +902,14 @@ class SplitDateTimeWidget(MultiWidget):
     """
     A widget that splits datetime input into two <input type="text"> boxes.
     """
+
     supports_microseconds = False
     template_name = 'django/forms/widgets/splitdatetime.html'
 
     def __init__(self, attrs=None, date_format=None, time_format=None, date_attrs=None, time_attrs=None):
         widgets = (
-            DateInput(
-                attrs=attrs if date_attrs is None else date_attrs,
-                format=date_format,
-            ),
-            TimeInput(
-                attrs=attrs if time_attrs is None else time_attrs,
-                format=time_format,
-            ),
+            DateInput(attrs=attrs if date_attrs is None else date_attrs, format=date_format),
+            TimeInput(attrs=attrs if time_attrs is None else time_attrs, format=time_format),
         )
         super().__init__(widgets)
 
@@ -913,6 +924,7 @@ class SplitHiddenDateTimeWidget(SplitDateTimeWidget):
     """
     A widget that splits datetime input into two <input type="hidden"> inputs.
     """
+
     template_name = 'django/forms/widgets/splithiddendatetime.html'
 
     def __init__(self, attrs=None, date_format=None, time_format=None, date_attrs=None, time_attrs=None):
@@ -928,6 +940,7 @@ class SelectDateWidget(Widget):
     This also serves as an example of a Widget that has more than one HTML
     element and hence implements value_from_datadict.
     """
+
     none_value = ('', '---')
     month_field = '%s_month'
     day_field = '%s_day'
@@ -994,7 +1007,7 @@ class SelectDateWidget(Widget):
         if not self.is_required:
             day_choices.insert(0, self.day_none_value)
         day_name = self.day_field % name
-        date_context['day'] = self.select_widget(attrs, choices=day_choices,).get_context(
+        date_context['day'] = self.select_widget(attrs, choices=day_choices).get_context(
             name=day_name,
             value=context['widget']['value']['day'],
             attrs={**context['widget']['attrs'], 'id': 'id_%s' % day_name},
@@ -1073,7 +1086,4 @@ class SelectDateWidget(Widget):
         return data.get(name)
 
     def value_omitted_from_data(self, data, files, name):
-        return not any(
-            ('{}_{}'.format(name, interval) in data)
-            for interval in ('year', 'month', 'day')
-        )
+        return not any(('{}_{}'.format(name, interval) in data) for interval in ('year', 'month', 'day'))

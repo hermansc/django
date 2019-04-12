@@ -9,7 +9,6 @@ from django.utils.html import escape
 
 
 class GeometryFieldTest(SimpleTestCase):
-
     def test_init(self):
         "Testing GeometryField initialization with defaults."
         fld = forms.GeometryField()
@@ -61,7 +60,7 @@ class GeometryFieldTest(SimpleTestCase):
         # a WKT for any other geom_type will be properly transformed by `to_python`
         self.assertEqual(
             GEOSGeometry('LINESTRING(0 0, 1 1)', srid=pnt_fld.widget.map_srid),
-            pnt_fld.to_python('LINESTRING(0 0, 1 1)')
+            pnt_fld.to_python('LINESTRING(0 0, 1 1)'),
         )
         # but rejected by `clean`
         with self.assertRaises(forms.ValidationError):
@@ -72,11 +71,7 @@ class GeometryFieldTest(SimpleTestCase):
         to_python() either returns a correct GEOSGeometry object or
         a ValidationError.
         """
-        good_inputs = [
-            'POINT(5 23)',
-            'MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)))',
-            'LINESTRING(0 0, 1 1)',
-        ]
+        good_inputs = ['POINT(5 23)', 'MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)))', 'LINESTRING(0 0, 1 1)']
         bad_inputs = [
             'POINT(5)',
             'MULTI   POLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)))',
@@ -120,16 +115,13 @@ class GeometryFieldTest(SimpleTestCase):
         Initialization of a geometry field with a valid/empty/invalid string.
         Only the invalid string should trigger an error log entry.
         """
+
         class PointForm(forms.Form):
             pt1 = forms.PointField(srid=4326)
             pt2 = forms.PointField(srid=4326)
             pt3 = forms.PointField(srid=4326)
 
-        form = PointForm({
-            'pt1': 'SRID=4326;POINT(7.3 44)',  # valid
-            'pt2': '',  # empty
-            'pt3': 'PNT(0)',  # invalid
-        })
+        form = PointForm({'pt1': 'SRID=4326;POINT(7.3 44)', 'pt2': '', 'pt3': 'PNT(0)'})  # valid  # empty  # invalid
 
         with self.assertLogs('django.contrib.gis', 'ERROR') as logger_calls:
             output = str(form)
@@ -142,22 +134,19 @@ class GeometryFieldTest(SimpleTestCase):
         self.assertJSONEqual(pt1_json, pt1_expected.json)
 
         self.assertInHTML(
-            '<textarea id="id_pt2" class="vSerializedField required" cols="150"'
-            ' rows="10" name="pt2"></textarea>',
-            output
+            '<textarea id="id_pt2" class="vSerializedField required" cols="150"' ' rows="10" name="pt2"></textarea>',
+            output,
         )
         self.assertInHTML(
-            '<textarea id="id_pt3" class="vSerializedField required" cols="150"'
-            ' rows="10" name="pt3"></textarea>',
-            output
+            '<textarea id="id_pt3" class="vSerializedField required" cols="150"' ' rows="10" name="pt3"></textarea>',
+            output,
         )
         # Only the invalid PNT(0) triggers an error log entry.
         # Deserialization is called in form clean and in widget rendering.
         self.assertEqual(len(logger_calls.records), 2)
         self.assertEqual(
             logger_calls.records[0].getMessage(),
-            "Error creating geometry from value 'PNT(0)' (String input "
-            "unrecognized as WKT EWKT, and HEXEWKB.)"
+            "Error creating geometry from value 'PNT(0)' (String input " "unrecognized as WKT EWKT, and HEXEWKB.)",
         )
 
 
@@ -165,54 +154,66 @@ class SpecializedFieldTest(SimpleTestCase):
     def setUp(self):
         self.geometries = {
             'point': GEOSGeometry("SRID=4326;POINT(9.052734375 42.451171875)"),
-            'multipoint': GEOSGeometry("SRID=4326;MULTIPOINT("
-                                       "(13.18634033203125 14.504356384277344),"
-                                       "(13.207969665527 14.490966796875),"
-                                       "(13.177070617675 14.454917907714))"),
-            'linestring': GEOSGeometry("SRID=4326;LINESTRING("
-                                       "-8.26171875 -0.52734375,"
-                                       "-7.734375 4.21875,"
-                                       "6.85546875 3.779296875,"
-                                       "5.44921875 -3.515625)"),
-            'multilinestring': GEOSGeometry("SRID=4326;MULTILINESTRING("
-                                            "(-16.435546875 -2.98828125,"
-                                            "-17.2265625 2.98828125,"
-                                            "-0.703125 3.515625,"
-                                            "-1.494140625 -3.33984375),"
-                                            "(-8.0859375 -5.9765625,"
-                                            "8.525390625 -8.7890625,"
-                                            "12.392578125 -0.87890625,"
-                                            "10.01953125 7.646484375))"),
-            'polygon': GEOSGeometry("SRID=4326;POLYGON("
-                                    "(-1.669921875 6.240234375,"
-                                    "-3.8671875 -0.615234375,"
-                                    "5.9765625 -3.955078125,"
-                                    "18.193359375 3.955078125,"
-                                    "9.84375 9.4921875,"
-                                    "-1.669921875 6.240234375))"),
-            'multipolygon': GEOSGeometry("SRID=4326;MULTIPOLYGON("
-                                         "((-17.578125 13.095703125,"
-                                         "-17.2265625 10.8984375,"
-                                         "-13.974609375 10.1953125,"
-                                         "-13.359375 12.744140625,"
-                                         "-15.732421875 13.7109375,"
-                                         "-17.578125 13.095703125)),"
-                                         "((-8.525390625 5.537109375,"
-                                         "-8.876953125 2.548828125,"
-                                         "-5.888671875 1.93359375,"
-                                         "-5.09765625 4.21875,"
-                                         "-6.064453125 6.240234375,"
-                                         "-8.525390625 5.537109375)))"),
-            'geometrycollection': GEOSGeometry("SRID=4326;GEOMETRYCOLLECTION("
-                                               "POINT(5.625 -0.263671875),"
-                                               "POINT(6.767578125 -3.603515625),"
-                                               "POINT(8.525390625 0.087890625),"
-                                               "POINT(8.0859375 -2.13134765625),"
-                                               "LINESTRING("
-                                               "6.273193359375 -1.175537109375,"
-                                               "5.77880859375 -1.812744140625,"
-                                               "7.27294921875 -2.230224609375,"
-                                               "7.657470703125 -1.25244140625))"),
+            'multipoint': GEOSGeometry(
+                "SRID=4326;MULTIPOINT("
+                "(13.18634033203125 14.504356384277344),"
+                "(13.207969665527 14.490966796875),"
+                "(13.177070617675 14.454917907714))"
+            ),
+            'linestring': GEOSGeometry(
+                "SRID=4326;LINESTRING("
+                "-8.26171875 -0.52734375,"
+                "-7.734375 4.21875,"
+                "6.85546875 3.779296875,"
+                "5.44921875 -3.515625)"
+            ),
+            'multilinestring': GEOSGeometry(
+                "SRID=4326;MULTILINESTRING("
+                "(-16.435546875 -2.98828125,"
+                "-17.2265625 2.98828125,"
+                "-0.703125 3.515625,"
+                "-1.494140625 -3.33984375),"
+                "(-8.0859375 -5.9765625,"
+                "8.525390625 -8.7890625,"
+                "12.392578125 -0.87890625,"
+                "10.01953125 7.646484375))"
+            ),
+            'polygon': GEOSGeometry(
+                "SRID=4326;POLYGON("
+                "(-1.669921875 6.240234375,"
+                "-3.8671875 -0.615234375,"
+                "5.9765625 -3.955078125,"
+                "18.193359375 3.955078125,"
+                "9.84375 9.4921875,"
+                "-1.669921875 6.240234375))"
+            ),
+            'multipolygon': GEOSGeometry(
+                "SRID=4326;MULTIPOLYGON("
+                "((-17.578125 13.095703125,"
+                "-17.2265625 10.8984375,"
+                "-13.974609375 10.1953125,"
+                "-13.359375 12.744140625,"
+                "-15.732421875 13.7109375,"
+                "-17.578125 13.095703125)),"
+                "((-8.525390625 5.537109375,"
+                "-8.876953125 2.548828125,"
+                "-5.888671875 1.93359375,"
+                "-5.09765625 4.21875,"
+                "-6.064453125 6.240234375,"
+                "-8.525390625 5.537109375)))"
+            ),
+            'geometrycollection': GEOSGeometry(
+                "SRID=4326;GEOMETRYCOLLECTION("
+                "POINT(5.625 -0.263671875),"
+                "POINT(6.767578125 -3.603515625),"
+                "POINT(8.525390625 0.087890625),"
+                "POINT(8.0859375 -2.13134765625),"
+                "LINESTRING("
+                "6.273193359375 -1.175537109375,"
+                "5.77880859375 -1.812744140625,"
+                "7.27294921875 -2.230224609375,"
+                "7.657470703125 -1.25244140625))"
+            ),
         }
 
     def assertMapWidget(self, form_instance):
@@ -334,9 +335,7 @@ class SpecializedFieldTest(SimpleTestCase):
 
 class OSMWidgetTest(SimpleTestCase):
     def setUp(self):
-        self.geometries = {
-            'point': GEOSGeometry("SRID=4326;POINT(9.052734375 42.451171875)"),
-        }
+        self.geometries = {'point': GEOSGeometry("SRID=4326;POINT(9.052734375 42.451171875)")}
 
     def test_osm_widget(self):
         class PointForm(forms.Form):
@@ -356,11 +355,7 @@ class OSMWidgetTest(SimpleTestCase):
 
         class PointForm(forms.Form):
             p = forms.PointField(
-                widget=forms.OSMWidget(attrs={
-                    'default_lon': 20,
-                    'default_lat': 30,
-                    'default_zoom': 17,
-                }),
+                widget=forms.OSMWidget(attrs={'default_lon': 20, 'default_lat': 30, 'default_zoom': 17})
             )
 
         form = PointForm()
@@ -372,7 +367,6 @@ class OSMWidgetTest(SimpleTestCase):
 
 
 class GeometryWidgetTests(SimpleTestCase):
-
     def test_get_context_attrs(self):
         """The Widget.get_context() attrs argument overrides self.attrs."""
         widget = BaseGeometryWidget(attrs={'geom_type': 'POINT'})
@@ -383,20 +377,22 @@ class GeometryWidgetTests(SimpleTestCase):
         widget = forms.BaseGeometryWidget()
         self.assertEqual(
             list(widget.subwidgets('name', 'value')),
-            [{
-                'is_hidden': False,
-                'attrs': {
-                    'map_srid': 4326,
-                    'map_width': 600,
-                    'geom_type': 'GEOMETRY',
-                    'map_height': 400,
-                    'display_raw': False,
-                },
-                'name': 'name',
-                'template_name': '',
-                'value': 'value',
-                'required': False,
-            }]
+            [
+                {
+                    'is_hidden': False,
+                    'attrs': {
+                        'map_srid': 4326,
+                        'map_width': 600,
+                        'geom_type': 'GEOMETRY',
+                        'map_height': 400,
+                        'display_raw': False,
+                    },
+                    'name': 'name',
+                    'template_name': '',
+                    'value': 'value',
+                    'required': False,
+                }
+            ],
         )
 
     def test_custom_serialization_widget(self):

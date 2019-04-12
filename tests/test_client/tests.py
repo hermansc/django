@@ -26,9 +26,7 @@ from unittest import mock
 from django.contrib.auth.models import User
 from django.core import mail
 from django.http import HttpResponse
-from django.test import (
-    Client, RequestFactory, SimpleTestCase, TestCase, override_settings,
-)
+from django.test import Client, RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse_lazy
 
 from .views import TwoArgException, get_view, post_view, trace_view
@@ -36,7 +34,6 @@ from .views import TwoArgException, get_view, post_view, trace_view
 
 @override_settings(ROOT_URLCONF='test_client.urls')
 class ClientTest(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.u1 = User.objects.create_user(username='testclient', password='password')
@@ -60,10 +57,7 @@ class ClientTest(TestCase):
         self.assertEqual(response.context['var'], '1\ufffd')
 
     def test_get_data_none(self):
-        msg = (
-            'Cannot encode None in a query string. Did you mean to pass an '
-            'empty string or omit the value?'
-        )
+        msg = 'Cannot encode None in a query string. Did you mean to pass an ' 'empty string or omit the value?'
         with self.assertRaisesMessage(TypeError, msg):
             self.client.get('/get_view/', {'value': None})
 
@@ -89,9 +83,7 @@ class ClientTest(TestCase):
 
     def test_post(self):
         "POST some data to a view"
-        post_data = {
-            'value': 37
-        }
+        post_data = {'value': 37}
         response = self.client.post('/post_view/', post_data)
 
         # Check some response details
@@ -101,21 +93,14 @@ class ClientTest(TestCase):
         self.assertContains(response, 'Data received')
 
     def test_post_data_none(self):
-        msg = (
-            'Cannot encode None as POST data. Did you mean to pass an empty '
-            'string or omit the value?'
-        )
+        msg = 'Cannot encode None as POST data. Did you mean to pass an empty ' 'string or omit the value?'
         with self.assertRaisesMessage(TypeError, msg):
             self.client.post('/post_view/', {'value': None})
 
     def test_json_serialization(self):
         """The test client serializes JSON data."""
         methods = ('post', 'put', 'patch', 'delete')
-        tests = (
-            ({'value': 37}, {'value': 37}),
-            ([37, True], [37, True]),
-            ((37, False), [37, False]),
-        )
+        tests = (({'value': 37}, {'value': 37}), ([37, True], [37, True]), ((37, False), [37, False]))
         for method in methods:
             with self.subTest(method=method):
                 for data, expected in tests:
@@ -324,7 +309,7 @@ class ClientTest(TestCase):
             'email': 'foo@example.com',
             'value': 37,
             'single': 'b',
-            'multi': ('b', 'c', 'e')
+            'multi': ('b', 'c', 'e'),
         }
         response = self.client.post('/form_view/', post_data)
         self.assertEqual(response.status_code, 200)
@@ -332,10 +317,7 @@ class ClientTest(TestCase):
 
     def test_valid_form_with_hints(self):
         "GET a form, providing hints in the GET data"
-        hints = {
-            'text': 'Hello World',
-            'multi': ('b', 'c', 'e')
-        }
+        hints = {'text': 'Hello World', 'multi': ('b', 'c', 'e')}
         response = self.client.get('/form_view/', data=hints)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "Form GET Template")
@@ -344,10 +326,7 @@ class ClientTest(TestCase):
 
     def test_incomplete_data_form(self):
         "POST incomplete data to a form"
-        post_data = {
-            'text': 'Hello World',
-            'value': 37
-        }
+        post_data = {'text': 'Hello World', 'value': 37}
         response = self.client.post('/form_view/', post_data)
         self.assertContains(response, 'This field is required.', 3)
         self.assertEqual(response.status_code, 200)
@@ -364,7 +343,7 @@ class ClientTest(TestCase):
             'email': 'not an email address',
             'value': 37,
             'single': 'b',
-            'multi': ('b', 'c', 'e')
+            'multi': ('b', 'c', 'e'),
         }
         response = self.client.post('/form_view/', post_data)
         self.assertEqual(response.status_code, 200)
@@ -379,7 +358,7 @@ class ClientTest(TestCase):
             'email': 'foo@example.com',
             'value': 37,
             'single': 'b',
-            'multi': ('b', 'c', 'e')
+            'multi': ('b', 'c', 'e'),
         }
         response = self.client.post('/form_view_with_template/', post_data)
         self.assertContains(response, 'POST data OK')
@@ -389,10 +368,7 @@ class ClientTest(TestCase):
 
     def test_incomplete_data_form_with_template(self):
         "POST incomplete data to a form using multiple templates"
-        post_data = {
-            'text': 'Hello World',
-            'value': 37
-        }
+        post_data = {'text': 'Hello World', 'value': 37}
         response = self.client.post('/form_view_with_template/', post_data)
         self.assertContains(response, 'POST data has errors')
         self.assertTemplateUsed(response, 'form_view.html')
@@ -410,7 +386,7 @@ class ClientTest(TestCase):
             'email': 'not an email address',
             'value': 37,
             'single': 'b',
-            'multi': ('b', 'c', 'e')
+            'multi': ('b', 'c', 'e'),
         }
         response = self.client.post('/form_view_with_template/', post_data)
         self.assertContains(response, 'POST data has errors')
@@ -450,10 +426,7 @@ class ClientTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['user'].username, 'testclient')
 
-    @override_settings(
-        INSTALLED_APPS=['django.contrib.auth'],
-        SESSION_ENGINE='django.contrib.sessions.backends.file',
-    )
+    @override_settings(INSTALLED_APPS=['django.contrib.auth'], SESSION_ENGINE='django.contrib.sessions.backends.file')
     def test_view_with_login_when_sessions_app_is_not_installed(self):
         self.test_view_with_login()
 
@@ -609,7 +582,7 @@ class ClientTest(TestCase):
         AUTHENTICATION_BACKENDS=[
             'django.contrib.auth.backends.ModelBackend',
             'test_client.auth_backends.TestClientBackend',
-        ],
+        ]
     )
     def test_force_login_with_backend(self):
         """
@@ -633,7 +606,7 @@ class ClientTest(TestCase):
         AUTHENTICATION_BACKENDS=[
             'django.contrib.auth.backends.ModelBackend',
             'test_client.auth_backends.TestClientBackend',
-        ],
+        ]
     )
     def test_force_login_without_backend(self):
         """
@@ -646,10 +619,12 @@ class ClientTest(TestCase):
         self.assertEqual(response.context['user'].username, 'testclient')
         self.assertEqual(self.u1.backend, 'django.contrib.auth.backends.ModelBackend')
 
-    @override_settings(AUTHENTICATION_BACKENDS=[
-        'test_client.auth_backends.BackendWithoutGetUserMethod',
-        'django.contrib.auth.backends.ModelBackend',
-    ])
+    @override_settings(
+        AUTHENTICATION_BACKENDS=[
+            'test_client.auth_backends.BackendWithoutGetUserMethod',
+            'django.contrib.auth.backends.ModelBackend',
+        ]
+    )
     def test_force_login_with_backend_missing_get_user(self):
         """
         force_login() skips auth backends without a get_user() method.
@@ -739,17 +714,11 @@ class ClientTest(TestCase):
         # The session was modified
         self.assertEqual(self.client.session['tobacconist'], 'hovercraft')
 
-    @override_settings(
-        INSTALLED_APPS=[],
-        SESSION_ENGINE='django.contrib.sessions.backends.file',
-    )
+    @override_settings(INSTALLED_APPS=[], SESSION_ENGINE='django.contrib.sessions.backends.file')
     def test_sessions_app_is_not_installed(self):
         self.test_session_modifying_view()
 
-    @override_settings(
-        INSTALLED_APPS=[],
-        SESSION_ENGINE='django.contrib.sessions.backends.nonexistent',
-    )
+    @override_settings(INSTALLED_APPS=[], SESSION_ENGINE='django.contrib.sessions.backends.nonexistent')
     def test_session_engine_is_invalid(self):
         with self.assertRaisesMessage(ImportError, 'nonexistent'):
             self.test_session_modifying_view()
@@ -844,12 +813,8 @@ class ClientTest(TestCase):
         self.assertEqual(response.content, b'named_temp_file')
 
 
-@override_settings(
-    MIDDLEWARE=['django.middleware.csrf.CsrfViewMiddleware'],
-    ROOT_URLCONF='test_client.urls',
-)
+@override_settings(MIDDLEWARE=['django.middleware.csrf.CsrfViewMiddleware'], ROOT_URLCONF='test_client.urls')
 class CSRFEnabledClientTests(SimpleTestCase):
-
     def test_csrf_enabled_client(self):
         "A client can be instantiated with CSRF checks enabled"
         csrf_client = Client(enforce_csrf_checks=True)

@@ -10,7 +10,6 @@ from .models import BigD, Foo
 
 
 class DecimalFieldTests(TestCase):
-
     def test_to_python(self):
         f = models.DecimalField(max_digits=4, decimal_places=2)
         self.assertEqual(f.to_python(3), Decimal('3'))

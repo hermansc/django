@@ -19,15 +19,14 @@ class FormsUtilsTestCase(SimpleTestCase):
         self.assertEqual(flatatt({'class': "news", 'title': "Read this"}), ' class="news" title="Read this"')
         self.assertEqual(
             flatatt({'class': "news", 'title': "Read this", 'required': "required"}),
-            ' class="news" required="required" title="Read this"'
+            ' class="news" required="required" title="Read this"',
         )
         self.assertEqual(
             flatatt({'class': "news", 'title': "Read this", 'required': True}),
-            ' class="news" title="Read this" required'
+            ' class="news" title="Read this" required',
         )
         self.assertEqual(
-            flatatt({'class': "news", 'title': "Read this", 'required': False}),
-            ' class="news" title="Read this"'
+            flatatt({'class': "news", 'title': "Read this", 'required': False}), ' class="news" title="Read this"'
         )
         self.assertEqual(flatatt({'class': None}), '')
         self.assertEqual(flatatt({}), '')
@@ -57,46 +56,50 @@ class FormsUtilsTestCase(SimpleTestCase):
         # Can take a string.
         self.assertHTMLEqual(
             str(ErrorList(ValidationError("There was an error.").messages)),
-            '<ul class="errorlist"><li>There was an error.</li></ul>'
+            '<ul class="errorlist"><li>There was an error.</li></ul>',
         )
         # Can take a unicode string.
         self.assertHTMLEqual(
-            str(ErrorList(ValidationError("Not \u03C0.").messages)),
-            '<ul class="errorlist"><li>Not π.</li></ul>'
+            str(ErrorList(ValidationError("Not \u03C0.").messages)), '<ul class="errorlist"><li>Not π.</li></ul>'
         )
         # Can take a lazy string.
         self.assertHTMLEqual(
             str(ErrorList(ValidationError(gettext_lazy("Error.")).messages)),
-            '<ul class="errorlist"><li>Error.</li></ul>'
+            '<ul class="errorlist"><li>Error.</li></ul>',
         )
         # Can take a list.
         self.assertHTMLEqual(
             str(ErrorList(ValidationError(["Error one.", "Error two."]).messages)),
-            '<ul class="errorlist"><li>Error one.</li><li>Error two.</li></ul>'
+            '<ul class="errorlist"><li>Error one.</li><li>Error two.</li></ul>',
         )
         # Can take a dict.
         self.assertHTMLEqual(
             str(ErrorList(sorted(ValidationError({'error_1': "1. Error one.", 'error_2': "2. Error two."}).messages))),
-            '<ul class="errorlist"><li>1. Error one.</li><li>2. Error two.</li></ul>'
+            '<ul class="errorlist"><li>1. Error one.</li><li>2. Error two.</li></ul>',
         )
         # Can take a mixture in a list.
         self.assertHTMLEqual(
-            str(ErrorList(sorted(ValidationError([
-                "1. First error.",
-                "2. Not \u03C0.",
-                gettext_lazy("3. Error."),
-                {
-                    'error_1': "4. First dict error.",
-                    'error_2': "5. Second dict error.",
-                },
-            ]).messages))),
+            str(
+                ErrorList(
+                    sorted(
+                        ValidationError(
+                            [
+                                "1. First error.",
+                                "2. Not \u03C0.",
+                                gettext_lazy("3. Error."),
+                                {'error_1': "4. First dict error.", 'error_2': "5. Second dict error."},
+                            ]
+                        ).messages
+                    )
+                )
+            ),
             '<ul class="errorlist">'
             '<li>1. First error.</li>'
             '<li>2. Not π.</li>'
             '<li>3. Error.</li>'
             '<li>4. First dict error.</li>'
             '<li>5. Second dict error.</li>'
-            '</ul>'
+            '</ul>',
         )
 
         class VeryBadError:
@@ -106,7 +109,7 @@ class FormsUtilsTestCase(SimpleTestCase):
         # Can take a non-string.
         self.assertHTMLEqual(
             str(ErrorList(ValidationError(VeryBadError()).messages)),
-            '<ul class="errorlist"><li>A very bad error.</li></ul>'
+            '<ul class="errorlist"><li>A very bad error.</li></ul>',
         )
 
         # Escapes non-safe input but not input marked safe.
@@ -114,36 +117,31 @@ class FormsUtilsTestCase(SimpleTestCase):
         self.assertHTMLEqual(
             str(ErrorList([example])),
             '<ul class="errorlist"><li>Example of link: '
-            '&lt;a href=&quot;http://www.example.com/&quot;&gt;example&lt;/a&gt;</li></ul>'
+            '&lt;a href=&quot;http://www.example.com/&quot;&gt;example&lt;/a&gt;</li></ul>',
         )
         self.assertHTMLEqual(
             str(ErrorList([mark_safe(example)])),
-            '<ul class="errorlist"><li>Example of link: '
-            '<a href="http://www.example.com/">example</a></li></ul>'
+            '<ul class="errorlist"><li>Example of link: ' '<a href="http://www.example.com/">example</a></li></ul>',
         )
         self.assertHTMLEqual(
             str(ErrorDict({'name': example})),
             '<ul class="errorlist"><li>nameExample of link: '
-            '&lt;a href=&quot;http://www.example.com/&quot;&gt;example&lt;/a&gt;</li></ul>'
+            '&lt;a href=&quot;http://www.example.com/&quot;&gt;example&lt;/a&gt;</li></ul>',
         )
         self.assertHTMLEqual(
             str(ErrorDict({'name': mark_safe(example)})),
             '<ul class="errorlist"><li>nameExample of link: '
-            '<a href="http://www.example.com/">example</a></li></ul>'
+            '<a href="http://www.example.com/">example</a></li></ul>',
         )
 
     def test_error_dict_copy(self):
         e = ErrorDict()
-        e['__all__'] = ErrorList([
-            ValidationError(
-                message='message %(i)s',
-                params={'i': 1},
-            ),
-            ValidationError(
-                message='message %(i)s',
-                params={'i': 2},
-            ),
-        ])
+        e['__all__'] = ErrorList(
+            [
+                ValidationError(message='message %(i)s', params={'i': 1}),
+                ValidationError(message='message %(i)s', params={'i': 2}),
+            ]
+        )
 
         e_copy = copy.copy(e)
         self.assertEqual(e, e_copy)

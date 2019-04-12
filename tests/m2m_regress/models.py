@@ -84,6 +84,7 @@ class RegressionModelSplit(BadModelWithSplit):
     """
     Model with a split method should not cause an error in add_lazy_relation
     """
+
     others = models.ManyToManyField('self')
 
 

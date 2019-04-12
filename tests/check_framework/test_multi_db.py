@@ -9,6 +9,7 @@ class TestRouter:
     """
     Routes to the 'other' database if the model name starts with 'Other'.
     """
+
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         return db == ('other' if model_name.startswith('other') else 'default')
 
@@ -16,7 +17,6 @@ class TestRouter:
 @override_settings(DATABASE_ROUTERS=[TestRouter()])
 @isolate_apps('check_framework')
 class TestMultiDBChecks(SimpleTestCase):
-
     def _patch_check_field_on(self, db):
         return mock.patch.object(connections[db].validation, 'check_field')
 

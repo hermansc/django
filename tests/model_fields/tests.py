@@ -6,10 +6,7 @@ from django.db import models
 from django.test import SimpleTestCase, TestCase
 from django.utils.functional import lazy
 
-from .models import (
-    Bar, Choiceful, Foo, RenamedField, VerboseNameField, Whiz, WhizDelayed,
-    WhizIter, WhizIterEmpty,
-)
+from .models import Bar, Choiceful, Foo, RenamedField, VerboseNameField, Whiz, WhizDelayed, WhizIter, WhizIterEmpty
 
 
 class Nested:
@@ -18,7 +15,6 @@ class Nested:
 
 
 class BasicFieldTests(SimpleTestCase):
-
     def test_show_hidden_initial(self):
         """
         Fields with choices respect show_hidden_initial as a kwarg to
@@ -104,7 +100,6 @@ class BasicFieldTests(SimpleTestCase):
 
 
 class ChoicesTests(SimpleTestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -139,27 +134,23 @@ class ChoicesTests(SimpleTestCase):
     def test_formfield(self):
         no_choices_formfield = self.no_choices.formfield()
         self.assertIsInstance(no_choices_formfield, forms.IntegerField)
-        fields = (
-            self.empty_choices, self.with_choices, self.empty_choices_bool,
-            self.empty_choices_text,
-        )
+        fields = (self.empty_choices, self.with_choices, self.empty_choices_bool, self.empty_choices_text)
         for field in fields:
             with self.subTest(field=field):
                 self.assertIsInstance(field.formfield(), forms.ChoiceField)
 
 
 class GetFieldDisplayTests(SimpleTestCase):
-
     def test_choices_and_field_display(self):
         """
         get_choices() interacts with get_FIELD_display() to return the expected
         values.
         """
-        self.assertEqual(Whiz(c=1).get_c_display(), 'First')    # A nested value
-        self.assertEqual(Whiz(c=0).get_c_display(), 'Other')    # A top level value
-        self.assertEqual(Whiz(c=9).get_c_display(), 9)          # Invalid value
-        self.assertIsNone(Whiz(c=None).get_c_display())         # Blank value
-        self.assertEqual(Whiz(c='').get_c_display(), '')        # Empty value
+        self.assertEqual(Whiz(c=1).get_c_display(), 'First')  # A nested value
+        self.assertEqual(Whiz(c=0).get_c_display(), 'Other')  # A top level value
+        self.assertEqual(Whiz(c=9).get_c_display(), 9)  # Invalid value
+        self.assertIsNone(Whiz(c=None).get_c_display())  # Blank value
+        self.assertEqual(Whiz(c='').get_c_display(), '')  # Empty value
         self.assertEqual(WhizDelayed(c=0).get_c_display(), 'Other')  # Delayed choices
 
     def test_get_FIELD_display_translated(self):
@@ -172,23 +163,22 @@ class GetFieldDisplayTests(SimpleTestCase):
         """
         get_choices() works with Iterators.
         """
-        self.assertEqual(WhizIter(c=1).c, 1)          # A nested value
-        self.assertEqual(WhizIter(c=9).c, 9)          # Invalid value
-        self.assertIsNone(WhizIter(c=None).c)         # Blank value
-        self.assertEqual(WhizIter(c='').c, '')        # Empty value
+        self.assertEqual(WhizIter(c=1).c, 1)  # A nested value
+        self.assertEqual(WhizIter(c=9).c, 9)  # Invalid value
+        self.assertIsNone(WhizIter(c=None).c)  # Blank value
+        self.assertEqual(WhizIter(c='').c, '')  # Empty value
 
     def test_empty_iterator_choices(self):
         """
         get_choices() works with empty iterators.
         """
-        self.assertEqual(WhizIterEmpty(c="a").c, "a")      # A nested value
-        self.assertEqual(WhizIterEmpty(c="b").c, "b")      # Invalid value
-        self.assertIsNone(WhizIterEmpty(c=None).c)         # Blank value
-        self.assertEqual(WhizIterEmpty(c='').c, '')        # Empty value
+        self.assertEqual(WhizIterEmpty(c="a").c, "a")  # A nested value
+        self.assertEqual(WhizIterEmpty(c="b").c, "b")  # Invalid value
+        self.assertIsNone(WhizIterEmpty(c=None).c)  # Blank value
+        self.assertEqual(WhizIterEmpty(c='').c, '')  # Empty value
 
 
 class GetChoicesTests(SimpleTestCase):
-
     def test_empty_choices(self):
         choices = []
         f = models.CharField(choices=choices)
@@ -200,15 +190,7 @@ class GetChoicesTests(SimpleTestCase):
         self.assertEqual(f.get_choices(include_blank=True), choices)
 
     def test_blank_in_grouped_choices(self):
-        choices = [
-            ('f', 'Foo'),
-            ('b', 'Bar'),
-            ('Group', (
-                ('', 'No Preference'),
-                ('fg', 'Foo'),
-                ('bg', 'Bar'),
-            )),
-        ]
+        choices = [('f', 'Foo'), ('b', 'Bar'), ('Group', (('', 'No Preference'), ('fg', 'Foo'), ('bg', 'Bar')))]
         f = models.CharField(choices=choices)
         self.assertEqual(f.get_choices(include_blank=True), choices)
 
@@ -219,7 +201,6 @@ class GetChoicesTests(SimpleTestCase):
 
 
 class GetChoicesOrderingTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.foo1 = Foo.objects.create(a='a', d='12.34')
@@ -232,21 +213,13 @@ class GetChoicesOrderingTests(TestCase):
         self.assertEqual(choices, [(obj.pk, str(obj)) for obj in objs])
 
     def test_get_choices(self):
-        self.assertChoicesEqual(
-            self.field.get_choices(include_blank=False, ordering=('a',)),
-            [self.foo1, self.foo2]
-        )
-        self.assertChoicesEqual(
-            self.field.get_choices(include_blank=False, ordering=('-a',)),
-            [self.foo2, self.foo1]
-        )
+        self.assertChoicesEqual(self.field.get_choices(include_blank=False, ordering=('a',)), [self.foo1, self.foo2])
+        self.assertChoicesEqual(self.field.get_choices(include_blank=False, ordering=('-a',)), [self.foo2, self.foo1])
 
     def test_get_choices_reverse_related_field(self):
         self.assertChoicesEqual(
-            self.field.remote_field.get_choices(include_blank=False, ordering=('a',)),
-            [self.bar1, self.bar2]
+            self.field.remote_field.get_choices(include_blank=False, ordering=('a',)), [self.bar1, self.bar2]
         )
         self.assertChoicesEqual(
-            self.field.remote_field.get_choices(include_blank=False, ordering=('-a',)),
-            [self.bar2, self.bar1]
+            self.field.remote_field.get_choices(include_blank=False, ordering=('-a',)), [self.bar2, self.bar1]
         )

@@ -26,8 +26,7 @@ class FlatpageNode(template.Node):
         flatpages = FlatPage.objects.filter(sites__id=site_pk)
         # If a prefix was specified, add a filter
         if self.starts_with:
-            flatpages = flatpages.filter(
-                url__startswith=self.starts_with.resolve(context))
+            flatpages = flatpages.filter(url__startswith=self.starts_with.resolve(context))
 
         # If the provided user is not authenticated, or no user
         # was provided, filter the list to only public flatpages.
@@ -70,9 +69,10 @@ def get_flatpages(parser, token):
         {% get_flatpages '/about/' for someuser as about_pages %}
     """
     bits = token.split_contents()
-    syntax_message = ("%(tag_name)s expects a syntax of %(tag_name)s "
-                      "['url_starts_with'] [for user] as context_name" %
-                      {'tag_name': bits[0]})
+    syntax_message = (
+        "%(tag_name)s expects a syntax of %(tag_name)s "
+        "['url_starts_with'] [for user] as context_name" % {'tag_name': bits[0]}
+    )
     # Must have at 3-6 bits in the tag
     if 3 <= len(bits) <= 6:
         # If there's an even number of bits, there's no prefix

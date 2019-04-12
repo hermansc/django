@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy
 
 @ignore_warnings(category=RemovedInDjango40Warning)
 class TestDeprecatedEncodingUtils(SimpleTestCase):
-
     def test_force_text(self):
         s = SimpleLazyObject(lambda: 'x')
         self.assertIs(type(force_text(s)), str)

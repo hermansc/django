@@ -10,9 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models.signals import post_migrate
 from django.http import HttpRequest, HttpResponse
-from django.test import (
-    SimpleTestCase, TestCase, modify_settings, override_settings,
-)
+from django.test import SimpleTestCase, TestCase, modify_settings, override_settings
 from django.test.utils import captured_stdout
 
 
@@ -59,10 +57,7 @@ class SitesFrameworkTests(TestCase):
     def test_get_current_site(self):
         # The correct Site object is returned
         request = HttpRequest()
-        request.META = {
-            "SERVER_NAME": "example.com",
-            "SERVER_PORT": "80",
-        }
+        request.META = {"SERVER_NAME": "example.com", "SERVER_PORT": "80"}
         site = get_current_site(request)
         self.assertIsInstance(site, Site)
         self.assertEqual(site.id, settings.SITE_ID)
@@ -82,10 +77,7 @@ class SitesFrameworkTests(TestCase):
     @override_settings(SITE_ID='', ALLOWED_HOSTS=['example.com'])
     def test_get_current_site_no_site_id(self):
         request = HttpRequest()
-        request.META = {
-            "SERVER_NAME": "example.com",
-            "SERVER_PORT": "80",
-        }
+        request.META = {"SERVER_NAME": "example.com", "SERVER_PORT": "80"}
         del settings.SITE_ID
         site = get_current_site(request)
         self.assertEqual(site.name, "example.com")
@@ -96,10 +88,7 @@ class SitesFrameworkTests(TestCase):
         The site is matched if the name in the request has a trailing dot.
         """
         request = HttpRequest()
-        request.META = {
-            'SERVER_NAME': 'example.com.',
-            'SERVER_PORT': '80',
-        }
+        request.META = {'SERVER_NAME': 'example.com.', 'SERVER_PORT': '80'}
         site = get_current_site(request)
         self.assertEqual(site.name, 'example.com')
 
@@ -155,10 +144,7 @@ class SitesFrameworkTests(TestCase):
     @override_settings(ALLOWED_HOSTS=['example.com'])
     def test_clear_site_cache(self):
         request = HttpRequest()
-        request.META = {
-            "SERVER_NAME": "example.com",
-            "SERVER_PORT": "80",
-        }
+        request.META = {"SERVER_NAME": "example.com", "SERVER_PORT": "80"}
         self.assertEqual(models.SITE_CACHE, {})
         get_current_site(request)
         expected_cache = {self.site.id: self.site}
@@ -177,10 +163,7 @@ class SitesFrameworkTests(TestCase):
     def test_clear_site_cache_domain(self):
         site = Site.objects.create(name='example2.com', domain='example2.com')
         request = HttpRequest()
-        request.META = {
-            "SERVER_NAME": "example2.com",
-            "SERVER_PORT": "80",
-        }
+        request.META = {"SERVER_NAME": "example2.com", "SERVER_PORT": "80"}
         get_current_site(request)  # prime the models.SITE_CACHE
         expected_cache = {site.domain: site}
         self.assertEqual(models.SITE_CACHE, expected_cache)
@@ -205,7 +188,6 @@ class SitesFrameworkTests(TestCase):
 
 @override_settings(ALLOWED_HOSTS=['example.com'])
 class RequestSiteTests(SimpleTestCase):
-
     def setUp(self):
         request = HttpRequest()
         request.META = {'HTTP_HOST': 'example.com'}
@@ -324,7 +306,6 @@ class CreateDefaultSiteTests(TestCase):
 
 
 class MiddlewareTest(TestCase):
-
     def test_old_style_request(self):
         """The request has correct `site` attribute."""
         middleware = CurrentSiteMiddleware()
@@ -335,5 +316,6 @@ class MiddlewareTest(TestCase):
     def test_request(self):
         def get_response(request):
             return HttpResponse(str(request.site.id))
+
         response = CurrentSiteMiddleware(get_response)(HttpRequest())
         self.assertContains(response, settings.SITE_ID)

@@ -10,7 +10,6 @@ from .models import Article, Author, OrderedByFArticle, Reference
 
 
 class OrderingTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.a1 = Article.objects.create(headline="Article 1", pub_date=datetime(2005, 7, 26))
@@ -28,13 +27,7 @@ class OrderingTests(TestCase):
         headline ascending.
         """
         self.assertQuerysetEqual(
-            Article.objects.all(), [
-                "Article 4",
-                "Article 2",
-                "Article 3",
-                "Article 1",
-            ],
-            attrgetter("headline")
+            Article.objects.all(), ["Article 4", "Article 2", "Article 3", "Article 1"], attrgetter("headline")
         )
 
         # Getting a single item should work too:
@@ -46,22 +39,14 @@ class OrderingTests(TestCase):
         ordering attribute in models.
         """
         self.assertQuerysetEqual(
-            Article.objects.order_by("headline"), [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by("headline"),
+            ["Article 1", "Article 2", "Article 3", "Article 4"],
+            attrgetter("headline"),
         )
         self.assertQuerysetEqual(
-            Article.objects.order_by("pub_date", "-headline"), [
-                "Article 1",
-                "Article 3",
-                "Article 2",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by("pub_date", "-headline"),
+            ["Article 1", "Article 3", "Article 2", "Article 4"],
+            attrgetter("headline"),
         )
 
     def test_order_by_override(self):
@@ -70,22 +55,14 @@ class OrderingTests(TestCase):
         previous ordering).
         """
         self.assertQuerysetEqual(
-            Article.objects.order_by("id"), [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by("id"),
+            ["Article 1", "Article 2", "Article 3", "Article 4"],
+            attrgetter("headline"),
         )
         self.assertQuerysetEqual(
-            Article.objects.order_by("id").order_by("-headline"), [
-                "Article 4",
-                "Article 3",
-                "Article 2",
-                "Article 1",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by("id").order_by("-headline"),
+            ["Article 4", "Article 3", "Article 2", "Article 1"],
+            attrgetter("headline"),
         )
 
     def test_order_by_nulls_first_and_last(self):
@@ -145,18 +122,17 @@ class OrderingTests(TestCase):
         Article.objects.filter(headline='Article 4').update(author=self.author_2)
         Author.objects.filter(name__isnull=True).delete()
         author_3 = Author.objects.create(name='Name 3')
-        article_subquery = Article.objects.filter(
-            author=OuterRef('pk'),
-            headline__icontains='Article',
-        ).order_by().values('author').annotate(
-            last_date=Max('pub_date'),
-        ).values('last_date')
+        article_subquery = (
+            Article.objects.filter(author=OuterRef('pk'), headline__icontains='Article')
+            .order_by()
+            .values('author')
+            .annotate(last_date=Max('pub_date'))
+            .values('last_date')
+        )
         self.assertQuerysetEqualReversible(
-            Author.objects.annotate(
-                last_date=Subquery(article_subquery, output_field=DateTimeField())
-            ).order_by(
-                F('last_date').asc(nulls_first=True)
-            ).distinct(),
+            Author.objects.annotate(last_date=Subquery(article_subquery, output_field=DateTimeField()))
+            .order_by(F('last_date').asc(nulls_first=True))
+            .distinct(),
             [author_3, self.author_1, self.author_2],
         )
 
@@ -165,11 +141,7 @@ class OrderingTests(TestCase):
         Use the 'stop' part of slicing notation to limit the results.
         """
         self.assertQuerysetEqual(
-            Article.objects.order_by("headline")[:2], [
-                "Article 1",
-                "Article 2",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by("headline")[:2], ["Article 1", "Article 2"], attrgetter("headline")
         )
 
     def test_stop_start_slicing(self):
@@ -178,20 +150,14 @@ class OrderingTests(TestCase):
         result list.
         """
         self.assertQuerysetEqual(
-            Article.objects.order_by("headline")[1:3], [
-                "Article 2",
-                "Article 3",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by("headline")[1:3], ["Article 2", "Article 3"], attrgetter("headline")
         )
 
     def test_random_ordering(self):
         """
         Use '?' to order randomly.
         """
-        self.assertEqual(
-            len(list(Article.objects.order_by("?"))), 4
-        )
+        self.assertEqual(len(list(Article.objects.order_by("?"))), 4)
 
     def test_reversed_ordering(self):
         """
@@ -200,34 +166,14 @@ class OrderingTests(TestCase):
         and then take the first two).
         """
         self.assertQuerysetEqual(
-            Article.objects.all().reverse()[:2], [
-                "Article 1",
-                "Article 3",
-            ],
-            attrgetter("headline")
+            Article.objects.all().reverse()[:2], ["Article 1", "Article 3"], attrgetter("headline")
         )
 
     def test_reverse_ordering_pure(self):
         qs1 = Article.objects.order_by(F('headline').asc())
         qs2 = qs1.reverse()
-        self.assertQuerysetEqual(
-            qs1, [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
-        )
-        self.assertQuerysetEqual(
-            qs2, [
-                "Article 4",
-                "Article 3",
-                "Article 2",
-                "Article 1",
-            ],
-            attrgetter("headline")
-        )
+        self.assertQuerysetEqual(qs1, ["Article 1", "Article 2", "Article 3", "Article 4"], attrgetter("headline"))
+        self.assertQuerysetEqual(qs2, ["Article 4", "Article 3", "Article 2", "Article 1"], attrgetter("headline"))
 
     def test_no_reordering_after_slicing(self):
         msg = 'Cannot reverse a query once a slice has been taken.'
@@ -242,13 +188,9 @@ class OrderingTests(TestCase):
         Ordering can be based on fields included from an 'extra' clause
         """
         self.assertQuerysetEqual(
-            Article.objects.extra(select={"foo": "pub_date"}, order_by=["foo", "headline"]), [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.extra(select={"foo": "pub_date"}, order_by=["foo", "headline"]),
+            ["Article 1", "Article 2", "Article 3", "Article 4"],
+            attrgetter("headline"),
         )
 
     def test_extra_ordering_quoting(self):
@@ -257,33 +199,21 @@ class OrderingTests(TestCase):
         protected by quoting.
         """
         self.assertQuerysetEqual(
-            Article.objects.extra(select={"order": "pub_date"}, order_by=["order", "headline"]), [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.extra(select={"order": "pub_date"}, order_by=["order", "headline"]),
+            ["Article 1", "Article 2", "Article 3", "Article 4"],
+            attrgetter("headline"),
         )
 
     def test_extra_ordering_with_table_name(self):
         self.assertQuerysetEqual(
-            Article.objects.extra(order_by=['ordering_article.headline']), [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.extra(order_by=['ordering_article.headline']),
+            ["Article 1", "Article 2", "Article 3", "Article 4"],
+            attrgetter("headline"),
         )
         self.assertQuerysetEqual(
-            Article.objects.extra(order_by=['-ordering_article.headline']), [
-                "Article 4",
-                "Article 3",
-                "Article 2",
-                "Article 1",
-            ],
-            attrgetter("headline")
+            Article.objects.extra(order_by=['-ordering_article.headline']),
+            ["Article 4", "Article 3", "Article 2", "Article 1"],
+            attrgetter("headline"),
         )
 
     def test_order_by_pk(self):
@@ -291,9 +221,7 @@ class OrderingTests(TestCase):
         'pk' works as an ordering option in Meta.
         """
         self.assertQuerysetEqual(
-            Author.objects.all(),
-            list(reversed(range(1, Author.objects.count() + 1))),
-            attrgetter("pk"),
+            Author.objects.all(), list(reversed(range(1, Author.objects.count() + 1))), attrgetter("pk")
         )
 
     def test_order_by_fk_attname(self):
@@ -308,42 +236,26 @@ class OrderingTests(TestCase):
             article.save(update_fields={'author'})
 
         self.assertQuerysetEqual(
-            Article.objects.order_by('author_id'), [
-                "Article 4",
-                "Article 3",
-                "Article 2",
-                "Article 1",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by('author_id'),
+            ["Article 4", "Article 3", "Article 2", "Article 1"],
+            attrgetter("headline"),
         )
 
     def test_order_by_f_expression(self):
         self.assertQuerysetEqual(
-            Article.objects.order_by(F('headline')), [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by(F('headline')),
+            ["Article 1", "Article 2", "Article 3", "Article 4"],
+            attrgetter("headline"),
         )
         self.assertQuerysetEqual(
-            Article.objects.order_by(F('headline').asc()), [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by(F('headline').asc()),
+            ["Article 1", "Article 2", "Article 3", "Article 4"],
+            attrgetter("headline"),
         )
         self.assertQuerysetEqual(
-            Article.objects.order_by(F('headline').desc()), [
-                "Article 4",
-                "Article 3",
-                "Article 2",
-                "Article 1",
-            ],
-            attrgetter("headline")
+            Article.objects.order_by(F('headline').desc()),
+            ["Article 4", "Article 3", "Article 2", "Article 1"],
+            attrgetter("headline"),
         )
 
     def test_order_by_f_expression_duplicates(self):
@@ -353,30 +265,14 @@ class OrderingTests(TestCase):
         """
         qs = Article.objects.order_by(F('headline').asc(), F('headline').desc())
         sql = str(qs.query).upper()
-        fragment = sql[sql.find('ORDER BY'):]
+        fragment = sql[sql.find('ORDER BY') :]
         self.assertEqual(fragment.count('HEADLINE'), 1)
-        self.assertQuerysetEqual(
-            qs, [
-                "Article 1",
-                "Article 2",
-                "Article 3",
-                "Article 4",
-            ],
-            attrgetter("headline")
-        )
+        self.assertQuerysetEqual(qs, ["Article 1", "Article 2", "Article 3", "Article 4"], attrgetter("headline"))
         qs = Article.objects.order_by(F('headline').desc(), F('headline').asc())
         sql = str(qs.query).upper()
-        fragment = sql[sql.find('ORDER BY'):]
+        fragment = sql[sql.find('ORDER BY') :]
         self.assertEqual(fragment.count('HEADLINE'), 1)
-        self.assertQuerysetEqual(
-            qs, [
-                "Article 4",
-                "Article 3",
-                "Article 2",
-                "Article 1",
-            ],
-            attrgetter("headline")
-        )
+        self.assertQuerysetEqual(qs, ["Article 4", "Article 3", "Article 2", "Article 1"], attrgetter("headline"))
 
     def test_related_ordering_duplicate_table_reference(self):
         """
@@ -401,8 +297,7 @@ class OrderingTests(TestCase):
         articles.filter(headline='Article 2').update(author=self.author_2)
         articles.filter(headline='Article 3').update(author=self.author_1)
         self.assertQuerysetEqual(
-            articles, ['Article 1', 'Article 4', 'Article 3', 'Article 2'],
-            attrgetter('headline')
+            articles, ['Article 1', 'Article 4', 'Article 3', 'Article 2'], attrgetter('headline')
         )
 
     def test_deprecated_values_annotate(self):

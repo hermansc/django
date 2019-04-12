@@ -4,7 +4,6 @@ from django.test import SimpleTestCase, override_settings
 
 
 class TemplateUtilsTests(SimpleTestCase):
-
     @override_settings(TEMPLATES=[{'BACKEND': 'raise.import.error'}])
     def test_backend_import_error(self):
         """
@@ -16,12 +15,16 @@ class TemplateUtilsTests(SimpleTestCase):
         with self.assertRaisesMessage(ImportError, "No module named 'raise"):
             engines.all()
 
-    @override_settings(TEMPLATES=[{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # Incorrect: APP_DIRS and loaders are mutually incompatible.
-        'APP_DIRS': True,
-        'OPTIONS': {'loaders': []},
-    }])
+    @override_settings(
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                # Incorrect: APP_DIRS and loaders are mutually incompatible.
+                'APP_DIRS': True,
+                'OPTIONS': {'loaders': []},
+            }
+        ]
+    )
     def test_backend_improperly_configured(self):
         """
         Failing to initialize a backend keeps raising the original exception
@@ -33,11 +36,12 @@ class TemplateUtilsTests(SimpleTestCase):
         with self.assertRaisesMessage(ImproperlyConfigured, msg):
             engines.all()
 
-    @override_settings(TEMPLATES=[{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    }, {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    }])
+    @override_settings(
+        TEMPLATES=[
+            {'BACKEND': 'django.template.backends.django.DjangoTemplates'},
+            {'BACKEND': 'django.template.backends.django.DjangoTemplates'},
+        ]
+    )
     def test_backend_names_must_be_unique(self):
         msg = (
             "Template engine aliases aren't unique, duplicates: django. Set "

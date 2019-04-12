@@ -13,6 +13,4 @@ site = admin.AdminSite(name='auth_test_admin')
 site.register(User, UserAdmin)
 site.register(Group, GroupAdmin)
 
-urlpatterns += [
-    path('admin/', site.urls),
-]
+urlpatterns += [path('admin/', site.urls)]

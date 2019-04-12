@@ -8,13 +8,10 @@ from django.db import connection
 from django.db.models.functions import Substr
 from django.test import TestCase, skipUnlessDBFeature
 
-from .models import (
-    Article, Author, Game, IsNullWithNoneAsRHS, Player, Season, Tag,
-)
+from .models import Article, Author, Game, IsNullWithNoneAsRHS, Player, Season, Tag
 
 
 class LookupTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         # Create a few Authors.
@@ -22,46 +19,25 @@ class LookupTests(TestCase):
         cls.au2 = Author.objects.create(name='Author 2', alias='a2')
         # Create a few Articles.
         cls.a1 = Article.objects.create(
-            headline='Article 1',
-            pub_date=datetime(2005, 7, 26),
-            author=cls.au1,
-            slug='a1',
+            headline='Article 1', pub_date=datetime(2005, 7, 26), author=cls.au1, slug='a1'
         )
         cls.a2 = Article.objects.create(
-            headline='Article 2',
-            pub_date=datetime(2005, 7, 27),
-            author=cls.au1,
-            slug='a2',
+            headline='Article 2', pub_date=datetime(2005, 7, 27), author=cls.au1, slug='a2'
         )
         cls.a3 = Article.objects.create(
-            headline='Article 3',
-            pub_date=datetime(2005, 7, 27),
-            author=cls.au1,
-            slug='a3',
+            headline='Article 3', pub_date=datetime(2005, 7, 27), author=cls.au1, slug='a3'
         )
         cls.a4 = Article.objects.create(
-            headline='Article 4',
-            pub_date=datetime(2005, 7, 28),
-            author=cls.au1,
-            slug='a4',
+            headline='Article 4', pub_date=datetime(2005, 7, 28), author=cls.au1, slug='a4'
         )
         cls.a5 = Article.objects.create(
-            headline='Article 5',
-            pub_date=datetime(2005, 8, 1, 9, 0),
-            author=cls.au2,
-            slug='a5',
+            headline='Article 5', pub_date=datetime(2005, 8, 1, 9, 0), author=cls.au2, slug='a5'
         )
         cls.a6 = Article.objects.create(
-            headline='Article 6',
-            pub_date=datetime(2005, 8, 1, 8, 0),
-            author=cls.au2,
-            slug='a6',
+            headline='Article 6', pub_date=datetime(2005, 8, 1, 8, 0), author=cls.au2, slug='a6'
         )
         cls.a7 = Article.objects.create(
-            headline='Article 7',
-            pub_date=datetime(2005, 7, 27),
-            author=cls.au2,
-            slug='a7',
+            headline='Article 7', pub_date=datetime(2005, 7, 27), author=cls.au2, slug='a7'
         )
         # Create a few Tags.
         cls.t1 = Tag.objects.create(name='Tag 1')
@@ -81,8 +57,7 @@ class LookupTests(TestCase):
 
     def test_lookup_int_as_str(self):
         # Integer value can be queried using string
-        self.assertQuerysetEqual(Article.objects.filter(id__iexact=str(self.a1.id)),
-                                 ['<Article: Article 1>'])
+        self.assertQuerysetEqual(Article.objects.filter(id__iexact=str(self.a1.id)), ['<Article: Article 1>'])
 
     @skipUnlessDBFeature('supports_date_lookup_using_string')
     def test_lookup_date_as_str(self):
@@ -97,7 +72,7 @@ class LookupTests(TestCase):
                 '<Article: Article 3>',
                 '<Article: Article 7>',
                 '<Article: Article 1>',
-            ]
+            ],
         )
 
     def test_iterator(self):
@@ -107,22 +82,13 @@ class LookupTests(TestCase):
 
         self.assertQuerysetEqual(
             Article.objects.iterator(),
-            [
-                'Article 5',
-                'Article 6',
-                'Article 4',
-                'Article 2',
-                'Article 3',
-                'Article 7',
-                'Article 1',
-            ],
-            transform=attrgetter('headline')
+            ['Article 5', 'Article 6', 'Article 4', 'Article 2', 'Article 3', 'Article 7', 'Article 1'],
+            transform=attrgetter('headline'),
         )
         # iterator() can be used on any QuerySet.
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__endswith='4').iterator(),
-            ['Article 4'],
-            transform=attrgetter('headline'))
+            Article.objects.filter(headline__endswith='4').iterator(), ['Article 4'], transform=attrgetter('headline')
+        )
 
     def test_count(self):
         # count() returns the number of objects matching search criteria.
@@ -155,7 +121,7 @@ class LookupTests(TestCase):
                 self.a5.id: self.a5,
                 self.a6.id: self.a6,
                 self.a7.id: self.a7,
-            }
+            },
         )
         self.assertEqual(Article.objects.in_bulk([self.a3.id]), {self.a3.id: self.a3})
         self.assertEqual(Article.objects.in_bulk({self.a3.id}), {self.a3.id: self.a3})
@@ -180,11 +146,7 @@ class LookupTests(TestCase):
     def test_in_bulk_with_field(self):
         self.assertEqual(
             Article.objects.in_bulk([self.a1.slug, self.a2.slug, self.a3.slug], field_name='slug'),
-            {
-                self.a1.slug: self.a1,
-                self.a2.slug: self.a2,
-                self.a3.slug: self.a3,
-            }
+            {self.a1.slug: self.a1, self.a2.slug: self.a2, self.a3.slug: self.a3},
         )
 
     def test_in_bulk_non_unique_field(self):
@@ -262,16 +224,18 @@ class LookupTests(TestCase):
         }
         self.assertSequenceEqual(
             Article.objects.filter(id=self.a1.id).extra(select=data).values(*data),
-            [{
-                'id_plus_one': self.a1.id + 1,
-                'id_plus_two': self.a1.id + 2,
-                'id_plus_three': self.a1.id + 3,
-                'id_plus_four': self.a1.id + 4,
-                'id_plus_five': self.a1.id + 5,
-                'id_plus_six': self.a1.id + 6,
-                'id_plus_seven': self.a1.id + 7,
-                'id_plus_eight': self.a1.id + 8,
-            }],
+            [
+                {
+                    'id_plus_one': self.a1.id + 1,
+                    'id_plus_two': self.a1.id + 2,
+                    'id_plus_three': self.a1.id + 3,
+                    'id_plus_four': self.a1.id + 4,
+                    'id_plus_five': self.a1.id + 5,
+                    'id_plus_six': self.a1.id + 6,
+                    'id_plus_seven': self.a1.id + 7,
+                    'id_plus_eight': self.a1.id + 8,
+                }
+            ],
         )
         # You can specify fields from forward and reverse relations, just like filter().
         self.assertSequenceEqual(
@@ -300,9 +264,9 @@ class LookupTests(TestCase):
         )
         self.assertSequenceEqual(
             (
-                Author.objects
-                .values('name', 'article__headline', 'article__tag__name')
-                .order_by('name', 'article__headline', 'article__tag__name')
+                Author.objects.values('name', 'article__headline', 'article__tag__name').order_by(
+                    'name', 'article__headline', 'article__tag__name'
+                )
             ),
             [
                 {'name': self.au1.name, 'article__headline': self.a1.headline, 'article__tag__name': self.t1.name},
@@ -328,13 +292,15 @@ class LookupTests(TestCase):
         # If you don't specify field names to values(), all are returned.
         self.assertSequenceEqual(
             Article.objects.filter(id=self.a5.id).values(),
-            [{
-                'id': self.a5.id,
-                'author_id': self.au2.id,
-                'headline': 'Article 5',
-                'pub_date': datetime(2005, 8, 1, 9, 0),
-                'slug': 'a5',
-            }],
+            [
+                {
+                    'id': self.a5.id,
+                    'author_id': self.au2.id,
+                    'headline': 'Article 5',
+                    'pub_date': datetime(2005, 8, 1, 9, 0),
+                    'slug': 'a5',
+                }
+            ],
         )
 
     def test_values_list(self):
@@ -375,7 +341,7 @@ class LookupTests(TestCase):
                 (self.a4.id + 1, self.a4.id),
                 (self.a5.id + 1, self.a5.id),
                 (self.a6.id + 1, self.a6.id),
-                (self.a7.id + 1, self.a7.id)
+                (self.a7.id + 1, self.a7.id),
             ],
         )
         self.assertSequenceEqual(
@@ -387,7 +353,7 @@ class LookupTests(TestCase):
                 (self.a4.id, self.a4.id + 1),
                 (self.a5.id, self.a5.id + 1),
                 (self.a6.id, self.a6.id + 1),
-                (self.a7.id, self.a7.id + 1)
+                (self.a7.id, self.a7.id + 1),
             ],
         )
         args = ('name', 'article__headline', 'article__tag__name')
@@ -446,11 +412,10 @@ class LookupTests(TestCase):
                 '<Article: Article 3>',
                 '<Article: Article 7>',
                 '<Article: Article 1>',
-            ]
+            ],
         )
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__startswith='Article_'),
-            ['<Article: Article_ with underscore>']
+            Article.objects.filter(headline__startswith='Article_'), ['<Article: Article_ with underscore>']
         )
         Article.objects.create(headline='Article% with percent sign', pub_date=datetime(2005, 11, 21))
         self.assertQuerysetEqual(
@@ -465,24 +430,24 @@ class LookupTests(TestCase):
                 '<Article: Article 3>',
                 '<Article: Article 7>',
                 '<Article: Article 1>',
-            ]
+            ],
         )
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__startswith='Article%'),
-            ['<Article: Article% with percent sign>']
+            Article.objects.filter(headline__startswith='Article%'), ['<Article: Article% with percent sign>']
         )
         Article.objects.create(headline='Article with \\ backslash', pub_date=datetime(2005, 11, 22))
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__contains='\\'),
-            [r'<Article: Article with \ backslash>']
+            Article.objects.filter(headline__contains='\\'), [r'<Article: Article with \ backslash>']
         )
 
     def test_exclude(self):
-        Article.objects.bulk_create([
-            Article(headline='Article_ with underscore', pub_date=datetime(2005, 11, 20)),
-            Article(headline='Article% with percent sign', pub_date=datetime(2005, 11, 21)),
-            Article(headline='Article with \\ backslash', pub_date=datetime(2005, 11, 22)),
-        ])
+        Article.objects.bulk_create(
+            [
+                Article(headline='Article_ with underscore', pub_date=datetime(2005, 11, 20)),
+                Article(headline='Article% with percent sign', pub_date=datetime(2005, 11, 21)),
+                Article(headline='Article with \\ backslash', pub_date=datetime(2005, 11, 22)),
+            ]
+        )
         # exclude() is the opposite of filter() when doing lookups:
         self.assertQuerysetEqual(
             Article.objects.filter(headline__contains='Article').exclude(headline__contains='with'),
@@ -494,7 +459,7 @@ class LookupTests(TestCase):
                 '<Article: Article 3>',
                 '<Article: Article 7>',
                 '<Article: Article 1>',
-            ]
+            ],
         )
         self.assertQuerysetEqual(
             Article.objects.exclude(headline__startswith="Article_"),
@@ -508,7 +473,7 @@ class LookupTests(TestCase):
                 '<Article: Article 3>',
                 '<Article: Article 7>',
                 '<Article: Article 1>',
-            ]
+            ],
         )
         self.assertQuerysetEqual(
             Article.objects.exclude(headline="Article 7"),
@@ -522,7 +487,7 @@ class LookupTests(TestCase):
                 '<Article: Article 2>',
                 '<Article: Article 3>',
                 '<Article: Article 1>',
-            ]
+            ],
         )
 
     def test_none(self):
@@ -547,14 +512,14 @@ class LookupTests(TestCase):
                 '<Article: Article 3>',
                 '<Article: Article 7>',
                 '<Article: Article 1>',
-            ]
+            ],
         )
 
     def test_in_different_database(self):
         with self.assertRaisesMessage(
             ValueError,
             "Subqueries aren't allowed across different databases. Force the "
-            "inner query to be evaluated using `list(inner_query)`."
+            "inner query to be evaluated using `list(inner_query)`.",
         ):
             list(Article.objects.filter(id__in=Article.objects.using('other').all()))
 
@@ -567,7 +532,7 @@ class LookupTests(TestCase):
         with self.assertRaisesMessage(
             FieldError,
             "Cannot resolve keyword 'pub_date_year' into field. Choices are: "
-            "author, author_id, headline, id, pub_date, slug, tag"
+            "author, author_id, headline, id, pub_date, slug, tag",
         ):
             Article.objects.filter(pub_date_year='2005').count()
 
@@ -575,21 +540,19 @@ class LookupTests(TestCase):
         with self.assertRaisesMessage(
             FieldError,
             "Unsupported lookup 'starts' for CharField or join on the field "
-            "not permitted, perhaps you meant startswith or istartswith?"
+            "not permitted, perhaps you meant startswith or istartswith?",
         ):
             Article.objects.filter(headline__starts='Article')
 
         with self.assertRaisesMessage(
             FieldError,
             "Unsupported lookup 'is_null' for DateTimeField or join on the field "
-            "not permitted, perhaps you meant isnull?"
+            "not permitted, perhaps you meant isnull?",
         ):
             Article.objects.filter(pub_date__is_null=True)
 
         with self.assertRaisesMessage(
-            FieldError,
-            "Unsupported lookup 'gobbledygook' for DateTimeField or join on the field "
-            "not permitted."
+            FieldError, "Unsupported lookup 'gobbledygook' for DateTimeField or join on the field " "not permitted."
         ):
             Article.objects.filter(pub_date__gobbledygook='blahblah')
 
@@ -607,85 +570,71 @@ class LookupTests(TestCase):
         for a in Article.objects.all():
             a.delete()
         now = datetime.now()
-        Article.objects.bulk_create([
-            Article(pub_date=now, headline='f'),
-            Article(pub_date=now, headline='fo'),
-            Article(pub_date=now, headline='foo'),
-            Article(pub_date=now, headline='fooo'),
-            Article(pub_date=now, headline='hey-Foo'),
-            Article(pub_date=now, headline='bar'),
-            Article(pub_date=now, headline='AbBa'),
-            Article(pub_date=now, headline='baz'),
-            Article(pub_date=now, headline='baxZ'),
-        ])
+        Article.objects.bulk_create(
+            [
+                Article(pub_date=now, headline='f'),
+                Article(pub_date=now, headline='fo'),
+                Article(pub_date=now, headline='foo'),
+                Article(pub_date=now, headline='fooo'),
+                Article(pub_date=now, headline='hey-Foo'),
+                Article(pub_date=now, headline='bar'),
+                Article(pub_date=now, headline='AbBa'),
+                Article(pub_date=now, headline='baz'),
+                Article(pub_date=now, headline='baxZ'),
+            ]
+        )
         # zero-or-more
         self.assertQuerysetEqual(
             Article.objects.filter(headline__regex=r'fo*'),
-            ['<Article: f>', '<Article: fo>', '<Article: foo>', '<Article: fooo>']
+            ['<Article: f>', '<Article: fo>', '<Article: foo>', '<Article: fooo>'],
         )
         self.assertQuerysetEqual(
             Article.objects.filter(headline__iregex=r'fo*'),
-            [
-                '<Article: f>',
-                '<Article: fo>',
-                '<Article: foo>',
-                '<Article: fooo>',
-                '<Article: hey-Foo>',
-            ]
+            ['<Article: f>', '<Article: fo>', '<Article: foo>', '<Article: fooo>', '<Article: hey-Foo>'],
         )
         # one-or-more
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__regex=r'fo+'),
-            ['<Article: fo>', '<Article: foo>', '<Article: fooo>']
+            Article.objects.filter(headline__regex=r'fo+'), ['<Article: fo>', '<Article: foo>', '<Article: fooo>']
         )
         # wildcard
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__regex=r'fooo?'),
-            ['<Article: foo>', '<Article: fooo>']
+            Article.objects.filter(headline__regex=r'fooo?'), ['<Article: foo>', '<Article: fooo>']
         )
         # leading anchor
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__regex=r'^b'),
-            ['<Article: bar>', '<Article: baxZ>', '<Article: baz>']
+            Article.objects.filter(headline__regex=r'^b'), ['<Article: bar>', '<Article: baxZ>', '<Article: baz>']
         )
         self.assertQuerysetEqual(Article.objects.filter(headline__iregex=r'^a'), ['<Article: AbBa>'])
         # trailing anchor
         self.assertQuerysetEqual(Article.objects.filter(headline__regex=r'z$'), ['<Article: baz>'])
-        self.assertQuerysetEqual(
-            Article.objects.filter(headline__iregex=r'z$'),
-            ['<Article: baxZ>', '<Article: baz>']
-        )
+        self.assertQuerysetEqual(Article.objects.filter(headline__iregex=r'z$'), ['<Article: baxZ>', '<Article: baz>'])
         # character sets
         self.assertQuerysetEqual(
-            Article.objects.filter(headline__regex=r'ba[rz]'),
-            ['<Article: bar>', '<Article: baz>']
+            Article.objects.filter(headline__regex=r'ba[rz]'), ['<Article: bar>', '<Article: baz>']
         )
         self.assertQuerysetEqual(Article.objects.filter(headline__regex=r'ba.[RxZ]'), ['<Article: baxZ>'])
         self.assertQuerysetEqual(
             Article.objects.filter(headline__iregex=r'ba[RxZ]'),
-            ['<Article: bar>', '<Article: baxZ>', '<Article: baz>']
+            ['<Article: bar>', '<Article: baxZ>', '<Article: baz>'],
         )
 
         # and more articles:
-        Article.objects.bulk_create([
-            Article(pub_date=now, headline='foobar'),
-            Article(pub_date=now, headline='foobaz'),
-            Article(pub_date=now, headline='ooF'),
-            Article(pub_date=now, headline='foobarbaz'),
-            Article(pub_date=now, headline='zoocarfaz'),
-            Article(pub_date=now, headline='barfoobaz'),
-            Article(pub_date=now, headline='bazbaRFOO'),
-        ])
+        Article.objects.bulk_create(
+            [
+                Article(pub_date=now, headline='foobar'),
+                Article(pub_date=now, headline='foobaz'),
+                Article(pub_date=now, headline='ooF'),
+                Article(pub_date=now, headline='foobarbaz'),
+                Article(pub_date=now, headline='zoocarfaz'),
+                Article(pub_date=now, headline='barfoobaz'),
+                Article(pub_date=now, headline='bazbaRFOO'),
+            ]
+        )
 
         # alternation
         self.assertQuerysetEqual(
             Article.objects.filter(headline__regex=r'oo(f|b)'),
-            [
-                '<Article: barfoobaz>',
-                '<Article: foobar>',
-                '<Article: foobarbaz>',
-                '<Article: foobaz>',
-            ]
+            ['<Article: barfoobaz>', '<Article: foobar>', '<Article: foobarbaz>', '<Article: foobaz>'],
         )
         self.assertQuerysetEqual(
             Article.objects.filter(headline__iregex=r'oo(f|b)'),
@@ -695,11 +644,11 @@ class LookupTests(TestCase):
                 '<Article: foobarbaz>',
                 '<Article: foobaz>',
                 '<Article: ooF>',
-            ]
+            ],
         )
         self.assertQuerysetEqual(
             Article.objects.filter(headline__regex=r'^foo(f|b)'),
-            ['<Article: foobar>', '<Article: foobarbaz>', '<Article: foobaz>']
+            ['<Article: foobar>', '<Article: foobarbaz>', '<Article: foobaz>'],
         )
 
         # greedy matching
@@ -711,7 +660,7 @@ class LookupTests(TestCase):
                 '<Article: bazbaRFOO>',
                 '<Article: foobarbaz>',
                 '<Article: foobaz>',
-            ]
+            ],
         )
         self.assertQuerysetEqual(
             Article.objects.filter(headline__iregex=r'b.*ar'),
@@ -721,25 +670,27 @@ class LookupTests(TestCase):
                 '<Article: bazbaRFOO>',
                 '<Article: foobar>',
                 '<Article: foobarbaz>',
-            ]
+            ],
         )
 
     @skipUnlessDBFeature('supports_regex_backreferencing')
     def test_regex_backreferencing(self):
         # grouping and backreferences
         now = datetime.now()
-        Article.objects.bulk_create([
-            Article(pub_date=now, headline='foobar'),
-            Article(pub_date=now, headline='foobaz'),
-            Article(pub_date=now, headline='ooF'),
-            Article(pub_date=now, headline='foobarbaz'),
-            Article(pub_date=now, headline='zoocarfaz'),
-            Article(pub_date=now, headline='barfoobaz'),
-            Article(pub_date=now, headline='bazbaRFOO'),
-        ])
+        Article.objects.bulk_create(
+            [
+                Article(pub_date=now, headline='foobar'),
+                Article(pub_date=now, headline='foobaz'),
+                Article(pub_date=now, headline='ooF'),
+                Article(pub_date=now, headline='foobarbaz'),
+                Article(pub_date=now, headline='zoocarfaz'),
+                Article(pub_date=now, headline='barfoobaz'),
+                Article(pub_date=now, headline='bazbaRFOO'),
+            ]
+        )
         self.assertQuerysetEqual(
             Article.objects.filter(headline__regex=r'b(.).*b\1'),
-            ['<Article: barfoobaz>', '<Article: bazbaRFOO>', '<Article: foobarbaz>']
+            ['<Article: barfoobaz>', '<Article: bazbaRFOO>', '<Article: foobarbaz>'],
         )
 
     def test_regex_null(self):
@@ -846,28 +797,36 @@ class LookupTests(TestCase):
         self.assertQuerysetEqual(
             Article.objects.filter(pub_date__month__gt=7),
             ['<Article: Article 5>', '<Article: Article 6>'],
-            ordered=False
+            ordered=False,
         )
         self.assertQuerysetEqual(
             Article.objects.filter(pub_date__day__gte=27),
-            ['<Article: Article 2>', '<Article: Article 3>',
-             '<Article: Article 4>', '<Article: Article 7>'],
-            ordered=False
+            ['<Article: Article 2>', '<Article: Article 3>', '<Article: Article 4>', '<Article: Article 7>'],
+            ordered=False,
         )
         self.assertQuerysetEqual(
             Article.objects.filter(pub_date__hour__lt=8),
-            ['<Article: Article 1>', '<Article: Article 2>',
-             '<Article: Article 3>', '<Article: Article 4>',
-             '<Article: Article 7>'],
-            ordered=False
+            [
+                '<Article: Article 1>',
+                '<Article: Article 2>',
+                '<Article: Article 3>',
+                '<Article: Article 4>',
+                '<Article: Article 7>',
+            ],
+            ordered=False,
         )
         self.assertQuerysetEqual(
             Article.objects.filter(pub_date__minute__lte=0),
-            ['<Article: Article 1>', '<Article: Article 2>',
-             '<Article: Article 3>', '<Article: Article 4>',
-             '<Article: Article 5>', '<Article: Article 6>',
-             '<Article: Article 7>'],
-            ordered=False
+            [
+                '<Article: Article 1>',
+                '<Article: Article 2>',
+                '<Article: Article 3>',
+                '<Article: Article 4>',
+                '<Article: Article 5>',
+                '<Article: Article 6>',
+                '<Article: Article 7>',
+            ],
+            ordered=False,
         )
 
     def test_exact_none_transform(self):
@@ -880,21 +839,14 @@ class LookupTests(TestCase):
 
     def test_exact_sliced_queryset_limit_one(self):
         self.assertCountEqual(
-            Article.objects.filter(author=Author.objects.all()[:1]),
-            [self.a1, self.a2, self.a3, self.a4]
+            Article.objects.filter(author=Author.objects.all()[:1]), [self.a1, self.a2, self.a3, self.a4]
         )
 
     def test_exact_sliced_queryset_limit_one_offset(self):
-        self.assertCountEqual(
-            Article.objects.filter(author=Author.objects.all()[1:2]),
-            [self.a5, self.a6, self.a7]
-        )
+        self.assertCountEqual(Article.objects.filter(author=Author.objects.all()[1:2]), [self.a5, self.a6, self.a7])
 
     def test_exact_sliced_queryset_not_limited_to_one(self):
-        msg = (
-            'The QuerySet value for an exact lookup must be limited to one '
-            'result using slicing.'
-        )
+        msg = 'The QuerySet value for an exact lookup must be limited to one ' 'result using slicing.'
         with self.assertRaisesMessage(ValueError, msg):
             list(Article.objects.filter(author=Author.objects.all()[:2]))
         with self.assertRaisesMessage(ValueError, msg):

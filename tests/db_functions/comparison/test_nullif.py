@@ -9,7 +9,6 @@ from ..models import Author
 
 
 class NullIfTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         Author.objects.create(name='John Smith', alias='smithj')
@@ -18,10 +17,7 @@ class NullIfTests(TestCase):
     def test_basic(self):
         authors = Author.objects.annotate(nullif=NullIf('alias', 'name')).values_list('nullif')
         self.assertSequenceEqual(
-            authors, [
-                ('smithj',),
-                ('' if connection.features.interprets_empty_strings_as_nulls else None,)
-            ]
+            authors, [('smithj',), ('' if connection.features.interprets_empty_strings_as_nulls else None,)]
         )
 
     def test_null_argument(self):

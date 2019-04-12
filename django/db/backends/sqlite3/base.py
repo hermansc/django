@@ -23,12 +23,12 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime, parse_time
 from django.utils.duration import duration_microseconds
 
-from .client import DatabaseClient                          # isort:skip
-from .creation import DatabaseCreation                      # isort:skip
-from .features import DatabaseFeatures                      # isort:skip
-from .introspection import DatabaseIntrospection            # isort:skip
-from .operations import DatabaseOperations                  # isort:skip
-from .schema import DatabaseSchemaEditor                    # isort:skip
+from .client import DatabaseClient  # isort:skip
+from .creation import DatabaseCreation  # isort:skip
+from .features import DatabaseFeatures  # isort:skip
+from .introspection import DatabaseIntrospection  # isort:skip
+from .operations import DatabaseOperations  # isort:skip
+from .schema import DatabaseSchemaEditor  # isort:skip
 
 
 def decoder(conv_func):
@@ -45,9 +45,11 @@ def none_guard(func):
     are NULL. This decorator simplifies the implementation of this for the
     custom functions registered below.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return None if None in args else func(*args, **kwargs)
+
     return wrapper
 
 
@@ -112,10 +114,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'PositiveIntegerField': '"%(column)s" >= 0',
         'PositiveSmallIntegerField': '"%(column)s" >= 0',
     }
-    data_types_suffix = {
-        'AutoField': 'AUTOINCREMENT',
-        'BigAutoField': 'AUTOINCREMENT',
-    }
+    data_types_suffix = {'AutoField': 'AUTOINCREMENT', 'BigAutoField': 'AUTOINCREMENT'}
     # SQLite requires LIKE statements to include an ESCAPE clause if the value
     # being escaped has a percent or underscore in it.
     # See https://www.sqlite.org/lang_expr.html for an explanation.
@@ -166,9 +165,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def get_connection_params(self):
         settings_dict = self.settings_dict
         if not settings_dict['NAME']:
-            raise ImproperlyConfigured(
-                "settings.DATABASES is improperly configured. "
-                "Please supply the NAME value.")
+            raise ImproperlyConfigured("settings.DATABASES is improperly configured. " "Please supply the NAME value.")
         kwargs = {
             'database': settings_dict['NAME'],
             'detect_types': Database.PARSE_DECLTYPES | Database.PARSE_COLNAMES,
@@ -186,7 +183,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 'True. It will be overridden with False. Use the '
                 '`DatabaseWrapper.allow_thread_sharing` property instead '
                 'for controlling thread shareability.',
-                RuntimeWarning
+                RuntimeWarning,
             )
         kwargs.update({'check_same_thread': False, 'uri': True})
         return kwargs
@@ -307,23 +304,27 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                     )
                 # See https://www.sqlite.org/pragma.html#pragma_foreign_key_check
                 for table_name, rowid, referenced_table_name, foreign_key_index in violations:
-                    foreign_key = cursor.execute(
-                        'PRAGMA foreign_key_list(%s)' % table_name
-                    ).fetchall()[foreign_key_index]
+                    foreign_key = cursor.execute('PRAGMA foreign_key_list(%s)' % table_name).fetchall()[
+                        foreign_key_index
+                    ]
                     column_name, referenced_column_name = foreign_key[3:5]
                     primary_key_column_name = self.introspection.get_primary_key_column(cursor, table_name)
                     primary_key_value, bad_value = cursor.execute(
-                        'SELECT %s, %s FROM %s WHERE rowid = %%s' % (
-                            primary_key_column_name, column_name, table_name
-                        ),
+                        'SELECT %s, %s FROM %s WHERE rowid = %%s' % (primary_key_column_name, column_name, table_name),
                         (rowid,),
                     ).fetchone()
                     raise utils.IntegrityError(
                         "The row in table '%s' with primary key '%s' has an "
                         "invalid foreign key: %s.%s contains a value '%s' that "
-                        "does not have a corresponding value in %s.%s." % (
-                            table_name, primary_key_value, table_name, column_name,
-                            bad_value, referenced_table_name, referenced_column_name
+                        "does not have a corresponding value in %s.%s."
+                        % (
+                            table_name,
+                            primary_key_value,
+                            table_name,
+                            column_name,
+                            bad_value,
+                            referenced_table_name,
+                            referenced_column_name,
                         )
                     )
         else:
@@ -344,18 +345,29 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                             WHERE REFERRING.`%s` IS NOT NULL AND REFERRED.`%s` IS NULL
                             """
                             % (
-                                primary_key_column_name, column_name, table_name,
-                                referenced_table_name, column_name, referenced_column_name,
-                                column_name, referenced_column_name,
+                                primary_key_column_name,
+                                column_name,
+                                table_name,
+                                referenced_table_name,
+                                column_name,
+                                referenced_column_name,
+                                column_name,
+                                referenced_column_name,
                             )
                         )
                         for bad_row in cursor.fetchall():
                             raise utils.IntegrityError(
                                 "The row in table '%s' with primary key '%s' has an "
                                 "invalid foreign key: %s.%s contains a value '%s' that "
-                                "does not have a corresponding value in %s.%s." % (
-                                    table_name, bad_row[0], table_name, column_name,
-                                    bad_row[1], referenced_table_name, referenced_column_name,
+                                "does not have a corresponding value in %s.%s."
+                                % (
+                                    table_name,
+                                    bad_row[0],
+                                    table_name,
+                                    column_name,
+                                    bad_row[1],
+                                    referenced_table_name,
+                                    referenced_column_name,
                                 )
                             )
 
@@ -384,6 +396,7 @@ class SQLiteCursorWrapper(Database.Cursor):
     This fixes it -- but note that if you want to use a literal "%s" in a query,
     you'll need to use "%%s".
     """
+
     def execute(self, query, params=None):
         if params is None:
             return Database.Cursor.execute(self, query)
@@ -535,14 +548,14 @@ def _sqlite_time_diff(lhs, rhs):
     left = backend_utils.typecast_time(lhs)
     right = backend_utils.typecast_time(rhs)
     return (
-        (left.hour * 60 * 60 * 1000000) +
-        (left.minute * 60 * 1000000) +
-        (left.second * 1000000) +
-        (left.microsecond) -
-        (right.hour * 60 * 60 * 1000000) -
-        (right.minute * 60 * 1000000) -
-        (right.second * 1000000) -
-        (right.microsecond)
+        (left.hour * 60 * 60 * 1000000)
+        + (left.minute * 60 * 1000000)
+        + (left.second * 1000000)
+        + (left.microsecond)
+        - (right.hour * 60 * 60 * 1000000)
+        - (right.minute * 60 * 1000000)
+        - (right.second * 1000000)
+        - (right.microsecond)
     )
 
 
@@ -562,7 +575,7 @@ def _sqlite_regexp(re_pattern, re_string):
 def _sqlite_lpad(text, length, fill_text):
     if len(text) >= length:
         return text[:length]
-    return (fill_text * length)[:length - len(text)] + text
+    return (fill_text * length)[: length - len(text)] + text
 
 
 @none_guard

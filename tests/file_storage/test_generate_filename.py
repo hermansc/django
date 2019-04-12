@@ -12,6 +12,7 @@ class AWSS3Storage(Storage):
     characters in file names but where there aren't actual folders but just
     keys.
     """
+
     prefix = 'mys3folder/'
 
     def _save(self, name, content):
@@ -36,12 +37,10 @@ class AWSS3Storage(Storage):
 
 
 class GenerateFilenameStorageTests(SimpleTestCase):
-
     def test_filefield_generate_filename(self):
         f = FileField(upload_to='some/folder/')
         self.assertEqual(
-            f.generate_filename(None, 'test with space.txt'),
-            os.path.normpath('some/folder/test_with_space.txt')
+            f.generate_filename(None, 'test with space.txt'), os.path.normpath('some/folder/test_with_space.txt')
         )
 
     def test_filefield_generate_filename_with_upload_to(self):
@@ -50,8 +49,7 @@ class GenerateFilenameStorageTests(SimpleTestCase):
 
         f = FileField(upload_to=upload_to)
         self.assertEqual(
-            f.generate_filename(None, 'test with space.txt'),
-            os.path.normpath('some/folder/test_with_space.txt')
+            f.generate_filename(None, 'test with space.txt'), os.path.normpath('some/folder/test_with_space.txt')
         )
 
     def test_filefield_awss3_storage(self):

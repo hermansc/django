@@ -17,10 +17,7 @@ CURSOR = 'cursor'
 NO_RESULTS = 'no results'
 
 ORDER_PATTERN = re.compile(r'\?|[-+]?[.\w]+$')
-ORDER_DIR = {
-    'ASC': ('ASC', 'DESC'),
-    'DESC': ('DESC', 'ASC'),
-}
+ORDER_DIR = {'ASC': ('ASC', 'DESC'), 'DESC': ('DESC', 'ASC')}
 
 # SQL join types.
 INNER = 'INNER JOIN'

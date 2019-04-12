@@ -52,5 +52,6 @@ def csrf_exempt(view_func):
     # if they don't have side effects, so return a new function.
     def wrapped_view(*args, **kwargs):
         return view_func(*args, **kwargs)
+
     wrapped_view.csrf_exempt = True
     return wraps(view_func)(wrapped_view)

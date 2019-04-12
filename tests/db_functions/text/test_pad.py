@@ -43,8 +43,4 @@ class PadTests(TestCase):
         Author.objects.create(name='Rhonda', alias='john_smith')
         Author.objects.create(name='♥♣♠', alias='bytes')
         authors = Author.objects.annotate(filled=LPad('name', Length('alias'), output_field=CharField()))
-        self.assertQuerysetEqual(
-            authors.order_by('alias'),
-            ['  ♥♣♠', '    Rhonda'],
-            lambda a: a.filled,
-        )
+        self.assertQuerysetEqual(authors.order_by('alias'), ['  ♥♣♠', '    Rhonda'], lambda a: a.filled)

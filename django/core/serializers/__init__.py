@@ -41,6 +41,7 @@ class BadSerializer:
     is an error raised in the process of creating a serializer it will be
     raised and passed along to the caller when the serializer is used.
     """
+
     internal_use_only = False
 
     def __init__(self, exception):
@@ -71,10 +72,7 @@ def register_serializer(format, serializer_module, serializers=None):
     except ImportError as exc:
         bad_serializer = BadSerializer(exc)
 
-        module = type('BadSerializerModule', (), {
-            'Deserializer': bad_serializer,
-            'Serializer': bad_serializer,
-        })
+        module = type('BadSerializerModule', (), {'Deserializer': bad_serializer, 'Serializer': bad_serializer})
 
     if serializers is None:
         _serializers[format] = module
@@ -223,8 +221,8 @@ def sort_dependencies(app_list):
                 skipped.append((model, deps))
         if not changed:
             raise RuntimeError(
-                "Can't resolve dependencies for %s in serialized app list." %
-                ', '.join(
+                "Can't resolve dependencies for %s in serialized app list."
+                % ', '.join(
                     '%s.%s' % (model._meta.app_label, model._meta.object_name)
                     for model, deps in sorted(skipped, key=lambda obj: obj[0].__name__)
                 )

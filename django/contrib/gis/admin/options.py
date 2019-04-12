@@ -12,6 +12,7 @@ class GeoModelAdmin(ModelAdmin):
     The administration options class for Geographic models. Map settings
     may be overloaded from their defaults to create custom maps.
     """
+
     # The default map settings that may be overloaded -- still subject
     # to API changes.
     default_lon = 0
@@ -121,6 +122,7 @@ class GeoModelAdmin(ModelAdmin):
                 'wms_options': wms_options,
                 'debug': self.debug,
             }
+
         return OLMap
 
 

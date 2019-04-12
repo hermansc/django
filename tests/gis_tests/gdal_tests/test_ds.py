@@ -2,12 +2,8 @@ import os
 import re
 from datetime import datetime
 
-from django.contrib.gis.gdal import (
-    DataSource, Envelope, GDALException, OGRGeometry,
-)
-from django.contrib.gis.gdal.field import (
-    OFTDateTime, OFTInteger, OFTReal, OFTString,
-)
+from django.contrib.gis.gdal import DataSource, Envelope, GDALException, OGRGeometry
+from django.contrib.gis.gdal.field import OFTDateTime, OFTInteger, OFTReal, OFTString
 from django.test import SimpleTestCase
 
 from ..test_data import TEST_DATA, TestDS, get_ds_file
@@ -25,7 +21,12 @@ datetime_format = '%Y-%m-%dT%H:%M:%S'
 # List of acceptable data sources.
 ds_list = (
     TestDS(
-        'test_point', nfeat=5, nfld=3, geom='POINT', gtype=1, driver='ESRI Shapefile',
+        'test_point',
+        nfeat=5,
+        nfld=3,
+        geom='POINT',
+        gtype=1,
+        driver='ESRI Shapefile',
         fields={'dbl': OFTReal, 'int': OFTInteger, 'str': OFTString},
         extent=(-1.35011, 0.166623, -0.524093, 0.824508),  # Got extent from QGIS
         srs_wkt=wgs_84_wkt,
@@ -34,10 +35,15 @@ ds_list = (
             'int': list(range(1, 6)),
             'str': [str(i) for i in range(1, 6)],
         },
-        fids=range(5)
+        fids=range(5),
     ),
     TestDS(
-        'test_vrt', ext='vrt', nfeat=3, nfld=3, geom='POINT', gtype='Point25D',
+        'test_vrt',
+        ext='vrt',
+        nfeat=3,
+        nfld=3,
+        geom='POINT',
+        gtype='Point25D',
         driver='OGR_VRT',
         fields={
             'POINT_X': OFTString,
@@ -50,18 +56,27 @@ ds_list = (
             'POINT_Y': ['2.0', '23.0', '523.5'],
             'NUM': ['5', '17', '23'],
         },
-        fids=range(1, 4)
+        fids=range(1, 4),
     ),
     TestDS(
-        'test_poly', nfeat=3, nfld=3, geom='POLYGON', gtype=3,
+        'test_poly',
+        nfeat=3,
+        nfld=3,
+        geom='POLYGON',
+        gtype=3,
         driver='ESRI Shapefile',
         fields={'float': OFTReal, 'int': OFTInteger, 'str': OFTString},
         extent=(-1.01513, -0.558245, 0.161876, 0.839637),  # Got extent from QGIS
         srs_wkt=wgs_84_wkt,
     ),
     TestDS(
-        'has_nulls', nfeat=3, nfld=6, geom='POLYGON', gtype=3,
-        driver='GeoJSON', ext='geojson',
+        'has_nulls',
+        nfeat=3,
+        nfld=6,
+        geom='POLYGON',
+        gtype=3,
+        driver='GeoJSON',
+        ext='geojson',
         fields={
             'uuid': OFTString,
             'name': OFTString,
@@ -85,7 +100,7 @@ ds_list = (
                 datetime.strptime('1994-08-14T11:32:14', datetime_format),
                 None,
                 datetime.strptime('2018-11-29T03:02:52', datetime_format),
-            ]
+            ],
         },
         fids=range(3),
     ),
@@ -95,7 +110,6 @@ bad_ds = (TestDS('foo'),)
 
 
 class DataSourceTest(SimpleTestCase):
-
     def test01_valid_shp(self):
         "Testing valid SHP Data Source files."
 

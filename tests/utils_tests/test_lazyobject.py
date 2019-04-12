@@ -13,6 +13,7 @@ class Foo:
     """
     A simple class with just one attribute.
     """
+
     foo = 'bar'
 
     def __eq__(self, other):
@@ -24,6 +25,7 @@ class LazyObjectTestCase(TestCase):
         """
         Wrap the given object into a LazyObject
         """
+
         class AdHocLazyObject(LazyObject):
             def _setup(self):
                 self._wrapped = wrapped_object
@@ -115,12 +117,7 @@ class LazyObjectTestCase(TestCase):
         self.assertEqual(d['foo'], 'bar')
 
     def test_contains(self):
-        test_data = [
-            ('c', 'abcde'),
-            (2, [1, 2, 3]),
-            ('a', {'a': 1, 'b': 2, 'c': 3}),
-            (2, {1, 2, 3}),
-        ]
+        test_data = [('c', 'abcde'), (2, [1, 2, 3]), ('a', {'a': 1, 'b': 2, 'c': 3}), (2, {1, 2, 3})]
         for needle, haystack in test_data:
             self.assertIn(needle, self.lazy_wrap(haystack))
 
@@ -178,7 +175,6 @@ class LazyObjectTestCase(TestCase):
         # used when iterating over it.
 
         class IterObject:
-
             def __init__(self, values):
                 self.values = values
 
@@ -186,10 +182,7 @@ class LazyObjectTestCase(TestCase):
                 return iter(self.values)
 
         original_list = ['test', '123']
-        self.assertEqual(
-            list(self.lazy_wrap(IterObject(original_list))),
-            original_list
-        )
+        self.assertEqual(list(self.lazy_wrap(IterObject(original_list))), original_list)
 
     def test_pickle(self):
         # See ticket #16563
@@ -322,10 +315,12 @@ class SimpleLazyObjectTestCase(LazyObjectTestCase):
         # See ticket #19456
         old_trace_func = sys.gettrace()
         try:
+
             def trace_func(frame, event, arg):
                 frame.f_locals['self'].__class__
                 if old_trace_func is not None:
                     old_trace_func(frame, event, arg)
+
             sys.settrace(trace_func)
             self.lazy_wrap(None)
         finally:
@@ -373,6 +368,7 @@ class BaseBaz:
     A base class with a funky __reduce__ method, meant to simulate the
     __reduce__ method of Model, which sets self._django_version.
     """
+
     def __init__(self):
         self.baz = 'wrong'
 
@@ -395,6 +391,7 @@ class Baz(BaseBaz):
     """
     A class that inherits from BaseBaz and has its own __reduce_ex__ method.
     """
+
     def __init__(self, bar):
         self.bar = bar
         super().__init__()
@@ -410,6 +407,7 @@ class BazProxy(Baz):
     dicts, which simulates some crazy things that people might do with
     e.g. proxy models.
     """
+
     def __init__(self, baz):
         self.__dict__ = baz.__dict__
         self._baz = baz
@@ -422,6 +420,7 @@ class SimpleLazyObjectPickleTestCase(TestCase):
     Regression test for pickling a SimpleLazyObject wrapping a model (#25389).
     Also covers other classes with a custom __reduce__ method.
     """
+
     def test_pickle_with_reduce(self):
         """
         Test in a fairly synthetic setting.

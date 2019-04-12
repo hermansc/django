@@ -34,5 +34,5 @@ class StaticFilesFormsMediaTestCase(SimpleTestCase):
 <script type="text/javascript" src="/path/to/js1"></script>
 <script type="text/javascript" src="http://media.other.com/path/to/js2"></script>
 <script type="text/javascript" src="https://secure.other.com/path/to/js3"></script>
-<script type="text/javascript" src="https://example.com/assets/relative/path/to/js4"></script>"""
+<script type="text/javascript" src="https://example.com/assets/relative/path/to/js4"></script>""",
         )

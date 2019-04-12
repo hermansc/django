@@ -5,8 +5,18 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from .models import (
-    CustomMembership, Employee, Event, Friendship, Group, Ingredient,
-    Invitation, Membership, Person, PersonSelfRefM2M, Recipe, RecipeIngredient,
+    CustomMembership,
+    Employee,
+    Event,
+    Friendship,
+    Group,
+    Ingredient,
+    Invitation,
+    Membership,
+    Person,
+    PersonSelfRefM2M,
+    Recipe,
+    RecipeIngredient,
     Relationship,
 )
 
@@ -25,21 +35,14 @@ class M2mThroughTests(TestCase):
         Membership.objects.create(person=self.jane, group=self.rock)
 
         expected = ['Jane', 'Jim']
-        self.assertQuerysetEqual(
-            self.rock.members.all(),
-            expected,
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(self.rock.members.all(), expected, attrgetter("name"))
 
     def test_get_on_intermediate_model(self):
         Membership.objects.create(person=self.jane, group=self.rock)
 
         queryset = Membership.objects.get(person=self.jane, group=self.rock)
 
-        self.assertEqual(
-            repr(queryset),
-            '<Membership: Jane is a member of Rock>'
-        )
+        self.assertEqual(repr(queryset), '<Membership: Jane is a member of Rock>')
 
     def test_filter_on_intermediate_model(self):
         Membership.objects.create(person=self.jim, group=self.rock)
@@ -47,15 +50,9 @@ class M2mThroughTests(TestCase):
 
         queryset = Membership.objects.filter(group=self.rock)
 
-        expected = [
-            '<Membership: Jim is a member of Rock>',
-            '<Membership: Jane is a member of Rock>',
-        ]
+        expected = ['<Membership: Jim is a member of Rock>', '<Membership: Jane is a member of Rock>']
 
-        self.assertQuerysetEqual(
-            queryset,
-            expected
-        )
+        self.assertQuerysetEqual(queryset, expected)
 
     def test_add_on_m2m_with_intermediate_model(self):
         self.rock.members.add(self.bob, through_defaults={'invite_reason': 'He is good.'})
@@ -134,21 +131,14 @@ class M2mThroughTests(TestCase):
 
         self.rock.members.clear()
 
-        self.assertQuerysetEqual(
-            self.rock.members.all(),
-            []
-        )
+        self.assertQuerysetEqual(self.rock.members.all(), [])
 
     def test_retrieve_reverse_intermediate_items(self):
         Membership.objects.create(person=self.jim, group=self.rock)
         Membership.objects.create(person=self.jim, group=self.roll)
 
         expected = ['Rock', 'Roll']
-        self.assertQuerysetEqual(
-            self.jim.group_set.all(),
-            expected,
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(self.jim.group_set.all(), expected, attrgetter("name"))
 
     def test_add_on_reverse_m2m_with_intermediate_model(self):
         self.bob.group_set.add(self.rock)
@@ -174,10 +164,7 @@ class M2mThroughTests(TestCase):
 
         self.jim.group_set.clear()
 
-        self.assertQuerysetEqual(
-            self.jim.group_set.all(),
-            []
-        )
+        self.assertQuerysetEqual(self.jim.group_set.all(), [])
 
     def test_query_model_by_attribute_name_of_related_model(self):
         Membership.objects.create(person=self.jim, group=self.rock)
@@ -186,65 +173,33 @@ class M2mThroughTests(TestCase):
         Membership.objects.create(person=self.jim, group=self.roll)
         Membership.objects.create(person=self.jane, group=self.roll)
 
-        self.assertQuerysetEqual(
-            Group.objects.filter(members__name='Bob'),
-            ['Roll'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(Group.objects.filter(members__name='Bob'), ['Roll'], attrgetter("name"))
 
     def test_order_by_relational_field_through_model(self):
         CustomMembership.objects.create(person=self.jim, group=self.rock)
         CustomMembership.objects.create(person=self.bob, group=self.rock)
         CustomMembership.objects.create(person=self.jane, group=self.roll)
         CustomMembership.objects.create(person=self.jim, group=self.roll)
+        self.assertSequenceEqual(self.rock.custom_members.order_by('custom_person_related_name'), [self.jim, self.bob])
         self.assertSequenceEqual(
-            self.rock.custom_members.order_by('custom_person_related_name'),
-            [self.jim, self.bob]
-        )
-        self.assertSequenceEqual(
-            self.roll.custom_members.order_by('custom_person_related_name'),
-            [self.jane, self.jim]
+            self.roll.custom_members.order_by('custom_person_related_name'), [self.jane, self.jim]
         )
 
     def test_query_first_model_by_intermediate_model_attribute(self):
-        Membership.objects.create(
-            person=self.jane, group=self.roll,
-            invite_reason="She was just awesome."
-        )
-        Membership.objects.create(
-            person=self.jim, group=self.roll,
-            invite_reason="He is good."
-        )
+        Membership.objects.create(person=self.jane, group=self.roll, invite_reason="She was just awesome.")
+        Membership.objects.create(person=self.jim, group=self.roll, invite_reason="He is good.")
         Membership.objects.create(person=self.bob, group=self.roll)
 
-        qs = Group.objects.filter(
-            membership__invite_reason="She was just awesome."
-        )
-        self.assertQuerysetEqual(
-            qs,
-            ['Roll'],
-            attrgetter("name")
-        )
+        qs = Group.objects.filter(membership__invite_reason="She was just awesome.")
+        self.assertQuerysetEqual(qs, ['Roll'], attrgetter("name"))
 
     def test_query_second_model_by_intermediate_model_attribute(self):
-        Membership.objects.create(
-            person=self.jane, group=self.roll,
-            invite_reason="She was just awesome."
-        )
-        Membership.objects.create(
-            person=self.jim, group=self.roll,
-            invite_reason="He is good."
-        )
+        Membership.objects.create(person=self.jane, group=self.roll, invite_reason="She was just awesome.")
+        Membership.objects.create(person=self.jim, group=self.roll, invite_reason="He is good.")
         Membership.objects.create(person=self.bob, group=self.roll)
 
-        qs = Person.objects.filter(
-            membership__invite_reason="She was just awesome."
-        )
-        self.assertQuerysetEqual(
-            qs,
-            ['Jane'],
-            attrgetter("name")
-        )
+        qs = Person.objects.filter(membership__invite_reason="She was just awesome.")
+        self.assertQuerysetEqual(qs, ['Jane'], attrgetter("name"))
 
     def test_query_model_by_related_model_name(self):
         Membership.objects.create(person=self.jim, group=self.rock)
@@ -253,83 +208,47 @@ class M2mThroughTests(TestCase):
         Membership.objects.create(person=self.jim, group=self.roll)
         Membership.objects.create(person=self.jane, group=self.roll)
 
-        self.assertQuerysetEqual(
-            Person.objects.filter(group__name="Rock"),
-            ['Jane', 'Jim'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(Person.objects.filter(group__name="Rock"), ['Jane', 'Jim'], attrgetter("name"))
 
     def test_query_model_by_custom_related_name(self):
         CustomMembership.objects.create(person=self.bob, group=self.rock)
         CustomMembership.objects.create(person=self.jim, group=self.rock)
 
-        self.assertQuerysetEqual(
-            Person.objects.filter(custom__name="Rock"),
-            ['Bob', 'Jim'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(Person.objects.filter(custom__name="Rock"), ['Bob', 'Jim'], attrgetter("name"))
 
     def test_query_model_by_intermediate_can_return_non_unique_queryset(self):
         Membership.objects.create(person=self.jim, group=self.rock)
-        Membership.objects.create(
-            person=self.jane, group=self.rock,
-            date_joined=datetime(2006, 1, 1)
-        )
-        Membership.objects.create(
-            person=self.bob, group=self.roll,
-            date_joined=datetime(2004, 1, 1))
+        Membership.objects.create(person=self.jane, group=self.rock, date_joined=datetime(2006, 1, 1))
+        Membership.objects.create(person=self.bob, group=self.roll, date_joined=datetime(2004, 1, 1))
         Membership.objects.create(person=self.jim, group=self.roll)
-        Membership.objects.create(
-            person=self.jane, group=self.roll,
-            date_joined=datetime(2004, 1, 1))
+        Membership.objects.create(person=self.jane, group=self.roll, date_joined=datetime(2004, 1, 1))
 
-        qs = Person.objects.filter(
-            membership__date_joined__gt=datetime(2004, 1, 1)
-        )
-        self.assertQuerysetEqual(
-            qs,
-            ['Jane', 'Jim', 'Jim'],
-            attrgetter("name")
-        )
+        qs = Person.objects.filter(membership__date_joined__gt=datetime(2004, 1, 1))
+        self.assertQuerysetEqual(qs, ['Jane', 'Jim', 'Jim'], attrgetter("name"))
 
     def test_custom_related_name_forward_empty_qs(self):
-        self.assertQuerysetEqual(
-            self.rock.custom_members.all(),
-            []
-        )
+        self.assertQuerysetEqual(self.rock.custom_members.all(), [])
 
     def test_custom_related_name_reverse_empty_qs(self):
-        self.assertQuerysetEqual(
-            self.bob.custom.all(),
-            []
-        )
+        self.assertQuerysetEqual(self.bob.custom.all(), [])
 
     def test_custom_related_name_forward_non_empty_qs(self):
         CustomMembership.objects.create(person=self.bob, group=self.rock)
         CustomMembership.objects.create(person=self.jim, group=self.rock)
 
-        self.assertQuerysetEqual(
-            self.rock.custom_members.all(),
-            ['Bob', 'Jim'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(self.rock.custom_members.all(), ['Bob', 'Jim'], attrgetter("name"))
 
     def test_custom_related_name_reverse_non_empty_qs(self):
         CustomMembership.objects.create(person=self.bob, group=self.rock)
         CustomMembership.objects.create(person=self.jim, group=self.rock)
 
-        self.assertQuerysetEqual(
-            self.bob.custom.all(),
-            ['Rock'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(self.bob.custom.all(), ['Rock'], attrgetter("name"))
 
     def test_custom_related_name_doesnt_conflict_with_fky_related_name(self):
         CustomMembership.objects.create(person=self.bob, group=self.rock)
 
         self.assertQuerysetEqual(
-            self.bob.custom_person_related_name.all(),
-            ['<CustomMembership: Bob is a member of Rock>']
+            self.bob.custom_person_related_name.all(), ['<CustomMembership: Bob is a member of Rock>']
         )
 
     def test_through_fields(self):
@@ -340,88 +259,49 @@ class M2mThroughTests(TestCase):
         event = Event.objects.create(title='Rockwhale 2014')
         Invitation.objects.create(event=event, inviter=self.bob, invitee=self.jim)
         Invitation.objects.create(event=event, inviter=self.bob, invitee=self.jane)
-        self.assertQuerysetEqual(
-            event.invitees.all(),
-            ['Jane', 'Jim'],
-            attrgetter('name')
-        )
+        self.assertQuerysetEqual(event.invitees.all(), ['Jane', 'Jim'], attrgetter('name'))
 
 
 class M2mThroughReferentialTests(TestCase):
     def test_self_referential_empty_qs(self):
         tony = PersonSelfRefM2M.objects.create(name="Tony")
-        self.assertQuerysetEqual(
-            tony.friends.all(),
-            []
-        )
+        self.assertQuerysetEqual(tony.friends.all(), [])
 
     def test_self_referential_non_symmetrical_first_side(self):
         tony = PersonSelfRefM2M.objects.create(name="Tony")
         chris = PersonSelfRefM2M.objects.create(name="Chris")
-        Friendship.objects.create(
-            first=tony, second=chris, date_friended=datetime.now()
-        )
+        Friendship.objects.create(first=tony, second=chris, date_friended=datetime.now())
 
-        self.assertQuerysetEqual(
-            tony.friends.all(),
-            ['Chris'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(tony.friends.all(), ['Chris'], attrgetter("name"))
 
     def test_self_referential_non_symmetrical_second_side(self):
         tony = PersonSelfRefM2M.objects.create(name="Tony")
         chris = PersonSelfRefM2M.objects.create(name="Chris")
-        Friendship.objects.create(
-            first=tony, second=chris, date_friended=datetime.now()
-        )
+        Friendship.objects.create(first=tony, second=chris, date_friended=datetime.now())
 
-        self.assertQuerysetEqual(
-            chris.friends.all(),
-            []
-        )
+        self.assertQuerysetEqual(chris.friends.all(), [])
 
     def test_self_referential_non_symmetrical_clear_first_side(self):
         tony = PersonSelfRefM2M.objects.create(name="Tony")
         chris = PersonSelfRefM2M.objects.create(name="Chris")
-        Friendship.objects.create(
-            first=tony, second=chris, date_friended=datetime.now()
-        )
+        Friendship.objects.create(first=tony, second=chris, date_friended=datetime.now())
 
         chris.friends.clear()
 
-        self.assertQuerysetEqual(
-            chris.friends.all(),
-            []
-        )
+        self.assertQuerysetEqual(chris.friends.all(), [])
 
         # Since this isn't a symmetrical relation, Tony's friend link still exists.
-        self.assertQuerysetEqual(
-            tony.friends.all(),
-            ['Chris'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(tony.friends.all(), ['Chris'], attrgetter("name"))
 
     def test_self_referential_symmetrical(self):
         tony = PersonSelfRefM2M.objects.create(name="Tony")
         chris = PersonSelfRefM2M.objects.create(name="Chris")
-        Friendship.objects.create(
-            first=tony, second=chris, date_friended=datetime.now()
-        )
-        Friendship.objects.create(
-            first=chris, second=tony, date_friended=datetime.now()
-        )
+        Friendship.objects.create(first=tony, second=chris, date_friended=datetime.now())
+        Friendship.objects.create(first=chris, second=tony, date_friended=datetime.now())
 
-        self.assertQuerysetEqual(
-            tony.friends.all(),
-            ['Chris'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(tony.friends.all(), ['Chris'], attrgetter("name"))
 
-        self.assertQuerysetEqual(
-            chris.friends.all(),
-            ['Tony'],
-            attrgetter("name")
-        )
+        self.assertQuerysetEqual(chris.friends.all(), ['Tony'], attrgetter("name"))
 
     def test_through_fields_self_referential(self):
         john = Employee.objects.create(name='john')
@@ -433,11 +313,7 @@ class M2mThroughReferentialTests(TestCase):
         Relationship.objects.create(source=john, target=mary, another=None)
         Relationship.objects.create(source=john, target=harry, another=peter)
 
-        self.assertQuerysetEqual(
-            john.subordinates.all(),
-            ['peter', 'mary', 'harry'],
-            attrgetter('name')
-        )
+        self.assertQuerysetEqual(john.subordinates.all(), ['peter', 'mary', 'harry'], attrgetter('name'))
 
 
 class M2mThroughToFieldsTests(TestCase):
@@ -459,7 +335,4 @@ class M2mThroughToFieldsTests(TestCase):
 
     def test_choices(self):
         field = Recipe._meta.get_field('ingredients')
-        self.assertEqual(
-            [choice[0] for choice in field.get_choices(include_blank=False)],
-            ['pea', 'potato', 'tomato']
-        )
+        self.assertEqual([choice[0] for choice in field.get_choices(include_blank=False)], ['pea', 'potato', 'tomato'])

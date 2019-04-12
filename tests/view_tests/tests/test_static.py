@@ -57,8 +57,7 @@ class StaticTests(SimpleTestCase):
     def test_is_modified_since(self):
         file_name = 'file.txt'
         response = self.client.get(
-            '/%s/%s' % (self.prefix, file_name),
-            HTTP_IF_MODIFIED_SINCE='Thu, 1 Jan 1970 00:00:00 GMT'
+            '/%s/%s' % (self.prefix, file_name), HTTP_IF_MODIFIED_SINCE='Thu, 1 Jan 1970 00:00:00 GMT'
         )
         response_content = b''.join(response)
         with open(path.join(media_dir, file_name), 'rb') as fp:
@@ -82,8 +81,7 @@ class StaticTests(SimpleTestCase):
         """
         file_name = 'file.txt'
         invalid_date = 'Mon, 28 May 999999999999 28:25:26 GMT'
-        response = self.client.get('/%s/%s' % (self.prefix, file_name),
-                                   HTTP_IF_MODIFIED_SINCE=invalid_date)
+        response = self.client.get('/%s/%s' % (self.prefix, file_name), HTTP_IF_MODIFIED_SINCE=invalid_date)
         response_content = b''.join(response)
         with open(path.join(media_dir, file_name), 'rb') as fp:
             self.assertEqual(fp.read(), response_content)
@@ -97,8 +95,7 @@ class StaticTests(SimpleTestCase):
         """
         file_name = 'file.txt'
         invalid_date = ': 1291108438, Wed, 20 Oct 2010 14:05:00 GMT'
-        response = self.client.get('/%s/%s' % (self.prefix, file_name),
-                                   HTTP_IF_MODIFIED_SINCE=invalid_date)
+        response = self.client.get('/%s/%s' % (self.prefix, file_name), HTTP_IF_MODIFIED_SINCE=invalid_date)
         response_content = b''.join(response)
         with open(path.join(media_dir, file_name), 'rb') as fp:
             self.assertEqual(fp.read(), response_content)
@@ -120,16 +117,18 @@ class StaticTests(SimpleTestCase):
         # File with a leading dot (e.g. .hidden) aren't displayed.
         self.assertEqual(response.context['file_list'], ['visible'])
 
-    @override_settings(TEMPLATES=[{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {
-            'loaders': [
-                ('django.template.loaders.locmem.Loader', {
-                    'static/directory_index.html': 'Test index',
-                }),
-            ],
-        },
-    }])
+    @override_settings(
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'OPTIONS': {
+                    'loaders': [
+                        ('django.template.loaders.locmem.Loader', {'static/directory_index.html': 'Test index'})
+                    ]
+                },
+            }
+        ]
+    )
     def test_index_custom_template(self):
         response = self.client.get('/%s/' % self.prefix)
         self.assertEqual(response.content, b'Test index')
@@ -139,6 +138,7 @@ class StaticHelperTest(StaticTests):
     """
     Test case to make sure the static URL pattern helper works as expected
     """
+
     def setUp(self):
         super().setUp()
         self._old_views_urlpatterns = urls.urlpatterns[:]

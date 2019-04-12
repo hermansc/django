@@ -14,14 +14,9 @@ class AlbumForm(forms.ModelForm):
         fields = ['band', 'featuring']
         widgets = {
             'band': AutocompleteSelect(
-                Album._meta.get_field('band').remote_field,
-                admin.site,
-                attrs={'class': 'my-class'},
+                Album._meta.get_field('band').remote_field, admin.site, attrs={'class': 'my-class'}
             ),
-            'featuring': AutocompleteSelect(
-                Album._meta.get_field('featuring').remote_field,
-                admin.site,
-            )
+            'featuring': AutocompleteSelect(Album._meta.get_field('featuring').remote_field, admin.site),
         }
 
 
@@ -49,15 +44,18 @@ class AutocompleteMixinTests(TestCase):
     def test_build_attrs(self):
         form = AlbumForm()
         attrs = form['band'].field.widget.get_context(name='my_field', value=None, attrs={})['widget']['attrs']
-        self.assertEqual(attrs, {
-            'class': 'my-class admin-autocomplete',
-            'data-ajax--cache': 'true',
-            'data-ajax--type': 'GET',
-            'data-ajax--url': '/admin_widgets/band/autocomplete/',
-            'data-theme': 'admin-autocomplete',
-            'data-allow-clear': 'false',
-            'data-placeholder': ''
-        })
+        self.assertEqual(
+            attrs,
+            {
+                'class': 'my-class admin-autocomplete',
+                'data-ajax--cache': 'true',
+                'data-ajax--type': 'GET',
+                'data-ajax--url': '/admin_widgets/band/autocomplete/',
+                'data-theme': 'admin-autocomplete',
+                'data-allow-clear': 'false',
+                'data-placeholder': '',
+            },
+        )
 
     def test_build_attrs_no_custom_class(self):
         form = AlbumForm()
@@ -132,9 +130,7 @@ class AutocompleteMixinTests(TestCase):
             with self.subTest(lang=lang):
                 if select_lang:
                     expected_files = (
-                        base_files[:2] +
-                        (('admin/js/vendor/select2/i18n/%s.js' % select_lang),) +
-                        base_files[2:]
+                        base_files[:2] + (('admin/js/vendor/select2/i18n/%s.js' % select_lang),) + base_files[2:]
                     )
                 else:
                     expected_files = base_files

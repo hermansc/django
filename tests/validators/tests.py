@@ -8,13 +8,27 @@ from unittest import TestCase
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import (
-    BaseValidator, DecimalValidator, EmailValidator, FileExtensionValidator,
-    MaxLengthValidator, MaxValueValidator, MinLengthValidator,
-    MinValueValidator, ProhibitNullCharactersValidator, RegexValidator,
-    URLValidator, int_list_validator, validate_comma_separated_integer_list,
-    validate_email, validate_image_file_extension, validate_integer,
-    validate_ipv4_address, validate_ipv6_address, validate_ipv46_address,
-    validate_slug, validate_unicode_slug,
+    BaseValidator,
+    DecimalValidator,
+    EmailValidator,
+    FileExtensionValidator,
+    MaxLengthValidator,
+    MaxValueValidator,
+    MinLengthValidator,
+    MinValueValidator,
+    ProhibitNullCharactersValidator,
+    RegexValidator,
+    URLValidator,
+    int_list_validator,
+    validate_comma_separated_integer_list,
+    validate_email,
+    validate_image_file_extension,
+    validate_integer,
+    validate_ipv4_address,
+    validate_ipv6_address,
+    validate_ipv46_address,
+    validate_slug,
+    validate_unicode_slug,
 )
 from django.test import SimpleTestCase
 
@@ -33,13 +47,11 @@ TEST_DATA = [
     (validate_integer, '42', None),
     (validate_integer, '-42', None),
     (validate_integer, -42, None),
-
     (validate_integer, -42.5, ValidationError),
     (validate_integer, None, ValidationError),
     (validate_integer, 'a', ValidationError),
     (validate_integer, '\n42', ValidationError),
     (validate_integer, '42\n', ValidationError),
-
     (validate_email, 'email@here.com', None),
     (validate_email, 'weirder-email@here.and.there.com', None),
     (validate_email, 'email@[127.0.0.1]', None),
@@ -55,7 +67,6 @@ TEST_DATA = [
     (validate_email, 'example@atm.%s' % ('a' * 63), None),
     (validate_email, 'example@%s.atm' % ('a' * 63), None),
     (validate_email, 'example@%s.%s.atm' % ('a' * 63, 'b' * 10), None),
-
     (validate_email, 'example@atm.%s' % ('a' * 64), ValidationError),
     (validate_email, 'example@%s.atm.%s' % ('b' * 64, 'a' * 63), ValidationError),
     (validate_email, None, ValidationError),
@@ -89,7 +100,6 @@ TEST_DATA = [
     (validate_email, 'a\n@b.com', ValidationError),
     (validate_email, '"test@test"\n@example.com', ValidationError),
     (validate_email, 'a@[127.0.0.1]\n', ValidationError),
-
     (validate_slug, 'slug-ok', None),
     (validate_slug, 'longer-slug-still-ok', None),
     (validate_slug, '--------', None),
@@ -97,7 +107,6 @@ TEST_DATA = [
     (validate_slug, 'a', None),
     (validate_slug, '1', None),
     (validate_slug, 'a1', None),
-
     (validate_slug, '', ValidationError),
     (validate_slug, ' text ', ValidationError),
     (validate_slug, ' ', ValidationError),
@@ -106,7 +115,6 @@ TEST_DATA = [
     (validate_slug, '你 好', ValidationError),
     (validate_slug, '\n', ValidationError),
     (validate_slug, 'trailing-newline\n', ValidationError),
-
     (validate_unicode_slug, 'slug-ok', None),
     (validate_unicode_slug, 'longer-slug-still-ok', None),
     (validate_unicode_slug, '--------', None),
@@ -115,7 +123,6 @@ TEST_DATA = [
     (validate_unicode_slug, '1', None),
     (validate_unicode_slug, 'a1', None),
     (validate_unicode_slug, '你好', None),
-
     (validate_unicode_slug, '', ValidationError),
     (validate_unicode_slug, ' text ', ValidationError),
     (validate_unicode_slug, ' ', ValidationError),
@@ -123,35 +130,29 @@ TEST_DATA = [
     (validate_unicode_slug, '\n', ValidationError),
     (validate_unicode_slug, '你 好', ValidationError),
     (validate_unicode_slug, 'trailing-newline\n', ValidationError),
-
     (validate_ipv4_address, '1.1.1.1', None),
     (validate_ipv4_address, '255.0.0.0', None),
     (validate_ipv4_address, '0.0.0.0', None),
-
     (validate_ipv4_address, '256.1.1.1', ValidationError),
     (validate_ipv4_address, '25.1.1.', ValidationError),
     (validate_ipv4_address, '25,1,1,1', ValidationError),
     (validate_ipv4_address, '25.1 .1.1', ValidationError),
     (validate_ipv4_address, '1.1.1.1\n', ValidationError),
     (validate_ipv4_address, '٧.2٥.3٣.243', ValidationError),
-
     # validate_ipv6_address uses django.utils.ipv6, which
     # is tested in much greater detail in its own testcase
     (validate_ipv6_address, 'fe80::1', None),
     (validate_ipv6_address, '::1', None),
     (validate_ipv6_address, '1:2:3:4:5:6:7:8', None),
-
     (validate_ipv6_address, '1:2', ValidationError),
     (validate_ipv6_address, '::zzz', ValidationError),
     (validate_ipv6_address, '12345::', ValidationError),
-
     (validate_ipv46_address, '1.1.1.1', None),
     (validate_ipv46_address, '255.0.0.0', None),
     (validate_ipv46_address, '0.0.0.0', None),
     (validate_ipv46_address, 'fe80::1', None),
     (validate_ipv46_address, '::1', None),
     (validate_ipv46_address, '1:2:3:4:5:6:7:8', None),
-
     (validate_ipv46_address, '256.1.1.1', ValidationError),
     (validate_ipv46_address, '25.1.1.', ValidationError),
     (validate_ipv46_address, '25,1,1,1', ValidationError),
@@ -159,13 +160,11 @@ TEST_DATA = [
     (validate_ipv46_address, '1:2', ValidationError),
     (validate_ipv46_address, '::zzz', ValidationError),
     (validate_ipv46_address, '12345::', ValidationError),
-
     (validate_comma_separated_integer_list, '1', None),
     (validate_comma_separated_integer_list, '12', None),
     (validate_comma_separated_integer_list, '1,2', None),
     (validate_comma_separated_integer_list, '1,2,3', None),
     (validate_comma_separated_integer_list, '10,32', None),
-
     (validate_comma_separated_integer_list, '', ValidationError),
     (validate_comma_separated_integer_list, 'a', ValidationError),
     (validate_comma_separated_integer_list, 'a,b,c', ValidationError),
@@ -175,52 +174,39 @@ TEST_DATA = [
     (validate_comma_separated_integer_list, '1,2,', ValidationError),
     (validate_comma_separated_integer_list, ',1', ValidationError),
     (validate_comma_separated_integer_list, '1,,2', ValidationError),
-
     (int_list_validator(sep='.'), '1.2.3', None),
     (int_list_validator(sep='.', allow_negative=True), '1.2.3', None),
     (int_list_validator(allow_negative=True), '-1,-2,3', None),
     (int_list_validator(allow_negative=True), '1,-2,-12', None),
-
     (int_list_validator(), '-1,2,3', ValidationError),
     (int_list_validator(sep='.'), '1,2,3', ValidationError),
     (int_list_validator(sep='.'), '1.2.3\n', ValidationError),
-
     (MaxValueValidator(10), 10, None),
     (MaxValueValidator(10), -10, None),
     (MaxValueValidator(10), 0, None),
     (MaxValueValidator(NOW), NOW, None),
     (MaxValueValidator(NOW), NOW - timedelta(days=1), None),
-
     (MaxValueValidator(0), 1, ValidationError),
     (MaxValueValidator(NOW), NOW + timedelta(days=1), ValidationError),
-
     (MinValueValidator(-10), -10, None),
     (MinValueValidator(-10), 10, None),
     (MinValueValidator(-10), 0, None),
     (MinValueValidator(NOW), NOW, None),
     (MinValueValidator(NOW), NOW + timedelta(days=1), None),
-
     (MinValueValidator(0), -1, ValidationError),
     (MinValueValidator(NOW), NOW - timedelta(days=1), ValidationError),
-
     # limit_value may be a callable.
     (MinValueValidator(lambda: 1), 0, ValidationError),
     (MinValueValidator(lambda: 1), 1, None),
-
     (MaxLengthValidator(10), '', None),
     (MaxLengthValidator(10), 10 * 'x', None),
-
     (MaxLengthValidator(10), 15 * 'x', ValidationError),
-
     (MinLengthValidator(10), 15 * 'x', None),
     (MinLengthValidator(10), 10 * 'x', None),
-
     (MinLengthValidator(10), '', ValidationError),
-
     (URLValidator(EXTENDED_SCHEMES), 'file://localhost/path', None),
     (URLValidator(EXTENDED_SCHEMES), 'git://example.com/', None),
     (URLValidator(EXTENDED_SCHEMES), 'git+ssh://git@github.com/example/hg-git.git', None),
-
     (URLValidator(EXTENDED_SCHEMES), 'git://-invalid.com', ValidationError),
     # Trailing newlines not accepted
     (URLValidator(), 'http://www.djangoproject.com/\n', ValidationError),
@@ -228,10 +214,8 @@ TEST_DATA = [
     # Trailing junk does not take forever to reject
     (URLValidator(), 'http://www.asdasdasdasdsadfm.com.br ', ValidationError),
     (URLValidator(), 'http://www.asdasdasdasdsadfm.com.br z', ValidationError),
-
     (BaseValidator(True), True, None),
     (BaseValidator(True), False, ValidationError),
-
     (RegexValidator(), '', None),
     (RegexValidator(), 'x1x2', None),
     (RegexValidator('[0-9]+'), 'xxxxxx', ValidationError),
@@ -240,30 +224,25 @@ TEST_DATA = [
     (RegexValidator('.*'), '', None),
     (RegexValidator(re.compile('.*')), '', None),
     (RegexValidator('.*'), 'xxxxx', None),
-
     (RegexValidator('x'), 'y', ValidationError),
     (RegexValidator(re.compile('x')), 'y', ValidationError),
     (RegexValidator('x', inverse_match=True), 'y', None),
     (RegexValidator(re.compile('x'), inverse_match=True), 'y', None),
     (RegexValidator('x', inverse_match=True), 'x', ValidationError),
     (RegexValidator(re.compile('x'), inverse_match=True), 'x', ValidationError),
-
     (RegexValidator('x', flags=re.IGNORECASE), 'y', ValidationError),
     (RegexValidator('a'), 'A', ValidationError),
     (RegexValidator('a', flags=re.IGNORECASE), 'A', None),
-
     (FileExtensionValidator(['txt']), ContentFile('contents', name='fileWithUnsupportedExt.jpg'), ValidationError),
     (FileExtensionValidator(['txt']), ContentFile('contents', name='fileWithUnsupportedExt.JPG'), ValidationError),
     (FileExtensionValidator(['txt']), ContentFile('contents', name='fileWithNoExtension'), ValidationError),
     (FileExtensionValidator(['']), ContentFile('contents', name='fileWithAnExtension.txt'), ValidationError),
     (FileExtensionValidator([]), ContentFile('contents', name='file.txt'), ValidationError),
-
     (FileExtensionValidator(['']), ContentFile('contents', name='fileWithNoExtension'), None),
     (FileExtensionValidator(['txt']), ContentFile('contents', name='file.txt'), None),
     (FileExtensionValidator(['txt']), ContentFile('contents', name='file.TXT'), None),
     (FileExtensionValidator(['TXT']), ContentFile('contents', name='file.txt'), None),
     (FileExtensionValidator(), ContentFile('contents', name='file.jpg'), None),
-
     (DecimalValidator(max_digits=2, decimal_places=2), Decimal('0.99'), None),
     (DecimalValidator(max_digits=2, decimal_places=1), Decimal('0.99'), ValidationError),
     (DecimalValidator(max_digits=3, decimal_places=1), Decimal('999'), ValidationError),
@@ -279,17 +258,25 @@ TEST_DATA = [
     *[
         (DecimalValidator(decimal_places=2, max_digits=10), Decimal(value), ValidationError)
         for value in (
-            'NaN', '-NaN', '+NaN', 'sNaN', '-sNaN', '+sNaN',
-            'Inf', '-Inf', '+Inf', 'Infinity', '-Infinity', '-Infinity',
+            'NaN',
+            '-NaN',
+            '+NaN',
+            'sNaN',
+            '-sNaN',
+            '+sNaN',
+            'Inf',
+            '-Inf',
+            '+Inf',
+            'Infinity',
+            '-Infinity',
+            '-Infinity',
         )
     ],
-
     (validate_image_file_extension, ContentFile('contents', name='file.jpg'), None),
     (validate_image_file_extension, ContentFile('contents', name='file.png'), None),
     (validate_image_file_extension, ContentFile('contents', name='file.PNG'), None),
     (validate_image_file_extension, ContentFile('contents', name='file.txt'), ValidationError),
     (validate_image_file_extension, ContentFile('contents', name='file'), ValidationError),
-
     (ProhibitNullCharactersValidator(), '\x00something', ValidationError),
     (ProhibitNullCharactersValidator(), 'something', None),
     (ProhibitNullCharactersValidator(), None, None),
@@ -311,7 +298,6 @@ with open(create_path('invalid_urls.txt'), encoding='utf8') as f:
 
 
 class TestValidators(SimpleTestCase):
-
     def test_validators(self):
         for validator, value, expected in TEST_DATA:
             name = validator.__name__ if isinstance(validator, types.FunctionType) else validator.__class__.__name__
@@ -357,14 +343,8 @@ class TestValidatorEquality(TestCase):
     """
 
     def test_regex_equality(self):
-        self.assertEqual(
-            RegexValidator(r'^(?:[a-z0-9\.\-]*)://'),
-            RegexValidator(r'^(?:[a-z0-9\.\-]*)://'),
-        )
-        self.assertNotEqual(
-            RegexValidator(r'^(?:[a-z0-9\.\-]*)://'),
-            RegexValidator(r'^(?:[0-9\.\-]*)://'),
-        )
+        self.assertEqual(RegexValidator(r'^(?:[a-z0-9\.\-]*)://'), RegexValidator(r'^(?:[a-z0-9\.\-]*)://'))
+        self.assertNotEqual(RegexValidator(r'^(?:[a-z0-9\.\-]*)://'), RegexValidator(r'^(?:[0-9\.\-]*)://'))
         self.assertEqual(
             RegexValidator(r'^(?:[a-z0-9\.\-]*)://', "oh noes", "invalid"),
             RegexValidator(r'^(?:[a-z0-9\.\-]*)://', "oh noes", "invalid"),
@@ -374,19 +354,12 @@ class TestValidatorEquality(TestCase):
             RegexValidator(r'^(?:[a-z0-9\.\-]*)://', "oh noes", "invalid"),
         )
         self.assertNotEqual(
-            RegexValidator(r'^(?:[a-z0-9\.\-]*)://', "oh noes", "invalid"),
-            RegexValidator(r'^(?:[a-z0-9\.\-]*)://'),
+            RegexValidator(r'^(?:[a-z0-9\.\-]*)://', "oh noes", "invalid"), RegexValidator(r'^(?:[a-z0-9\.\-]*)://')
         )
 
-        self.assertNotEqual(
-            RegexValidator('', flags=re.IGNORECASE),
-            RegexValidator(''),
-        )
+        self.assertNotEqual(RegexValidator('', flags=re.IGNORECASE), RegexValidator(''))
 
-        self.assertNotEqual(
-            RegexValidator(''),
-            RegexValidator('', inverse_match=True),
-        )
+        self.assertNotEqual(RegexValidator(''), RegexValidator('', inverse_match=True))
 
     def test_regex_equality_nocache(self):
         pattern = r'^(?:[a-z0-9\.\-]*)://'
@@ -394,115 +367,53 @@ class TestValidatorEquality(TestCase):
         re.purge()
         right = RegexValidator(pattern)
 
-        self.assertEqual(
-            left,
-            right,
-        )
+        self.assertEqual(left, right)
 
     def test_regex_equality_blank(self):
-        self.assertEqual(
-            RegexValidator(),
-            RegexValidator(),
-        )
+        self.assertEqual(RegexValidator(), RegexValidator())
 
     def test_email_equality(self):
+        self.assertEqual(EmailValidator(), EmailValidator())
+        self.assertNotEqual(EmailValidator(message="BAD EMAIL"), EmailValidator())
         self.assertEqual(
-            EmailValidator(),
-            EmailValidator(),
-        )
-        self.assertNotEqual(
-            EmailValidator(message="BAD EMAIL"),
-            EmailValidator(),
-        )
-        self.assertEqual(
-            EmailValidator(message="BAD EMAIL", code="bad"),
-            EmailValidator(message="BAD EMAIL", code="bad"),
+            EmailValidator(message="BAD EMAIL", code="bad"), EmailValidator(message="BAD EMAIL", code="bad")
         )
 
     def test_basic_equality(self):
-        self.assertEqual(
-            MaxValueValidator(44),
-            MaxValueValidator(44),
-        )
-        self.assertNotEqual(
-            MaxValueValidator(44),
-            MinValueValidator(44),
-        )
-        self.assertNotEqual(
-            MinValueValidator(45),
-            MinValueValidator(11),
-        )
+        self.assertEqual(MaxValueValidator(44), MaxValueValidator(44))
+        self.assertNotEqual(MaxValueValidator(44), MinValueValidator(44))
+        self.assertNotEqual(MinValueValidator(45), MinValueValidator(11))
 
     def test_decimal_equality(self):
-        self.assertEqual(
-            DecimalValidator(1, 2),
-            DecimalValidator(1, 2),
-        )
-        self.assertNotEqual(
-            DecimalValidator(1, 2),
-            DecimalValidator(1, 1),
-        )
-        self.assertNotEqual(
-            DecimalValidator(1, 2),
-            DecimalValidator(2, 2),
-        )
-        self.assertNotEqual(
-            DecimalValidator(1, 2),
-            MinValueValidator(11),
-        )
+        self.assertEqual(DecimalValidator(1, 2), DecimalValidator(1, 2))
+        self.assertNotEqual(DecimalValidator(1, 2), DecimalValidator(1, 1))
+        self.assertNotEqual(DecimalValidator(1, 2), DecimalValidator(2, 2))
+        self.assertNotEqual(DecimalValidator(1, 2), MinValueValidator(11))
 
     def test_file_extension_equality(self):
-        self.assertEqual(
-            FileExtensionValidator(),
-            FileExtensionValidator()
-        )
-        self.assertEqual(
-            FileExtensionValidator(['txt']),
-            FileExtensionValidator(['txt'])
-        )
-        self.assertEqual(
-            FileExtensionValidator(['TXT']),
-            FileExtensionValidator(['txt'])
-        )
-        self.assertEqual(
-            FileExtensionValidator(['TXT', 'png']),
-            FileExtensionValidator(['txt', 'png'])
-        )
-        self.assertEqual(
-            FileExtensionValidator(['txt']),
-            FileExtensionValidator(['txt'], code='invalid_extension')
-        )
+        self.assertEqual(FileExtensionValidator(), FileExtensionValidator())
+        self.assertEqual(FileExtensionValidator(['txt']), FileExtensionValidator(['txt']))
+        self.assertEqual(FileExtensionValidator(['TXT']), FileExtensionValidator(['txt']))
+        self.assertEqual(FileExtensionValidator(['TXT', 'png']), FileExtensionValidator(['txt', 'png']))
+        self.assertEqual(FileExtensionValidator(['txt']), FileExtensionValidator(['txt'], code='invalid_extension'))
+        self.assertNotEqual(FileExtensionValidator(['txt']), FileExtensionValidator(['png']))
+        self.assertNotEqual(FileExtensionValidator(['txt']), FileExtensionValidator(['png', 'jpg']))
+        self.assertNotEqual(FileExtensionValidator(['txt']), FileExtensionValidator(['txt'], code='custom_code'))
         self.assertNotEqual(
-            FileExtensionValidator(['txt']),
-            FileExtensionValidator(['png'])
-        )
-        self.assertNotEqual(
-            FileExtensionValidator(['txt']),
-            FileExtensionValidator(['png', 'jpg'])
-        )
-        self.assertNotEqual(
-            FileExtensionValidator(['txt']),
-            FileExtensionValidator(['txt'], code='custom_code')
-        )
-        self.assertNotEqual(
-            FileExtensionValidator(['txt']),
-            FileExtensionValidator(['txt'], message='custom error message')
+            FileExtensionValidator(['txt']), FileExtensionValidator(['txt'], message='custom error message')
         )
 
     def test_prohibit_null_characters_validator_equality(self):
         self.assertEqual(
             ProhibitNullCharactersValidator(message='message', code='code'),
-            ProhibitNullCharactersValidator(message='message', code='code')
+            ProhibitNullCharactersValidator(message='message', code='code'),
         )
-        self.assertEqual(
-            ProhibitNullCharactersValidator(),
-            ProhibitNullCharactersValidator()
-        )
+        self.assertEqual(ProhibitNullCharactersValidator(), ProhibitNullCharactersValidator())
         self.assertNotEqual(
             ProhibitNullCharactersValidator(message='message1', code='code'),
-            ProhibitNullCharactersValidator(message='message2', code='code')
+            ProhibitNullCharactersValidator(message='message2', code='code'),
         )
         self.assertNotEqual(
             ProhibitNullCharactersValidator(message='message', code='code1'),
-            ProhibitNullCharactersValidator(message='message', code='code2')
+            ProhibitNullCharactersValidator(message='message', code='code2'),
         )

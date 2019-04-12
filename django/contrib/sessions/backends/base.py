@@ -8,9 +8,7 @@ from django.conf import settings
 from django.contrib.sessions.exceptions import SuspiciousSession
 from django.core.exceptions import SuspiciousOperation
 from django.utils import timezone
-from django.utils.crypto import (
-    constant_time_compare, get_random_string, salted_hmac,
-)
+from django.utils.crypto import constant_time_compare, get_random_string, salted_hmac
 from django.utils.deprecation import RemovedInDjango40Warning
 from django.utils.module_loading import import_string
 from django.utils.translation import LANGUAGE_SESSION_KEY
@@ -25,6 +23,7 @@ class CreateError(Exception):
     Used internally as a consistent exception type to catch from save (see the
     docstring for SessionBase.save() for details).
     """
+
     pass
 
 
@@ -32,6 +31,7 @@ class UpdateError(Exception):
     """
     Occurs if Django tries to update a session that was deleted.
     """
+
     pass
 
 
@@ -39,6 +39,7 @@ class SessionBase:
     """
     Base class for all Session classes.
     """
+
     TEST_COOKIE_NAME = 'testcookie'
     TEST_COOKIE_VALUE = 'worked'
 
@@ -59,7 +60,8 @@ class SessionBase:
                 'The user language will no longer be stored in '
                 'request.session in Django 4.0. Read it from '
                 'request.COOKIES[settings.LANGUAGE_COOKIE_NAME] instead.',
-                RemovedInDjango40Warning, stacklevel=2,
+                RemovedInDjango40Warning,
+                stacklevel=2,
             )
         return self._session[key]
 
@@ -224,7 +226,7 @@ class SessionBase:
         except KeyError:
             expiry = self.get('_session_expiry')
 
-        if not expiry:   # Checks both None and 0 cases
+        if not expiry:  # Checks both None and 0 cases
             return settings.SESSION_COOKIE_AGE
         if not isinstance(expiry, datetime):
             return expiry
@@ -249,7 +251,7 @@ class SessionBase:
 
         if isinstance(expiry, datetime):
             return expiry
-        expiry = expiry or settings.SESSION_COOKIE_AGE   # Checks both None and 0 cases
+        expiry = expiry or settings.SESSION_COOKIE_AGE  # Checks both None and 0 cases
         return modification + timedelta(seconds=expiry)
 
     def set_expiry(self, value):

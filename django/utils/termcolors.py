@@ -129,7 +129,7 @@ PALETTES = {
         'HTTP_SERVER_ERROR': {'fg': 'magenta', 'opts': ('bold',)},
         'MIGRATE_HEADING': {'fg': 'cyan', 'opts': ('bold',)},
         'MIGRATE_LABEL': {'opts': ('bold',)},
-    }
+    },
 }
 DEFAULT_PALETTE = DARK_PALETTE
 

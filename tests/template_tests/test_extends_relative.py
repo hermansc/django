@@ -9,7 +9,6 @@ RELATIVE = os.path.join(ROOT, 'relative_templates')
 
 
 class ExtendsRelativeBehaviorTests(SimpleTestCase):
-
     def test_normal_extend(self):
         engine = Engine(dirs=[RELATIVE])
         template = engine.get_template('one.html')
@@ -57,7 +56,6 @@ class ExtendsRelativeBehaviorTests(SimpleTestCase):
 
 
 class IncludeRelativeBehaviorTests(SimpleTestCase):
-
     def test_normal_include(self):
         engine = Engine(dirs=[RELATIVE])
         template = engine.get_template('dir1/dir2/inc2.html')
@@ -81,7 +79,6 @@ class IncludeRelativeBehaviorTests(SimpleTestCase):
 
 
 class ExtendsMixedBehaviorTests(SimpleTestCase):
-
     def test_mixing1(self):
         engine = Engine(dirs=[RELATIVE])
         template = engine.get_template('dir1/two.html')

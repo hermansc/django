@@ -26,13 +26,32 @@ IMMUTABLE_WARNING = (
 )
 
 DEFAULT_NAMES = (
-    'verbose_name', 'verbose_name_plural', 'db_table', 'ordering',
-    'unique_together', 'permissions', 'get_latest_by', 'order_with_respect_to',
-    'app_label', 'db_tablespace', 'abstract', 'managed', 'proxy', 'swappable',
-    'auto_created', 'index_together', 'apps', 'default_permissions',
-    'select_on_save', 'default_related_name', 'required_db_features',
-    'required_db_vendor', 'base_manager_name', 'default_manager_name',
-    'indexes', 'constraints',
+    'verbose_name',
+    'verbose_name_plural',
+    'db_table',
+    'ordering',
+    'unique_together',
+    'permissions',
+    'get_latest_by',
+    'order_with_respect_to',
+    'app_label',
+    'db_tablespace',
+    'abstract',
+    'managed',
+    'proxy',
+    'swappable',
+    'auto_created',
+    'index_together',
+    'apps',
+    'default_permissions',
+    'select_on_save',
+    'default_related_name',
+    'required_db_features',
+    'required_db_vendor',
+    'base_manager_name',
+    'default_manager_name',
+    'indexes',
+    'constraints',
 )
 
 
@@ -64,8 +83,14 @@ def make_immutable_fields_list(name, data):
 
 class Options:
     FORWARD_PROPERTIES = {
-        'fields', 'many_to_many', 'concrete_fields', 'local_concrete_fields',
-        '_forward_fields_map', 'managers', 'managers_map', 'base_manager',
+        'fields',
+        'many_to_many',
+        'concrete_fields',
+        'local_concrete_fields',
+        '_forward_fields_map',
+        'managers',
+        'managers_map',
+        'base_manager',
         'default_manager',
     }
     REVERSE_PROPERTIES = {'related_objects', 'fields_map', '_relation_tree'}
@@ -208,8 +233,7 @@ class Options:
             query = self.order_with_respect_to
             try:
                 self.order_with_respect_to = next(
-                    f for f in self._get_fields(reverse=False)
-                    if f.name == query or f.attname == query
+                    f for f in self._get_fields(reverse=False) if f.name == query or f.attname == query
                 )
             except StopIteration:
                 raise FieldDoesNotExist("%s has no field named '%s'" % (self.object_name, query))
@@ -234,9 +258,7 @@ class Options:
                 field.primary_key = True
                 self.setup_pk(field)
                 if not field.remote_field.parent_link:
-                    raise ImproperlyConfigured(
-                        'Add parent_link=True to %s.' % field,
-                    )
+                    raise ImproperlyConfigured('Add parent_link=True to %s.' % field)
             else:
                 auto = AutoField(verbose_name='ID', primary_key=True, auto_created=True)
                 model.add_to_class('id', auto)
@@ -307,8 +329,7 @@ class Options:
         if self.required_db_vendor:
             return self.required_db_vendor == connection.vendor
         if self.required_db_features:
-            return all(getattr(connection.features, feat, False)
-                       for feat in self.required_db_features)
+            return all(getattr(connection.features, feat, False) for feat in self.required_db_features)
         return True
 
     @property
@@ -357,10 +378,7 @@ class Options:
                 seen_managers.add(manager.name)
                 managers.append((depth, manager.creation_counter, manager))
 
-        return make_immutable_fields_list(
-            "managers",
-            (m[2] for m in sorted(managers)),
-        )
+        return make_immutable_fields_list("managers", (m[2] for m in sorted(managers)))
 
     @cached_property
     def managers_map(self):
@@ -381,12 +399,7 @@ class Options:
             try:
                 return self.managers_map[base_manager_name]
             except KeyError:
-                raise ValueError(
-                    "%s has no manager named %r" % (
-                        self.object_name,
-                        base_manager_name,
-                    )
-                )
+                raise ValueError("%s has no manager named %r" % (self.object_name, base_manager_name))
 
         manager = Manager()
         manager.name = '_base_manager'
@@ -408,12 +421,7 @@ class Options:
             try:
                 return self.managers_map[default_manager_name]
             except KeyError:
-                raise ValueError(
-                    "%s has no manager named %r" % (
-                        self.object_name,
-                        default_manager_name,
-                    )
-                )
+                raise ValueError("%s has no manager named %r" % (self.object_name, default_manager_name))
 
         if self.managers:
             return self.managers[0]
@@ -448,8 +456,11 @@ class Options:
 
         return make_immutable_fields_list(
             "fields",
-            (f for f in self._get_fields(reverse=False)
-             if is_not_an_m2m_field(f) and is_not_a_generic_relation(f) and is_not_a_generic_foreign_key(f))
+            (
+                f
+                for f in self._get_fields(reverse=False)
+                if is_not_an_m2m_field(f) and is_not_a_generic_relation(f) and is_not_a_generic_foreign_key(f)
+            ),
         )
 
     @cached_property
@@ -461,9 +472,7 @@ class Options:
         combined with filtering of field properties is the public API for
         obtaining this field list.
         """
-        return make_immutable_fields_list(
-            "concrete_fields", (f for f in self.fields if f.concrete)
-        )
+        return make_immutable_fields_list("concrete_fields", (f for f in self.fields if f.concrete))
 
     @cached_property
     def local_concrete_fields(self):
@@ -474,9 +483,7 @@ class Options:
         combined with filtering of field properties is the public API for
         obtaining this field list.
         """
-        return make_immutable_fields_list(
-            "local_concrete_fields", (f for f in self.local_fields if f.concrete)
-        )
+        return make_immutable_fields_list("local_concrete_fields", (f for f in self.local_fields if f.concrete))
 
     @cached_property
     def many_to_many(self):
@@ -488,8 +495,7 @@ class Options:
         obtaining this list.
         """
         return make_immutable_fields_list(
-            "many_to_many",
-            (f for f in self._get_fields(reverse=False) if f.is_relation and f.many_to_many)
+            "many_to_many", (f for f in self._get_fields(reverse=False) if f.is_relation and f.many_to_many)
         )
 
     @cached_property
@@ -505,8 +511,7 @@ class Options:
         """
         all_related_fields = self._get_fields(forward=False, reverse=True, include_hidden=True)
         return make_immutable_fields_list(
-            "related_objects",
-            (obj for obj in all_related_fields if not obj.hidden or obj.field.many_to_many)
+            "related_objects", (obj for obj in all_related_fields if not obj.hidden or obj.field.many_to_many)
         )
 
     @cached_property
@@ -631,15 +636,17 @@ class Options:
                 final_field = opts.parents[int_model]
                 targets = (final_field.remote_field.get_related_field(),)
                 opts = int_model._meta
-                path.append(PathInfo(
-                    from_opts=final_field.model._meta,
-                    to_opts=opts,
-                    target_fields=targets,
-                    join_field=final_field,
-                    m2m=False,
-                    direct=True,
-                    filtered_relation=None,
-                ))
+                path.append(
+                    PathInfo(
+                        from_opts=final_field.model._meta,
+                        to_opts=opts,
+                        target_fields=targets,
+                        join_field=final_field,
+                        m2m=False,
+                        direct=True,
+                        filtered_relation=None,
+                    )
+                )
         return path
 
     def get_path_from_parent(self, parent):
@@ -681,7 +688,8 @@ class Options:
             if opts.abstract:
                 continue
             fields_with_relations = (
-                f for f in opts._get_fields(reverse=False, include_parents=False)
+                f
+                for f in opts._get_fields(reverse=False, include_parents=False)
                 if f.is_relation and f.related_model is not None
             )
             for f in fields_with_relations:
@@ -731,8 +739,7 @@ class Options:
             include_parents = PROXY_PARENTS
         return self._get_fields(include_parents=include_parents, include_hidden=include_hidden)
 
-    def _get_fields(self, forward=True, reverse=True, include_parents=True, include_hidden=False,
-                    seen_models=None):
+    def _get_fields(self, forward=True, reverse=True, include_parents=True, include_hidden=False, seen_models=None):
         """
         Internal helper function to return fields of the model.
         * If forward=True, then fields defined on this model are returned.
@@ -777,12 +784,15 @@ class Options:
                 # fields from the same parent again.
                 if parent in seen_models:
                     continue
-                if (parent._meta.concrete_model != self.concrete_model and
-                        include_parents == PROXY_PARENTS):
+                if parent._meta.concrete_model != self.concrete_model and include_parents == PROXY_PARENTS:
                     continue
                 for obj in parent._meta._get_fields(
-                        forward=forward, reverse=reverse, include_parents=include_parents,
-                        include_hidden=include_hidden, seen_models=seen_models):
+                    forward=forward,
+                    reverse=reverse,
+                    include_parents=include_parents,
+                    include_hidden=include_hidden,
+                    seen_models=seen_models,
+                ):
                     if not getattr(obj, 'parent_link', False) or obj.model == self.concrete_model:
                         fields.append(obj)
         if reverse and not self.proxy:

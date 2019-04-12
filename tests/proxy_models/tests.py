@@ -10,10 +10,29 @@ from django.urls import reverse
 
 from .admin import admin as force_admin_model_registration  # NOQA
 from .models import (
-    Abstract, BaseUser, Bug, Country, Improvement, Issue, LowerStatusPerson,
-    MultiUserProxy, MyPerson, MyPersonProxy, OtherPerson, Person, ProxyBug,
-    ProxyImprovement, ProxyProxyBug, ProxyTrackerUser, State, StateProxy,
-    StatusPerson, TrackerUser, User, UserProxy, UserProxyProxy,
+    Abstract,
+    BaseUser,
+    Bug,
+    Country,
+    Improvement,
+    Issue,
+    LowerStatusPerson,
+    MultiUserProxy,
+    MyPerson,
+    MyPersonProxy,
+    OtherPerson,
+    Person,
+    ProxyBug,
+    ProxyImprovement,
+    ProxyProxyBug,
+    ProxyTrackerUser,
+    State,
+    StateProxy,
+    StatusPerson,
+    TrackerUser,
+    User,
+    UserProxy,
+    UserProxyProxy,
 )
 
 
@@ -23,10 +42,8 @@ class ProxyModelTests(TestCase):
         The MyPerson model should be generating the same database queries as
         the Person model (when the same manager is used in each case).
         """
-        my_person_sql = MyPerson.other.all().query.get_compiler(
-            DEFAULT_DB_ALIAS).as_sql()
-        person_sql = Person.objects.order_by("name").query.get_compiler(
-            DEFAULT_DB_ALIAS).as_sql()
+        my_person_sql = MyPerson.other.all().query.get_compiler(DEFAULT_DB_ALIAS).as_sql()
+        person_sql = Person.objects.order_by("name").query.get_compiler(DEFAULT_DB_ALIAS).as_sql()
         self.assertEqual(my_person_sql, person_sql)
 
     def test_inheritance_new_table(self):
@@ -34,10 +51,8 @@ class ProxyModelTests(TestCase):
         The StatusPerson models should have its own table (it's using ORM-level
         inheritance).
         """
-        sp_sql = StatusPerson.objects.all().query.get_compiler(
-            DEFAULT_DB_ALIAS).as_sql()
-        p_sql = Person.objects.all().query.get_compiler(
-            DEFAULT_DB_ALIAS).as_sql()
+        sp_sql = StatusPerson.objects.all().query.get_compiler(DEFAULT_DB_ALIAS).as_sql()
+        p_sql = Person.objects.all().query.get_compiler(DEFAULT_DB_ALIAS).as_sql()
         self.assertNotEqual(sp_sql, p_sql)
 
     def test_basic_proxy(self):
@@ -106,6 +121,7 @@ class ProxyModelTests(TestCase):
     def test_abstract_base_with_model_fields(self):
         msg = "Abstract base class containing model fields not permitted for proxy model 'NoAbstract'."
         with self.assertRaisesMessage(TypeError, msg):
+
             class NoAbstract(Abstract):
                 class Meta:
                     proxy = True
@@ -113,6 +129,7 @@ class ProxyModelTests(TestCase):
     def test_too_many_concrete_classes(self):
         msg = "Proxy model 'TooManyBases' has more than one non-abstract model base class."
         with self.assertRaisesMessage(TypeError, msg):
+
             class TooManyBases(User, Person):
                 class Meta:
                     proxy = True
@@ -120,6 +137,7 @@ class ProxyModelTests(TestCase):
     def test_no_base_classes(self):
         msg = "Proxy model 'NoBaseClasses' has no non-abstract model base class."
         with self.assertRaisesMessage(TypeError, msg):
+
             class NoBaseClasses(models.Model):
                 class Meta:
                     proxy = True
@@ -133,19 +151,13 @@ class ProxyModelTests(TestCase):
                 proxy = True
 
         errors = NoNewFields.check()
-        expected = [
-            checks.Error(
-                "Proxy model 'NoNewFields' contains model fields.",
-                id='models.E017',
-            )
-        ]
+        expected = [checks.Error("Proxy model 'NoNewFields' contains model fields.", id='models.E017')]
         self.assertEqual(errors, expected)
 
     @override_settings(TEST_SWAPPABLE_MODEL='proxy_models.AlternateModel')
     @isolate_apps('proxy_models')
     def test_swappable(self):
         class SwappableModel(models.Model):
-
             class Meta:
                 swappable = 'TEST_SWAPPABLE_MODEL'
 
@@ -154,8 +166,8 @@ class ProxyModelTests(TestCase):
 
         # You can't proxy a swapped model
         with self.assertRaises(TypeError):
-            class ProxyModel(SwappableModel):
 
+            class ProxyModel(SwappableModel):
                 class Meta:
                     proxy = True
 
@@ -186,6 +198,7 @@ class ProxyModelTests(TestCase):
 
     def test_permissions_created(self):
         from django.contrib.auth.models import Permission
+
         Permission.objects.get(name="May display users information")
 
     def test_proxy_model_signals(self):
@@ -197,6 +210,7 @@ class ProxyModelTests(TestCase):
         def make_handler(model, event):
             def _handler(*args, **kwargs):
                 output.append('%s %s save' % (model, event))
+
             return _handler
 
         h1 = make_handler('MyPerson', 'pre')
@@ -210,10 +224,7 @@ class ProxyModelTests(TestCase):
         signals.post_save.connect(h4, sender=Person)
 
         MyPerson.objects.create(name="dino")
-        self.assertEqual(output, [
-            'MyPerson pre save',
-            'MyPerson post save'
-        ])
+        self.assertEqual(output, ['MyPerson pre save', 'MyPerson post save'])
 
         output = []
 
@@ -225,10 +236,7 @@ class ProxyModelTests(TestCase):
 
         MyPersonProxy.objects.create(name="pebbles")
 
-        self.assertEqual(output, [
-            'MyPersonProxy pre save',
-            'MyPersonProxy post save'
-        ])
+        self.assertEqual(output, ['MyPersonProxy pre save', 'MyPersonProxy post save'])
 
         signals.pre_save.disconnect(h1, sender=MyPerson)
         signals.post_save.disconnect(h2, sender=MyPerson)
@@ -317,8 +325,10 @@ class ProxyModelTests(TestCase):
         Bug.objects.create(summary='fix this', version='1.1beta', assignee=contributor, reporter=someone)
         pcontributor = ProxyTrackerUser.objects.create(name='OtherContributor', status='proxy')
         Improvement.objects.create(
-            summary='improve that', version='1.1beta',
-            assignee=contributor, reporter=pcontributor,
+            summary='improve that',
+            version='1.1beta',
+            assignee=contributor,
+            reporter=pcontributor,
             associated_bug=ProxyProxyBug.objects.all()[0],
         )
 
@@ -331,28 +341,16 @@ class ProxyModelTests(TestCase):
         self.assertEqual(repr(resp), '<ProxyBug: ProxyBug:fix this>')
 
         # Proxy of proxy, select_related + filter
-        resp = ProxyProxyBug.objects.select_related().get(
-            version__icontains='beta'
-        )
+        resp = ProxyProxyBug.objects.select_related().get(version__icontains='beta')
         self.assertEqual(repr(resp), '<ProxyProxyBug: ProxyProxyBug:fix this>')
 
         # Select related + filter on a related proxy field
-        resp = ProxyImprovement.objects.select_related().get(
-            reporter__name__icontains='butor'
-        )
-        self.assertEqual(
-            repr(resp),
-            '<ProxyImprovement: ProxyImprovement:improve that>'
-        )
+        resp = ProxyImprovement.objects.select_related().get(reporter__name__icontains='butor')
+        self.assertEqual(repr(resp), '<ProxyImprovement: ProxyImprovement:improve that>')
 
         # Select related + filter on a related proxy of proxy field
-        resp = ProxyImprovement.objects.select_related().get(
-            associated_bug__summary__icontains='fix'
-        )
-        self.assertEqual(
-            repr(resp),
-            '<ProxyImprovement: ProxyImprovement:improve that>'
-        )
+        resp = ProxyImprovement.objects.select_related().get(associated_bug__summary__icontains='fix')
+        self.assertEqual(repr(resp), '<ProxyImprovement: ProxyImprovement:improve that>')
 
     def test_proxy_load_from_fixture(self):
         management.call_command('loaddata', 'mypeople.json', verbosity=0)
@@ -365,7 +363,6 @@ class ProxyModelTests(TestCase):
 
 @override_settings(ROOT_URLCONF='proxy_models.urls')
 class ProxyModelAdminTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.superuser = AuthUser.objects.create(is_superuser=True, is_staff=True)
@@ -396,10 +393,12 @@ class ProxyModelAdminTests(TestCase):
         proxy = ProxyTrackerUser.objects.get(name='Django Pony')
 
         user_str = 'Tracker user: <a href="%s">%s</a>' % (
-            reverse('admin_proxy:proxy_models_trackeruser_change', args=(user.pk,)), user
+            reverse('admin_proxy:proxy_models_trackeruser_change', args=(user.pk,)),
+            user,
         )
         proxy_str = 'Proxy tracker user: <a href="%s">%s</a>' % (
-            reverse('admin_proxy:proxy_models_proxytrackeruser_change', args=(proxy.pk,)), proxy
+            reverse('admin_proxy:proxy_models_proxytrackeruser_change', args=(proxy.pk,)),
+            proxy,
         )
 
         self.client.force_login(self.superuser)

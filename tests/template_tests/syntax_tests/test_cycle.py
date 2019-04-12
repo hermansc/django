@@ -5,7 +5,6 @@ from ..utils import setup
 
 
 class CycleTagTests(SimpleTestCase):
-
     @setup({'cycle01': '{% cycle a %}'})
     def test_cycle01(self):
         msg = "No named cycles in template. 'a' is not defined"
@@ -59,8 +58,12 @@ class CycleTagTests(SimpleTestCase):
         output = self.engine.render_to_string('cycle16', {'one': 'A', 'two': '2'})
         self.assertEqual(output, 'a2')
 
-    @setup({'cycle17': "{% cycle 'a' 'b' 'c' as abc silent %}"
-                       "{% cycle abc %}{% cycle abc %}{% cycle abc %}{% cycle abc %}"})
+    @setup(
+        {
+            'cycle17': "{% cycle 'a' 'b' 'c' as abc silent %}"
+            "{% cycle abc %}{% cycle abc %}{% cycle abc %}{% cycle abc %}"
+        }
+    )
     def test_cycle17(self):
         output = self.engine.render_to_string('cycle17')
         self.assertEqual(output, '')
@@ -81,8 +84,7 @@ class CycleTagTests(SimpleTestCase):
         output = self.engine.render_to_string('cycle20', {'two': 'C & D', 'one': 'A & B'})
         self.assertEqual(output, 'A &amp; B &amp; C &amp; D')
 
-    @setup({'cycle21': '{% filter force_escape %}'
-                       '{% cycle one two as foo %} & {% cycle foo %}{% endfilter %}'})
+    @setup({'cycle21': '{% filter force_escape %}' '{% cycle one two as foo %} & {% cycle foo %}{% endfilter %}'})
     def test_cycle21(self):
         output = self.engine.render_to_string('cycle21', {'two': 'C & D', 'one': 'A & B'})
         self.assertEqual(output, 'A &amp;amp; B &amp; C &amp;amp; D')
@@ -92,17 +94,18 @@ class CycleTagTests(SimpleTestCase):
         output = self.engine.render_to_string('cycle22', {'values': [1, 2, 3, 4]})
         self.assertEqual(output, '1234')
 
-    @setup({'cycle23': "{% for x in values %}"
-                       "{% cycle 'a' 'b' 'c' as abc silent %}{{ abc }}{{ x }}{% endfor %}"})
+    @setup({'cycle23': "{% for x in values %}" "{% cycle 'a' 'b' 'c' as abc silent %}{{ abc }}{{ x }}{% endfor %}"})
     def test_cycle23(self):
         output = self.engine.render_to_string('cycle23', {'values': [1, 2, 3, 4]})
         self.assertEqual(output, 'a1b2c3a4')
 
-    @setup({
-        'cycle24': "{% for x in values %}"
-                   "{% cycle 'a' 'b' 'c' as abc silent %}{% include 'included-cycle' %}{% endfor %}",
-        'included-cycle': '{{ abc }}',
-    })
+    @setup(
+        {
+            'cycle24': "{% for x in values %}"
+            "{% cycle 'a' 'b' 'c' as abc silent %}{% include 'included-cycle' %}{% endfor %}",
+            'included-cycle': '{{ abc }}',
+        }
+    )
     def test_cycle24(self):
         output = self.engine.render_to_string('cycle24', {'values': [1, 2, 3, 4]})
         self.assertEqual(output, 'abca')
@@ -127,16 +130,18 @@ class CycleTagTests(SimpleTestCase):
         output = self.engine.render_to_string('cycle28', {'a': '<', 'b': '>'})
         self.assertEqual(output, '<&gt;')
 
-    @setup({
-        'cycle29': "{% cycle 'a' 'b' 'c' as cycler silent %}"
-                   "{% for x in values %}"
-                   "{% ifchanged x %}"
-                   "{% cycle cycler %}{{ cycler }}"
-                   "{% else %}"
-                   "{{ cycler }}"
-                   "{% endifchanged %}"
-                   "{% endfor %}"
-    })
+    @setup(
+        {
+            'cycle29': "{% cycle 'a' 'b' 'c' as cycler silent %}"
+            "{% for x in values %}"
+            "{% ifchanged x %}"
+            "{% cycle cycler %}{{ cycler }}"
+            "{% else %}"
+            "{{ cycler }}"
+            "{% endifchanged %}"
+            "{% endfor %}"
+        }
+    )
     def test_cycle29(self):
         """
         A named {% cycle %} tag works inside an {% ifchanged %} block and a
@@ -145,35 +150,37 @@ class CycleTagTests(SimpleTestCase):
         output = self.engine.render_to_string('cycle29', {'values': [1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 9, 9]})
         self.assertEqual(output, 'bcabcabcccaa')
 
-    @setup({
-        'cycle30': "{% cycle 'a' 'b' 'c' as cycler silent %}"
-                   "{% for x in values %}"
-                   "{% with doesnothing=irrelevant %}"
-                   "{% ifchanged x %}"
-                   "{% cycle cycler %}{{ cycler }}"
-                   "{% else %}"
-                   "{{ cycler }}"
-                   "{% endifchanged %}"
-                   "{% endwith %}"
-                   "{% endfor %}"})
+    @setup(
+        {
+            'cycle30': "{% cycle 'a' 'b' 'c' as cycler silent %}"
+            "{% for x in values %}"
+            "{% with doesnothing=irrelevant %}"
+            "{% ifchanged x %}"
+            "{% cycle cycler %}{{ cycler }}"
+            "{% else %}"
+            "{{ cycler }}"
+            "{% endifchanged %}"
+            "{% endwith %}"
+            "{% endfor %}"
+        }
+    )
     def test_cycle30(self):
         """
         A {% with %} tag shouldn't reset the {% cycle %} variable.
         """
         output = self.engine.render_to_string(
-            'cycle30', {
-                'irrelevant': 1,
-                'values': [1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 9, 9]
-            })
+            'cycle30', {'irrelevant': 1, 'values': [1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 9, 9]}
+        )
         self.assertEqual(output, 'bcabcabcccaa')
 
-    @setup({
-        'undefined_cycle':
-            "{% cycle 'a' 'b' 'c' as cycler silent %}"
+    @setup(
+        {
+            'undefined_cycle': "{% cycle 'a' 'b' 'c' as cycler silent %}"
             "{% for x in values %}"
             "{% cycle undefined %}{{ cycler }}"
             "{% endfor %}"
-    })
+        }
+    )
     def test_cycle_undefined(self):
         with self.assertRaisesMessage(TemplateSyntaxError, "Named cycle 'undefined' does not exist"):
             self.engine.render_to_string('undefined_cycle')

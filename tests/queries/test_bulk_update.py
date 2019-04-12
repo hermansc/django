@@ -6,33 +6,35 @@ from django.db.models.functions import Lower
 from django.test import TestCase
 
 from .models import (
-    Article, CustomDbColumn, CustomPk, Detail, Individual, Member, Note,
-    Number, Order, Paragraph, SpecialCategory, Tag, Valid,
+    Article,
+    CustomDbColumn,
+    CustomPk,
+    Detail,
+    Individual,
+    Member,
+    Note,
+    Number,
+    Order,
+    Paragraph,
+    SpecialCategory,
+    Tag,
+    Valid,
 )
 
 
 class BulkUpdateNoteTests(TestCase):
     def setUp(self):
-        self.notes = [
-            Note.objects.create(note=str(i), misc=str(i))
-            for i in range(10)
-        ]
+        self.notes = [Note.objects.create(note=str(i), misc=str(i)) for i in range(10)]
 
     def create_tags(self):
-        self.tags = [
-            Tag.objects.create(name=str(i))
-            for i in range(10)
-        ]
+        self.tags = [Tag.objects.create(name=str(i)) for i in range(10)]
 
     def test_simple(self):
         for note in self.notes:
             note.note = 'test-%s' % note.id
         with self.assertNumQueries(1):
             Note.objects.bulk_update(self.notes, ['note'])
-        self.assertCountEqual(
-            Note.objects.values_list('note', flat=True),
-            [cat.note for cat in self.notes]
-        )
+        self.assertCountEqual(Note.objects.values_list('note', flat=True), [cat.note for cat in self.notes])
 
     def test_multiple_fields(self):
         for note in self.notes:
@@ -40,14 +42,8 @@ class BulkUpdateNoteTests(TestCase):
             note.misc = 'misc-%s' % note.id
         with self.assertNumQueries(1):
             Note.objects.bulk_update(self.notes, ['note', 'misc'])
-        self.assertCountEqual(
-            Note.objects.values_list('note', flat=True),
-            [cat.note for cat in self.notes]
-        )
-        self.assertCountEqual(
-            Note.objects.values_list('misc', flat=True),
-            [cat.misc for cat in self.notes]
-        )
+        self.assertCountEqual(Note.objects.values_list('note', flat=True), [cat.note for cat in self.notes])
+        self.assertCountEqual(Note.objects.values_list('misc', flat=True), [cat.misc for cat in self.notes])
 
     def test_batch_size(self):
         with self.assertNumQueries(len(self.notes)):
@@ -127,10 +123,7 @@ class BulkUpdateTests(TestCase):
             Note.objects.bulk_update([], ['note'])
 
     def test_large_batch(self):
-        Note.objects.bulk_create([
-            Note(note=str(i), misc=str(i))
-            for i in range(0, 2000)
-        ])
+        Note.objects.bulk_create([Note(note=str(i), misc=str(i)) for i in range(0, 2000)])
         notes = list(Note.objects.all())
         Note.objects.bulk_update(notes, ['note'])
 
@@ -155,17 +148,11 @@ class BulkUpdateTests(TestCase):
         self.assertEqual(model.custom_column, 2)
 
     def test_custom_pk(self):
-        custom_pks = [
-            CustomPk.objects.create(name='pk-%s' % i, extra='')
-            for i in range(10)
-        ]
+        custom_pks = [CustomPk.objects.create(name='pk-%s' % i, extra='') for i in range(10)]
         for model in custom_pks:
             model.extra = 'extra-%s' % model.pk
         CustomPk.objects.bulk_update(custom_pks, ['extra'])
-        self.assertCountEqual(
-            CustomPk.objects.values_list('extra', flat=True),
-            [cat.extra for cat in custom_pks]
-        )
+        self.assertCountEqual(CustomPk.objects.values_list('extra', flat=True), [cat.extra for cat in custom_pks])
 
     def test_falsey_pk_value(self):
         order = Order.objects.create(pk=0, name='test')
@@ -175,21 +162,17 @@ class BulkUpdateTests(TestCase):
         self.assertEqual(order.name, 'updated')
 
     def test_inherited_fields(self):
-        special_categories = [
-            SpecialCategory.objects.create(name=str(i), special_name=str(i))
-            for i in range(10)
-        ]
+        special_categories = [SpecialCategory.objects.create(name=str(i), special_name=str(i)) for i in range(10)]
         for category in special_categories:
             category.name = 'test-%s' % category.id
             category.special_name = 'special-test-%s' % category.special_name
         SpecialCategory.objects.bulk_update(special_categories, ['name', 'special_name'])
         self.assertCountEqual(
-            SpecialCategory.objects.values_list('name', flat=True),
-            [cat.name for cat in special_categories]
+            SpecialCategory.objects.values_list('name', flat=True), [cat.name for cat in special_categories]
         )
         self.assertCountEqual(
             SpecialCategory.objects.values_list('special_name', flat=True),
-            [cat.special_name for cat in special_categories]
+            [cat.special_name for cat in special_categories],
         )
 
     def test_field_references(self):
@@ -209,20 +192,14 @@ class BulkUpdateTests(TestCase):
     def test_ipaddressfield(self):
         for ip in ('2001::1', '1.2.3.4'):
             with self.subTest(ip=ip):
-                models = [
-                    CustomDbColumn.objects.create(ip_address='0.0.0.0')
-                    for _ in range(10)
-                ]
+                models = [CustomDbColumn.objects.create(ip_address='0.0.0.0') for _ in range(10)]
                 for model in models:
                     model.ip_address = ip
                 CustomDbColumn.objects.bulk_update(models, ['ip_address'])
                 self.assertCountEqual(CustomDbColumn.objects.filter(ip_address=ip), models)
 
     def test_datetime_field(self):
-        articles = [
-            Article.objects.create(name=str(i), created=datetime.datetime.today())
-            for i in range(10)
-        ]
+        articles = [Article.objects.create(name=str(i), created=datetime.datetime.today()) for i in range(10)]
         point_in_time = datetime.datetime(1991, 10, 31)
         for article in articles:
             article.created = point_in_time

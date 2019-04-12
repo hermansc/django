@@ -8,7 +8,6 @@ from .models import City, site
 
 @override_settings(ROOT_URLCONF='django.contrib.gis.tests.geoadmin.urls')
 class GeoAdminTest(SimpleTestCase):
-
     def test_ensure_geographic_media(self):
         geoadmin = site._registry[City]
         admin_js = geoadmin.media.render_js()
@@ -19,11 +18,10 @@ class GeoAdminTest(SimpleTestCase):
 
         original_geoadmin = site._registry[City]
         params = original_geoadmin.get_map_widget(City._meta.get_field('point')).params
-        result = original_geoadmin.get_map_widget(City._meta.get_field('point'))(
-        ).render('point', Point(-79.460734, 40.18476), params)
-        self.assertIn(
-            """geodjango_point.layers.base = new OpenLayers.Layer.OSM("OpenStreetMap (Mapnik)");""",
-            result)
+        result = original_geoadmin.get_map_widget(City._meta.get_field('point'))().render(
+            'point', Point(-79.460734, 40.18476), params
+        )
+        self.assertIn("""geodjango_point.layers.base = new OpenLayers.Layer.OSM("OpenStreetMap (Mapnik)");""", result)
 
         self.assertIn(delete_all_btn, result)
 
@@ -32,8 +30,9 @@ class GeoAdminTest(SimpleTestCase):
         try:
             geoadmin = site._registry[City]
             params = geoadmin.get_map_widget(City._meta.get_field('point')).params
-            result = geoadmin.get_map_widget(City._meta.get_field('point'))(
-            ).render('point', Point(-79.460734, 40.18476), params)
+            result = geoadmin.get_map_widget(City._meta.get_field('point'))().render(
+                'point', Point(-79.460734, 40.18476), params
+            )
 
             self.assertNotIn(delete_all_btn, result)
         finally:
@@ -42,12 +41,12 @@ class GeoAdminTest(SimpleTestCase):
 
     def test_olmap_WMS_rendering(self):
         geoadmin = admin.GeoModelAdmin(City, site)
-        result = geoadmin.get_map_widget(City._meta.get_field('point'))(
-        ).render('point', Point(-79.460734, 40.18476))
+        result = geoadmin.get_map_widget(City._meta.get_field('point'))().render('point', Point(-79.460734, 40.18476))
         self.assertIn(
             """geodjango_point.layers.base = new OpenLayers.Layer.WMS("OpenLayers WMS", """
             """"http://vmap0.tiles.osgeo.org/wms/vmap0", {layers: 'basic', format: 'image/jpeg'});""",
-            result)
+            result,
+        )
 
     def test_olwidget_has_changed(self):
         """
@@ -76,9 +75,8 @@ class GeoAdminTest(SimpleTestCase):
             with self.assertLogs('django.contrib.gis', 'ERROR'):
                 output = str(form['point'])
         self.assertInHTML(
-            '<textarea id="id_point" class="vWKTField required" cols="150"'
-            ' rows="10" name="point"></textarea>',
-            output
+            '<textarea id="id_point" class="vWKTField required" cols="150"' ' rows="10" name="point"></textarea>',
+            output,
         )
 
     def test_olwidget_invalid_string(self):
@@ -87,13 +85,11 @@ class GeoAdminTest(SimpleTestCase):
         with self.assertLogs('django.contrib.gis', 'ERROR') as cm:
             output = str(form['point'])
         self.assertInHTML(
-            '<textarea id="id_point" class="vWKTField required" cols="150"'
-            ' rows="10" name="point"></textarea>',
-            output
+            '<textarea id="id_point" class="vWKTField required" cols="150"' ' rows="10" name="point"></textarea>',
+            output,
         )
         self.assertEqual(len(cm.records), 1)
         self.assertEqual(
             cm.records[0].getMessage(),
-            "Error creating geometry from value 'INVALID()' (String input "
-            "unrecognized as WKT EWKT, and HEXEWKB.)"
+            "Error creating geometry from value 'INVALID()' (String input " "unrecognized as WKT EWKT, and HEXEWKB.)",
         )

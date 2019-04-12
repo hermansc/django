@@ -11,6 +11,7 @@ class MessageEncoder(json.JSONEncoder):
     """
     Compactly serialize instances of the ``Message`` class as JSON.
     """
+
     message_key = '__json_message'
 
     def default(self, obj):
@@ -40,8 +41,7 @@ class MessageDecoder(json.JSONDecoder):
                 return Message(*obj[2:])
             return [self.process_messages(item) for item in obj]
         if isinstance(obj, dict):
-            return {key: self.process_messages(value)
-                    for key, value in obj.items()}
+            return {key: self.process_messages(value) for key, value in obj.items()}
         return obj
 
     def decode(self, s, **kwargs):
@@ -53,6 +53,7 @@ class CookieStorage(BaseStorage):
     """
     Store messages in a cookie.
     """
+
     cookie_name = 'messages'
     # uwsgi's default configuration enforces a maximum size of 4kb for all the
     # HTTP headers. In order to leave some room for other cookies and headers,
@@ -82,7 +83,8 @@ class CookieStorage(BaseStorage):
         """
         if encoded_data:
             response.set_cookie(
-                self.cookie_name, encoded_data,
+                self.cookie_name,
+                encoded_data,
                 domain=settings.SESSION_COOKIE_DOMAIN,
                 secure=settings.SESSION_COOKIE_SECURE or None,
                 httponly=settings.SESSION_COOKIE_HTTPONLY or None,
@@ -115,8 +117,7 @@ class CookieStorage(BaseStorage):
                     unstored_messages.append(messages.pop(0))
                 else:
                     unstored_messages.insert(0, messages.pop())
-                encoded_data = self._encode(messages + [self.not_finished],
-                                            encode_empty=unstored_messages)
+                encoded_data = self._encode(messages + [self.not_finished], encode_empty=unstored_messages)
         self._update_cookie(encoded_data, response)
         return unstored_messages
 

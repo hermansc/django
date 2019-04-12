@@ -61,6 +61,7 @@ class CustomRequestApiTests(ApiTests):
     add_message() should use ducktyping to allow request wrappers such as the
     one in Django REST framework.
     """
+
     def setUp(self):
         super().setUp()
         self.request = CustomRequest(self.request)

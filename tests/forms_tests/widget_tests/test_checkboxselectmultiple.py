@@ -11,39 +11,54 @@ class CheckboxSelectMultipleTest(WidgetTest):
     widget = CheckboxSelectMultiple
 
     def test_render_value(self):
-        self.check_html(self.widget(choices=self.beatles), 'beatles', ['J'], html=(
-            """<ul>
+        self.check_html(
+            self.widget(choices=self.beatles),
+            'beatles',
+            ['J'],
+            html=(
+                """<ul>
             <li><label><input checked type="checkbox" name="beatles" value="J"> John</label></li>
             <li><label><input type="checkbox" name="beatles" value="P"> Paul</label></li>
             <li><label><input type="checkbox" name="beatles" value="G"> George</label></li>
             <li><label><input type="checkbox" name="beatles" value="R"> Ringo</label></li>
             </ul>"""
-        ))
+            ),
+        )
 
     def test_render_value_multiple(self):
-        self.check_html(self.widget(choices=self.beatles), 'beatles', ['J', 'P'], html=(
-            """<ul>
+        self.check_html(
+            self.widget(choices=self.beatles),
+            'beatles',
+            ['J', 'P'],
+            html=(
+                """<ul>
             <li><label><input checked type="checkbox" name="beatles" value="J"> John</label></li>
             <li><label><input checked type="checkbox" name="beatles" value="P"> Paul</label></li>
             <li><label><input type="checkbox" name="beatles" value="G"> George</label></li>
             <li><label><input type="checkbox" name="beatles" value="R"> Ringo</label></li>
             </ul>"""
-        ))
+            ),
+        )
 
     def test_render_none(self):
         """
         If the value is None, none of the options are selected, even if the
         choices have an empty option.
         """
-        self.check_html(self.widget(choices=(('', 'Unknown'),) + self.beatles), 'beatles', None, html=(
-            """<ul>
+        self.check_html(
+            self.widget(choices=(('', 'Unknown'),) + self.beatles),
+            'beatles',
+            None,
+            html=(
+                """<ul>
             <li><label><input type="checkbox" name="beatles" value=""> Unknown</label></li>
             <li><label><input type="checkbox" name="beatles" value="J"> John</label></li>
             <li><label><input type="checkbox" name="beatles" value="P"> Paul</label></li>
             <li><label><input type="checkbox" name="beatles" value="G"> George</label></li>
             <li><label><input type="checkbox" name="beatles" value="R"> Ringo</label></li>
             </ul>"""
-        ))
+            ),
+        )
 
     def test_nested_choices(self):
         nested_choices = (
@@ -79,8 +94,7 @@ class CheckboxSelectMultipleTest(WidgetTest):
         </ul>
         """
         self.check_html(
-            self.widget(choices=nested_choices), 'nestchoice', ('vinyl', 'dvd'),
-            attrs={'id': 'media'}, html=html,
+            self.widget(choices=nested_choices), 'nestchoice', ('vinyl', 'dvd'), attrs={'id': 'media'}, html=html
         )
 
     def test_nested_choices_without_id(self):
@@ -156,11 +170,7 @@ class CheckboxSelectMultipleTest(WidgetTest):
 
     @override_settings(USE_L10N=True, USE_THOUSAND_SEPARATOR=True)
     def test_doesnt_localize_input_value(self):
-        choices = [
-            (1, 'One'),
-            (1000, 'One thousand'),
-            (1000000, 'One million'),
-        ]
+        choices = [(1, 'One'), (1000, 'One thousand'), (1000000, 'One million')]
         html = """
         <ul>
         <li><label><input type="checkbox" name="numbers" value="1"> One</label></li>
@@ -170,10 +180,7 @@ class CheckboxSelectMultipleTest(WidgetTest):
         """
         self.check_html(self.widget(choices=choices), 'numbers', None, html=html)
 
-        choices = [
-            (datetime.time(0, 0), 'midnight'),
-            (datetime.time(12, 0), 'noon'),
-        ]
+        choices = [(datetime.time(0, 0), 'midnight'), (datetime.time(12, 0), 'noon')]
         html = """
         <ul>
         <li><label><input type="checkbox" name="times" value="00:00:00"> midnight</label></li>
@@ -200,6 +207,7 @@ class CheckboxSelectMultipleTest(WidgetTest):
         CheckboxSelectMultiple doesn't contain 'for="field_0"' in the <label>
         because clicking that would toggle the first checkbox.
         """
+
         class TestForm(forms.Form):
             f = forms.MultipleChoiceField(widget=CheckboxSelectMultiple)
 

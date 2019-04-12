@@ -14,8 +14,13 @@ class IntrospectionTests(TestCase):
         quotation.
         """
         testable_column_strings = (
-            ('id', 'id'), ('[id]', 'id'), ('`id`', 'id'), ('"id"', 'id'),
-            ('[id col]', 'id col'), ('`id col`', 'id col'), ('"id col"', 'id col')
+            ('id', 'id'),
+            ('[id]', 'id'),
+            ('`id`', 'id'),
+            ('"id"', 'id'),
+            ('[id col]', 'id col'),
+            ('`id col`', 'id col'),
+            ('"id col"', 'id col'),
         )
         with connection.cursor() as cursor:
             for column, expected_string in testable_column_strings:
@@ -39,14 +44,17 @@ class ParsingTests(TestCase):
             return connection.introspection._parse_column_or_constraint_definition(tokens, set(columns))
 
     def assertConstraint(self, constraint_details, cols, unique=False, check=False):
-        self.assertEqual(constraint_details, {
-            'unique': unique,
-            'columns': cols,
-            'primary_key': False,
-            'foreign_key': None,
-            'check': check,
-            'index': False,
-        })
+        self.assertEqual(
+            constraint_details,
+            {
+                'unique': unique,
+                'columns': cols,
+                'primary_key': False,
+                'foreign_key': None,
+                'check': check,
+                'index': False,
+            },
+        )
 
     def test_unique_column(self):
         tests = (

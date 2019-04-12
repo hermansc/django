@@ -15,6 +15,7 @@ class OpenLayersWidget(Textarea):
     """
     Render an OpenLayers map using the WKT of the geometry.
     """
+
     def get_context(self, name, value, attrs):
         # Update the template parameters with any attributes passed in.
         if attrs:
@@ -37,8 +38,7 @@ class OpenLayersWidget(Textarea):
                 logger.error("Error creating geometry from value '%s' (%s)", value, err)
                 value = None
 
-        if (value and value.geom_type.upper() != self.geom_type and
-                self.geom_type != 'GEOMETRY'):
+        if value and value.geom_type.upper() != self.geom_type and self.geom_type != 'GEOMETRY':
             value = None
 
         # Constructing the dictionary of the map options.
@@ -63,10 +63,7 @@ class OpenLayersWidget(Textarea):
                     ogr.transform(srid)
                     wkt = ogr.wkt
                 except GDALException as err:
-                    logger.error(
-                        "Error transforming geometry from srid '%s' to srid '%s' (%s)",
-                        value.srid, srid, err
-                    )
+                    logger.error("Error transforming geometry from srid '%s' to srid '%s' (%s)", value.srid, srid, err)
                     wkt = ''
             else:
                 wkt = value.wkt
@@ -89,15 +86,16 @@ class OpenLayersWidget(Textarea):
 
         # An array of the parameter name, the name of their OpenLayers
         # counterpart, and the type of variable they are.
-        map_types = [('srid', 'projection', 'srid'),
-                     ('display_srid', 'displayProjection', 'srid'),
-                     ('units', 'units', str),
-                     ('max_resolution', 'maxResolution', float),
-                     ('max_extent', 'maxExtent', 'bounds'),
-                     ('num_zoom', 'numZoomLevels', int),
-                     ('max_zoom', 'maxZoomLevels', int),
-                     ('min_zoom', 'minZoomLevel', int),
-                     ]
+        map_types = [
+            ('srid', 'projection', 'srid'),
+            ('display_srid', 'displayProjection', 'srid'),
+            ('units', 'units', str),
+            ('max_resolution', 'maxResolution', float),
+            ('max_extent', 'maxExtent', 'bounds'),
+            ('num_zoom', 'numZoomLevels', int),
+            ('max_zoom', 'maxZoomLevels', int),
+            ('min_zoom', 'minZoomLevel', int),
+        ]
 
         # Building the map options hash.
         map_options = {}

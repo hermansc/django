@@ -18,6 +18,4 @@ class CustomUserAdmin(UserAdmin):
 
 site.register(get_user_model(), CustomUserAdmin)
 
-urlpatterns = [
-    path('admin/', site.urls),
-]
+urlpatterns = [path('admin/', site.urls)]

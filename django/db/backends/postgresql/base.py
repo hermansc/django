@@ -36,13 +36,13 @@ if PSYCOPG2_VERSION < (2, 5, 4):
 
 
 # Some of these import psycopg2, so import them after checking if it's installed.
-from .client import DatabaseClient                          # NOQA isort:skip
-from .creation import DatabaseCreation                      # NOQA isort:skip
-from .features import DatabaseFeatures                      # NOQA isort:skip
-from .introspection import DatabaseIntrospection            # NOQA isort:skip
-from .operations import DatabaseOperations                  # NOQA isort:skip
-from .schema import DatabaseSchemaEditor                    # NOQA isort:skip
-from .utils import utc_tzinfo_factory                       # NOQA isort:skip
+from .client import DatabaseClient  # NOQA isort:skip
+from .creation import DatabaseCreation  # NOQA isort:skip
+from .features import DatabaseFeatures  # NOQA isort:skip
+from .introspection import DatabaseIntrospection  # NOQA isort:skip
+from .operations import DatabaseOperations  # NOQA isort:skip
+from .schema import DatabaseSchemaEditor  # NOQA isort:skip
+from .utils import utc_tzinfo_factory  # NOQA isort:skip
 
 psycopg2.extensions.register_adapter(SafeString, psycopg2.extensions.QuotedString)
 psycopg2.extras.register_uuid()
@@ -50,11 +50,7 @@ psycopg2.extras.register_uuid()
 # Register support for inet[] manually so we don't have to handle the Inet()
 # object on load all the time.
 INETARRAY_OID = 1041
-INETARRAY = psycopg2.extensions.new_array_type(
-    (INETARRAY_OID,),
-    'INETARRAY',
-    psycopg2.extensions.UNICODE,
-)
+INETARRAY = psycopg2.extensions.new_array_type((INETARRAY_OID,), 'INETARRAY', psycopg2.extensions.UNICODE)
 psycopg2.extensions.register_type(INETARRAY)
 
 
@@ -146,23 +142,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         settings_dict = self.settings_dict
         # None may be used to connect to the default 'postgres' db
         if settings_dict['NAME'] == '':
-            raise ImproperlyConfigured(
-                "settings.DATABASES is improperly configured. "
-                "Please supply the NAME value.")
+            raise ImproperlyConfigured("settings.DATABASES is improperly configured. " "Please supply the NAME value.")
         if len(settings_dict['NAME'] or '') > self.ops.max_name_length():
             raise ImproperlyConfigured(
                 "The database name '%s' (%d characters) is longer than "
                 "PostgreSQL's limit of %d characters. Supply a shorter NAME "
-                "in settings.DATABASES." % (
-                    settings_dict['NAME'],
-                    len(settings_dict['NAME']),
-                    self.ops.max_name_length(),
-                )
+                "in settings.DATABASES."
+                % (settings_dict['NAME'], len(settings_dict['NAME']), self.ops.max_name_length())
             )
-        conn_params = {
-            'database': settings_dict['NAME'] or 'postgres',
-            **settings_dict['OPTIONS'],
-        }
+        conn_params = {'database': settings_dict['NAME'] or 'postgres', **settings_dict['OPTIONS']}
         conn_params.pop('isolation_level', None)
         if settings_dict['USER']:
             conn_params['user'] = settings_dict['USER']
@@ -227,7 +215,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def chunked_cursor(self):
         self._named_cursor_idx += 1
         return self._cursor(
-            name='_django_curs_%d_%d' % (
+            name='_django_curs_%d_%d'
+            % (
                 # Avoid reusing name in other threads
                 threading.current_thread().ident,
                 self._named_cursor_idx,
@@ -267,13 +256,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 "database when it's not needed (for example, when running tests). "
                 "Django was unable to create a connection to the 'postgres' database "
                 "and will use the first PostgreSQL database instead.",
-                RuntimeWarning
+                RuntimeWarning,
             )
             for connection in connections.all():
                 if connection.vendor == 'postgresql' and connection.settings_dict['NAME'] != 'postgres':
                     return self.__class__(
-                        {**self.settings_dict, 'NAME': connection.settings_dict['NAME']},
-                        alias=self.alias,
+                        {**self.settings_dict, 'NAME': connection.settings_dict['NAME']}, alias=self.alias
                     )
         return nodb_connection
 

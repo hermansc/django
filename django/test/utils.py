@@ -31,10 +31,15 @@ except ImportError:
 
 
 __all__ = (
-    'Approximate', 'ContextList', 'isolate_lru_cache', 'get_runner',
-    'modify_settings', 'override_settings',
+    'Approximate',
+    'ContextList',
+    'isolate_lru_cache',
+    'get_runner',
+    'modify_settings',
+    'override_settings',
     'requires_tz_support',
-    'setup_test_environment', 'teardown_test_environment',
+    'setup_test_environment',
+    'teardown_test_environment',
 )
 
 TZ_SUPPORT = hasattr(time, 'tzset')
@@ -57,6 +62,7 @@ class ContextList(list):
     A wrapper that provides direct key access to context items contained
     in a list of context objects.
     """
+
     def __getitem__(self, key):
         if isinstance(key, str):
             for subcontext in self:
@@ -174,19 +180,14 @@ def setup_databases(verbosity, interactive, keepdb=False, debug_sql=False, paral
                 )
                 if parallel > 1:
                     for index in range(parallel):
-                        connection.creation.clone_test_db(
-                            suffix=str(index + 1),
-                            verbosity=verbosity,
-                            keepdb=keepdb,
-                        )
+                        connection.creation.clone_test_db(suffix=str(index + 1), verbosity=verbosity, keepdb=keepdb)
             # Configure all other connections as mirrors of the first one
             else:
                 connections[alias].creation.set_as_test_mirror(connections[first_alias].settings_dict)
 
     # Configure the test mirrors.
     for alias, mirror_alias in mirrored_aliases.items():
-        connections[alias].creation.set_as_test_mirror(
-            connections[mirror_alias].settings_dict)
+        connections[alias].creation.set_as_test_mirror(connections[mirror_alias].settings_dict)
 
     if debug_sql:
         for alias in connections:
@@ -213,8 +214,7 @@ def dependency_ordered(test_databases, dependencies):
             all_deps.update(dependencies.get(alias, []))
         if not all_deps.isdisjoint(aliases):
             raise ImproperlyConfigured(
-                "Circular dependency: databases %r depend on each other, "
-                "but are aliases." % aliases
+                "Circular dependency: databases %r depend on each other, " "but are aliases." % aliases
             )
         dependencies_map[sig] = all_deps
 
@@ -268,8 +268,7 @@ def get_unique_databases_and_mirrors(aliases=None):
             # If we have two aliases with the same values for that tuple,
             # we only need to create the test database once.
             item = test_databases.setdefault(
-                connection.creation.test_db_signature(),
-                (connection.settings_dict['NAME'], set())
+                connection.creation.test_db_signature(), (connection.settings_dict['NAME'], set())
             )
             item[1].add(alias)
 
@@ -289,11 +288,7 @@ def teardown_databases(old_config, verbosity, parallel=0, keepdb=False):
         if destroy:
             if parallel > 1:
                 for index in range(parallel):
-                    connection.creation.destroy_test_db(
-                        suffix=str(index + 1),
-                        verbosity=verbosity,
-                        keepdb=keepdb,
-                    )
+                    connection.creation.destroy_test_db(suffix=str(index + 1), verbosity=verbosity, keepdb=keepdb)
             connection.creation.destroy_test_db(old_name, verbosity, keepdb)
 
 
@@ -322,6 +317,7 @@ class TestContextDecorator:
     `kwarg_name`: keyword argument passing the return value of enable() if
                   used as a function decorator.
     """
+
     def __init__(self, attr_name=None, kwarg_name=None):
         self.attr_name = attr_name
         self.kwarg_name = kwarg_name
@@ -369,6 +365,7 @@ class TestContextDecorator:
                 if self.kwarg_name:
                     kwargs[self.kwarg_name] = context
                 return func(*args, **kwargs)
+
         return inner
 
     def __call__(self, decorated):
@@ -386,6 +383,7 @@ class override_settings(TestContextDecorator):
     with the ``with`` statement. In either event, entering/exiting are called
     before and after, respectively, the function/block is executed.
     """
+
     enable_exception = None
 
     def __init__(self, **kwargs):
@@ -408,10 +406,7 @@ class override_settings(TestContextDecorator):
         settings._wrapped = override
         for key, new_value in self.options.items():
             try:
-                setting_changed.send(
-                    sender=settings._wrapped.__class__,
-                    setting=key, value=new_value, enter=True,
-                )
+                setting_changed.send(sender=settings._wrapped.__class__, setting=key, value=new_value, enter=True)
             except Exception as exc:
                 self.enable_exception = exc
                 self.disable()
@@ -425,8 +420,7 @@ class override_settings(TestContextDecorator):
         for key in self.options:
             new_value = getattr(settings, key, None)
             responses_for_setting = setting_changed.send_robust(
-                sender=settings._wrapped.__class__,
-                setting=key, value=new_value, enter=False,
+                sender=settings._wrapped.__class__, setting=key, value=new_value, enter=False
             )
             responses.extend(responses_for_setting)
         if self.enable_exception is not None:
@@ -442,17 +436,13 @@ class override_settings(TestContextDecorator):
             test_func._overridden_settings = self.options
         else:
             # Duplicate dict to prevent subclasses from altering their parent.
-            test_func._overridden_settings = {
-                **test_func._overridden_settings,
-                **self.options,
-            }
+            test_func._overridden_settings = {**test_func._overridden_settings, **self.options}
 
     def decorate_class(self, cls):
         from django.test import SimpleTestCase
+
         if not issubclass(cls, SimpleTestCase):
-            raise ValueError(
-                "Only subclasses of Django SimpleTestCase can be decorated "
-                "with override_settings")
+            raise ValueError("Only subclasses of Django SimpleTestCase can be decorated " "with override_settings")
         self.save_options(cls)
         return cls
 
@@ -462,6 +452,7 @@ class modify_settings(override_settings):
     Like override_settings, but makes it possible to append, prepend, or remove
     items instead of redefining the entire list.
     """
+
     def __init__(self, *args, **kwargs):
         if args:
             # Hack used when instantiating from SimpleTestCase.setUpClass.
@@ -477,8 +468,7 @@ class modify_settings(override_settings):
             test_func._modified_settings = self.operations
         else:
             # Duplicate list to prevent subclasses from altering their parent.
-            test_func._modified_settings = list(
-                test_func._modified_settings) + self.operations
+            test_func._modified_settings = list(test_func._modified_settings) + self.operations
 
     def enable(self):
         self.options = {}
@@ -511,8 +501,10 @@ class override_system_checks(TestContextDecorator):
     Useful when you override `INSTALLED_APPS`, e.g. if you exclude `auth` app,
     you also need to exclude its system checks.
     """
+
     def __init__(self, new_checks, deployment_checks=None):
         from django.core.checks.registry import registry
+
         self.registry = registry
         self.new_checks = new_checks
         self.deployment_checks = deployment_checks
@@ -548,12 +540,10 @@ def compare_xml(want, got):
         return _norm_whitespace_re.sub(' ', v)
 
     def child_text(element):
-        return ''.join(c.data for c in element.childNodes
-                       if c.nodeType == Node.TEXT_NODE)
+        return ''.join(c.data for c in element.childNodes if c.nodeType == Node.TEXT_NODE)
 
     def children(element):
-        return [c for c in element.childNodes
-                if c.nodeType == Node.ELEMENT_NODE]
+        return [c for c in element.childNodes if c.nodeType == Node.ELEMENT_NODE]
 
     def norm_child_text(element):
         return norm_whitespace(child_text(element))
@@ -600,6 +590,7 @@ class CaptureQueriesContext:
     """
     Context manager that captures queries executed by the specified connection.
     """
+
     def __init__(self, connection):
         self.connection = connection
 
@@ -614,7 +605,7 @@ class CaptureQueriesContext:
 
     @property
     def captured_queries(self):
-        return self.connection.queries[self.initial_queries:self.final_queries]
+        return self.connection.queries[self.initial_queries : self.final_queries]
 
     def __enter__(self):
         self.force_debug_cursor = self.connection.force_debug_cursor
@@ -661,7 +652,7 @@ class ignore_warnings(TestContextDecorator):
 requires_tz_support = skipUnless(
     TZ_SUPPORT,
     "This test relies on the ability to run a program in an arbitrary "
-    "time zone, but your operating system isn't able to do that."
+    "time zone, but your operating system isn't able to do that.",
 )
 
 
@@ -757,19 +748,22 @@ def require_jinja2(test_func):
     Django template engine for a test or skip it if Jinja2 isn't available.
     """
     test_func = skipIf(jinja2 is None, "this test requires jinja2")(test_func)
-    test_func = override_settings(TEMPLATES=[{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'APP_DIRS': True,
-    }, {
-        'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'APP_DIRS': True,
-        'OPTIONS': {'keep_trailing_newline': True},
-    }])(test_func)
+    test_func = override_settings(
+        TEMPLATES=[
+            {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'APP_DIRS': True},
+            {
+                'BACKEND': 'django.template.backends.jinja2.Jinja2',
+                'APP_DIRS': True,
+                'OPTIONS': {'keep_trailing_newline': True},
+            },
+        ]
+    )(test_func)
     return test_func
 
 
 class override_script_prefix(TestContextDecorator):
     """Decorator or context manager to temporary override the script prefix."""
+
     def __init__(self, prefix):
         self.prefix = prefix
         super().__init__()
@@ -787,6 +781,7 @@ class LoggingCaptureMixin:
     Capture the output from the 'django' logger and store it on the class's
     logger_output attribute.
     """
+
     def setUp(self):
         self.logger = logging.getLogger('django')
         self.old_stream = self.logger.handlers[0].stream
@@ -813,6 +808,7 @@ class isolate_apps(TestContextDecorator):
     `kwarg_name`: keyword argument passing the isolated registry if used as a
                   function decorator.
     """
+
     def __init__(self, *installed_apps, **kwargs):
         self.installed_apps = installed_apps
         super().__init__(**kwargs)
@@ -829,12 +825,14 @@ class isolate_apps(TestContextDecorator):
 
 def tag(*tags):
     """Decorator to add tags to a test class or method."""
+
     def decorator(obj):
         if hasattr(obj, 'tags'):
             obj.tags = obj.tags.union(tags)
         else:
             setattr(obj, 'tags', set(tags))
         return obj
+
     return decorator
 
 

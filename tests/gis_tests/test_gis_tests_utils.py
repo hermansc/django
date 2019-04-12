@@ -27,6 +27,7 @@ def test_mutation(raises=True):
                 getattr(TestFunc(), 'as_' + connection.vendor)(None, None)
 
         return test
+
     return wrapper
 
 

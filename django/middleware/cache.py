@@ -45,10 +45,7 @@ More details about how the caching works:
 
 from django.conf import settings
 from django.core.cache import DEFAULT_CACHE_ALIAS, caches
-from django.utils.cache import (
-    get_cache_key, get_max_age, has_vary_header, learn_cache_key,
-    patch_response_headers,
-)
+from django.utils.cache import get_cache_key, get_max_age, has_vary_header, learn_cache_key, patch_response_headers
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -61,6 +58,7 @@ class UpdateCacheMiddleware(MiddlewareMixin):
     UpdateCacheMiddleware must be the first piece of middleware in MIDDLEWARE
     so that it'll get called last during the response phase.
     """
+
     def __init__(self, get_response=None):
         self.cache_timeout = settings.CACHE_MIDDLEWARE_SECONDS
         self.key_prefix = settings.CACHE_MIDDLEWARE_KEY_PREFIX
@@ -102,9 +100,7 @@ class UpdateCacheMiddleware(MiddlewareMixin):
         if timeout and response.status_code == 200:
             cache_key = learn_cache_key(request, response, timeout, self.key_prefix, cache=self.cache)
             if hasattr(response, 'render') and callable(response.render):
-                response.add_post_render_callback(
-                    lambda r: self.cache.set(cache_key, r, timeout)
-                )
+                response.add_post_render_callback(lambda r: self.cache.set(cache_key, r, timeout))
             else:
                 self.cache.set(cache_key, response, timeout)
         return response
@@ -118,6 +114,7 @@ class FetchFromCacheMiddleware(MiddlewareMixin):
     FetchFromCacheMiddleware must be the last piece of middleware in MIDDLEWARE
     so that it'll get called last during the request phase.
     """
+
     def __init__(self, get_response=None):
         self.key_prefix = settings.CACHE_MIDDLEWARE_KEY_PREFIX
         self.cache_alias = settings.CACHE_MIDDLEWARE_ALIAS
@@ -160,6 +157,7 @@ class CacheMiddleware(UpdateCacheMiddleware, FetchFromCacheMiddleware):
     Also used as the hook point for the cache decorator, which is generated
     using the decorator-from-middleware utility.
     """
+
     def __init__(self, get_response=None, cache_timeout=None, **kwargs):
         self.get_response = get_response
         # We need to differentiate between "provided, but using default value",

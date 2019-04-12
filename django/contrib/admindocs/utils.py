@@ -88,8 +88,10 @@ def parse_rst(text, default_reference_context, thing_being_parsed=None):
 """
     parts = docutils.core.publish_parts(
         source % text,
-        source_path=thing_being_parsed, destination_path=None,
-        writer_name='html', settings_overrides=overrides,
+        source_path=thing_being_parsed,
+        destination_path=None,
+        writer_name='html',
+        settings_overrides=overrides,
     )
     return mark_safe(parts['fragment'])
 
@@ -111,15 +113,10 @@ def create_reference_role(rolename, urlbase):
         if options is None:
             options = {}
         node = docutils.nodes.reference(
-            rawtext,
-            text,
-            refuri=(urlbase % (
-                inliner.document.settings.link_base,
-                text.lower(),
-            )),
-            **options
+            rawtext, text, refuri=(urlbase % (inliner.document.settings.link_base, text.lower())), **options
         )
         return [node], []
+
     docutils.parsers.rst.roles.register_canonical_role(rolename, _role)
 
 
@@ -128,13 +125,7 @@ def default_reference_role(name, rawtext, text, lineno, inliner, options=None, c
         options = {}
     context = inliner.document.settings.default_reference_context
     node = docutils.nodes.reference(
-        rawtext,
-        text,
-        refuri=(ROLES[context] % (
-            inliner.document.settings.link_base,
-            text.lower(),
-        )),
-        **options
+        rawtext, text, refuri=(ROLES[context] % (inliner.document.settings.link_base, text.lower())), **options
     )
     return [node], []
 
@@ -156,10 +147,7 @@ def replace_named_groups(pattern):
     1. ^(?P<a>\w+)/b/(\w+)$ ==> ^<a>/b/(\w+)$
     2. ^(?P<a>\w+)/b/(?P<c>\w+)/$ ==> ^<a>/b/<c>/$
     """
-    named_group_indices = [
-        (m.start(0), m.end(0), m.group(1))
-        for m in named_group_matcher.finditer(pattern)
-    ]
+    named_group_indices = [(m.start(0), m.end(0), m.group(1)) for m in named_group_matcher.finditer(pattern)]
     # Tuples of (named capture group pattern, group name).
     group_pattern_and_name = []
     # Loop over the groups and their start and end indices.
@@ -170,7 +158,7 @@ def replace_named_groups(pattern):
             # If brackets are balanced, the end of the string for the current
             # named capture group pattern has been reached.
             if unmatched_open_brackets == 0:
-                group_pattern_and_name.append((pattern[start:end + idx], group_name))
+                group_pattern_and_name.append((pattern[start : end + idx], group_name))
                 break
 
             # Check for unescaped `(` and `)`. They mark the start and end of a
@@ -200,7 +188,7 @@ def replace_unnamed_groups(pattern):
     for start in unnamed_group_indices:
         # Handle nested parentheses, e.g. '^b/((x|y)\w+)$'.
         unmatched_open_brackets, prev_char = 1, None
-        for idx, val in enumerate(pattern[start + 1:]):
+        for idx, val in enumerate(pattern[start + 1 :]):
             if unmatched_open_brackets == 0:
                 group_indices.append((start, start + 1 + idx))
                 break

@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class TanTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_tan=Tan('normal')).first()
@@ -35,9 +34,7 @@ class TanTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_tan=Tan('small'),
-            normal_tan=Tan('normal'),
-            big_tan=Tan('big'),
+            small_tan=Tan('small'), normal_tan=Tan('normal'), big_tan=Tan('big')
         ).first()
         self.assertIsInstance(obj.small_tan, float)
         self.assertIsInstance(obj.normal_tan, float)

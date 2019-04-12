@@ -17,7 +17,6 @@ from .tests import AdminDocsTestCase, TestDataMixin
 
 @unittest.skipUnless(utils.docutils_is_available, "no docutils installed.")
 class AdminDocViewTests(TestDataMixin, AdminDocsTestCase):
-
     def setUp(self):
         self.client.force_login(self.superuser)
 
@@ -47,7 +46,7 @@ class AdminDocViewTests(TestDataMixin, AdminDocsTestCase):
         self.assertContains(
             response,
             '<h3><a href="/admindocs/views/django.contrib.admindocs.views.BaseAdminDocsView/">/admindocs/</a></h3>',
-            html=True
+            html=True,
         )
         self.assertContains(response, 'Views by namespace test')
         self.assertContains(response, 'Name: <code>test:func</code>.')
@@ -66,7 +65,7 @@ class AdminDocViewTests(TestDataMixin, AdminDocsTestCase):
         self.assertContains(
             response,
             '<h3><a href="/admindocs/views/django.contrib.admin.sites.AdminSite.index/">/admin/</a></h3>',
-            html=True
+            html=True,
         )
 
     def test_view_detail(self):
@@ -98,9 +97,7 @@ class AdminDocViewTests(TestDataMixin, AdminDocsTestCase):
     def test_model_index(self):
         response = self.client.get(reverse('django-admindocs-models-index'))
         self.assertContains(
-            response,
-            '<h2 id="app-auth">Authentication and Authorization (django.contrib.auth)</h2>',
-            html=True
+            response, '<h2 id="app-auth">Authentication and Authorization (django.contrib.auth)</h2>', html=True
         )
 
     def test_template_detail(self):
@@ -115,14 +112,14 @@ class AdminDocViewTests(TestDataMixin, AdminDocsTestCase):
                 response,
                 '<h3>The admin documentation system requires Python\'s '
                 '<a href="http://docutils.sf.net/">docutils</a> library.</h3>',
-                html=True
+                html=True,
             )
             self.assertContains(response, '<h1 id="site-name"><a href="/admin/">Django administration</a></h1>')
         finally:
             utils.docutils_is_available = True
 
     @modify_settings(INSTALLED_APPS={'remove': 'django.contrib.sites'})
-    @override_settings(SITE_ID=None)    # will restore SITE_ID after the test
+    @override_settings(SITE_ID=None)  # will restore SITE_ID after the test
     def test_no_sites_framework(self):
         """
         Without the sites framework, should not access SITE_ID or Site
@@ -134,18 +131,14 @@ class AdminDocViewTests(TestDataMixin, AdminDocsTestCase):
         self.assertContains(response, 'View documentation')
 
 
-@override_settings(TEMPLATES=[{
-    'NAME': 'ONE',
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'APP_DIRS': True,
-}, {
-    'NAME': 'TWO',
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'APP_DIRS': True,
-}])
+@override_settings(
+    TEMPLATES=[
+        {'NAME': 'ONE', 'BACKEND': 'django.template.backends.django.DjangoTemplates', 'APP_DIRS': True},
+        {'NAME': 'TWO', 'BACKEND': 'django.template.backends.django.DjangoTemplates', 'APP_DIRS': True},
+    ]
+)
 @unittest.skipUnless(utils.docutils_is_available, "no docutils installed.")
 class AdminDocViewWithMultipleEngines(AdminDocViewTests):
-
     def test_templatefilter_index(self):
         # Overridden because non-trivial TEMPLATES settings aren't supported
         # but the page shouldn't crash (#24125).
@@ -161,7 +154,6 @@ class AdminDocViewWithMultipleEngines(AdminDocViewTests):
 
 @unittest.skipUnless(utils.docutils_is_available, "no docutils installed.")
 class TestModelDetailView(TestDataMixin, AdminDocsTestCase):
-
     def setUp(self):
         self.client.force_login(self.superuser)
         with captured_stderr() as self.docutils_stderr:
@@ -241,18 +233,16 @@ class TestModelDetailView(TestDataMixin, AdminDocsTestCase):
 
         # many to many fields
         self.assertContains(
-            self.response,
-            "number of related %s objects" % (link % ("admin_docs.group", "admin_docs.Group"))
+            self.response, "number of related %s objects" % (link % ("admin_docs.group", "admin_docs.Group"))
         )
         self.assertContains(
-            self.response,
-            "all related %s objects" % (link % ("admin_docs.group", "admin_docs.Group"))
+            self.response, "all related %s objects" % (link % ("admin_docs.group", "admin_docs.Group"))
         )
 
         # "raw" and "include" directives are disabled
-        self.assertContains(self.response, '<p>&quot;raw&quot; directive disabled.</p>',)
+        self.assertContains(self.response, '<p>&quot;raw&quot; directive disabled.</p>')
         self.assertContains(self.response, '.. raw:: html\n    :file: admin_docs/evilfile.txt')
-        self.assertContains(self.response, '<p>&quot;include&quot; directive disabled.</p>',)
+        self.assertContains(self.response, '<p>&quot;include&quot; directive disabled.</p>')
         self.assertContains(self.response, '.. include:: admin_docs/evilfile.txt')
         out = self.docutils_stderr.getvalue()
         self.assertIn('"raw" directive disabled', out)
@@ -260,17 +250,11 @@ class TestModelDetailView(TestDataMixin, AdminDocsTestCase):
 
     def test_model_with_many_to_one(self):
         link = '<a class="reference external" href="/admindocs/models/%s/">%s</a>'
-        response = self.client.get(
-            reverse('django-admindocs-models-detail', args=['admin_docs', 'company'])
-        )
+        response = self.client.get(reverse('django-admindocs-models-detail', args=['admin_docs', 'company']))
         self.assertContains(
-            response,
-            "number of related %s objects" % (link % ("admin_docs.person", "admin_docs.Person"))
+            response, "number of related %s objects" % (link % ("admin_docs.person", "admin_docs.Person"))
         )
-        self.assertContains(
-            response,
-            "all related %s objects" % (link % ("admin_docs.person", "admin_docs.Person"))
-        )
+        self.assertContains(response, "all related %s objects" % (link % ("admin_docs.person", "admin_docs.Person")))
 
     def test_model_with_no_backward_relations_render_only_relevant_fields(self):
         """
@@ -328,21 +312,16 @@ class TestFieldType(unittest.TestCase):
             views.get_readable_field_data_type("NotAField")
 
     def test_builtin_fields(self):
-        self.assertEqual(
-            views.get_readable_field_data_type(fields.BooleanField()),
-            'Boolean (Either True or False)'
-        )
+        self.assertEqual(views.get_readable_field_data_type(fields.BooleanField()), 'Boolean (Either True or False)')
 
     def test_custom_fields(self):
         self.assertEqual(views.get_readable_field_data_type(CustomField()), 'A custom field type')
         self.assertEqual(
-            views.get_readable_field_data_type(DescriptionLackingField()),
-            'Field of type: DescriptionLackingField'
+            views.get_readable_field_data_type(DescriptionLackingField()), 'Field of type: DescriptionLackingField'
         )
 
 
 class AdminDocViewFunctionsTests(SimpleTestCase):
-
     def test_simplify_regex(self):
         tests = (
             (r'^a', '/a'),

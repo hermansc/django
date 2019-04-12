@@ -8,12 +8,10 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class ModTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create(big=100)
         obj = IntegerModel.objects.annotate(
-            null_mod_small=Mod('small', 'normal'),
-            null_mod_normal=Mod('normal', 'big'),
+            null_mod_small=Mod('small', 'normal'), null_mod_normal=Mod('normal', 'big')
         ).first()
         self.assertIsNone(obj.null_mod_small)
         self.assertIsNone(obj.null_mod_normal)
@@ -33,9 +31,7 @@ class ModTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=20, normal=15, big=1)
         obj = IntegerModel.objects.annotate(
-            small_mod=Mod('small', 'normal'),
-            normal_mod=Mod('normal', 'big'),
-            big_mod=Mod('big', 'small'),
+            small_mod=Mod('small', 'normal'), normal_mod=Mod('normal', 'big'), big_mod=Mod('big', 'small')
         ).first()
         self.assertIsInstance(obj.small_mod, float)
         self.assertIsInstance(obj.normal_mod, float)

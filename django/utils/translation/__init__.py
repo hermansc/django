@@ -10,16 +10,32 @@ from django.utils.deprecation import RemovedInDjango40Warning
 from django.utils.functional import lazy
 
 __all__ = [
-    'activate', 'deactivate', 'override', 'deactivate_all',
-    'get_language', 'get_language_from_request',
-    'get_language_info', 'get_language_bidi',
-    'check_for_language', 'to_language', 'to_locale', 'templatize',
-    'gettext', 'gettext_lazy', 'gettext_noop',
-    'ugettext', 'ugettext_lazy', 'ugettext_noop',
-    'ngettext', 'ngettext_lazy',
-    'ungettext', 'ungettext_lazy',
-    'pgettext', 'pgettext_lazy',
-    'npgettext', 'npgettext_lazy',
+    'activate',
+    'deactivate',
+    'override',
+    'deactivate_all',
+    'get_language',
+    'get_language_from_request',
+    'get_language_info',
+    'get_language_bidi',
+    'check_for_language',
+    'to_language',
+    'to_locale',
+    'templatize',
+    'gettext',
+    'gettext_lazy',
+    'gettext_noop',
+    'ugettext',
+    'ugettext_lazy',
+    'ugettext_noop',
+    'ngettext',
+    'ngettext_lazy',
+    'ungettext',
+    'ungettext_lazy',
+    'pgettext',
+    'pgettext_lazy',
+    'npgettext',
+    'npgettext_lazy',
     'LANGUAGE_SESSION_KEY',
 ]
 
@@ -38,6 +54,7 @@ class TranslatorCommentWarning(SyntaxWarning):
 # replace the functions with their real counterparts (once we do access the
 # settings).
 
+
 class Trans:
     """
     The purpose of this class is to store the actual translation function upon
@@ -53,9 +70,11 @@ class Trans:
 
     def __getattr__(self, real_name):
         from django.conf import settings
+
         if settings.USE_I18N:
             from django.utils.translation import trans_real as trans
             from django.utils.translation.reloader import watch_for_translation_changes, translation_file_changed
+
             autoreload_started.connect(watch_for_translation_changes, dispatch_uid='translation_file_changed')
             file_changed.connect(translation_file_changed, dispatch_uid='translation_file_changed')
         else:
@@ -82,7 +101,8 @@ def ugettext_noop(message):
     warnings.warn(
         'django.utils.translation.ugettext_noop() is deprecated in favor of '
         'django.utils.translation.gettext_noop().',
-        RemovedInDjango40Warning, stacklevel=2,
+        RemovedInDjango40Warning,
+        stacklevel=2,
     )
     return gettext_noop(message)
 
@@ -97,9 +117,9 @@ def ugettext(message):
     Alias of gettext() since Django 2.0.
     """
     warnings.warn(
-        'django.utils.translation.ugettext() is deprecated in favor of '
-        'django.utils.translation.gettext().',
-        RemovedInDjango40Warning, stacklevel=2,
+        'django.utils.translation.ugettext() is deprecated in favor of ' 'django.utils.translation.gettext().',
+        RemovedInDjango40Warning,
+        stacklevel=2,
     )
     return gettext(message)
 
@@ -114,9 +134,9 @@ def ungettext(singular, plural, number):
     Alias of ngettext() since Django 2.0.
     """
     warnings.warn(
-        'django.utils.translation.ungettext() is deprecated in favor of '
-        'django.utils.translation.ngettext().',
-        RemovedInDjango40Warning, stacklevel=2,
+        'django.utils.translation.ungettext() is deprecated in favor of ' 'django.utils.translation.ngettext().',
+        RemovedInDjango40Warning,
+        stacklevel=2,
     )
     return ngettext(singular, plural, number)
 
@@ -141,7 +161,8 @@ def ugettext_lazy(message):
     warnings.warn(
         'django.utils.translation.ugettext_lazy() is deprecated in favor of '
         'django.utils.translation.gettext_lazy().',
-        RemovedInDjango40Warning, stacklevel=2,
+        RemovedInDjango40Warning,
+        stacklevel=2,
     )
     return gettext_lazy(message)
 
@@ -209,7 +230,8 @@ def ungettext_lazy(singular, plural, number=None):
     warnings.warn(
         'django.utils.translation.ungettext_lazy() is deprecated in favor of '
         'django.utils.translation.ngettext_lazy().',
-        RemovedInDjango40Warning, stacklevel=2,
+        RemovedInDjango40Warning,
+        stacklevel=2,
     )
     return ngettext_lazy(singular, plural, number)
 
@@ -263,7 +285,7 @@ def to_language(locale):
     """Turn a locale name (en_US) into a language name (en-us)."""
     p = locale.find('_')
     if p >= 0:
-        return locale[:p].lower() + '-' + locale[p + 1:].lower()
+        return locale[:p].lower() + '-' + locale[p + 1 :].lower()
     else:
         return locale.lower()
 
@@ -298,6 +320,7 @@ def get_supported_language_variant(lang_code, *, strict=False):
 
 def templatize(src, **kwargs):
     from .template import templatize
+
     return templatize(src, **kwargs)
 
 
@@ -307,6 +330,7 @@ def deactivate_all():
 
 def get_language_info(lang_code):
     from django.conf.locale import LANG_INFO
+
     try:
         lang_info = LANG_INFO[lang_code]
         if 'fallback' in lang_info and 'name' not in lang_info:

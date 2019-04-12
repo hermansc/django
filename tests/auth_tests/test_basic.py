@@ -90,10 +90,7 @@ class BasicTestCase(TestCase):
     @override_settings(AUTH_USER_MODEL='thismodel.doesntexist')
     def test_swappable_user_nonexistent_model(self):
         "The current user model must point to an installed model"
-        msg = (
-            "AUTH_USER_MODEL refers to model 'thismodel.doesntexist' "
-            "that has not been installed"
-        )
+        msg = "AUTH_USER_MODEL refers to model 'thismodel.doesntexist' " "that has not been installed"
         with self.assertRaisesMessage(ImproperlyConfigured, msg):
             get_user_model()
 
@@ -108,7 +105,6 @@ class BasicTestCase(TestCase):
 
 
 class TestGetUser(TestCase):
-
     def test_get_user_anonymous(self):
         request = HttpRequest()
         request.session = self.client.session

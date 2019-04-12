@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class FloorTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_floor=Floor('normal')).first()
@@ -35,9 +34,7 @@ class FloorTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_floor=Floor('small'),
-            normal_floor=Floor('normal'),
-            big_floor=Floor('big'),
+            small_floor=Floor('small'), normal_floor=Floor('normal'), big_floor=Floor('big')
         ).first()
         self.assertIsInstance(obj.small_floor, int)
         self.assertIsInstance(obj.normal_floor, int)

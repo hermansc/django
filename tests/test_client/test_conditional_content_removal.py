@@ -6,7 +6,6 @@ from django.test.client import conditional_content_removal
 
 
 class ConditionalContentTests(SimpleTestCase):
-
     def test_conditional_content_removal(self):
         """
         Content is removed from regular and streaming responses with a

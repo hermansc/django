@@ -13,8 +13,10 @@ from django.core.management import call_command
 from django.db import connections
 from django.test import SimpleTestCase, TestCase
 from django.test.utils import (
-    setup_databases as _setup_databases, setup_test_environment,
-    teardown_databases as _teardown_databases, teardown_test_environment,
+    setup_databases as _setup_databases,
+    setup_test_environment,
+    teardown_databases as _teardown_databases,
+    teardown_test_environment,
 )
 from django.utils.datastructures import OrderedSet
 
@@ -104,7 +106,8 @@ class RemoteTestResult:
         pickle.loads(pickle.dumps(obj))
 
     def _print_unpicklable_subtest(self, test, subtest, pickle_exc):
-        print("""
+        print(
+            """
 Subtest failed:
 
     test: {}
@@ -117,7 +120,10 @@ test runner cannot handle it cleanly. Here is the pickling error:
 
 You should re-run this test with --parallel=1 to reproduce the failure
 with a cleaner failure message.
-""".format(test, subtest, pickle_exc))
+""".format(
+                test, subtest, pickle_exc
+            )
+        )
 
     def check_picklable(self, test, err):
         # Ensure that sys.exc_info() tuples are picklable. This displays a
@@ -134,7 +140,8 @@ with a cleaner failure message.
             pickle_exc_txt = repr(exc)
             pickle_exc_txt = textwrap.fill(pickle_exc_txt, 75, initial_indent='    ', subsequent_indent='    ')
             if tblib is None:
-                print("""
+                print(
+                    """
 
 {} failed:
 
@@ -146,9 +153,13 @@ parallel test runner to handle this exception cleanly.
 In order to see the traceback, you should install tblib:
 
     pip install tblib
-""".format(test, original_exc_txt))
+""".format(
+                        test, original_exc_txt
+                    )
+                )
             else:
-                print("""
+                print(
+                    """
 
 {} failed:
 
@@ -163,7 +174,10 @@ Here's the error encountered while trying to pickle the exception:
 
 You should re-run this test with the --parallel=1 option to reproduce the
 failure and get a correct traceback.
-""".format(test, original_exc_txt, pickle_exc_txt))
+""".format(
+                        test, original_exc_txt, pickle_exc_txt
+                    )
+                )
             raise
 
     def check_subtest_picklable(self, test, subtest):
@@ -354,14 +368,9 @@ class ParallelTestSuite(unittest.TestSuite):
         """
         counter = multiprocessing.Value(ctypes.c_int, 0)
         pool = multiprocessing.Pool(
-            processes=self.processes,
-            initializer=self.init_worker.__func__,
-            initargs=[counter],
+            processes=self.processes, initializer=self.init_worker.__func__, initargs=[counter]
         )
-        args = [
-            (self.runner_class, index, subsuite, self.failfast)
-            for index, subsuite in enumerate(self.subsuites)
-        ]
+        args = [(self.runner_class, index, subsuite, self.failfast) for index, subsuite in enumerate(self.subsuites)]
         test_results = pool.imap_unordered(self.run_subsuite.__func__, args)
 
         while True:
@@ -404,10 +413,22 @@ class DiscoverRunner:
     test_loader = unittest.defaultTestLoader
     reorder_by = (TestCase, SimpleTestCase)
 
-    def __init__(self, pattern=None, top_level=None, verbosity=1,
-                 interactive=True, failfast=False, keepdb=False,
-                 reverse=False, debug_mode=False, debug_sql=False, parallel=0,
-                 tags=None, exclude_tags=None, **kwargs):
+    def __init__(
+        self,
+        pattern=None,
+        top_level=None,
+        verbosity=1,
+        interactive=True,
+        failfast=False,
+        keepdb=False,
+        reverse=False,
+        debug_mode=False,
+        debug_sql=False,
+        parallel=0,
+        tags=None,
+        exclude_tags=None,
+        **kwargs
+    ):
 
         self.pattern = pattern
         self.top_level = top_level
@@ -425,40 +446,34 @@ class DiscoverRunner:
     @classmethod
     def add_arguments(cls, parser):
         parser.add_argument(
-            '-t', '--top-level-directory', dest='top_level',
-            help='Top level of project for unittest discovery.',
+            '-t', '--top-level-directory', dest='top_level', help='Top level of project for unittest discovery.'
         )
         parser.add_argument(
-            '-p', '--pattern', default="test*.py",
-            help='The test matching pattern. Defaults to test*.py.',
+            '-p', '--pattern', default="test*.py", help='The test matching pattern. Defaults to test*.py.'
         )
+        parser.add_argument('-k', '--keepdb', action='store_true', help='Preserves the test DB between runs.')
+        parser.add_argument('-r', '--reverse', action='store_true', help='Reverses test cases order.')
+        parser.add_argument('--debug-mode', action='store_true', help='Sets settings.DEBUG to True.')
+        parser.add_argument('-d', '--debug-sql', action='store_true', help='Prints logged SQL queries on failure.')
         parser.add_argument(
-            '-k', '--keepdb', action='store_true',
-            help='Preserves the test DB between runs.'
-        )
-        parser.add_argument(
-            '-r', '--reverse', action='store_true',
-            help='Reverses test cases order.',
-        )
-        parser.add_argument(
-            '--debug-mode', action='store_true',
-            help='Sets settings.DEBUG to True.',
-        )
-        parser.add_argument(
-            '-d', '--debug-sql', action='store_true',
-            help='Prints logged SQL queries on failure.',
-        )
-        parser.add_argument(
-            '--parallel', nargs='?', default=1, type=int,
-            const=default_test_processes(), metavar='N',
+            '--parallel',
+            nargs='?',
+            default=1,
+            type=int,
+            const=default_test_processes(),
+            metavar='N',
             help='Run tests using up to N parallel processes.',
         )
         parser.add_argument(
-            '--tag', action='append', dest='tags',
+            '--tag',
+            action='append',
+            dest='tags',
             help='Run only tests with the specified tag. Can be used multiple times.',
         )
         parser.add_argument(
-            '--exclude-tag', action='append', dest='exclude_tags',
+            '--exclude-tag',
+            action='append',
+            dest='exclude_tags',
             help='Do not run tests with the specified tag. Can be used multiple times.',
         )
 
@@ -549,20 +564,13 @@ class DiscoverRunner:
         return suite
 
     def setup_databases(self, **kwargs):
-        return _setup_databases(
-            self.verbosity, self.interactive, self.keepdb, self.debug_sql,
-            self.parallel, **kwargs
-        )
+        return _setup_databases(self.verbosity, self.interactive, self.keepdb, self.debug_sql, self.parallel, **kwargs)
 
     def get_resultclass(self):
         return DebugSQLTextTestResult if self.debug_sql else None
 
     def get_test_runner_kwargs(self):
-        return {
-            'failfast': self.failfast,
-            'resultclass': self.get_resultclass(),
-            'verbosity': self.verbosity,
-        }
+        return {'failfast': self.failfast, 'resultclass': self.get_resultclass(), 'verbosity': self.verbosity}
 
     def run_checks(self):
         # Checks are run after database creation since some checks require
@@ -576,12 +584,7 @@ class DiscoverRunner:
 
     def teardown_databases(self, old_config, **kwargs):
         """Destroy all the non-mirror databases."""
-        _teardown_databases(
-            old_config,
-            verbosity=self.verbosity,
-            parallel=self.parallel,
-            keepdb=self.keepdb,
-        )
+        _teardown_databases(old_config, verbosity=self.verbosity, parallel=self.parallel, keepdb=self.keepdb)
 
     def teardown_test_environment(self, **kwargs):
         unittest.removeHandler()

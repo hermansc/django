@@ -16,6 +16,7 @@ def _update_method_wrapper(_wrapper, decorator):
     @decorator
     def dummy(*args, **kwargs):
         pass
+
     update_wrapper(_wrapper, dummy)
 
 
@@ -69,8 +70,7 @@ def method_decorator(decorator, name=''):
         method = getattr(obj, name)
         if not callable(method):
             raise TypeError(
-                "Cannot decorate '%s' as it isn't a callable attribute of "
-                "%s (%s)." % (name, obj, method)
+                "Cannot decorate '%s' as it isn't a callable attribute of " "%s (%s)." % (name, obj, method)
             )
         _wrapper = _multi_decorate(decorator, method)
         setattr(obj, name, _wrapper)
@@ -140,15 +140,20 @@ def make_middleware_decorator(middleware_class):
                     # Defer running of process_response until after the template
                     # has been rendered:
                     if hasattr(middleware, 'process_response'):
+
                         def callback(response):
                             return middleware.process_response(request, response)
+
                         response.add_post_render_callback(callback)
                 else:
                     if hasattr(middleware, 'process_response'):
                         return middleware.process_response(request, response)
                 return response
+
             return _wrapped_view
+
         return _decorator
+
     return _make_decorator
 
 

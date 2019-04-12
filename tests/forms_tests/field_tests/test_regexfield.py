@@ -5,7 +5,6 @@ from django.test import SimpleTestCase
 
 
 class RegexFieldTest(SimpleTestCase):
-
     def test_regexfield_1(self):
         f = RegexField('^[0-9][A-F][0-9]$')
         self.assertEqual('2A2', f.clean('2A2'))
@@ -43,9 +42,7 @@ class RegexFieldTest(SimpleTestCase):
         with self.assertRaisesMessage(ValidationError, "'Ensure this value has at least 5 characters (it has 3).'"):
             f.clean('123')
         with self.assertRaisesMessage(
-            ValidationError,
-            "'Ensure this value has at least 5 characters (it has 3).', "
-            "'Enter a valid value.'",
+            ValidationError, "'Ensure this value has at least 5 characters (it has 3).', " "'Enter a valid value.'"
         ):
             f.clean('abc')
         self.assertEqual('12345', f.clean('12345'))

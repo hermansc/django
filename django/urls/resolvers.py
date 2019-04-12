@@ -57,8 +57,13 @@ class ResolverMatch:
 
     def __repr__(self):
         return "ResolverMatch(func=%s, args=%s, kwargs=%s, url_name=%s, app_names=%s, namespaces=%s, route=%s)" % (
-            self._func_path, self.args, self.kwargs, self.url_name,
-            self.app_names, self.namespaces, self.route,
+            self._func_path,
+            self.args,
+            self.kwargs,
+            self.url_name,
+            self.app_names,
+            self.namespaces,
+            self.route,
         )
 
 
@@ -126,9 +131,7 @@ class CheckURLMixin:
             warning = Warning(
                 "Your URL pattern {} has a route beginning with a '/'. Remove this "
                 "slash as it is unnecessary. If this pattern is targeted in an "
-                "include(), ensure the include() pattern has a trailing '/'.".format(
-                    self.describe()
-                ),
+                "include(), ensure the include() pattern has a trailing '/'.".format(self.describe()),
                 id="urls.W002",
             )
             return [warning]
@@ -154,7 +157,7 @@ class RegexPattern(CheckURLMixin):
             # positional arguments.
             kwargs = match.groupdict()
             args = () if kwargs else match.groups()
-            return path[match.end():], args, kwargs
+            return path[match.end() :], args, kwargs
         return None
 
     def check(self):
@@ -167,12 +170,14 @@ class RegexPattern(CheckURLMixin):
     def _check_include_trailing_dollar(self):
         regex_pattern = self.regex.pattern
         if regex_pattern.endswith('$') and not regex_pattern.endswith(r'\$'):
-            return [Warning(
-                "Your URL pattern {} uses include with a route ending with a '$'. "
-                "Remove the dollar from the route to avoid problems including "
-                "URLs.".format(self.describe()),
-                id='urls.W001',
-            )]
+            return [
+                Warning(
+                    "Your URL pattern {} uses include with a route ending with a '$'. "
+                    "Remove the dollar from the route to avoid problems including "
+                    "URLs.".format(self.describe()),
+                    id='urls.W001',
+                )
+            ]
         else:
             return []
 
@@ -181,17 +186,13 @@ class RegexPattern(CheckURLMixin):
         try:
             return re.compile(regex)
         except re.error as e:
-            raise ImproperlyConfigured(
-                '"%s" is not a valid regular expression: %s' % (regex, e)
-            )
+            raise ImproperlyConfigured('"%s" is not a valid regular expression: %s' % (regex, e))
 
     def __str__(self):
         return str(self._regex)
 
 
-_PATH_PARAMETER_COMPONENT_RE = re.compile(
-    r'<(?:(?P<converter>[^>:]+):)?(?P<parameter>\w+)>'
-)
+_PATH_PARAMETER_COMPONENT_RE = re.compile(r'<(?:(?P<converter>[^>:]+):)?(?P<parameter>\w+)>')
 
 
 def _route_to_regex(route, is_endpoint=False):
@@ -209,8 +210,8 @@ def _route_to_regex(route, is_endpoint=False):
         if not match:
             parts.append(re.escape(route))
             break
-        parts.append(re.escape(route[:match.start()]))
-        route = route[match.end():]
+        parts.append(re.escape(route[: match.start()]))
+        route = route[match.end() :]
         parameter = match.group('parameter')
         if not parameter.isidentifier():
             raise ImproperlyConfigured(
@@ -224,9 +225,7 @@ def _route_to_regex(route, is_endpoint=False):
         try:
             converter = get_converter(raw_converter)
         except KeyError as e:
-            raise ImproperlyConfigured(
-                "URL route '%s' uses invalid converter %s." % (original_route, e)
-            )
+            raise ImproperlyConfigured("URL route '%s' uses invalid converter %s." % (original_route, e))
         converters[parameter] = converter
         parts.append('(?P<' + parameter + '>' + converter.regex + ')')
     if is_endpoint:
@@ -255,19 +254,21 @@ class RoutePattern(CheckURLMixin):
                     kwargs[key] = converter.to_python(value)
                 except ValueError:
                     return None
-            return path[match.end():], (), kwargs
+            return path[match.end() :], (), kwargs
         return None
 
     def check(self):
         warnings = self._check_pattern_startswith_slash()
         route = self._route
         if '(?P<' in route or route.startswith('^') or route.endswith('$'):
-            warnings.append(Warning(
-                "Your URL pattern {} has a route that contains '(?P<', begins "
-                "with a '^', or ends with a '$'. This was likely an oversight "
-                "when migrating to django.urls.path().".format(self.describe()),
-                id='2_0.W001',
-            ))
+            warnings.append(
+                Warning(
+                    "Your URL pattern {} has a route that contains '(?P<', begins "
+                    "with a '^', or ends with a '$'. This was likely an oversight "
+                    "when migrating to django.urls.path().".format(self.describe()),
+                    id='2_0.W001',
+                )
+            )
         return warnings
 
     def _compile(self, route):
@@ -298,7 +299,7 @@ class LocalePrefixPattern:
     def match(self, path):
         language_prefix = self.language_prefix
         if path.startswith(language_prefix):
-            return path[len(language_prefix):], (), {}
+            return path[len(language_prefix) :], (), {}
         return None
 
     def check(self):
@@ -389,8 +390,11 @@ class URLResolver:
         else:
             urlconf_repr = repr(self.urlconf_name)
         return '<%s %s (%s:%s) %s>' % (
-            self.__class__.__name__, urlconf_repr, self.app_name,
-            self.namespace, self.pattern.describe(),
+            self.__class__.__name__,
+            urlconf_repr,
+            self.app_name,
+            self.namespace,
+            self.pattern.describe(),
         )
 
     def check(self):
@@ -444,12 +448,12 @@ class URLResolver:
                     bits = normalize(url_pattern.pattern.regex.pattern)
                     lookups.appendlist(
                         url_pattern.callback,
-                        (bits, p_pattern, url_pattern.default_args, url_pattern.pattern.converters)
+                        (bits, p_pattern, url_pattern.default_args, url_pattern.pattern.converters),
                     )
                     if url_pattern.name is not None:
                         lookups.appendlist(
                             url_pattern.name,
-                            (bits, p_pattern, url_pattern.default_args, url_pattern.pattern.converters)
+                            (bits, p_pattern, url_pattern.default_args, url_pattern.pattern.converters),
                         )
                 else:  # url_pattern is a URLResolver.
                     url_pattern._populate()
@@ -466,8 +470,8 @@ class URLResolver:
                                         new_matches,
                                         p_pattern + pat,
                                         {**defaults, **url_pattern.default_kwargs},
-                                        {**self.pattern.converters, **url_pattern.pattern.converters, **converters}
-                                    )
+                                        {**self.pattern.converters, **url_pattern.pattern.converters, **converters},
+                                    ),
                                 )
                         for namespace, (prefix, sub_pattern) in url_pattern.namespace_dict.items():
                             current_converters = url_pattern.pattern.converters
@@ -586,6 +590,7 @@ class URLResolver:
             # No handler specified in file; use lazy import, since
             # django.conf.urls imports this file.
             from django.conf import urls
+
             callback = getattr(urls, 'handler%s' % view_type)
         return get_callable(callback), {}
 
@@ -648,13 +653,14 @@ class URLResolver:
                 arg_msg = "keyword arguments '%s'" % (kwargs,)
             else:
                 arg_msg = "no arguments"
-            msg = (
-                "Reverse for '%s' with %s not found. %d pattern(s) tried: %s" %
-                (lookup_view_s, arg_msg, len(patterns), patterns)
+            msg = "Reverse for '%s' with %s not found. %d pattern(s) tried: %s" % (
+                lookup_view_s,
+                arg_msg,
+                len(patterns),
+                patterns,
             )
         else:
-            msg = (
-                "Reverse for '%(view)s' not found. '%(view)s' is not "
-                "a valid view function or pattern name." % {'view': lookup_view_s}
-            )
+            msg = "Reverse for '%(view)s' not found. '%(view)s' is not " "a valid view function or pattern name." % {
+                'view': lookup_view_s
+            }
         raise NoReverseMatch(msg)

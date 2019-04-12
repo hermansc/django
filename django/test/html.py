@@ -138,10 +138,7 @@ class HTMLParseError(Exception):
 
 
 class Parser(HTMLParser):
-    SELF_CLOSING_TAGS = (
-        'br', 'hr', 'input', 'img', 'meta', 'spacer', 'link', 'frame', 'base',
-        'col',
-    )
+    SELF_CLOSING_TAGS = ('br', 'hr', 'input', 'img', 'meta', 'spacer', 'link', 'frame', 'base', 'col')
 
     def __init__(self):
         super().__init__(convert_charrefs=False)
@@ -177,10 +174,7 @@ class Parser(HTMLParser):
         # Special case handling of 'class' attribute, so that comparisons of DOM
         # instances are not sensitive to ordering of classes.
         attrs = [
-            (name, " ".join(sorted(value.split(" "))))
-            if name == "class"
-            else (name, value)
-            for name, value in attrs
+            (name, " ".join(sorted(value.split(" ")))) if name == "class" else (name, value) for name, value in attrs
         ]
         element = Element(tag, attrs)
         self.current.append(element)
@@ -190,13 +184,11 @@ class Parser(HTMLParser):
 
     def handle_endtag(self, tag):
         if not self.open_tags:
-            self.error("Unexpected end tag `%s` (%s)" % (
-                tag, self.format_position()))
+            self.error("Unexpected end tag `%s` (%s)" % (tag, self.format_position()))
         element = self.open_tags.pop()
         while element.name != tag:
             if not self.open_tags:
-                self.error("Unexpected end tag `%s` (%s)" % (
-                    tag, self.format_position()))
+                self.error("Unexpected end tag `%s` (%s)" % (tag, self.format_position()))
             element = self.open_tags.pop()
 
     def handle_data(self, data):

@@ -24,12 +24,7 @@ class NamedCategory(DumbCategory):
 
 class Tag(models.Model):
     name = models.CharField(max_length=10)
-    parent = models.ForeignKey(
-        'self',
-        models.SET_NULL,
-        blank=True, null=True,
-        related_name='children',
-    )
+    parent = models.ForeignKey('self', models.SET_NULL, blank=True, null=True, related_name='children')
     category = models.ForeignKey(NamedCategory, models.SET_NULL, null=True, default=None)
 
     class Meta:
@@ -147,6 +142,7 @@ class Number(models.Model):
     def __str__(self):
         return str(self.num)
 
+
 # Symmetrical m2m field with a normal field using the reverse accessor name
 # ("valid").
 
@@ -158,6 +154,7 @@ class Valid(models.Model):
     class Meta:
         ordering = ['valid']
 
+
 # Some funky cross-linked models for testing a couple of infinite recursion
 # cases.
 
@@ -168,6 +165,7 @@ class X(models.Model):
 
 class Y(models.Model):
     x1 = models.ForeignKey(X, models.CASCADE, related_name='y1')
+
 
 # Some models with a cycle in the default ordering. This would be bad if we
 # didn't catch the infinite loop.
@@ -214,6 +212,7 @@ class ManagedModel(models.Model):
     def __str__(self):
         return self.data
 
+
 # An inter-related setup with multiple paths from Child to Detail.
 
 
@@ -237,6 +236,7 @@ class Child(models.Model):
     person = models.OneToOneField(Member, models.CASCADE, primary_key=True)
     parent = models.ForeignKey(Member, models.CASCADE, related_name="children")
 
+
 # Custom primary keys interfered with ordering in the past.
 
 
@@ -257,6 +257,7 @@ class CustomPkTag(models.Model):
     custom_pk = models.ManyToManyField(CustomPk)
     tag = models.CharField(max_length=20)
 
+
 # An inter-related setup with a model subclass that has a nullable
 # path to another model, and a return path from that model.
 
@@ -275,6 +276,7 @@ class TvChef(Celebrity):
 
 class Fan(models.Model):
     fan_of = models.ForeignKey(Celebrity, models.CASCADE)
+
 
 # Multiple foreign keys
 
@@ -302,6 +304,7 @@ class ReservedName(models.Model):
     def __str__(self):
         return self.name
 
+
 # A simpler shared-foreign-key setup that can expose some problems.
 
 
@@ -318,6 +321,7 @@ class PointerA(models.Model):
 
 class PointerB(models.Model):
     connection = models.ForeignKey(SharedConnection, models.CASCADE)
+
 
 # Multi-layer ordering
 
@@ -380,6 +384,7 @@ class Node(models.Model):
 
     def __str__(self):
         return "%s" % self.num
+
 
 # Bug #12252
 
@@ -516,11 +521,11 @@ class JobResponsibilities(models.Model):
 
 class Responsibility(models.Model):
     description = models.CharField(max_length=20, unique=True)
-    jobs = models.ManyToManyField(Job, through=JobResponsibilities,
-                                  related_name='responsibilities')
+    jobs = models.ManyToManyField(Job, through=JobResponsibilities, related_name='responsibilities')
 
     def __str__(self):
         return self.description
+
 
 # Models for disjunction join promotion low level testing.
 
@@ -585,6 +590,7 @@ class MyObject(models.Model):
     parent = models.ForeignKey('self', models.SET_NULL, null=True, blank=True, related_name='children')
     data = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+
 
 # Models for #17600 regressions
 

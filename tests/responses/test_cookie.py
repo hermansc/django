@@ -10,7 +10,6 @@ from django.utils.timezone import utc
 
 
 class SetCookieTests(SimpleTestCase):
-
     def test_near_expiration(self):
         """Cookie will expire when a near expiration time is provided."""
         response = HttpResponse()
@@ -52,7 +51,7 @@ class SetCookieTests(SimpleTestCase):
         self.assertIn(
             datetime_cookie['expires'],
             # assertIn accounts for slight time dependency (#23450)
-            ('Fri, 01 Jan 2038 04:05:06 GMT', 'Fri, 01 Jan 2038 04:05:07 GMT')
+            ('Fri, 01 Jan 2038 04:05:06 GMT', 'Fri, 01 Jan 2038 04:05:07 GMT'),
         )
 
     def test_max_age_expiration(self):
@@ -92,7 +91,6 @@ class SetCookieTests(SimpleTestCase):
 
 
 class DeleteCookieTests(SimpleTestCase):
-
     def test_default(self):
         response = HttpResponse()
         response.delete_cookie('c')

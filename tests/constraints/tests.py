@@ -36,16 +36,13 @@ class CheckConstraintTests(TestCase):
         check1 = models.Q(price__gt=models.F('discounted_price'))
         check2 = models.Q(price__lt=models.F('discounted_price'))
         self.assertEqual(
-            models.CheckConstraint(check=check1, name='price'),
-            models.CheckConstraint(check=check1, name='price'),
+            models.CheckConstraint(check=check1, name='price'), models.CheckConstraint(check=check1, name='price')
         )
         self.assertNotEqual(
-            models.CheckConstraint(check=check1, name='price'),
-            models.CheckConstraint(check=check1, name='price2'),
+            models.CheckConstraint(check=check1, name='price'), models.CheckConstraint(check=check1, name='price2')
         )
         self.assertNotEqual(
-            models.CheckConstraint(check=check1, name='price'),
-            models.CheckConstraint(check=check2, name='price'),
+            models.CheckConstraint(check=check1, name='price'), models.CheckConstraint(check=check2, name='price')
         )
         self.assertNotEqual(models.CheckConstraint(check=check1, name='price'), 1)
 
@@ -53,10 +50,7 @@ class CheckConstraintTests(TestCase):
         check = models.Q(price__gt=models.F('discounted_price'))
         name = 'price_gt_discounted_price'
         constraint = models.CheckConstraint(check=check, name=name)
-        self.assertEqual(
-            repr(constraint),
-            "<CheckConstraint: check='{}' name='{}'>".format(check, name),
-        )
+        self.assertEqual(repr(constraint), "<CheckConstraint: check='{}' name='{}'>".format(check, name))
 
     def test_deconstruction(self):
         check = models.Q(price__gt=models.F('discounted_price'))
@@ -83,10 +77,7 @@ class CheckConstraintTests(TestCase):
 class UniqueConstraintTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.p1, cls.p2 = Product.objects.bulk_create([
-            Product(name='p1', color='red'),
-            Product(name='p2'),
-        ])
+        cls.p1, cls.p2 = Product.objects.bulk_create([Product(name='p1', color='red'), Product(name='p2')])
 
     def test_eq(self):
         self.assertEqual(
@@ -105,46 +96,27 @@ class UniqueConstraintTests(TestCase):
 
     def test_eq_with_condition(self):
         self.assertEqual(
-            models.UniqueConstraint(
-                fields=['foo', 'bar'], name='unique',
-                condition=models.Q(foo=models.F('bar'))
-            ),
-            models.UniqueConstraint(
-                fields=['foo', 'bar'], name='unique',
-                condition=models.Q(foo=models.F('bar'))),
+            models.UniqueConstraint(fields=['foo', 'bar'], name='unique', condition=models.Q(foo=models.F('bar'))),
+            models.UniqueConstraint(fields=['foo', 'bar'], name='unique', condition=models.Q(foo=models.F('bar'))),
         )
         self.assertNotEqual(
-            models.UniqueConstraint(
-                fields=['foo', 'bar'],
-                name='unique',
-                condition=models.Q(foo=models.F('bar'))
-            ),
-            models.UniqueConstraint(
-                fields=['foo', 'bar'],
-                name='unique',
-                condition=models.Q(foo=models.F('baz'))
-            ),
+            models.UniqueConstraint(fields=['foo', 'bar'], name='unique', condition=models.Q(foo=models.F('bar'))),
+            models.UniqueConstraint(fields=['foo', 'bar'], name='unique', condition=models.Q(foo=models.F('baz'))),
         )
 
     def test_repr(self):
         fields = ['foo', 'bar']
         name = 'unique_fields'
         constraint = models.UniqueConstraint(fields=fields, name=name)
-        self.assertEqual(
-            repr(constraint),
-            "<UniqueConstraint: fields=('foo', 'bar') name='unique_fields'>",
-        )
+        self.assertEqual(repr(constraint), "<UniqueConstraint: fields=('foo', 'bar') name='unique_fields'>")
 
     def test_repr_with_condition(self):
         constraint = models.UniqueConstraint(
-            fields=['foo', 'bar'],
-            name='unique_fields',
-            condition=models.Q(foo=models.F('bar')),
+            fields=['foo', 'bar'], name='unique_fields', condition=models.Q(foo=models.F('bar'))
         )
         self.assertEqual(
             repr(constraint),
-            "<UniqueConstraint: fields=('foo', 'bar') name='unique_fields' "
-            "condition=(AND: ('foo', F(bar)))>",
+            "<UniqueConstraint: fields=('foo', 'bar') name='unique_fields' " "condition=(AND: ('foo', F(bar)))>",
         )
 
     def test_deconstruction(self):

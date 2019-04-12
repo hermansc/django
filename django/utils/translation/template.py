@@ -82,34 +82,33 @@ def templatize(src, origin=None):
                 if endbmatch:
                     if inplural:
                         if message_context:
-                            out.write(' npgettext({p}{!r}, {p}{!r}, {p}{!r},count) '.format(
-                                message_context,
-                                join_tokens(singular, trimmed),
-                                join_tokens(plural, trimmed),
-                                p=raw_prefix,
-                            ))
+                            out.write(
+                                ' npgettext({p}{!r}, {p}{!r}, {p}{!r},count) '.format(
+                                    message_context,
+                                    join_tokens(singular, trimmed),
+                                    join_tokens(plural, trimmed),
+                                    p=raw_prefix,
+                                )
+                            )
                         else:
-                            out.write(' ngettext({p}{!r}, {p}{!r}, count) '.format(
-                                join_tokens(singular, trimmed),
-                                join_tokens(plural, trimmed),
-                                p=raw_prefix,
-                            ))
+                            out.write(
+                                ' ngettext({p}{!r}, {p}{!r}, count) '.format(
+                                    join_tokens(singular, trimmed), join_tokens(plural, trimmed), p=raw_prefix
+                                )
+                            )
                         for part in singular:
                             out.write(blankout(part, 'S'))
                         for part in plural:
                             out.write(blankout(part, 'P'))
                     else:
                         if message_context:
-                            out.write(' pgettext({p}{!r}, {p}{!r}) '.format(
-                                message_context,
-                                join_tokens(singular, trimmed),
-                                p=raw_prefix,
-                            ))
+                            out.write(
+                                ' pgettext({p}{!r}, {p}{!r}) '.format(
+                                    message_context, join_tokens(singular, trimmed), p=raw_prefix
+                                )
+                            )
                         else:
-                            out.write(' gettext({p}{!r}) '.format(
-                                join_tokens(singular, trimmed),
-                                p=raw_prefix,
-                            ))
+                            out.write(' gettext({p}{!r}) '.format(join_tokens(singular, trimmed), p=raw_prefix))
                         for part in singular:
                             out.write(blankout(part, 'S'))
                     message_context = None
@@ -179,9 +178,7 @@ def templatize(src, origin=None):
                             message_context = message_context.strip('"')
                         elif message_context[0] == "'":
                             message_context = message_context.strip("'")
-                        out.write(' pgettext({p}{!r}, {p}{!r}) '.format(
-                            message_context, g, p=raw_prefix
-                        ))
+                        out.write(' pgettext({p}{!r}, {p}{!r}) '.format(message_context, g, p=raw_prefix))
                         message_context = None
                     else:
                         out.write(' gettext({p}{!r}) '.format(g, p=raw_prefix))

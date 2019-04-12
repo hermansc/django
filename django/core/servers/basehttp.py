@@ -37,6 +37,7 @@ def get_internal_wsgi_application():
     whatever ``django.core.wsgi.get_wsgi_application`` returns.
     """
     from django.conf import settings
+
     app_path = getattr(settings, 'WSGI_APPLICATION')
     if app_path is None:
         return get_wsgi_application()
@@ -45,8 +46,7 @@ def get_internal_wsgi_application():
         return import_string(app_path)
     except ImportError as err:
         raise ImproperlyConfigured(
-            "WSGI application '%s' could not be loaded; "
-            "Error importing module." % app_path
+            "WSGI application '%s' could not be loaded; " "Error importing module." % app_path
         ) from err
 
 
@@ -75,6 +75,7 @@ class WSGIServer(simple_server.WSGIServer):
 
 class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):
     """A threaded version of the WSGIServer"""
+
     daemon_threads = True
 
 
@@ -124,17 +125,13 @@ class WSGIRequestHandler(simple_server.WSGIRequestHandler):
         return self.client_address[0]
 
     def log_message(self, format, *args):
-        extra = {
-            'request': self.request,
-            'server_time': self.log_date_time_string(),
-        }
+        extra = {'request': self.request, 'server_time': self.log_date_time_string()}
         if args[1][0] == '4':
             # 0x16 = Handshake, 0x03 = SSL 3.0 or TLS 1.x
             if args[0].startswith('\x16\x03'):
                 extra['status_code'] = 500
                 logger.error(
-                    "You're accessing the development server over HTTPS, but "
-                    "it only supports HTTP.\n", extra=extra,
+                    "You're accessing the development server over HTTPS, but " "it only supports HTTP.\n", extra=extra
                 )
                 return
 
@@ -187,10 +184,8 @@ class WSGIRequestHandler(simple_server.WSGIRequestHandler):
         if not self.parse_request():  # An error code has been sent, just exit
             return
 
-        handler = ServerHandler(
-            self.rfile, self.wfile, self.get_stderr(), self.get_environ()
-        )
-        handler.request_handler = self      # backpointer for logging & connection closing
+        handler = ServerHandler(self.rfile, self.wfile, self.get_stderr(), self.get_environ())
+        handler.request_handler = self  # backpointer for logging & connection closing
         handler.run(self.server.get_app())
 
 

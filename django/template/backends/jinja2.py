@@ -26,8 +26,7 @@ class Jinja2(BaseEngine):
             options['loader'] = jinja2.FileSystemLoader(self.template_dirs)
         options.setdefault('autoescape', True)
         options.setdefault('auto_reload', settings.DEBUG)
-        options.setdefault('undefined',
-                           jinja2.DebugUndefined if settings.DEBUG else jinja2.Undefined)
+        options.setdefault('undefined', jinja2.DebugUndefined if settings.DEBUG else jinja2.Undefined)
 
         self.env = environment_cls(**options)
 
@@ -50,16 +49,14 @@ class Jinja2(BaseEngine):
 
 
 class Template:
-
     def __init__(self, template, backend):
         self.template = template
         self.backend = backend
-        self.origin = Origin(
-            name=template.filename, template_name=template.name,
-        )
+        self.origin = Origin(name=template.filename, template_name=template.name)
 
     def render(self, context=None, request=None):
         from .utils import csrf_input_lazy, csrf_token_lazy
+
         if context is None:
             context = {}
         if request is not None:
@@ -76,6 +73,7 @@ class Origin:
     A container to hold debug information as described in the template API
     documentation.
     """
+
     def __init__(self, name, template_name):
         self.name = name
         self.template_name = template_name

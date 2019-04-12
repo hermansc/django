@@ -6,7 +6,6 @@ from ..utils import setup
 
 
 class IfEqualTagTests(SimpleTestCase):
-
     @setup({'ifequal01': '{% ifequal a b %}yes{% endifequal %}'})
     def test_ifequal01(self):
         output = self.engine.render_to_string('ifequal01', {'a': 1, 'b': 2})
@@ -197,7 +196,6 @@ class IfEqualTagTests(SimpleTestCase):
 
 
 class IfNotEqualTagTests(SimpleTestCase):
-
     @setup({'ifnotequal01': '{% ifnotequal a b %}yes{% endifnotequal %}'})
     def test_ifnotequal01(self):
         output = self.engine.render_to_string('ifnotequal01', {'a': 1, 'b': 2})

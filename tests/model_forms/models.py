@@ -39,11 +39,7 @@ class Writer(models.Model):
 
 
 class Article(models.Model):
-    ARTICLE_STATUS = (
-        (1, 'Draft'),
-        (2, 'Pending'),
-        (3, 'Live'),
-    )
+    ARTICLE_STATUS = ((1, 'Draft'), (2, 'Pending'), (3, 'Live'))
     headline = models.CharField(max_length=50)
     slug = models.SlugField()
     pub_date = models.DateField()
@@ -163,8 +159,9 @@ try:
         # trigger the bug in #10404 with width/height not getting assigned.
         width = models.IntegerField(editable=False)
         height = models.IntegerField(editable=False)
-        image = models.ImageField(storage=temp_storage, upload_to=custom_upload_path,
-                                  width_field='width', height_field='height')
+        image = models.ImageField(
+            storage=temp_storage, upload_to=custom_upload_path, width_field='width', height_field='height'
+        )
         path = models.CharField(max_length=16, blank=True, default='')
 
         def __str__(self):
@@ -176,9 +173,14 @@ try:
             return '%s/%s' % (path, filename)
 
         description = models.CharField(max_length=20)
-        image = models.ImageField(storage=temp_storage, upload_to=custom_upload_path,
-                                  width_field='width', height_field='height',
-                                  blank=True, null=True)
+        image = models.ImageField(
+            storage=temp_storage,
+            upload_to=custom_upload_path,
+            width_field='width',
+            height_field='height',
+            blank=True,
+            null=True,
+        )
         width = models.IntegerField(editable=False, null=True)
         height = models.IntegerField(editable=False, null=True)
         path = models.CharField(max_length=16, blank=True, default='')
@@ -195,6 +197,7 @@ try:
 
         def __str__(self):
             return self.description
+
 
 except ImportError:
     test_images = False
@@ -232,11 +235,7 @@ class Triple(models.Model):
 
 
 class ArticleStatus(models.Model):
-    ARTICLE_STATUS_CHAR = (
-        ('d', 'Draft'),
-        ('p', 'Pending'),
-        ('l', 'Live'),
-    )
+    ARTICLE_STATUS_CHAR = (('d', 'Draft'), ('p', 'Pending'), ('l', 'Live'))
     status = models.CharField(max_length=2, choices=ARTICLE_STATUS_CHAR, blank=True, null=True)
 
 
@@ -270,7 +269,7 @@ class BookXtra(models.Model):
     suffix2 = models.IntegerField(blank=True, default=0)
 
     class Meta:
-        unique_together = (('suffix1', 'suffix2'))
+        unique_together = ('suffix1', 'suffix2')
         abstract = True
 
 
@@ -362,14 +361,10 @@ class ColourfulItem(models.Model):
 
 class CustomErrorMessage(models.Model):
     name1 = models.CharField(
-        max_length=50,
-        validators=[validators.validate_slug],
-        error_messages={'invalid': 'Model custom error message.'},
+        max_length=50, validators=[validators.validate_slug], error_messages={'invalid': 'Model custom error message.'}
     )
     name2 = models.CharField(
-        max_length=50,
-        validators=[validators.validate_slug],
-        error_messages={'invalid': 'Model custom error message.'},
+        max_length=50, validators=[validators.validate_slug], error_messages={'invalid': 'Model custom error message.'}
     )
 
     def clean(self):
@@ -396,10 +391,7 @@ class Character(models.Model):
 
 class StumpJoke(models.Model):
     most_recently_fooled = models.ForeignKey(
-        Character,
-        models.CASCADE,
-        limit_choices_to=today_callable_dict,
-        related_name="+",
+        Character, models.CASCADE, limit_choices_to=today_callable_dict, related_name="+"
     )
     has_fooled_today = models.ManyToManyField(Character, limit_choices_to=today_callable_q, related_name="+")
 

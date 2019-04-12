@@ -36,18 +36,9 @@ class DistinctOnTests(TestCase):
         """QuerySet.distinct('field', ...) works"""
         # (qset, expected) tuples
         qsets = (
-            (
-                Staff.objects.distinct().order_by('name'),
-                ['<Staff: p1>', '<Staff: p1>', '<Staff: p2>', '<Staff: p3>'],
-            ),
-            (
-                Staff.objects.distinct('name').order_by('name'),
-                ['<Staff: p1>', '<Staff: p2>', '<Staff: p3>'],
-            ),
-            (
-                Staff.objects.distinct('organisation').order_by('organisation', 'name'),
-                ['<Staff: p1>', '<Staff: p1>'],
-            ),
+            (Staff.objects.distinct().order_by('name'), ['<Staff: p1>', '<Staff: p1>', '<Staff: p2>', '<Staff: p3>']),
+            (Staff.objects.distinct('name').order_by('name'), ['<Staff: p1>', '<Staff: p2>', '<Staff: p3>']),
+            (Staff.objects.distinct('organisation').order_by('organisation', 'name'), ['<Staff: p1>', '<Staff: p1>']),
             (
                 Staff.objects.distinct('name', 'organisation').order_by('name', 'organisation'),
                 ['<Staff: p1>', '<Staff: p1>', '<Staff: p2>', '<Staff: p3>'],
@@ -58,29 +49,22 @@ class DistinctOnTests(TestCase):
             ),
             # Does combining querysets work?
             (
-                (Celebrity.objects.filter(fan__in=[self.fan1, self.fan2]).
-                    distinct('name').order_by('name') |
-                 Celebrity.objects.filter(fan__in=[self.fan3]).
-                    distinct('name').order_by('name')),
+                (
+                    Celebrity.objects.filter(fan__in=[self.fan1, self.fan2]).distinct('name').order_by('name')
+                    | Celebrity.objects.filter(fan__in=[self.fan3]).distinct('name').order_by('name')
+                ),
                 ['<Celebrity: c1>', '<Celebrity: c2>'],
             ),
-            (
-                StaffTag.objects.distinct('staff', 'tag'),
-                ['<StaffTag: t1 -> p1>'],
-            ),
-            (
-                Tag.objects.order_by('parent__pk', 'pk').distinct('parent'),
-                ['<Tag: t2>', '<Tag: t4>', '<Tag: t1>'],
-            ),
+            (StaffTag.objects.distinct('staff', 'tag'), ['<StaffTag: t1 -> p1>']),
+            (Tag.objects.order_by('parent__pk', 'pk').distinct('parent'), ['<Tag: t2>', '<Tag: t4>', '<Tag: t1>']),
             (
                 StaffTag.objects.select_related('staff').distinct('staff__name').order_by('staff__name'),
                 ['<StaffTag: t1 -> p1>'],
             ),
             # Fetch the alphabetically first coworker for each worker
             (
-                (Staff.objects.distinct('id').order_by('id', 'coworkers__name').
-                    values_list('id', 'coworkers__name')),
-                ["(1, 'p2')", "(2, 'p1')", "(3, 'p1')", "(4, None)"]
+                (Staff.objects.distinct('id').order_by('id', 'coworkers__name').values_list('id', 'coworkers__name')),
+                ["(1, 'p2')", "(2, 'p1')", "(3, 'p1')", "(4, None)"],
             ),
         )
         for qset, expected in qsets:
@@ -104,8 +88,7 @@ class DistinctOnTests(TestCase):
         Tag.objects.create(name=new_name)
         with register_lookup(CharField, Lower):
             self.assertCountEqual(
-                Tag.objects.order_by().distinct('name__lower'),
-                [self.t1, self.t2, self.t3, self.t4, self.t5],
+                Tag.objects.order_by().distinct('name__lower'), [self.t1, self.t2, self.t3, self.t4, self.t5]
             )
 
     def test_distinct_not_implemented_checks(self):

@@ -5,9 +5,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 from django.conf import settings
-from django.core.exceptions import (
-    FieldDoesNotExist, ImproperlyConfigured, ValidationError,
-)
+from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured, ValidationError
 from django.utils.functional import lazy
 from django.utils.html import format_html, format_html_join
 from django.utils.module_loading import import_string
@@ -92,6 +90,7 @@ class MinimumLengthValidator:
     """
     Validate whether the password is of a minimum length.
     """
+
     def __init__(self, min_length=8):
         self.min_length = min_length
 
@@ -101,7 +100,7 @@ class MinimumLengthValidator:
                 ngettext(
                     "This password is too short. It must contain at least %(min_length)d character.",
                     "This password is too short. It must contain at least %(min_length)d characters.",
-                    self.min_length
+                    self.min_length,
                 ),
                 code='password_too_short',
                 params={'min_length': self.min_length},
@@ -111,7 +110,7 @@ class MinimumLengthValidator:
         return ngettext(
             "Your password must contain at least %(min_length)d character.",
             "Your password must contain at least %(min_length)d characters.",
-            self.min_length
+            self.min_length,
         ) % {'min_length': self.min_length}
 
 
@@ -126,6 +125,7 @@ class UserAttributeSimilarityValidator:
     example, a password is validated against either part of an email address,
     as well as the full address.
     """
+
     DEFAULT_USER_ATTRIBUTES = ('username', 'first_name', 'last_name', 'email')
 
     def __init__(self, user_attributes=DEFAULT_USER_ATTRIBUTES, max_similarity=0.7):
@@ -167,6 +167,7 @@ class CommonPasswordValidator:
     https://gist.github.com/roycewilliams/281ce539915a947a23db17137d91aeb7
     The password list must be lowercased to match the comparison in validate().
     """
+
     DEFAULT_PASSWORD_LIST_PATH = Path(__file__).resolve().parent / 'common-passwords.txt.gz'
 
     def __init__(self, password_list_path=DEFAULT_PASSWORD_LIST_PATH):
@@ -181,10 +182,7 @@ class CommonPasswordValidator:
 
     def validate(self, password, user=None):
         if password.lower().strip() in self.passwords:
-            raise ValidationError(
-                _("This password is too common."),
-                code='password_too_common',
-            )
+            raise ValidationError(_("This password is too common."), code='password_too_common')
 
     def get_help_text(self):
         return _("Your password can't be a commonly used password.")
@@ -194,12 +192,10 @@ class NumericPasswordValidator:
     """
     Validate whether the password is alphanumeric.
     """
+
     def validate(self, password, user=None):
         if password.isdigit():
-            raise ValidationError(
-                _("This password is entirely numeric."),
-                code='password_entirely_numeric',
-            )
+            raise ValidationError(_("This password is entirely numeric."), code='password_entirely_numeric')
 
     def get_help_text(self):
         return _("Your password can't be entirely numeric.")

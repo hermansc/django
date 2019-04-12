@@ -4,9 +4,7 @@ from psycopg2.extras import Json
 
 from django.contrib.postgres import forms, lookups
 from django.core import exceptions
-from django.db.models import (
-    Field, TextField, Transform, lookups as builtin_lookups,
-)
+from django.db.models import Field, TextField, Transform, lookups as builtin_lookups
 from django.utils.translation import gettext_lazy as _
 
 from .mixins import CheckFieldDefaultMixin
@@ -18,6 +16,7 @@ class JsonAdapter(Json):
     """
     Customized psycopg2.extras.Json to allow for a custom encoder.
     """
+
     def __init__(self, adapted, dumps=None, encoder=None):
         self.encoder = encoder
         super().__init__(adapted, dumps=dumps)
@@ -30,9 +29,7 @@ class JsonAdapter(Json):
 class JSONField(CheckFieldDefaultMixin, Field):
     empty_strings_allowed = False
     description = _('A JSON object')
-    default_error_messages = {
-        'invalid': _("Value must be valid JSON."),
-    }
+    default_error_messages = {'invalid': _("Value must be valid JSON.")}
     _default_hint = ('dict', '{}')
 
     def __init__(self, verbose_name=None, name=None, encoder=None, **kwargs):
@@ -67,20 +64,13 @@ class JSONField(CheckFieldDefaultMixin, Field):
         try:
             json.dumps(value, **options)
         except TypeError:
-            raise exceptions.ValidationError(
-                self.error_messages['invalid'],
-                code='invalid',
-                params={'value': value},
-            )
+            raise exceptions.ValidationError(self.error_messages['invalid'], code='invalid', params={'value': value})
 
     def value_to_string(self, obj):
         return self.value_from_object(obj)
 
     def formfield(self, **kwargs):
-        return super().formfield(**{
-            'form_class': forms.JSONField,
-            **kwargs,
-        })
+        return super().formfield(**{'form_class': forms.JSONField, **kwargs})
 
 
 JSONField.register_lookup(lookups.DataContains)
@@ -129,6 +119,7 @@ class KeyTransformTextLookupMixin:
     key lookup. Make use of the ->> operator instead of casting key values to
     text and performing the lookup on the resulting representation.
     """
+
     def __init__(self, key_transform, *args, **kwargs):
         assert isinstance(key_transform, KeyTransform)
         key_text_transform = KeyTextTransform(
@@ -180,7 +171,6 @@ KeyTransform.register_lookup(KeyTransformIRegex)
 
 
 class KeyTransformFactory:
-
     def __init__(self, key_name):
         self.key_name = key_name
 

@@ -1,14 +1,16 @@
 from django.urls import include, path, re_path
 
 from .views import (
-    absolute_kwargs_view, defaults_view, empty_view, empty_view_nested_partial,
-    empty_view_partial, empty_view_wrapped, nested_view,
+    absolute_kwargs_view,
+    defaults_view,
+    empty_view,
+    empty_view_nested_partial,
+    empty_view_partial,
+    empty_view_wrapped,
+    nested_view,
 )
 
-other_patterns = [
-    path('non_path_include/', empty_view, name='non_path_include'),
-    path('nested_path/', nested_view),
-]
+other_patterns = [path('non_path_include/', empty_view, name='non_path_include'), path('nested_path/', nested_view)]
 
 urlpatterns = [
     re_path(r'^places/([0-9]+)/$', empty_view, name='places'),
@@ -57,23 +59,17 @@ urlpatterns = [
     re_path(r'^lookahead\+/(?=a-city)(?P<city>[^/]+)/$', empty_view, name='lookahead-positive'),
     re_path(r'^lookbehind-/(?P<city>[^/]+)(?<!not-a-city)/$', empty_view, name='lookbehind-negative'),
     re_path(r'^lookbehind\+/(?P<city>[^/]+)(?<=a-city)/$', empty_view, name='lookbehind-positive'),
-
     # Partials should be fine.
     path('partial/', empty_view_partial, name='partial'),
     path('partial_nested/', empty_view_nested_partial, name='partial_nested'),
     path('partial_wrapped/', empty_view_wrapped, name='partial_wrapped'),
-
     # This is non-reversible, but we shouldn't blow up when parsing it.
     re_path(r'^(?:foo|bar)(\w+)/$', empty_view, name='disjunction'),
-
     path('absolute_arg_view/', absolute_kwargs_view),
-
     # Tests for #13154. Mixed syntax to test both ways of defining URLs.
     re_path(r'^defaults_view1/(?P<arg1>[0-9]+)/$', defaults_view, {'arg2': 1}, name='defaults'),
     re_path(r'^defaults_view2/(?P<arg1>[0-9]+)/$', defaults_view, {'arg2': 2}, 'defaults'),
-
     path('includes/', include(other_patterns)),
-
     # Security tests
     re_path('(.+)/security/$', empty_view, name='security'),
 ]

@@ -29,8 +29,7 @@ class Index:
         self.fields = list(fields)
         # A list of 2-tuple with the field name and ordering ('' or 'DESC').
         self.fields_orders = [
-            (field_name[1:], 'DESC') if field_name.startswith('-') else (field_name, '')
-            for field_name in self.fields
+            (field_name[1:], 'DESC') if field_name.startswith('-') else (field_name, '') for field_name in self.fields
         ]
         self.name = name or ''
         if self.name:
@@ -72,8 +71,14 @@ class Index:
         col_suffixes = [order[1] for order in self.fields_orders]
         condition = self._get_condition_sql(model, schema_editor)
         return schema_editor._create_index_sql(
-            model, fields, name=self.name, using=using, db_tablespace=self.db_tablespace,
-            col_suffixes=col_suffixes, opclasses=self.opclasses, condition=condition,
+            model,
+            fields,
+            name=self.name,
+            using=using,
+            db_tablespace=self.db_tablespace,
+            col_suffixes=col_suffixes,
+            opclasses=self.opclasses,
+            condition=condition,
         )
 
     def remove_sql(self, model, schema_editor):
@@ -119,14 +124,14 @@ class Index:
             '%s_%s' % (names_digest(*hash_data, length=6), self.suffix),
         )
         assert len(self.name) <= self.max_name_length, (
-            'Index too long for multiple database support. Is self.suffix '
-            'longer than 3 characters?'
+            'Index too long for multiple database support. Is self.suffix ' 'longer than 3 characters?'
         )
         self.check_name()
 
     def __repr__(self):
         return "<%s: fields='%s'%s>" % (
-            self.__class__.__name__, ', '.join(self.fields),
+            self.__class__.__name__,
+            ', '.join(self.fields),
             '' if self.condition is None else ', condition=%s' % self.condition,
         )
 

@@ -9,13 +9,8 @@ class CheckFieldDefaultMixin:
             return [
                 checks.Warning(
                     "%s default should be a callable instead of an instance so "
-                    "that it's not shared between all field instances." % (
-                        self.__class__.__name__,
-                    ),
-                    hint=(
-                        'Use a callable instead, e.g., use `%s` instead of '
-                        '`%s`.' % self._default_hint
-                    ),
+                    "that it's not shared between all field instances." % (self.__class__.__name__,),
+                    hint=('Use a callable instead, e.g., use `%s` instead of ' '`%s`.' % self._default_hint),
                     obj=self,
                     id='postgres.E003',
                 )

@@ -1,15 +1,10 @@
-from django.template import (
-    Context, Engine, TemplateDoesNotExist, TemplateSyntaxError, loader,
-)
+from django.template import Context, Engine, TemplateDoesNotExist, TemplateSyntaxError, loader
 from django.test import SimpleTestCase
 
 from ..utils import setup
 from .test_basic import basic_templates
 
-include_fail_templates = {
-    'include-fail1': '{% load bad_tag %}{% badtag %}',
-    'include-fail2': '{% load broken_tag %}',
-}
+include_fail_templates = {'include-fail1': '{% load bad_tag %}{% badtag %}', 'include-fail2': '{% load broken_tag %}'}
 
 
 class IncludeTagTests(SimpleTestCase):
@@ -27,10 +22,7 @@ class IncludeTagTests(SimpleTestCase):
 
     @setup({'include03': '{% include template_name %}'}, basic_templates)
     def test_include03(self):
-        output = self.engine.render_to_string(
-            'include03',
-            {'template_name': 'basic-syntax02', 'headline': 'Included'},
-        )
+        output = self.engine.render_to_string('include03', {'template_name': 'basic-syntax02', 'headline': 'Included'})
         self.assertEqual(output, 'Included')
 
     @setup({'include04': 'a{% include "nonexistent" %}b'})
@@ -39,10 +31,7 @@ class IncludeTagTests(SimpleTestCase):
         with self.assertRaises(TemplateDoesNotExist):
             template.render(Context({}))
 
-    @setup({
-        'include 05': 'template with a space',
-        'include06': '{% include "include 05"%}',
-    })
+    @setup({'include 05': 'template with a space', 'include06': '{% include "include 05"%}'})
     def test_include06(self):
         output = self.engine.render_to_string('include06')
         self.assertEqual(output, "template with a space")
@@ -58,9 +47,11 @@ class IncludeTagTests(SimpleTestCase):
         self.assertEqual(output, 'Dynamic')
 
     @setup(
-        {'include09': '{{ first }}--'
-                      '{% include "basic-syntax03" with first=second|lower|upper second=first|upper %}'
-                      '--{{ second }}'},
+        {
+            'include09': '{{ first }}--'
+            '{% include "basic-syntax03" with first=second|lower|upper second=first|upper %}'
+            '--{{ second }}'
+        },
         basic_templates,
     )
     def test_include09(self):
@@ -91,10 +82,7 @@ class IncludeTagTests(SimpleTestCase):
         else:
             self.assertEqual(output, '1 --- ')
 
-    @setup(
-        {'include13': '{% autoescape off %}{% include "basic-syntax03" %}{% endautoescape %}'},
-        basic_templates,
-    )
+    @setup({'include13': '{% autoescape off %}{% include "basic-syntax03" %}{% endautoescape %}'}, basic_templates)
     def test_include13(self):
         output = self.engine.render_to_string('include13', {'first': '&'})
         if self.engine.string_if_invalid:
@@ -103,9 +91,11 @@ class IncludeTagTests(SimpleTestCase):
             self.assertEqual(output, '& --- ')
 
     @setup(
-        {'include14': '{% autoescape off %}'
-                      '{% include "basic-syntax03" with first=var1 only %}'
-                      '{% endautoescape %}'},
+        {
+            'include14': '{% autoescape off %}'
+            '{% include "basic-syntax03" with first=var1 only %}'
+            '{% endautoescape %}'
+        },
         basic_templates,
     )
     def test_include14(self):
@@ -184,16 +174,12 @@ class IncludeTagTests(SimpleTestCase):
 
     @setup({'include_empty': '{% include %}'})
     def test_include_empty(self):
-        msg = (
-            "'include' tag takes at least one argument: the name of the "
-            "template to be included."
-        )
+        msg = "'include' tag takes at least one argument: the name of the " "template to be included."
         with self.assertRaisesMessage(TemplateSyntaxError, msg):
             self.engine.get_template('include_empty')
 
 
 class IncludeTests(SimpleTestCase):
-
     def test_include_missing_template(self):
         """
         The correct template is identified as not existing
@@ -218,11 +204,10 @@ class IncludeTests(SimpleTestCase):
         self.assertEqual(e.exception.args[0], 'missing.html')
 
     def test_extends_include_missing_cachedloader(self):
-        engine = Engine(debug=True, loaders=[
-            ('django.template.loaders.cached.Loader', [
-                'django.template.loaders.app_directories.Loader',
-            ]),
-        ])
+        engine = Engine(
+            debug=True,
+            loaders=[('django.template.loaders.cached.Loader', ['django.template.loaders.app_directories.Loader'])],
+        )
 
         template = engine.get_template('test_extends_error.html')
         with self.assertRaises(TemplateDoesNotExist) as e:
@@ -240,9 +225,7 @@ class IncludeTests(SimpleTestCase):
         Support any render() supporting object
         """
         engine = Engine()
-        ctx = Context({
-            'tmpl': engine.from_string('This worked!'),
-        })
+        ctx = Context({'tmpl': engine.from_string('This worked!')})
         outer_tmpl = engine.from_string('{% include tmpl %}')
         output = outer_tmpl.render(ctx)
         self.assertEqual(output, 'This worked!')
@@ -266,10 +249,8 @@ class IncludeTests(SimpleTestCase):
                 'children': [
                     {'comment': 'B1', 'children': []},
                     {'comment': 'B2', 'children': []},
-                    {'comment': 'B3', 'children': [
-                        {'comment': 'C1', 'children': []}
-                    ]},
-                ]
+                    {'comment': 'B3', 'children': [{'comment': 'C1', 'children': []}]},
+                ],
             }
         ]
         engine = Engine(app_dirs=True)
@@ -289,12 +270,18 @@ class IncludeTests(SimpleTestCase):
         This works as a regression test only if the cached loader
         isn't used, so the @setup decorator isn't used.
         """
-        engine = Engine(loaders=[
-            ('django.template.loaders.locmem.Loader', {
-                'template': '{% for x in vars %}{% include "include" %}{% endfor %}',
-                'include': '{% include "next" %}',
-                'next': '{% load custom %}{% counter %}'
-            }),
-        ], libraries={'custom': 'template_tests.templatetags.custom'})
+        engine = Engine(
+            loaders=[
+                (
+                    'django.template.loaders.locmem.Loader',
+                    {
+                        'template': '{% for x in vars %}{% include "include" %}{% endfor %}',
+                        'include': '{% include "next" %}',
+                        'next': '{% load custom %}{% counter %}',
+                    },
+                )
+            ],
+            libraries={'custom': 'template_tests.templatetags.custom'},
+        )
         output = engine.render_to_string('template', {'vars': range(9)})
         self.assertEqual(output, '012345678')

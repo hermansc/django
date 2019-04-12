@@ -5,7 +5,6 @@ from ..utils import setup
 
 
 class TitleTests(SimpleTestCase):
-
     @setup({'title1': '{{ a|title }}'})
     def test_title1(self):
         output = self.engine.render_to_string('title1', {'a': 'JOE\'S CRAB SHACK'})
@@ -18,7 +17,6 @@ class TitleTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_title(self):
         self.assertEqual(title('a nice title, isn\'t it?'), "A Nice Title, Isn't It?")
 

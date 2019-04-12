@@ -8,7 +8,6 @@ from django.test import SimpleTestCase, override_settings
 
 
 class FindersCheckTests(SimpleTestCase):
-
     def test_base_finder_check_not_implemented(self):
         finder = BaseFinder()
         msg = 'subclasses may provide a check() method to verify the finder is configured correctly.'
@@ -48,40 +47,49 @@ class FindersCheckTests(SimpleTestCase):
 
     @override_settings(STATICFILES_DIRS='a string')
     def test_dirs_not_tuple_or_list(self):
-        self.assertEqual(check_finders(None), [
-            Error(
-                'The STATICFILES_DIRS setting is not a tuple or list.',
-                hint='Perhaps you forgot a trailing comma?',
-                id='staticfiles.E001',
-            )
-        ])
+        self.assertEqual(
+            check_finders(None),
+            [
+                Error(
+                    'The STATICFILES_DIRS setting is not a tuple or list.',
+                    hint='Perhaps you forgot a trailing comma?',
+                    id='staticfiles.E001',
+                )
+            ],
+        )
 
     @override_settings(STATICFILES_DIRS=['/fake/path', settings.STATIC_ROOT])
     def test_dirs_contains_static_root(self):
-        self.assertEqual(check_finders(None), [
-            Error(
-                'The STATICFILES_DIRS setting should not contain the '
-                'STATIC_ROOT setting.',
-                id='staticfiles.E002',
-            )
-        ])
+        self.assertEqual(
+            check_finders(None),
+            [
+                Error(
+                    'The STATICFILES_DIRS setting should not contain the ' 'STATIC_ROOT setting.',
+                    id='staticfiles.E002',
+                )
+            ],
+        )
 
     @override_settings(STATICFILES_DIRS=[('prefix', settings.STATIC_ROOT)])
     def test_dirs_contains_static_root_in_tuple(self):
-        self.assertEqual(check_finders(None), [
-            Error(
-                'The STATICFILES_DIRS setting should not contain the '
-                'STATIC_ROOT setting.',
-                id='staticfiles.E002',
-            )
-        ])
+        self.assertEqual(
+            check_finders(None),
+            [
+                Error(
+                    'The STATICFILES_DIRS setting should not contain the ' 'STATIC_ROOT setting.',
+                    id='staticfiles.E002',
+                )
+            ],
+        )
 
     @override_settings(STATICFILES_DIRS=[('prefix/', '/fake/path')])
     def test_prefix_contains_trailing_slash(self):
-        self.assertEqual(check_finders(None), [
-            Error(
-                "The prefix 'prefix/' in the STATICFILES_DIRS setting must "
-                "not end with a slash.",
-                id='staticfiles.E003',
-            )
-        ])
+        self.assertEqual(
+            check_finders(None),
+            [
+                Error(
+                    "The prefix 'prefix/' in the STATICFILES_DIRS setting must " "not end with a slash.",
+                    id='staticfiles.E003',
+                )
+            ],
+        )

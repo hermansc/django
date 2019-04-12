@@ -4,7 +4,6 @@ from .models import Article, Author, Comment, Forum, Post, SystemInfo
 
 
 class NullFkOrderingTests(TestCase):
-
     def test_ordering_across_null_fk(self):
         """
         Regression test for #7512

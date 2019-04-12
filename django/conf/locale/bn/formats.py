@@ -19,14 +19,8 @@ DATE_INPUT_FORMATS = [
     '%d-%m-%Y',  # 25-10-2016
     '%d-%m-%y',  # 25-10-16
 ]
-TIME_INPUT_FORMATS = [
-    '%H:%M:%S',  # 14:30:59
-    '%H:%M',  # 14:30
-]
-DATETIME_INPUT_FORMATS = [
-    '%d/%m/%Y %H:%M:%S',  # 25/10/2006 14:30:59
-    '%d/%m/%Y %H:%M',  # 25/10/2006 14:30
-]
+TIME_INPUT_FORMATS = ['%H:%M:%S', '%H:%M']  # 14:30:59  # 14:30
+DATETIME_INPUT_FORMATS = ['%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M']  # 25/10/2006 14:30:59  # 25/10/2006 14:30
 DECIMAL_SEPARATOR = '.'
 THOUSAND_SEPARATOR = ','
 # NUMBER_GROUPING =

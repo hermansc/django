@@ -7,7 +7,6 @@ from django.utils.timesince import timesince, timeuntil
 
 
 class TimesinceTests(unittest.TestCase):
-
     def setUp(self):
         self.t = datetime.datetime(2007, 8, 14, 13, 46, 0)
         self.onemicrosecond = datetime.timedelta(microseconds=1)
@@ -49,8 +48,7 @@ class TimesinceTests(unittest.TestCase):
         displayed.
         """
         self.assertEqual(
-            timesince(self.t, self.t + 2 * self.oneweek + 3 * self.onehour + 4 * self.oneminute),
-            '2\xa0weeks'
+            timesince(self.t, self.t + 2 * self.oneweek + 3 * self.onehour + 4 * self.oneminute), '2\xa0weeks'
         )
         self.assertEqual(timesince(self.t, self.t + 4 * self.oneday + 5 * self.oneminute), '4\xa0days')
 
@@ -118,6 +116,7 @@ class TimesinceTests(unittest.TestCase):
         class naive(datetime.tzinfo):
             def utcoffset(self, dt):
                 return None
+
         future = datetime.datetime(2080, 1, 1, tzinfo=naive())
         self.assertEqual(timesince(future), '0\xa0minutes')
         past = datetime.datetime(1980, 1, 1, tzinfo=naive())

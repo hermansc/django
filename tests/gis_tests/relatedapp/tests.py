@@ -6,9 +6,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from ..utils import no_oracle
-from .models import (
-    Article, Author, Book, City, DirectoryEntry, Event, Location, Parcel,
-)
+from .models import Article, Author, Book, City, DirectoryEntry, Event, Location, Parcel
 
 
 class RelatedGeoModelTest(TestCase):
@@ -62,11 +60,7 @@ class RelatedGeoModelTest(TestCase):
         """
         cities = City.objects.annotate(points_extent=Extent('location__point')).order_by('name')
         tol = 4
-        self.assertAlmostEqual(
-            cities[0].points_extent,
-            (-97.516111, 33.058333, -97.516111, 33.058333),
-            tol
-        )
+        self.assertAlmostEqual(cities[0].points_extent, (-97.516111, 33.058333, -97.516111, 33.058333), tol)
 
     @skipUnlessDBFeature('supports_union_aggr')
     def test_related_union_aggregate(self):
@@ -89,9 +83,9 @@ class RelatedGeoModelTest(TestCase):
         ref_u2 = MultiPoint(p2, p3, srid=4326)
 
         u1 = City.objects.aggregate(Union('location__point'))['location__point__union']
-        u2 = City.objects.exclude(
-            name__in=('Roswell', 'Houston', 'Dallas', 'Fort Worth'),
-        ).aggregate(Union('location__point'))['location__point__union']
+        u2 = City.objects.exclude(name__in=('Roswell', 'Houston', 'Dallas', 'Fort Worth')).aggregate(
+            Union('location__point')
+        )['location__point__union']
         u3 = aggs['location__point__union']
         self.assertEqual(type(u1), MultiPoint)
         self.assertEqual(type(u3), MultiPoint)
@@ -114,7 +108,7 @@ class RelatedGeoModelTest(TestCase):
         b1 = GEOSGeometry(
             'POLYGON((-97.501205 33.052520,-97.501205 33.052576,'
             '-97.501150 33.052576,-97.501150 33.052520,-97.501205 33.052520))',
-            srid=4326
+            srid=4326,
         )
         pcity = City.objects.get(name='Aurora')
 
@@ -277,8 +271,7 @@ class RelatedGeoModelTest(TestCase):
         #    "relatedapp_location" ON ("relatedapp_city"."location_id" = "relatedapp_location"."id")
         #    WHERE "relatedapp_city"."state" = 'TX';
         ref_geom = GEOSGeometry(
-            'MULTIPOINT(-97.516111 33.058333,-96.801611 32.782057,'
-            '-95.363151 29.763374,-96.801611 32.782057)'
+            'MULTIPOINT(-97.516111 33.058333,-96.801611 32.782057,' '-95.363151 29.763374,-96.801611 32.782057)'
         )
 
         coll = City.objects.filter(state='TX').aggregate(Collect('location__point'))['location__point__collect']
@@ -297,8 +290,7 @@ class RelatedGeoModelTest(TestCase):
 
     def test16_annotated_date_queryset(self):
         "Ensure annotated date querysets work if spatial backend is used.  See #14648."
-        birth_years = [dt.year for dt in
-                       list(Author.objects.annotate(num_books=Count('books')).dates('dob', 'year'))]
+        birth_years = [dt.year for dt in list(Author.objects.annotate(num_books=Count('books')).dates('dob', 'year'))]
         birth_years.sort()
         self.assertEqual([1950, 1974], birth_years)
 

@@ -13,13 +13,14 @@ class DeprecatedFieldsTests(SimpleTestCase):
         model = IPAddressModel()
         self.assertEqual(
             model.check(),
-            [checks.Error(
-                'IPAddressField has been removed except for support in '
-                'historical migrations.',
-                hint='Use GenericIPAddressField instead.',
-                obj=IPAddressModel._meta.get_field('ip'),
-                id='fields.E900',
-            )],
+            [
+                checks.Error(
+                    'IPAddressField has been removed except for support in ' 'historical migrations.',
+                    hint='Use GenericIPAddressField instead.',
+                    obj=IPAddressModel._meta.get_field('ip'),
+                    id='fields.E900',
+                )
+            ],
         )
 
     def test_CommaSeparatedIntegerField_deprecated(self):
@@ -29,11 +30,12 @@ class DeprecatedFieldsTests(SimpleTestCase):
         model = CommaSeparatedIntegerModel()
         self.assertEqual(
             model.check(),
-            [checks.Error(
-                'CommaSeparatedIntegerField is removed except for support in '
-                'historical migrations.',
-                hint='Use CharField(validators=[validate_comma_separated_integer_list]) instead.',
-                obj=CommaSeparatedIntegerModel._meta.get_field('csi'),
-                id='fields.E901',
-            )],
+            [
+                checks.Error(
+                    'CommaSeparatedIntegerField is removed except for support in ' 'historical migrations.',
+                    hint='Use CharField(validators=[validate_comma_separated_integer_list]) instead.',
+                    obj=CommaSeparatedIntegerModel._meta.get_field('csi'),
+                    id='fields.E901',
+                )
+            ],
         )

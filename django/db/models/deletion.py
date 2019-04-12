@@ -12,8 +12,7 @@ class ProtectedError(IntegrityError):
 
 
 def CASCADE(collector, field, sub_objs, using):
-    collector.collect(sub_objs, source=field.remote_field.model,
-                      source_attr=field.name, nullable=field.null)
+    collector.collect(sub_objs, source=field.remote_field.model, source_attr=field.name, nullable=field.null)
     if field.null and not connections[using].features.can_defer_constraint_checks:
         collector.add_field_update(field, None, sub_objs)
 
@@ -21,20 +20,23 @@ def CASCADE(collector, field, sub_objs, using):
 def PROTECT(collector, field, sub_objs, using):
     raise ProtectedError(
         "Cannot delete some instances of model '%s' because they are "
-        "referenced through a protected foreign key: '%s.%s'" % (
-            field.remote_field.model.__name__, sub_objs[0].__class__.__name__, field.name
-        ),
-        sub_objs
+        "referenced through a protected foreign key: '%s.%s'"
+        % (field.remote_field.model.__name__, sub_objs[0].__class__.__name__, field.name),
+        sub_objs,
     )
 
 
 def SET(value):
     if callable(value):
+
         def set_on_delete(collector, field, sub_objs, using):
             collector.add_field_update(field, value(), sub_objs)
+
     else:
+
         def set_on_delete(collector, field, sub_objs, using):
             collector.add_field_update(field, value, sub_objs)
+
     set_on_delete.deconstruct = lambda: ('django.db.models.SET', (value,), {})
     return set_on_delete
 
@@ -55,7 +57,8 @@ def get_candidate_relations_to_delete(opts):
     # The candidate relations are the ones that come from N-1 and 1-1 relations.
     # N-N  (i.e., many-to-many) relations aren't candidates for deletion.
     return (
-        f for f in opts.get_fields(include_hidden=True)
+        f
+        for f in opts.get_fields(include_hidden=True)
         if f.auto_created and not f.concrete and (f.one_to_one or f.one_to_many)
     )
 
@@ -100,8 +103,7 @@ class Collector:
         if source is not None and not nullable:
             if reverse_dependency:
                 source, model = model, source
-            self.dependencies.setdefault(
-                source._meta.concrete_model, set()).add(model._meta.concrete_model)
+            self.dependencies.setdefault(source._meta.concrete_model, set()).add(model._meta.concrete_model)
         return new_objs
 
     def add_field_update(self, field, value, objs):
@@ -112,9 +114,7 @@ class Collector:
         if not objs:
             return
         model = objs[0].__class__
-        self.field_updates.setdefault(
-            model, {}).setdefault(
-            (field, value), set()).update(objs)
+        self.field_updates.setdefault(model, {}).setdefault((field, value), set()).update(objs)
 
     def can_fast_delete(self, objs, from_field=None):
         """
@@ -135,20 +135,24 @@ class Collector:
             model = objs.model
         else:
             return False
-        if (signals.pre_delete.has_listeners(model) or
-                signals.post_delete.has_listeners(model) or
-                signals.m2m_changed.has_listeners(model)):
+        if (
+            signals.pre_delete.has_listeners(model)
+            or signals.post_delete.has_listeners(model)
+            or signals.m2m_changed.has_listeners(model)
+        ):
             return False
         # The use of from_field comes from the need to avoid cascade back to
         # parent when parent delete is cascading to child.
         opts = model._meta
         return (
-            all(link == from_field for link in opts.concrete_model._meta.parents.values()) and
+            all(link == from_field for link in opts.concrete_model._meta.parents.values())
+            and
             # Foreign keys pointing to this model.
             all(
                 related.field.remote_field.on_delete is DO_NOTHING
                 for related in get_candidate_relations_to_delete(opts)
-            ) and (
+            )
+            and (
                 # Something like generic foreign key.
                 not any(hasattr(field, 'bulk_related_objects') for field in opts.private_fields)
             )
@@ -158,16 +162,22 @@ class Collector:
         """
         Return the objs in suitably sized batches for the used connection.
         """
-        conn_batch_size = max(
-            connections[self.using].ops.bulk_batch_size([field.name], objs), 1)
+        conn_batch_size = max(connections[self.using].ops.bulk_batch_size([field.name], objs), 1)
         if len(objs) > conn_batch_size:
-            return [objs[i:i + conn_batch_size]
-                    for i in range(0, len(objs), conn_batch_size)]
+            return [objs[i : i + conn_batch_size] for i in range(0, len(objs), conn_batch_size)]
         else:
             return [objs]
 
-    def collect(self, objs, source=None, nullable=False, collect_related=True,
-                source_attr=None, reverse_dependency=False, keep_parents=False):
+    def collect(
+        self,
+        objs,
+        source=None,
+        nullable=False,
+        collect_related=True,
+        source_attr=None,
+        reverse_dependency=False,
+        keep_parents=False,
+    ):
         """
         Add 'objs' to the collection of objects to be deleted as well as all
         parent instances.  'objs' must be a homogeneous iterable collection of
@@ -188,8 +198,7 @@ class Collector:
         if self.can_fast_delete(objs):
             self.fast_deletes.append(objs)
             return
-        new_objs = self.add(objs, source, nullable,
-                            reverse_dependency=reverse_dependency)
+        new_objs = self.add(objs, source, nullable, reverse_dependency=reverse_dependency)
         if not new_objs:
             return
 
@@ -202,10 +211,13 @@ class Collector:
             for ptr in concrete_model._meta.parents.values():
                 if ptr:
                     parent_objs = [getattr(obj, ptr.name) for obj in new_objs]
-                    self.collect(parent_objs, source=model,
-                                 source_attr=ptr.remote_field.related_name,
-                                 collect_related=False,
-                                 reverse_dependency=True)
+                    self.collect(
+                        parent_objs,
+                        source=model,
+                        source_attr=ptr.remote_field.related_name,
+                        collect_related=False,
+                        reverse_dependency=True,
+                    )
         if collect_related:
             parents = model._meta.parents
             for related in get_candidate_relations_to_delete(model._meta):
@@ -232,9 +244,7 @@ class Collector:
         """
         Get a QuerySet of objects related to `objs` via the relation `related`.
         """
-        return related.related_model._base_manager.using(self.using).filter(
-            **{"%s__in" % related.field.name: objs}
-        )
+        return related.related_model._base_manager.using(self.using).filter(**{"%s__in" % related.field.name: objs})
 
     def instances_with_model(self):
         for model, instances in self.data.items():
@@ -284,9 +294,7 @@ class Collector:
             # send pre_delete signals
             for model, obj in self.instances_with_model():
                 if not model._meta.auto_created:
-                    signals.pre_delete.send(
-                        sender=model, instance=obj, using=self.using
-                    )
+                    signals.pre_delete.send(sender=model, instance=obj, using=self.using)
 
             # fast deletes
             for qs in self.fast_deletes:
@@ -297,8 +305,7 @@ class Collector:
             for model, instances_for_fieldvalues in self.field_updates.items():
                 for (field, value), instances in instances_for_fieldvalues.items():
                     query = sql.UpdateQuery(model)
-                    query.update_batch([obj.pk for obj in instances],
-                                       {field.name: value}, self.using)
+                    query.update_batch([obj.pk for obj in instances], {field.name: value}, self.using)
 
             # reverse instance collections
             for instances in self.data.values():
@@ -313,9 +320,7 @@ class Collector:
 
                 if not model._meta.auto_created:
                     for obj in instances:
-                        signals.post_delete.send(
-                            sender=model, instance=obj, using=self.using
-                        )
+                        signals.post_delete.send(sender=model, instance=obj, using=self.using)
 
         # update collected instances
         for instances_for_fieldvalues in self.field_updates.values():

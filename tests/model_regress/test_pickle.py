@@ -11,6 +11,7 @@ class ModelPickleTests(SimpleTestCase):
         #21430 -- Verifies a warning is raised for models that are
         unpickled without a Django version
         """
+
         class MissingDjangoVersion(models.Model):
             title = models.CharField(max_length=10)
 
@@ -30,6 +31,7 @@ class ModelPickleTests(SimpleTestCase):
         #21430 -- Verifies a warning is raised for models that are
         unpickled with a different Django version than the current
         """
+
         class DifferentDjangoVersion(models.Model):
             title = models.CharField(max_length=10)
 
@@ -48,6 +50,7 @@ class ModelPickleTests(SimpleTestCase):
         """
         A model may override __getstate__() to choose the attributes to pickle.
         """
+
         class PickledModel(models.Model):
             def __getstate__(self):
                 state = super().__getstate__().copy()

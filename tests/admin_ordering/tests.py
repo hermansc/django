@@ -4,10 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models import F
 from django.test import RequestFactory, TestCase
 
-from .models import (
-    Band, DynOrderingBandAdmin, Song, SongInlineDefaultOrdering,
-    SongInlineNewOrdering,
-)
+from .models import Band, DynOrderingBandAdmin, Song, SongInlineDefaultOrdering, SongInlineNewOrdering
 
 
 class MockRequest:
@@ -34,15 +31,18 @@ class TestAdminOrdering(TestCase):
     in ModelAdmin rather that ordering defined in the model's inner Meta
     class.
     """
+
     request_factory = RequestFactory()
 
     @classmethod
     def setUpTestData(cls):
-        Band.objects.bulk_create([
-            Band(name='Aerosmith', bio='', rank=3),
-            Band(name='Radiohead', bio='', rank=1),
-            Band(name='Van Halen', bio='', rank=2),
-        ])
+        Band.objects.bulk_create(
+            [
+                Band(name='Aerosmith', bio='', rank=3),
+                Band(name='Radiohead', bio='', rank=1),
+                Band(name='Van Halen', bio='', rank=2),
+            ]
+        )
 
     def test_default_ordering(self):
         """
@@ -58,8 +58,10 @@ class TestAdminOrdering(TestCase):
         Let's use a custom ModelAdmin that changes the ordering, and make sure
         it actually changes.
         """
+
         class BandAdmin(ModelAdmin):
             ordering = ('rank',)  # default ordering is ('name',)
+
         ma = BandAdmin(Band, site)
         names = [b.name for b in ma.get_queryset(request)]
         self.assertEqual(['Radiohead', 'Van Halen', 'Aerosmith'], names)
@@ -67,6 +69,7 @@ class TestAdminOrdering(TestCase):
     def test_specified_ordering_by_f_expression(self):
         class BandAdmin(ModelAdmin):
             ordering = (F('rank').desc(nulls_last=True),)
+
         band_admin = BandAdmin(Band, site)
         names = [b.name for b in band_admin.get_queryset(request)]
         self.assertEqual(['Aerosmith', 'Van Halen', 'Radiohead'], names)
@@ -96,11 +99,13 @@ class TestInlineModelAdminOrdering(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.band = Band.objects.create(name='Aerosmith', bio='', rank=3)
-        Song.objects.bulk_create([
-            Song(band=cls.band, name='Pink', duration=235),
-            Song(band=cls.band, name='Dude (Looks Like a Lady)', duration=264),
-            Song(band=cls.band, name='Jaded', duration=214),
-        ])
+        Song.objects.bulk_create(
+            [
+                Song(band=cls.band, name='Pink', duration=235),
+                Song(band=cls.band, name='Dude (Looks Like a Lady)', duration=264),
+                Song(band=cls.band, name='Jaded', duration=214),
+            ]
+        )
 
     def test_default_ordering(self):
         """
@@ -132,6 +137,7 @@ class TestRelatedFieldsAdminOrdering(TestCase):
         # for the related model
         class SongAdmin(admin.ModelAdmin):
             pass
+
         site.register(Song, SongAdmin)
 
     def tearDown(self):
@@ -152,6 +158,7 @@ class TestRelatedFieldsAdminOrdering(TestCase):
     def test_admin_with_no_ordering_fallback_to_model_ordering(self):
         class NoOrderingBandAdmin(admin.ModelAdmin):
             pass
+
         site.register(Band, NoOrderingBandAdmin)
 
         # should be ordered by name (as defined by the model)
@@ -160,6 +167,7 @@ class TestRelatedFieldsAdminOrdering(TestCase):
     def test_admin_ordering_beats_model_ordering(self):
         class StaticOrderingBandAdmin(admin.ModelAdmin):
             ordering = ('rank',)
+
         site.register(Band, StaticOrderingBandAdmin)
 
         # should be ordered by rank (defined by the ModelAdmin)
@@ -167,6 +175,7 @@ class TestRelatedFieldsAdminOrdering(TestCase):
 
     def test_custom_queryset_still_wins(self):
         """Custom queryset has still precedence (#21405)"""
+
         class SongAdmin(admin.ModelAdmin):
             # Exclude one of the two Bands from the querysets
             def formfield_for_foreignkey(self, db_field, request, **kwargs):

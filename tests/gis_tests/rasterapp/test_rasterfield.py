@@ -21,21 +21,19 @@ class RasterFieldTest(TransactionTestCase):
     available_apps = ['gis_tests.rasterapp']
 
     def setUp(self):
-        rast = GDALRaster({
-            "srid": 4326,
-            "origin": [0, 0],
-            "scale": [-1, 1],
-            "skew": [0, 0],
-            "width": 5,
-            "height": 5,
-            "nr_of_bands": 2,
-            "bands": [{"data": range(25)}, {"data": range(25, 50)}],
-        })
-        model_instance = RasterModel.objects.create(
-            rast=rast,
-            rastprojected=rast,
-            geom="POINT (-95.37040 29.70486)",
+        rast = GDALRaster(
+            {
+                "srid": 4326,
+                "origin": [0, 0],
+                "scale": [-1, 1],
+                "skew": [0, 0],
+                "width": 5,
+                "height": 5,
+                "nr_of_bands": 2,
+                "bands": [{"data": range(25)}, {"data": range(25, 50)}],
+            }
         )
+        model_instance = RasterModel.objects.create(rast=rast, rastprojected=rast, geom="POINT (-95.37040 29.70486)")
         RasterRelatedModel.objects.create(rastermodel=model_instance)
 
     def test_field_null_value(self):
@@ -73,13 +71,33 @@ class RasterFieldTest(TransactionTestCase):
         # value is as expected.
         self.assertEqual(
             [
-                0.0, 1.0, 2.0, 3.0, 4.0,
-                5.0, 6.0, 7.0, 8.0, 9.0,
-                10.0, 11.0, 12.0, 13.0, 14.0,
-                15.0, 16.0, 17.0, 18.0, 19.0,
-                20.0, 21.0, 22.0, 23.0, 24.0
+                0.0,
+                1.0,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+                13.0,
+                14.0,
+                15.0,
+                16.0,
+                17.0,
+                18.0,
+                19.0,
+                20.0,
+                21.0,
+                22.0,
+                23.0,
+                24.0,
             ],
-            band
+            band,
         )
 
     def test_implicit_raster_transformation(self):
@@ -97,10 +115,7 @@ class RasterFieldTest(TransactionTestCase):
         # Confirm raster has been transformed to the default srid
         self.assertEqual(r.rast.srs.srid, 4326)
         # Confirm geotransform is in lat/lon
-        expected = [
-            -87.9298551266551, 9.459646421449934e-06, 0.0, 23.94249275457565,
-            0.0, -9.459646421449934e-06,
-        ]
+        expected = [-87.9298551266551, 9.459646421449934e-06, 0.0, 23.94249275457565, 0.0, -9.459646421449934e-06]
         for val, exp in zip(r.rast.geotransform, expected):
             self.assertAlmostEqual(exp, val)
 
@@ -108,10 +123,7 @@ class RasterFieldTest(TransactionTestCase):
         """
         RasterField should accept a positional verbose name argument.
         """
-        self.assertEqual(
-            RasterModel._meta.get_field('rast').verbose_name,
-            'A Verbose Raster Name'
-        )
+        self.assertEqual(RasterModel._meta.get_field('rast').verbose_name, 'A Verbose Raster Name')
 
     def test_all_gis_lookups_with_rasters(self):
         """
@@ -128,18 +140,22 @@ class RasterFieldTest(TransactionTestCase):
         stx_pnt.transform(3086)
 
         lookups = [
-            (name, lookup)
-            for name, lookup in BaseSpatialField.get_lookups().items()
-            if issubclass(lookup, GISLookup)
+            (name, lookup) for name, lookup in BaseSpatialField.get_lookups().items() if issubclass(lookup, GISLookup)
         ]
         self.assertNotEqual(lookups, [], 'No lookups found')
         # Loop through all the GIS lookups.
         for name, lookup in lookups:
             # Construct lookup filter strings.
             combo_keys = [
-                field + name for field in [
-                    'rast__', 'rast__', 'rastprojected__0__', 'rast__',
-                    'rastprojected__', 'geom__', 'rast__',
+                field + name
+                for field in [
+                    'rast__',
+                    'rast__',
+                    'rastprojected__0__',
+                    'rast__',
+                    'rastprojected__',
+                    'geom__',
+                    'rast__',
                 ]
             ]
             if issubclass(lookup, DistanceLookupBase):
@@ -169,10 +185,7 @@ class RasterFieldTest(TransactionTestCase):
                 continue
             elif PostGISOperations.gis_operators[name].func:
                 # Set lookup values for all function based operators.
-                combo_values = [
-                    rast, (rast, 0), (rast, 0), (stx_pnt, 0), stx_pnt,
-                    rast, json.loads(JSON_RASTER)
-                ]
+                combo_values = [rast, (rast, 0), (rast, 0), (stx_pnt, 0), stx_pnt, rast, json.loads(JSON_RASTER)]
             else:
                 # Override band lookup for these, as it's not supported.
                 combo_keys[2] = 'rastprojected__' + name
@@ -181,15 +194,11 @@ class RasterFieldTest(TransactionTestCase):
 
             # Create query filter combinations.
             self.assertEqual(
-                len(combo_keys),
-                len(combo_values),
-                'Number of lookup names and values should be the same',
+                len(combo_keys), len(combo_values), 'Number of lookup names and values should be the same'
             )
             combos = [x for x in zip(combo_keys, combo_values) if x[1]]
             self.assertEqual(
-                [(n, x) for n, x in enumerate(combos) if x in combos[:n]],
-                [],
-                'There are repeated test lookups',
+                [(n, x) for n, x in enumerate(combos) if x in combos[:n]], [], 'There are repeated test lookups'
             )
             combos = [{k: v} for k, v in combos]
 

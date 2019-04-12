@@ -13,7 +13,6 @@ gentlemen.
 
 
 class MultilineTests(SimpleTestCase):
-
     @setup({'multiline01': multiline_string})
     def test_multiline01(self):
         output = self.engine.render_to_string('multiline01')

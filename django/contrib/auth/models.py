@@ -53,12 +53,9 @@ class Permission(models.Model):
 
     The permissions listed above are automatically created for each model.
     """
+
     name = models.CharField(_('name'), max_length=255)
-    content_type = models.ForeignKey(
-        ContentType,
-        models.CASCADE,
-        verbose_name=_('content type'),
-    )
+    content_type = models.ForeignKey(ContentType, models.CASCADE, verbose_name=_('content type'))
     codename = models.CharField(_('codename'), max_length=100)
 
     objects = PermissionManager()
@@ -67,14 +64,14 @@ class Permission(models.Model):
         verbose_name = _('permission')
         verbose_name_plural = _('permissions')
         unique_together = (('content_type', 'codename'),)
-        ordering = ('content_type__app_label', 'content_type__model',
-                    'codename')
+        ordering = ('content_type__app_label', 'content_type__model', 'codename')
 
     def __str__(self):
         return '%s | %s' % (self.content_type, self.name)
 
     def natural_key(self):
         return (self.codename,) + self.content_type.natural_key()
+
     natural_key.dependencies = ['contenttypes.contenttype']
 
 
@@ -82,6 +79,7 @@ class GroupManager(models.Manager):
     """
     The manager for the auth's Group model.
     """
+
     use_in_migrations = True
 
     def get_by_natural_key(self, name):
@@ -105,12 +103,9 @@ class Group(models.Model):
     members-only portion of your site, or sending them members-only email
     messages.
     """
+
     name = models.CharField(_('name'), max_length=150, unique=True)
-    permissions = models.ManyToManyField(
-        Permission,
-        verbose_name=_('permissions'),
-        blank=True,
-    )
+    permissions = models.ManyToManyField(Permission, verbose_name=_('permissions'), blank=True)
 
     objects = GroupManager()
 
@@ -202,21 +197,18 @@ class PermissionsMixin(models.Model):
     Add the fields and methods necessary to support the Group and Permission
     models using the ModelBackend.
     """
+
     is_superuser = models.BooleanField(
         _('superuser status'),
         default=False,
-        help_text=_(
-            'Designates that this user has all permissions without '
-            'explicitly assigning them.'
-        ),
+        help_text=_('Designates that this user has all permissions without ' 'explicitly assigning them.'),
     )
     groups = models.ManyToManyField(
         Group,
         verbose_name=_('groups'),
         blank=True,
         help_text=_(
-            'The groups this user belongs to. A user will get all permissions '
-            'granted to each of their groups.'
+            'The groups this user belongs to. A user will get all permissions ' 'granted to each of their groups.'
         ),
         related_name="user_set",
         related_query_name="user",
@@ -289,6 +281,7 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
 
     Username and password are required. Other fields are optional.
     """
+
     username_validator = UnicodeUsernameValidator()
 
     username = models.CharField(
@@ -297,24 +290,19 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
         unique=True,
         help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
         validators=[username_validator],
-        error_messages={
-            'unique': _("A user with that username already exists."),
-        },
+        error_messages={'unique': _("A user with that username already exists.")},
     )
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     email = models.EmailField(_('email address'), blank=True)
     is_staff = models.BooleanField(
-        _('staff status'),
-        default=False,
-        help_text=_('Designates whether the user can log into this admin site.'),
+        _('staff status'), default=False, help_text=_('Designates whether the user can log into this admin site.')
     )
     is_active = models.BooleanField(
         _('active'),
         default=True,
         help_text=_(
-            'Designates whether this user should be treated as active. '
-            'Unselect this instead of deleting accounts.'
+            'Designates whether this user should be treated as active. ' 'Unselect this instead of deleting accounts.'
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
@@ -357,6 +345,7 @@ class User(AbstractUser):
 
     Username and password are required. Other fields are optional.
     """
+
     class Meta(AbstractUser.Meta):
         swappable = 'AUTH_USER_MODEL'
 

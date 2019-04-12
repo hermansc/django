@@ -5,9 +5,7 @@ import shutil
 import tempfile
 
 from django.conf import settings
-from django.contrib.sessions.backends.base import (
-    VALID_KEY_CHARS, CreateError, SessionBase, UpdateError,
-)
+from django.contrib.sessions.backends.base import VALID_KEY_CHARS, CreateError, SessionBase, UpdateError
 from django.contrib.sessions.exceptions import InvalidSessionKey
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.utils import timezone
@@ -17,6 +15,7 @@ class SessionStore(SessionBase):
     """
     Implement a file based session store.
     """
+
     def __init__(self, session_key=None):
         self.storage_path = self._get_storage_path()
         self.file_prefix = settings.SESSION_COOKIE_NAME
@@ -33,7 +32,8 @@ class SessionStore(SessionBase):
                 raise ImproperlyConfigured(
                     "The session storage path %r doesn't exist. Please set your"
                     " SESSION_FILE_PATH setting to an existing directory in which"
-                    " Django can store session data." % storage_path)
+                    " Django can store session data." % storage_path
+                )
 
             cls._storage_path = storage_path
             return storage_path
@@ -49,8 +49,7 @@ class SessionStore(SessionBase):
         # should always be md5s, so they should never contain directory
         # components.
         if not set(session_key).issubset(VALID_KEY_CHARS):
-            raise InvalidSessionKey(
-                "Invalid characters in session key")
+            raise InvalidSessionKey("Invalid characters in session key")
 
         return os.path.join(self.storage_path, self.file_prefix + session_key)
 
@@ -193,7 +192,7 @@ class SessionStore(SessionBase):
         for session_file in os.listdir(storage_path):
             if not session_file.startswith(file_prefix):
                 continue
-            session_key = session_file[len(file_prefix):]
+            session_key = session_file[len(file_prefix) :]
             session = cls(session_key)
             # When an expired session is loaded, its file is removed, and a
             # new file is immediately created. Prevent this by disabling

@@ -10,7 +10,6 @@ class TestPoint:
 
 
 class EnvelopeTest(unittest.TestCase):
-
     def setUp(self):
         self.e = Envelope(0, 0, 5, 5)
 

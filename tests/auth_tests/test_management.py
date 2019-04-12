@@ -7,12 +7,8 @@ from unittest import mock
 
 from django.apps import apps
 from django.contrib.auth import get_permission_codename, management
-from django.contrib.auth.management import (
-    create_permissions, get_default_username,
-)
-from django.contrib.auth.management.commands import (
-    changepassword, createsuperuser,
-)
+from django.contrib.auth.management import create_permissions, get_default_username
+from django.contrib.auth.management.commands import changepassword, createsuperuser
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
@@ -21,10 +17,7 @@ from django.db import migrations
 from django.test import TestCase, override_settings
 from django.utils.translation import gettext_lazy as _
 
-from .models import (
-    CustomUser, CustomUserNonUniqueUsername, CustomUserWithFK, Email,
-    UserProxy,
-)
+from .models import CustomUser, CustomUserNonUniqueUsername, CustomUserWithFK, Email, UserProxy
 
 MOCK_INPUT_KEY_TO_PROMPTS = {
     # @mock_inputs dict key: [expected prompt messages],
@@ -41,6 +34,7 @@ def mock_inputs(inputs):
     Decorator to temporarily replace input/getpass to allow interactive
     createsuperuser.
     """
+
     def inner(test_func):
         def wrapped(*args):
             class mock_getpass:
@@ -80,7 +74,9 @@ def mock_inputs(inputs):
             finally:
                 createsuperuser.getpass = old_getpass
                 builtins.input = old_input
+
         return wrapped
+
     return inner
 
 
@@ -89,6 +85,7 @@ class MockTTY:
     A fake stdin object that pretends to be a TTY to be used in conjunction
     with mock_inputs.
     """
+
     def isatty(self):
         return True
 
@@ -101,7 +98,6 @@ class MockInputTests(TestCase):
 
 
 class GetDefaultUsernameTestCase(TestCase):
-
     def setUp(self):
         self.old_get_system_username = management.get_system_username
 
@@ -119,8 +115,7 @@ class GetDefaultUsernameTestCase(TestCase):
         User.objects.create(username='joe')
         management.get_system_username = lambda: 'joe'
         self.assertEqual(management.get_default_username(), '')
-        self.assertEqual(
-            management.get_default_username(check_db=False), 'joe')
+        self.assertEqual(management.get_default_username(check_db=False), 'joe')
 
     def test_i18n(self):
         # 'Julia' with accented 'u':
@@ -128,11 +123,10 @@ class GetDefaultUsernameTestCase(TestCase):
         self.assertEqual(management.get_default_username(), 'julia')
 
 
-@override_settings(AUTH_PASSWORD_VALIDATORS=[
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-])
+@override_settings(
+    AUTH_PASSWORD_VALIDATORS=[{'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'}]
+)
 class ChangepasswordManagementCommandTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username='joe', password='qwerty')
@@ -176,8 +170,7 @@ class ChangepasswordManagementCommandTestCase(TestCase):
         command_output = self.stdout.getvalue().strip()
 
         self.assertEqual(
-            command_output,
-            "Changing password for user 'joe'\nPassword changed successfully for user 'joe'"
+            command_output, "Changing password for user 'joe'\nPassword changed successfully for user 'joe'"
         )
         self.assertTrue(User.objects.get(username="joe").check_password("not qwerty"))
 
@@ -229,8 +222,7 @@ class MultiDBChangepasswordManagementCommandTestCase(TestCase):
         command_output = out.getvalue().strip()
 
         self.assertEqual(
-            command_output,
-            "Changing password for user 'joe'\nPassword changed successfully for user 'joe'"
+            command_output, "Changing password for user 'joe'\nPassword changed successfully for user 'joe'"
         )
         self.assertTrue(User.objects.using('other').get(username="joe").check_password('not qwerty'))
 
@@ -240,7 +232,6 @@ class MultiDBChangepasswordManagementCommandTestCase(TestCase):
     AUTH_PASSWORD_VALIDATORS=[{'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'}],
 )
 class CreatesuperuserManagementCommandTestCase(TestCase):
-
     def test_no_email_argument(self):
         new_io = StringIO()
         with self.assertRaisesMessage(CommandError, 'You must use --email with --noinput.'):
@@ -250,13 +241,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         "Check the operation of the createsuperuser management command"
         # We can use the management command to create a superuser
         new_io = StringIO()
-        call_command(
-            "createsuperuser",
-            interactive=False,
-            username="joe",
-            email="joe@somewhere.org",
-            stdout=new_io
-        )
+        call_command("createsuperuser", interactive=False, username="joe", email="joe@somewhere.org", stdout=new_io)
         command_output = new_io.getvalue().strip()
         self.assertEqual(command_output, 'Superuser created successfully.')
         u = User.objects.get(username="joe")
@@ -266,23 +251,20 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         self.assertFalse(u.has_usable_password())
 
     def test_non_ascii_verbose_name(self):
-        @mock_inputs({
-            'password': "nopasswd",
-            "Uživatel (leave blank to use '%s'): " % get_default_username(): 'foo',  # username (cz)
-            'email': 'nolocale@somewhere.org',
-        })
+        @mock_inputs(
+            {
+                'password': "nopasswd",
+                "Uživatel (leave blank to use '%s'): " % get_default_username(): 'foo',  # username (cz)
+                'email': 'nolocale@somewhere.org',
+            }
+        )
         def test(self):
             username_field = User._meta.get_field('username')
             old_verbose_name = username_field.verbose_name
             username_field.verbose_name = _('u\u017eivatel')
             new_io = StringIO()
             try:
-                call_command(
-                    "createsuperuser",
-                    interactive=True,
-                    stdout=new_io,
-                    stdin=MockTTY(),
-                )
+                call_command("createsuperuser", interactive=True, stdout=new_io, stdin=MockTTY())
             finally:
                 username_field.verbose_name = old_verbose_name
 
@@ -300,7 +282,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
             username="joe2",
             email="joe2@somewhere.org",
             verbosity=0,
-            stdout=new_io
+            stdout=new_io,
         )
         command_output = new_io.getvalue().strip()
         self.assertEqual(command_output, '')
@@ -315,7 +297,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
             interactive=False,
             username="joe+admin@somewhere.org",
             email="joe@somewhere.org",
-            stdout=new_io
+            stdout=new_io,
         )
         u = User._default_manager.get(username="joe+admin@somewhere.org")
         self.assertEqual(u.email, 'joe@somewhere.org')
@@ -352,32 +334,19 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         # swappable User model messes with validation.
         new_io = StringIO()
         with self.assertRaisesMessage(CommandError, 'You must use --email with --noinput.'):
-            call_command(
-                "createsuperuser",
-                interactive=False,
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command("createsuperuser", interactive=False, stdout=new_io, stderr=new_io)
 
         self.assertEqual(CustomUser._default_manager.count(), 0)
 
     @override_settings(
-        AUTH_USER_MODEL='auth_tests.CustomUserNonUniqueUsername',
-        AUTHENTICATION_BACKENDS=['my.custom.backend'],
+        AUTH_USER_MODEL='auth_tests.CustomUserNonUniqueUsername', AUTHENTICATION_BACKENDS=['my.custom.backend']
     )
     def test_swappable_user_username_non_unique(self):
-        @mock_inputs({
-            'username': 'joe',
-            'password': 'nopasswd',
-        })
+        @mock_inputs({'username': 'joe', 'password': 'nopasswd'})
         def createsuperuser():
             new_io = StringIO()
             call_command(
-                "createsuperuser",
-                interactive=True,
-                email="joe@somewhere.org",
-                stdout=new_io,
-                stdin=MockTTY(),
+                "createsuperuser", interactive=True, email="joe@somewhere.org", stdout=new_io, stdin=MockTTY()
             )
             command_output = new_io.getvalue().strip()
             self.assertEqual(command_output, 'Superuser created successfully.')
@@ -393,18 +362,15 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         If the command is not called from a TTY, it should be skipped and a
         message should be displayed (#7423).
         """
+
         class FakeStdin:
             """A fake stdin object that has isatty() return False."""
+
             def isatty(self):
                 return False
 
         out = StringIO()
-        call_command(
-            "createsuperuser",
-            stdin=FakeStdin(),
-            stdout=out,
-            interactive=True,
-        )
+        call_command("createsuperuser", stdin=FakeStdin(), stdout=out, interactive=True)
 
         self.assertEqual(User._default_manager.count(), 0)
         self.assertIn("Superuser creation skipped", out.getvalue())
@@ -447,12 +413,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         group = Group.objects.create(name='mygroup')
         email = Email.objects.create(email='mymail@gmail.com')
         call_command(
-            'createsuperuser',
-            interactive=False,
-            username=email.pk,
-            email=email.email,
-            group=group.pk,
-            stdout=new_io,
+            'createsuperuser', interactive=False, username=email.pk, email=email.email, group=group.pk, stdout=new_io
         )
         command_output = new_io.getvalue().strip()
         self.assertEqual(command_output, 'Superuser created successfully.')
@@ -464,11 +425,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         msg = 'email instance with email %r does not exist.' % non_existent_email
         with self.assertRaisesMessage(CommandError, msg):
             call_command(
-                'createsuperuser',
-                interactive=False,
-                username=email.pk,
-                email=non_existent_email,
-                stdout=new_io,
+                'createsuperuser', interactive=False, username=email.pk, email=non_existent_email, stdout=new_io
             )
 
     @override_settings(AUTH_USER_MODEL='auth_tests.CustomUserWithFK')
@@ -477,19 +434,16 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         group = Group.objects.create(name='mygroup')
         email = Email.objects.create(email='mymail@gmail.com')
 
-        @mock_inputs({
-            'password': 'nopasswd',
-            'Username (Email.id): ': email.pk,
-            'Email (Email.email): ': email.email,
-            'Group (Group.id): ': group.pk,
-        })
+        @mock_inputs(
+            {
+                'password': 'nopasswd',
+                'Username (Email.id): ': email.pk,
+                'Email (Email.email): ': email.email,
+                'Group (Group.id): ': group.pk,
+            }
+        )
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdout=new_io,
-                stdin=MockTTY(),
-            )
+            call_command('createsuperuser', interactive=True, stdout=new_io, stdin=MockTTY())
 
             command_output = new_io.getvalue().strip()
             self.assertEqual(command_output, 'Superuser created successfully.')
@@ -511,13 +465,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
 
         @mock_inputs({'password': return_passwords, 'username': '', 'email': ''})
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(new_io.getvalue().strip(), 'Superuser created successfully.')
             self.assertTrue(User.objects.filter(username=default_username).exists())
 
@@ -533,31 +481,18 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         def bad_then_good_password():
             return entered_passwords.pop(0)
 
-        @mock_inputs({
-            'password': bad_then_good_password,
-            'username': 'joe1234567890',
-            'email': '',
-            'bypass': 'n',
-        })
+        @mock_inputs({'password': bad_then_good_password, 'username': 'joe1234567890', 'email': '', 'bypass': 'n'})
         def test(self):
-            call_command(
-                "createsuperuser",
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command("createsuperuser", interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
-                new_io.getvalue().strip(),
-                "This password is entirely numeric.\n"
-                "Superuser created successfully."
+                new_io.getvalue().strip(), "This password is entirely numeric.\n" "Superuser created successfully."
             )
 
         test(self)
 
-    @override_settings(AUTH_PASSWORD_VALIDATORS=[
-        {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    ])
+    @override_settings(
+        AUTH_PASSWORD_VALIDATORS=[{'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'}]
+    )
     def test_validate_password_against_username(self):
         new_io = StringIO()
         username = 'supremelycomplex'
@@ -566,24 +501,12 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         def bad_then_good_password():
             return entered_passwords.pop(0)
 
-        @mock_inputs({
-            'password': bad_then_good_password,
-            'username': username,
-            'email': '',
-            'bypass': 'n',
-        })
+        @mock_inputs({'password': bad_then_good_password, 'username': username, 'email': '', 'bypass': 'n'})
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
                 new_io.getvalue().strip(),
-                'The password is too similar to the username.\n'
-                'Superuser created successfully.'
+                'The password is too similar to the username.\n' 'Superuser created successfully.',
             )
 
         test(self)
@@ -591,8 +514,8 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
     @override_settings(
         AUTH_USER_MODEL='auth_tests.CustomUser',
         AUTH_PASSWORD_VALIDATORS=[
-            {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-        ]
+            {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'}
+        ],
     )
     def test_validate_password_against_required_fields(self):
         new_io = StringIO()
@@ -602,26 +525,21 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         def bad_then_good_password():
             return entered_passwords.pop(0)
 
-        @mock_inputs({
-            'password': bad_then_good_password,
-            'username': 'whatever',
-            'first_name': first_name,
-            'date_of_birth': '1970-01-01',
-            'email': 'joey@example.com',
-            'bypass': 'n',
-        })
+        @mock_inputs(
+            {
+                'password': bad_then_good_password,
+                'username': 'whatever',
+                'first_name': first_name,
+                'date_of_birth': '1970-01-01',
+                'email': 'joey@example.com',
+                'bypass': 'n',
+            }
+        )
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
                 new_io.getvalue().strip(),
-                "The password is too similar to the first name.\n"
-                "Superuser created successfully."
+                "The password is too similar to the first name.\n" "Superuser created successfully.",
             )
 
         test(self)
@@ -632,13 +550,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
 
         def test(self):
             with self.assertRaisesMessage(CommandError, 'Username cannot be blank.'):
-                call_command(
-                    'createsuperuser',
-                    username='',
-                    stdin=MockTTY(),
-                    stdout=new_io,
-                    stderr=new_io,
-                )
+                call_command('createsuperuser', username='', stdin=MockTTY(), stdout=new_io, stderr=new_io)
 
         test(self)
 
@@ -648,12 +560,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         def test(self):
             with self.assertRaisesMessage(CommandError, 'Username cannot be blank.'):
                 call_command(
-                    'createsuperuser',
-                    username='',
-                    interactive=False,
-                    stdin=MockTTY(),
-                    stdout=new_io,
-                    stderr=new_io,
+                    'createsuperuser', username='', interactive=False, stdin=MockTTY(), stdout=new_io, stderr=new_io
                 )
 
         test(self)
@@ -664,24 +571,11 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         """
         new_io = StringIO()
 
-        @mock_inputs({
-            'password': '1234567890',
-            'username': 'joe1234567890',
-            'email': '',
-            'bypass': 'y',
-        })
+        @mock_inputs({'password': '1234567890', 'username': 'joe1234567890', 'email': '', 'bypass': 'y'})
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
-                new_io.getvalue().strip(),
-                'This password is entirely numeric.\n'
-                'Superuser created successfully.'
+                new_io.getvalue().strip(), 'This password is entirely numeric.\n' 'Superuser created successfully.'
             )
 
         test(self)
@@ -703,17 +597,11 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
 
         @mock_inputs({'password': return_passwords, 'username': return_usernames, 'email': ''})
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
                 new_io.getvalue().strip(),
                 'Error: Ensure this value has at most %s characters (it has %s).\n'
-                'Superuser created successfully.' % (user_field.max_length, len(invalid_username))
+                'Superuser created successfully.' % (user_field.max_length, len(invalid_username)),
             )
 
         test(self)
@@ -722,13 +610,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
     def test_keyboard_interrupt(self):
         new_io = StringIO()
         with self.assertRaises(SystemExit):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
         self.assertEqual(new_io.getvalue(), '\nOperation cancelled.\n')
 
     def test_existing_username(self):
@@ -747,17 +629,9 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
 
         @mock_inputs({'password': return_passwords, 'username': return_usernames, 'email': ''})
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
-                new_io.getvalue().strip(),
-                'Error: That username is already taken.\n'
-                'Superuser created successfully.'
+                new_io.getvalue().strip(), 'Error: That username is already taken.\n' 'Superuser created successfully.'
             )
 
         test(self)
@@ -767,13 +641,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         User.objects.create(username='janet')
         new_io = StringIO()
         with self.assertRaisesMessage(CommandError, "Error: That username is already taken."):
-            call_command(
-                'createsuperuser',
-                username='janet',
-                email='',
-                interactive=False,
-                stdout=new_io,
-            )
+            call_command('createsuperuser', username='janet', email='', interactive=False, stdout=new_io)
 
     def test_existing_username_provided_via_option_and_interactive(self):
         """call_command() gets username='janet' and interactive=True."""
@@ -784,19 +652,10 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         def return_passwords():
             return entered_passwords.pop(0)
 
-        @mock_inputs({
-            'password': return_passwords,
-            'username': 'janet1',
-            'email': 'test@test.com'
-        })
+        @mock_inputs({'password': return_passwords, 'username': 'janet1', 'email': 'test@test.com'})
         def test(self):
             call_command(
-                'createsuperuser',
-                username='janet',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
+                'createsuperuser', username='janet', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io
             )
             msg = 'Error: That username is already taken.\nSuperuser created successfully.'
             self.assertEqual(new_io.getvalue().strip(), msg)
@@ -816,23 +675,11 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         def mismatched_passwords_then_matched():
             return entered_passwords.pop(0)
 
-        @mock_inputs({
-            'password': mismatched_passwords_then_matched,
-            'username': 'joe1234567890',
-            'email': '',
-        })
+        @mock_inputs({'password': mismatched_passwords_then_matched, 'username': 'joe1234567890', 'email': ''})
         def test(self):
-            call_command(
-                "createsuperuser",
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command("createsuperuser", interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
-                new_io.getvalue().strip(),
-                "Error: Your passwords didn't match.\n"
-                "Superuser created successfully."
+                new_io.getvalue().strip(), "Error: Your passwords didn't match.\n" "Superuser created successfully."
             )
 
         test(self)
@@ -850,23 +697,11 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         def blank_passwords_then_valid():
             return entered_passwords.pop(0)
 
-        @mock_inputs({
-            'password': blank_passwords_then_valid,
-            'username': 'joe1234567890',
-            'email': '',
-        })
+        @mock_inputs({'password': blank_passwords_then_valid, 'username': 'joe1234567890', 'email': ''})
         def test(self):
-            call_command(
-                "createsuperuser",
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command("createsuperuser", interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(
-                new_io.getvalue().strip(),
-                "Error: Blank passwords aren't allowed.\n"
-                "Superuser created successfully."
+                new_io.getvalue().strip(), "Error: Blank passwords aren't allowed.\n" "Superuser created successfully."
             )
 
         test(self)
@@ -894,13 +729,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
 
         @mock_inputs({'username': 'username'})
         def test(self):
-            call_command(
-                'createsuperuser',
-                interactive=True,
-                stdin=MockTTY(),
-                stdout=new_io,
-                stderr=new_io,
-            )
+            call_command('createsuperuser', interactive=True, stdin=MockTTY(), stdout=new_io, stderr=new_io)
             self.assertEqual(new_io.getvalue().strip(), 'Superuser created successfully.')
 
         test(self)
@@ -929,7 +758,6 @@ class MultiDBCreatesuperuserTestCase(TestCase):
 
 
 class CreatePermissionsTests(TestCase):
-
     def setUp(self):
         self._original_permissions = Permission._meta.permissions[:]
         self._original_default_permissions = Permission._meta.default_permissions
@@ -942,24 +770,18 @@ class CreatePermissionsTests(TestCase):
 
     def test_default_permissions(self):
         permission_content_type = ContentType.objects.get_by_natural_key('auth', 'permission')
-        Permission._meta.permissions = [
-            ('my_custom_permission', 'Some permission'),
-        ]
+        Permission._meta.permissions = [('my_custom_permission', 'Some permission')]
         create_permissions(self.app_config, verbosity=0)
 
         # view/add/change/delete permission by default + custom permission
-        self.assertEqual(Permission.objects.filter(
-            content_type=permission_content_type,
-        ).count(), 5)
+        self.assertEqual(Permission.objects.filter(content_type=permission_content_type).count(), 5)
 
         Permission.objects.filter(content_type=permission_content_type).delete()
         Permission._meta.default_permissions = []
         create_permissions(self.app_config, verbosity=0)
 
         # custom permission only since default permissions is empty
-        self.assertEqual(Permission.objects.filter(
-            content_type=permission_content_type,
-        ).count(), 1)
+        self.assertEqual(Permission.objects.filter(content_type=permission_content_type).count(), 1)
 
     def test_unavailable_models(self):
         """
@@ -996,8 +818,6 @@ class CreatePermissionsTests(TestCase):
         codename = get_permission_codename('add', opts)
         self.assertTrue(
             Permission.objects.filter(
-                content_type__model=opts.model_name,
-                content_type__app_label=opts.app_label,
-                codename=codename,
+                content_type__model=opts.model_name, content_type__app_label=opts.app_label, codename=codename
             ).exists()
         )

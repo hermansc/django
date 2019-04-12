@@ -6,7 +6,6 @@ from ..utils import setup
 
 
 class LjustTests(SimpleTestCase):
-
     @setup({'ljust01': '{% autoescape off %}.{{ a|ljust:"5" }}. .{{ b|ljust:"5" }}.{% endautoescape %}'})
     def test_ljust01(self):
         output = self.engine.render_to_string('ljust01', {"a": "a&b", "b": mark_safe("a&b")})
@@ -19,7 +18,6 @@ class LjustTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_ljust(self):
         self.assertEqual(ljust('test', 10), 'test      ')
         self.assertEqual(ljust('test', 3), 'test')

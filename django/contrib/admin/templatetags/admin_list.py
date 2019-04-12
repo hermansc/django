@@ -1,12 +1,8 @@
 import datetime
 
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
-from django.contrib.admin.utils import (
-    display_for_field, display_for_value, label_for_field, lookup_field,
-)
-from django.contrib.admin.views.main import (
-    ALL_VAR, ORDER_VAR, PAGE_VAR, SEARCH_VAR,
-)
+from django.contrib.admin.utils import display_for_field, display_for_value, label_for_field, lookup_field
+from django.contrib.admin.views.main import ALL_VAR, ORDER_VAR, PAGE_VAR, SEARCH_VAR
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.template import Library
@@ -67,16 +63,14 @@ def pagination(cl):
             # ON_EACH_SIDE links at either end of the "current page" link.
             page_range = []
             if page_num > (ON_EACH_SIDE + ON_ENDS):
-                page_range += [
-                    *range(0, ON_ENDS), DOT,
-                    *range(page_num - ON_EACH_SIDE, page_num + 1),
-                ]
+                page_range += [*range(0, ON_ENDS), DOT, *range(page_num - ON_EACH_SIDE, page_num + 1)]
             else:
                 page_range.extend(range(0, page_num + 1))
             if page_num < (paginator.num_pages - ON_EACH_SIDE - ON_ENDS - 1):
                 page_range += [
-                    *range(page_num + 1, page_num + ON_EACH_SIDE + 1), DOT,
-                    *range(paginator.num_pages - ON_ENDS, paginator.num_pages)
+                    *range(page_num + 1, page_num + ON_EACH_SIDE + 1),
+                    DOT,
+                    *range(paginator.num_pages - ON_ENDS, paginator.num_pages),
                 ]
             else:
                 page_range.extend(range(page_num + 1, paginator.num_pages))
@@ -94,12 +88,7 @@ def pagination(cl):
 
 @register.tag(name='pagination')
 def pagination_tag(parser, token):
-    return InclusionAdminNode(
-        parser, token,
-        func=pagination,
-        template_name='pagination.html',
-        takes_context=False,
-    )
+    return InclusionAdminNode(parser, token, func=pagination, template_name='pagination.html', takes_context=False)
 
 
 def result_headers(cl):
@@ -108,11 +97,7 @@ def result_headers(cl):
     """
     ordering_field_columns = cl.get_ordering_field_columns()
     for i, field_name in enumerate(cl.list_display):
-        text, attr = label_for_field(
-            field_name, cl.model,
-            model_admin=cl.model_admin,
-            return_attr=True
-        )
+        text, attr = label_for_field(field_name, cl.model, model_admin=cl.model_admin, return_attr=True)
         is_field_sortable = cl.sortable_by is None or field_name in cl.sortable_by
         if attr:
             field_name = _coerce_field_name(field_name, i)
@@ -120,11 +105,7 @@ def result_headers(cl):
 
             # if the field is the action checkbox: no sorting and special class
             if field_name == 'action_checkbox':
-                yield {
-                    "text": text,
-                    "class_attrib": mark_safe(' class="action-checkbox-column"'),
-                    "sortable": False,
-                }
+                yield {"text": text, "class_attrib": mark_safe(' class="action-checkbox-column"'), "sortable": False}
                 continue
 
             admin_order_field = getattr(attr, "admin_order_field", None)
@@ -136,11 +117,7 @@ def result_headers(cl):
 
         if not is_field_sortable:
             # Not sortable
-            yield {
-                'text': text,
-                'class_attrib': format_html(' class="column-{}"', field_name),
-                'sortable': False,
-            }
+            yield {'text': text, 'class_attrib': format_html(' class="column-{}"', field_name), 'sortable': False}
             continue
 
         # OK, it is sortable if we got this far
@@ -278,19 +255,20 @@ def items_for_result(cl, result, form):
                 link_or_text = format_html(
                     '<a href="{}"{}>{}</a>',
                     url,
-                    format_html(
-                        ' data-popup-opener="{}"', value
-                    ) if cl.is_popup else '',
-                    result_repr)
+                    format_html(' data-popup-opener="{}"', value) if cl.is_popup else '',
+                    result_repr,
+                )
 
             yield format_html('<{}{}>{}</{}>', table_tag, row_class, link_or_text, table_tag)
         else:
             # By default the fields come from ModelAdmin.list_editable, but if we pull
             # the fields out of the form instead of list_editable custom admins
             # can provide fields on a per request basis
-            if (form and field_name in form.fields and not (
-                    field_name == cl.model._meta.pk.name and
-                    form[cl.model._meta.pk.name].is_hidden)):
+            if (
+                form
+                and field_name in form.fields
+                and not (field_name == cl.model._meta.pk.name and form[cl.model._meta.pk.name].is_hidden)
+            ):
                 bf = form[field_name]
                 result_repr = mark_safe(str(bf.errors) + str(bf))
             yield format_html('<td{}>{}</td>', row_class, result_repr)
@@ -304,6 +282,7 @@ class ResultList(list):
     with the form object for error reporting purposes. Needed to maintain
     backwards compatibility with existing admin templates.
     """
+
     def __init__(self, form, *items):
         self.form = form
         super().__init__(*items)
@@ -346,10 +325,7 @@ def result_list(cl):
 @register.tag(name='result_list')
 def result_list_tag(parser, token):
     return InclusionAdminNode(
-        parser, token,
-        func=result_list,
-        template_name='change_list_results.html',
-        takes_context=False,
+        parser, token, func=result_list, template_name='change_list_results.html', takes_context=False
     )
 
 
@@ -372,8 +348,7 @@ def date_hierarchy(cl):
 
         if not (year_lookup or month_lookup or day_lookup):
             # select appropriate start level
-            date_range = cl.queryset.aggregate(first=models.Min(field_name),
-                                               last=models.Max(field_name))
+            date_range = cl.queryset.aggregate(first=models.Min(field_name), last=models.Max(field_name))
             if date_range['first'] and date_range['last']:
                 if date_range['first'].year == date_range['last'].year:
                     year_lookup = date_range['first'].year
@@ -386,55 +361,49 @@ def date_hierarchy(cl):
                 'show': True,
                 'back': {
                     'link': link({year_field: year_lookup, month_field: month_lookup}),
-                    'title': capfirst(formats.date_format(day, 'YEAR_MONTH_FORMAT'))
+                    'title': capfirst(formats.date_format(day, 'YEAR_MONTH_FORMAT')),
                 },
-                'choices': [{'title': capfirst(formats.date_format(day, 'MONTH_DAY_FORMAT'))}]
+                'choices': [{'title': capfirst(formats.date_format(day, 'MONTH_DAY_FORMAT'))}],
             }
         elif year_lookup and month_lookup:
             days = getattr(cl.queryset, 'dates')(field_name, 'day')
             return {
                 'show': True,
-                'back': {
-                    'link': link({year_field: year_lookup}),
-                    'title': str(year_lookup)
-                },
-                'choices': [{
-                    'link': link({year_field: year_lookup, month_field: month_lookup, day_field: day.day}),
-                    'title': capfirst(formats.date_format(day, 'MONTH_DAY_FORMAT'))
-                } for day in days]
+                'back': {'link': link({year_field: year_lookup}), 'title': str(year_lookup)},
+                'choices': [
+                    {
+                        'link': link({year_field: year_lookup, month_field: month_lookup, day_field: day.day}),
+                        'title': capfirst(formats.date_format(day, 'MONTH_DAY_FORMAT')),
+                    }
+                    for day in days
+                ],
             }
         elif year_lookup:
             months = getattr(cl.queryset, 'dates')(field_name, 'month')
             return {
                 'show': True,
-                'back': {
-                    'link': link({}),
-                    'title': _('All dates')
-                },
-                'choices': [{
-                    'link': link({year_field: year_lookup, month_field: month.month}),
-                    'title': capfirst(formats.date_format(month, 'YEAR_MONTH_FORMAT'))
-                } for month in months]
+                'back': {'link': link({}), 'title': _('All dates')},
+                'choices': [
+                    {
+                        'link': link({year_field: year_lookup, month_field: month.month}),
+                        'title': capfirst(formats.date_format(month, 'YEAR_MONTH_FORMAT')),
+                    }
+                    for month in months
+                ],
             }
         else:
             years = getattr(cl.queryset, 'dates')(field_name, 'year')
             return {
                 'show': True,
                 'back': None,
-                'choices': [{
-                    'link': link({year_field: str(year.year)}),
-                    'title': str(year.year),
-                } for year in years]
+                'choices': [{'link': link({year_field: str(year.year)}), 'title': str(year.year)} for year in years],
             }
 
 
 @register.tag(name='date_hierarchy')
 def date_hierarchy_tag(parser, token):
     return InclusionAdminNode(
-        parser, token,
-        func=date_hierarchy,
-        template_name='date_hierarchy.html',
-        takes_context=False,
+        parser, token, func=date_hierarchy, template_name='date_hierarchy.html', takes_context=False
     )
 
 
@@ -442,11 +411,7 @@ def search_form(cl):
     """
     Display a search form for searching the list.
     """
-    return {
-        'cl': cl,
-        'show_result_count': cl.result_count != cl.full_result_count,
-        'search_var': SEARCH_VAR
-    }
+    return {'cl': cl, 'show_result_count': cl.result_count != cl.full_result_count, 'search_var': SEARCH_VAR}
 
 
 @register.tag(name='search_form')
@@ -457,11 +422,7 @@ def search_form_tag(parser, token):
 @register.simple_tag
 def admin_list_filter(cl, spec):
     tpl = get_template(spec.template)
-    return tpl.render({
-        'title': spec.title,
-        'choices': list(spec.choices(cl)),
-        'spec': spec,
-    })
+    return tpl.render({'title': spec.title, 'choices': list(spec.choices(cl)), 'spec': spec})
 
 
 def admin_actions(context):
@@ -482,7 +443,5 @@ def admin_actions_tag(parser, token):
 def change_list_object_tools_tag(parser, token):
     """Display the row of change list object tools."""
     return InclusionAdminNode(
-        parser, token,
-        func=lambda context: context,
-        template_name='change_list_object_tools.html',
+        parser, token, func=lambda context: context, template_name='change_list_object_tools.html'
     )

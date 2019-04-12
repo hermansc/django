@@ -13,6 +13,7 @@ class Article(models.Model):
     """
     A simple Article model for testing
     """
+
     site = models.ForeignKey(Site, models.CASCADE, related_name="admin_articles")
     title = models.CharField(max_length=100)
     hist = models.CharField(max_length=100, verbose_name=_("History"))
@@ -26,6 +27,7 @@ class Article(models.Model):
 
     def test_from_model_with_override(self):
         return "nothing"
+
     test_from_model_with_override.short_description = "not What you Expect"
 
 
@@ -68,10 +70,7 @@ class Vehicle(models.Model):
 
 class VehicleMixin(Vehicle):
     vehicle = models.OneToOneField(
-        Vehicle,
-        models.CASCADE,
-        parent_link=True,
-        related_name='vehicle_%(app_label)s_%(class)s',
+        Vehicle, models.CASCADE, parent_link=True, related_name='vehicle_%(app_label)s_%(class)s'
     )
 
     class Meta:

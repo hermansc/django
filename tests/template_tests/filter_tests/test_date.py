@@ -9,7 +9,6 @@ from .timezone_utils import TimezoneTestCase
 
 
 class DateTests(TimezoneTestCase):
-
     @setup({'date01': '{{ d|date:"m" }}'})
     def test_date01(self):
         output = self.engine.render_to_string('date01', {'d': datetime(2008, 1, 1)})
@@ -76,7 +75,6 @@ class DateTests(TimezoneTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_date(self):
         self.assertEqual(date(datetime(2005, 12, 29), "d F Y"), '29 December 2005')
 

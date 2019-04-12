@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class RadiansTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_radians=Radians('normal')).first()
@@ -35,9 +34,7 @@ class RadiansTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_radians=Radians('small'),
-            normal_radians=Radians('normal'),
-            big_radians=Radians('big'),
+            small_radians=Radians('small'), normal_radians=Radians('normal'), big_radians=Radians('big')
         ).first()
         self.assertIsInstance(obj.small_radians, float)
         self.assertIsInstance(obj.normal_radians, float)

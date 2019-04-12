@@ -15,18 +15,61 @@ from django.db import connection, models
 from django.test import TestCase
 
 from .models import (
-    Anchor, AutoNowDateTimeData, BigIntegerData, BinaryData, BooleanData,
-    BooleanPKData, CharData, CharPKData, DateData, DatePKData, DateTimeData,
-    DateTimePKData, DecimalData, DecimalPKData, EmailData, EmailPKData,
-    ExplicitInheritBaseModel, FileData, FilePathData, FilePathPKData, FKData,
-    FKDataToField, FKDataToO2O, FKSelfData, FKToUUID, FloatData, FloatPKData,
-    GenericData, GenericIPAddressData, GenericIPAddressPKData,
-    InheritAbstractModel, InheritBaseModel, IntegerData, IntegerPKData,
-    Intermediate, LengthModel, M2MData, M2MIntermediateData, M2MSelfData,
-    ModifyingSaveData, NullBooleanData, O2OData, PositiveIntegerData,
-    PositiveIntegerPKData, PositiveSmallIntegerData,
-    PositiveSmallIntegerPKData, SlugData, SlugPKData, SmallData, SmallPKData,
-    Tag, TextData, TimeData, UniqueAnchor, UUIDData,
+    Anchor,
+    AutoNowDateTimeData,
+    BigIntegerData,
+    BinaryData,
+    BooleanData,
+    BooleanPKData,
+    CharData,
+    CharPKData,
+    DateData,
+    DatePKData,
+    DateTimeData,
+    DateTimePKData,
+    DecimalData,
+    DecimalPKData,
+    EmailData,
+    EmailPKData,
+    ExplicitInheritBaseModel,
+    FileData,
+    FilePathData,
+    FilePathPKData,
+    FKData,
+    FKDataToField,
+    FKDataToO2O,
+    FKSelfData,
+    FKToUUID,
+    FloatData,
+    FloatPKData,
+    GenericData,
+    GenericIPAddressData,
+    GenericIPAddressPKData,
+    InheritAbstractModel,
+    InheritBaseModel,
+    IntegerData,
+    IntegerPKData,
+    Intermediate,
+    LengthModel,
+    M2MData,
+    M2MIntermediateData,
+    M2MSelfData,
+    ModifyingSaveData,
+    NullBooleanData,
+    O2OData,
+    PositiveIntegerData,
+    PositiveIntegerPKData,
+    PositiveSmallIntegerData,
+    PositiveSmallIntegerPKData,
+    SlugData,
+    SlugPKData,
+    SmallData,
+    SmallPKData,
+    Tag,
+    TextData,
+    TimeData,
+    UniqueAnchor,
+    UUIDData,
 )
 from .tests import register_tests
 
@@ -110,6 +153,7 @@ def inherited_create(pk, klass, data):
         created.append(klass.objects.get(id=pk))
     return created
 
+
 # A set of functions that can be used to compare
 # test data objects of various kinds
 
@@ -118,18 +162,17 @@ def data_compare(testcase, pk, klass, data):
     instance = klass.objects.get(id=pk)
     if klass == BinaryData and data is not None:
         testcase.assertEqual(
-            bytes(data), bytes(instance.data),
-            "Objects with PK=%d not equal; expected '%s' (%s), got '%s' (%s)" % (
-                pk, repr(bytes(data)), type(data), repr(bytes(instance.data)),
-                type(instance.data),
-            )
+            bytes(data),
+            bytes(instance.data),
+            "Objects with PK=%d not equal; expected '%s' (%s), got '%s' (%s)"
+            % (pk, repr(bytes(data)), type(data), repr(bytes(instance.data)), type(instance.data)),
         )
     else:
         testcase.assertEqual(
-            data, instance.data,
-            "Objects with PK=%d not equal; expected '%s' (%s), got '%s' (%s)" % (
-                pk, data, type(data), instance, type(instance.data),
-            )
+            data,
+            instance.data,
+            "Objects with PK=%d not equal; expected '%s' (%s), got '%s' (%s)"
+            % (pk, data, type(data), instance, type(instance.data)),
         )
 
 
@@ -252,38 +295,36 @@ test_data = [
     (data_obj, 151, SmallData, -12),
     (data_obj, 152, SmallData, 0),
     (data_obj, 153, SmallData, None),
-    (data_obj, 160, TextData, """This is a long piece of text.
+    (
+        data_obj,
+        160,
+        TextData,
+        """This is a long piece of text.
 It contains line breaks.
 Several of them.
-The end."""),
+The end.""",
+    ),
     (data_obj, 161, TextData, ""),
     (data_obj, 162, TextData, None),
     (data_obj, 170, TimeData, datetime.time(10, 42, 37)),
     (data_obj, 171, TimeData, None),
-
     (generic_obj, 200, GenericData, ['Generic Object 1', 'tag1', 'tag2']),
     (generic_obj, 201, GenericData, ['Generic Object 2', 'tag2', 'tag3']),
-
     (data_obj, 300, Anchor, "Anchor 1"),
     (data_obj, 301, Anchor, "Anchor 2"),
     (data_obj, 302, UniqueAnchor, "UAnchor 1"),
-
     (fk_obj, 400, FKData, 300),  # Post reference
     (fk_obj, 401, FKData, 500),  # Pre reference
     (fk_obj, 402, FKData, None),  # Empty reference
-
     (m2m_obj, 410, M2MData, []),  # Empty set
     (m2m_obj, 411, M2MData, [300, 301]),  # Post reference
     (m2m_obj, 412, M2MData, [500, 501]),  # Pre reference
     (m2m_obj, 413, M2MData, [300, 301, 500, 501]),  # Pre and Post reference
-
     (o2o_obj, None, O2OData, 300),  # Post reference
     (o2o_obj, None, O2OData, 500),  # Pre reference
-
     (fk_obj, 430, FKSelfData, 431),  # Pre reference
     (fk_obj, 431, FKSelfData, 430),  # Post reference
     (fk_obj, 432, FKSelfData, None),  # Empty reference
-
     (m2m_obj, 440, M2MSelfData, []),
     (m2m_obj, 441, M2MSelfData, []),
     (m2m_obj, 442, M2MSelfData, [440, 441]),
@@ -291,15 +332,11 @@ The end."""),
     (m2m_obj, 444, M2MSelfData, [440, 441, 445, 446]),
     (m2m_obj, 445, M2MSelfData, []),
     (m2m_obj, 446, M2MSelfData, []),
-
     (fk_obj, 450, FKDataToField, "UAnchor 1"),
     (fk_obj, 451, FKDataToField, "UAnchor 2"),
     (fk_obj, 452, FKDataToField, None),
-
     (fk_obj, 460, FKDataToO2O, 300),
-
     (im2m_obj, 470, M2MIntermediateData, None),
-
     # testing post- and pre-references and extra fields
     (im_obj, 480, Intermediate, {'right': 300, 'left': 470}),
     (im_obj, 481, Intermediate, {'right': 300, 'left': 490}),
@@ -309,13 +346,10 @@ The end."""),
     (im_obj, 485, Intermediate, {'right': 300, 'left': 490, 'extra': "extra"}),
     (im_obj, 486, Intermediate, {'right': 500, 'left': 470, 'extra': "extra"}),
     (im_obj, 487, Intermediate, {'right': 500, 'left': 490, 'extra': "extra"}),
-
     (im2m_obj, 490, M2MIntermediateData, []),
-
     (data_obj, 500, Anchor, "Anchor 3"),
     (data_obj, 501, Anchor, "Anchor 4"),
     (data_obj, 502, UniqueAnchor, "UAnchor 2"),
-
     (pk_obj, 601, BooleanPKData, True),
     (pk_obj, 602, BooleanPKData, False),
     (pk_obj, 610, CharPKData, "Test Char PKData"),
@@ -349,14 +383,11 @@ The end."""),
     # (pk_obj, 790, XMLPKData, "<foo></foo>"),
     (pk_obj, 791, UUIDData, uuid_obj),
     (fk_obj, 792, FKToUUID, uuid_obj),
-
     (data_obj, 800, AutoNowDateTimeData, datetime.datetime(2006, 6, 16, 10, 42, 37)),
     (data_obj, 810, ModifyingSaveData, 42),
-
     (inherited_obj, 900, InheritAbstractModel, {'child_data': 37, 'parent_data': 42}),
     (inherited_obj, 910, ExplicitInheritBaseModel, {'child_data': 37, 'parent_data': 42}),
     (inherited_obj, 920, InheritBaseModel, {'child_data': 37, 'parent_data': 42}),
-
     (data_obj, 1000, BigIntegerData, 9223372036854775807),
     (data_obj, 1001, BigIntegerData, -9223372036854775808),
     (data_obj, 1002, BigIntegerData, 0),
@@ -370,19 +401,17 @@ The end."""),
 # when field.empty_strings_allowed is True and the value is None; skip these
 # tests.
 if connection.features.interprets_empty_strings_as_nulls:
-    test_data = [data for data in test_data
-                 if not (data[0] == data_obj and
-                         data[2]._meta.get_field('data').empty_strings_allowed and
-                         data[3] is None)]
+    test_data = [
+        data
+        for data in test_data
+        if not (data[0] == data_obj and data[2]._meta.get_field('data').empty_strings_allowed and data[3] is None)
+    ]
 
 # Regression test for #8651 -- a FK to an object with PK of 0
 # This won't work on MySQL since it won't let you create an object
 # with an autoincrement primary key of 0,
 if connection.features.allows_auto_pk_0:
-    test_data.extend([
-        (data_obj, 0, Anchor, "Anchor 0"),
-        (fk_obj, 465, FKData, 0),
-    ])
+    test_data.extend([(data_obj, 0, Anchor, "Anchor 0"), (fk_obj, 465, FKData, 0)])
 
 
 class SerializerDataTests(TestCase):

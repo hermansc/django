@@ -27,11 +27,7 @@ class Concert(models.Model):
     main_band = models.ForeignKey(Band, models.CASCADE, related_name='main_concerts')
     opening_band = models.ForeignKey(Band, models.CASCADE, related_name='opening_concerts', blank=True)
     day = models.CharField(max_length=3, choices=((1, 'Fri'), (2, 'Sat')))
-    transport = models.CharField(max_length=100, choices=(
-        (1, 'Plane'),
-        (2, 'Train'),
-        (3, 'Bus')
-    ), blank=True)
+    transport = models.CharField(max_length=100, choices=((1, 'Plane'), (2, 'Train'), (3, 'Bus')), blank=True)
 
 
 class ValidationTestModel(models.Model):

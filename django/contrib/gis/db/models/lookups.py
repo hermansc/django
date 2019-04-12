@@ -87,12 +87,14 @@ class GISLookup(Lookup):
 # Geometry operators
 # ------------------
 
+
 @BaseSpatialField.register_lookup
 class OverlapsLeftLookup(GISLookup):
     """
     The overlaps_left operator returns true if A's bounding box overlaps or is to the
     left of B's bounding box.
     """
+
     lookup_name = 'overlaps_left'
 
 
@@ -102,6 +104,7 @@ class OverlapsRightLookup(GISLookup):
     The 'overlaps_right' operator returns true if A's bounding box overlaps or is to the
     right of B's bounding box.
     """
+
     lookup_name = 'overlaps_right'
 
 
@@ -111,6 +114,7 @@ class OverlapsBelowLookup(GISLookup):
     The 'overlaps_below' operator returns true if A's bounding box overlaps or is below
     B's bounding box.
     """
+
     lookup_name = 'overlaps_below'
 
 
@@ -120,6 +124,7 @@ class OverlapsAboveLookup(GISLookup):
     The 'overlaps_above' operator returns true if A's bounding box overlaps or is above
     B's bounding box.
     """
+
     lookup_name = 'overlaps_above'
 
 
@@ -129,6 +134,7 @@ class LeftLookup(GISLookup):
     The 'left' operator returns true if A's bounding box is strictly to the left
     of B's bounding box.
     """
+
     lookup_name = 'left'
 
 
@@ -138,6 +144,7 @@ class RightLookup(GISLookup):
     The 'right' operator returns true if A's bounding box is strictly to the right
     of B's bounding box.
     """
+
     lookup_name = 'right'
 
 
@@ -147,6 +154,7 @@ class StrictlyBelowLookup(GISLookup):
     The 'strictly_below' operator returns true if A's bounding box is strictly below B's
     bounding box.
     """
+
     lookup_name = 'strictly_below'
 
 
@@ -156,6 +164,7 @@ class StrictlyAboveLookup(GISLookup):
     The 'strictly_above' operator returns true if A's bounding box is strictly above B's
     bounding box.
     """
+
     lookup_name = 'strictly_above'
 
 
@@ -166,6 +175,7 @@ class SameAsLookup(GISLookup):
     equality of two features. So if A and B are the same feature,
     vertex-by-vertex, the operator returns true.
     """
+
     lookup_name = 'same_as'
 
 
@@ -178,6 +188,7 @@ class BBContainsLookup(GISLookup):
     The 'bbcontains' operator returns true if A's bounding box completely contains
     by B's bounding box.
     """
+
     lookup_name = 'bbcontains'
 
 
@@ -186,6 +197,7 @@ class BBOverlapsLookup(GISLookup):
     """
     The 'bboverlaps' operator returns true if A's bounding box overlaps B's bounding box.
     """
+
     lookup_name = 'bboverlaps'
 
 
@@ -195,12 +207,14 @@ class ContainedLookup(GISLookup):
     The 'contained' operator returns true if A's bounding box is completely contained
     by B's bounding box.
     """
+
     lookup_name = 'contained'
 
 
 # ------------------
 # Geometry functions
 # ------------------
+
 
 @BaseSpatialField.register_lookup
 class ContainsLookup(GISLookup):
@@ -293,8 +307,8 @@ class DistanceLookupBase(GISLookup):
         dist_param = self.rhs_params[0]
         return (
             compiler.compile(dist_param.resolve_expression(compiler.query))
-            if hasattr(dist_param, 'resolve_expression') else
-            ('%s', connection.ops.get_distance(self.lhs.output_field, self.rhs_params, self.lookup_name))
+            if hasattr(dist_param, 'resolve_expression')
+            else ('%s', connection.ops.get_distance(self.lhs.output_field, self.rhs_params, self.lookup_name))
         )
 
 
@@ -316,10 +330,7 @@ class DistanceLookupFromFunction(DistanceLookupBase):
         distance_expr = connection.ops.distance_expr_for_lookup(self.lhs, self.rhs, spheroid=spheroid)
         sql, params = compiler.compile(distance_expr.resolve_expression(compiler.query))
         dist_sql, dist_params = self.process_distance(compiler, connection)
-        return (
-            '%(func)s %(op)s %(dist)s' % {'func': sql, 'op': self.op, 'dist': dist_sql},
-            params + dist_params,
-        )
+        return ('%(func)s %(op)s %(dist)s' % {'func': sql, 'op': self.op, 'dist': dist_sql}, params + dist_params)
 
 
 @BaseSpatialField.register_lookup

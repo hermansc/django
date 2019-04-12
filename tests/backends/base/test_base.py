@@ -8,7 +8,6 @@ from ..models import Square
 
 
 class DatabaseWrapperTests(SimpleTestCase):
-
     def test_initialization_class_attributes(self):
         """
         The "initialization" class attributes like client_class and
@@ -37,7 +36,6 @@ class DatabaseWrapperTests(SimpleTestCase):
 
 
 class ExecuteWrapperTests(TestCase):
-
     @staticmethod
     def call_execute(connection, params=None):
         ret_val = '1' if params is None else '%s'
@@ -102,6 +100,7 @@ class ExecuteWrapperTests(TestCase):
     def test_outer_wrapper_blocks(self):
         def blocker(*args):
             pass
+
         wrapper = self.mock_wrapper()
         c = connection  # This alias shortens the next line.
         with c.execute_wrapper(wrapper), c.execute_wrapper(blocker), c.execute_wrapper(wrapper):

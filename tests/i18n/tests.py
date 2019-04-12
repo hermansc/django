@@ -19,36 +19,55 @@ from django.conf import settings
 from django.conf.locale import LANG_INFO
 from django.conf.urls.i18n import i18n_patterns
 from django.template import Context, Template
-from django.test import (
-    RequestFactory, SimpleTestCase, TestCase, override_settings,
-)
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.utils import translation
 from django.utils.deprecation import RemovedInDjango40Warning
 from django.utils.formats import (
-    date_format, get_format, get_format_modules, iter_format_modules, localize,
-    localize_input, reset_format_cache, sanitize_separators, time_format,
+    date_format,
+    get_format,
+    get_format_modules,
+    iter_format_modules,
+    localize,
+    localize_input,
+    reset_format_cache,
+    sanitize_separators,
+    time_format,
 )
 from django.utils.numberformat import format as nformat
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import (
-    LANGUAGE_SESSION_KEY, activate, check_for_language, deactivate,
-    get_language, get_language_bidi, get_language_from_request,
-    get_language_info, gettext, gettext_lazy, ngettext, ngettext_lazy,
-    npgettext, npgettext_lazy, pgettext, to_language, to_locale, trans_null,
-    trans_real, ugettext, ugettext_lazy, ugettext_noop, ungettext,
+    LANGUAGE_SESSION_KEY,
+    activate,
+    check_for_language,
+    deactivate,
+    get_language,
+    get_language_bidi,
+    get_language_from_request,
+    get_language_info,
+    gettext,
+    gettext_lazy,
+    ngettext,
+    ngettext_lazy,
+    npgettext,
+    npgettext_lazy,
+    pgettext,
+    to_language,
+    to_locale,
+    trans_null,
+    trans_real,
+    ugettext,
+    ugettext_lazy,
+    ugettext_noop,
+    ungettext,
     ungettext_lazy,
 )
-from django.utils.translation.reloader import (
-    translation_file_changed, watch_for_translation_changes,
-)
+from django.utils.translation.reloader import translation_file_changed, watch_for_translation_changes
 
 from .forms import CompanyForm, I18nForm, SelectDateForm
 from .models import Company, TestModel
 
 here = os.path.dirname(os.path.abspath(__file__))
-extended_locale_paths = settings.LOCALE_PATHS + [
-    os.path.join(here, 'other', 'locale'),
-]
+extended_locale_paths = settings.LOCALE_PATHS + [os.path.join(here, 'other', 'locale')]
 
 
 class AppModuleStub:
@@ -70,7 +89,6 @@ def patch_formats(lang, **settings):
 
 
 class TranslationTests(SimpleTestCase):
-
     @translation.override('de')
     def test_legacy_aliases(self):
         """
@@ -82,10 +100,7 @@ class TranslationTests(SimpleTestCase):
         )
         with self.assertWarnsMessage(RemovedInDjango40Warning, msg):
             self.assertEqual(ugettext_noop("Image"), "Image")
-        msg = (
-            'django.utils.translation.ugettext() is deprecated in favor of '
-            'django.utils.translation.gettext().'
-        )
+        msg = 'django.utils.translation.ugettext() is deprecated in favor of ' 'django.utils.translation.gettext().'
         with self.assertWarnsMessage(RemovedInDjango40Warning, msg):
             self.assertEqual(ugettext("Image"), "Bild")
         msg = (
@@ -94,10 +109,7 @@ class TranslationTests(SimpleTestCase):
         )
         with self.assertWarnsMessage(RemovedInDjango40Warning, msg):
             self.assertEqual(ugettext_lazy("Image"), gettext_lazy("Image"))
-        msg = (
-            'django.utils.translation.ungettext() is deprecated in favor of '
-            'django.utils.translation.ngettext().'
-        )
+        msg = 'django.utils.translation.ungettext() is deprecated in favor of ' 'django.utils.translation.ngettext().'
         with self.assertWarnsMessage(RemovedInDjango40Warning, msg):
             self.assertEqual(ungettext("%d year", "%d years", 0) % 0, "0 Jahre")
         msg = (
@@ -105,10 +117,7 @@ class TranslationTests(SimpleTestCase):
             'of django.utils.translation.ngettext_lazy().'
         )
         with self.assertWarnsMessage(RemovedInDjango40Warning, msg):
-            self.assertEqual(
-                ungettext_lazy("%d year", "%d years", 0) % 0,
-                ngettext_lazy("%d year", "%d years", 0) % 0,
-            )
+            self.assertEqual(ungettext_lazy("%d year", "%d years", 0) % 0, ngettext_lazy("%d year", "%d years", 0) % 0)
 
     @translation.override('fr')
     def test_plural(self):
@@ -142,7 +151,6 @@ class TranslationTests(SimpleTestCase):
             deactivate()
 
     def test_override_decorator(self):
-
         @translation.override('pl')
         def func_pl():
             self.assertEqual(get_language(), 'pl')
@@ -170,6 +178,7 @@ class TranslationTests(SimpleTestCase):
         @translation.override('pl')
         def func_pl():
             pass
+
         deactivate()
 
         try:
@@ -254,9 +263,7 @@ class TranslationTests(SimpleTestCase):
             self.assertEqual(simple_context_with_format.format(4), '4 guten Resultate!')
 
         complex_nonlazy = ngettext_lazy('Hi {name}, {num} good result', 'Hi {name}, {num} good results', 4)
-        complex_deferred = ngettext_lazy(
-            'Hi {name}, {num} good result', 'Hi {name}, {num} good results', 'num'
-        )
+        complex_deferred = ngettext_lazy('Hi {name}, {num} good result', 'Hi {name}, {num} good results', 'num')
         complex_context_nonlazy = npgettext_lazy(
             'Greeting', 'Hi {name}, {num} good result', 'Hi {name}, {num} good results', 4
         )
@@ -370,7 +377,6 @@ class TranslationTests(SimpleTestCase):
 
 
 class TranslationThreadSafetyTests(SimpleTestCase):
-
     def setUp(self):
         self._old_language = get_language()
         self._translations = trans_real._translations
@@ -399,7 +405,6 @@ class TranslationThreadSafetyTests(SimpleTestCase):
 
 @override_settings(USE_L10N=True)
 class FormattingTests(SimpleTestCase):
-
     def setUp(self):
         super().setUp()
         self.n = decimal.Decimal('66666.666')
@@ -408,14 +413,7 @@ class FormattingTests(SimpleTestCase):
         self.dt = datetime.datetime(2009, 12, 31, 20, 50)
         self.t = datetime.time(10, 15, 48)
         self.long = 10000
-        self.ctxt = Context({
-            'n': self.n,
-            't': self.t,
-            'd': self.d,
-            'dt': self.dt,
-            'f': self.f,
-            'l': self.long,
-        })
+        self.ctxt = Context({'n': self.n, 't': self.t, 'd': self.d, 'dt': self.dt, 'f': self.f, 'l': self.long})
 
     def test_all_format_strings(self):
         all_locales = LANG_INFO.keys()
@@ -442,32 +440,29 @@ class FormattingTests(SimpleTestCase):
 
         with self.settings(USE_THOUSAND_SEPARATOR=True):
             self.assertEqual(
-                '66,666.66',
-                nformat(self.n, decimal_sep='.', decimal_pos=2, grouping=3, thousand_sep=',')
+                '66,666.66', nformat(self.n, decimal_sep='.', decimal_pos=2, grouping=3, thousand_sep=',')
             )
             self.assertEqual(
-                '6B6B6B6B6A6',
-                nformat(self.n, decimal_sep='A', decimal_pos=1, grouping=1, thousand_sep='B')
+                '6B6B6B6B6A6', nformat(self.n, decimal_sep='A', decimal_pos=1, grouping=1, thousand_sep='B')
             )
             self.assertEqual('-66666.6', nformat(-66666.666, decimal_sep='.', decimal_pos=1))
             self.assertEqual('-66666.0', nformat(int('-66666'), decimal_sep='.', decimal_pos=1))
             self.assertEqual('10000.0', nformat(self.long, decimal_sep='.', decimal_pos=1))
             self.assertEqual(
                 '10,00,00,000.00',
-                nformat(100000000.00, decimal_sep='.', decimal_pos=2, grouping=(3, 2, 0), thousand_sep=',')
+                nformat(100000000.00, decimal_sep='.', decimal_pos=2, grouping=(3, 2, 0), thousand_sep=','),
             )
             self.assertEqual(
                 '1,0,00,000,0000.00',
-                nformat(10000000000.00, decimal_sep='.', decimal_pos=2, grouping=(4, 3, 2, 1, 0), thousand_sep=',')
+                nformat(10000000000.00, decimal_sep='.', decimal_pos=2, grouping=(4, 3, 2, 1, 0), thousand_sep=','),
             )
             self.assertEqual(
                 '10000,00,000.00',
-                nformat(1000000000.00, decimal_sep='.', decimal_pos=2, grouping=(3, 2, -1), thousand_sep=',')
+                nformat(1000000000.00, decimal_sep='.', decimal_pos=2, grouping=(3, 2, -1), thousand_sep=','),
             )
             # This unusual grouping/force_grouping combination may be triggered by the intcomma filter (#17414)
             self.assertEqual(
-                '10000',
-                nformat(self.long, decimal_sep='.', decimal_pos=0, grouping=0, force_grouping=True)
+                '10000', nformat(self.long, decimal_sep='.', decimal_pos=0, grouping=0, force_grouping=True)
             )
             # date filter
             self.assertEqual('31.12.2009 в 20:50', Template('{{ dt|date:"d.m.Y в H:i" }}').render(self.ctxt))
@@ -506,14 +501,16 @@ class FormattingTests(SimpleTestCase):
                 '12/31/2009 8:50 p.m.', Template('{{ dt|date:"SHORT_DATETIME_FORMAT" }}').render(self.ctxt)
             )
 
-            form = I18nForm({
-                'decimal_field': '66666,666',
-                'float_field': '99999,999',
-                'date_field': '31/12/2009',
-                'datetime_field': '31/12/2009 20:50',
-                'time_field': '20:50',
-                'integer_field': '1.234',
-            })
+            form = I18nForm(
+                {
+                    'decimal_field': '66666,666',
+                    'float_field': '99999,999',
+                    'date_field': '31/12/2009',
+                    'datetime_field': '31/12/2009 20:50',
+                    'time_field': '20:50',
+                    'integer_field': '1.234',
+                }
+            )
             self.assertFalse(form.is_valid())
             self.assertEqual(['Introdu\xefu un n\xfamero.'], form.errors['float_field'])
             self.assertEqual(['Introdu\xefu un n\xfamero.'], form.errors['decimal_field'])
@@ -521,11 +518,7 @@ class FormattingTests(SimpleTestCase):
             self.assertEqual(['Introdu\xefu una data/hora v\xe0lides.'], form.errors['datetime_field'])
             self.assertEqual(['Introdu\xefu un n\xfamero sencer.'], form.errors['integer_field'])
 
-            form2 = SelectDateForm({
-                'date_field_month': '12',
-                'date_field_day': '31',
-                'date_field_year': '2009'
-            })
+            form2 = SelectDateForm({'date_field_month': '12', 'date_field_day': '31', 'date_field_year': '2009'})
             self.assertTrue(form2.is_valid())
             self.assertEqual(datetime.date(2009, 12, 31), form2.cleaned_data['date_field'])
             self.assertHTMLEqual(
@@ -591,7 +584,7 @@ class FormattingTests(SimpleTestCase):
                 '<option value="2017">2017</option>'
                 '<option value="2018">2018</option>'
                 '</select>',
-                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31))
+                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31)),
             )
 
             # We shouldn't change the behavior of the floatformat filter re:
@@ -651,14 +644,16 @@ class FormattingTests(SimpleTestCase):
                 self.assertEqual('10.000', Template('{{ l }}').render(self.ctxt))
 
             with self.settings(USE_THOUSAND_SEPARATOR=True):
-                form3 = I18nForm({
-                    'decimal_field': '66.666,666',
-                    'float_field': '99.999,999',
-                    'date_field': '31/12/2009',
-                    'datetime_field': '31/12/2009 20:50',
-                    'time_field': '20:50',
-                    'integer_field': '1.234',
-                })
+                form3 = I18nForm(
+                    {
+                        'decimal_field': '66.666,666',
+                        'float_field': '99.999,999',
+                        'date_field': '31/12/2009',
+                        'datetime_field': '31/12/2009 20:50',
+                        'time_field': '20:50',
+                        'integer_field': '1.234',
+                    }
+                )
                 self.assertTrue(form3.is_valid())
                 self.assertEqual(decimal.Decimal('66666.666'), form3.cleaned_data['decimal_field'])
                 self.assertEqual(99999.999, form3.cleaned_data['float_field'])
@@ -677,21 +672,24 @@ class FormattingTests(SimpleTestCase):
                 self.assertEqual('10:15', Template('{{ t|time:"TIME_FORMAT" }}').render(self.ctxt))
                 self.assertEqual('31/12/2009', Template('{{ d|date:"SHORT_DATE_FORMAT" }}').render(self.ctxt))
                 self.assertEqual(
-                    '31/12/2009 20:50',
-                    Template('{{ dt|date:"SHORT_DATETIME_FORMAT" }}').render(self.ctxt)
+                    '31/12/2009 20:50', Template('{{ dt|date:"SHORT_DATETIME_FORMAT" }}').render(self.ctxt)
                 )
-                self.assertEqual(date_format(datetime.datetime.now(), "DATE_FORMAT"),
-                                 Template('{% now "DATE_FORMAT" %}').render(self.ctxt))
+                self.assertEqual(
+                    date_format(datetime.datetime.now(), "DATE_FORMAT"),
+                    Template('{% now "DATE_FORMAT" %}').render(self.ctxt),
+                )
 
             with self.settings(USE_THOUSAND_SEPARATOR=False):
-                form4 = I18nForm({
-                    'decimal_field': '66666,666',
-                    'float_field': '99999,999',
-                    'date_field': '31/12/2009',
-                    'datetime_field': '31/12/2009 20:50',
-                    'time_field': '20:50',
-                    'integer_field': '1234',
-                })
+                form4 = I18nForm(
+                    {
+                        'decimal_field': '66666,666',
+                        'float_field': '99999,999',
+                        'date_field': '31/12/2009',
+                        'datetime_field': '31/12/2009 20:50',
+                        'time_field': '20:50',
+                        'integer_field': '1234',
+                    }
+                )
                 self.assertTrue(form4.is_valid())
                 self.assertEqual(decimal.Decimal('66666.666'), form4.cleaned_data['decimal_field'])
                 self.assertEqual(99999.999, form4.cleaned_data['float_field'])
@@ -700,11 +698,7 @@ class FormattingTests(SimpleTestCase):
                 self.assertEqual(datetime.time(20, 50), form4.cleaned_data['time_field'])
                 self.assertEqual(1234, form4.cleaned_data['integer_field'])
 
-            form5 = SelectDateForm({
-                'date_field_month': '12',
-                'date_field_day': '31',
-                'date_field_year': '2009'
-            })
+            form5 = SelectDateForm({'date_field_month': '12', 'date_field_day': '31', 'date_field_year': '2009'})
             self.assertTrue(form5.is_valid())
             self.assertEqual(datetime.date(2009, 12, 31), form5.cleaned_data['date_field'])
             self.assertHTMLEqual(
@@ -770,7 +764,7 @@ class FormattingTests(SimpleTestCase):
                 '<option value="2017">2017</option>'
                 '<option value="2018">2018</option>'
                 '</select>',
-                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31))
+                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31)),
             )
 
         # Russian locale (with E as month)
@@ -838,7 +832,7 @@ class FormattingTests(SimpleTestCase):
                 '<option value="2017">2017</option>'
                 '<option value="2018">2018</option>'
                 '</select>',
-                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31))
+                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31)),
             )
 
         # English locale
@@ -877,18 +871,19 @@ class FormattingTests(SimpleTestCase):
                 self.assertEqual('100000.0', Template('{{ f|floatformat }}').render(self.ctxt))
                 self.assertEqual('12/31/2009', Template('{{ d|date:"SHORT_DATE_FORMAT" }}').render(self.ctxt))
                 self.assertEqual(
-                    '12/31/2009 8:50 p.m.',
-                    Template('{{ dt|date:"SHORT_DATETIME_FORMAT" }}').render(self.ctxt)
+                    '12/31/2009 8:50 p.m.', Template('{{ dt|date:"SHORT_DATETIME_FORMAT" }}').render(self.ctxt)
                 )
 
-            form5 = I18nForm({
-                'decimal_field': '66666.666',
-                'float_field': '99999.999',
-                'date_field': '12/31/2009',
-                'datetime_field': '12/31/2009 20:50',
-                'time_field': '20:50',
-                'integer_field': '1234',
-            })
+            form5 = I18nForm(
+                {
+                    'decimal_field': '66666.666',
+                    'float_field': '99999.999',
+                    'date_field': '12/31/2009',
+                    'datetime_field': '12/31/2009 20:50',
+                    'time_field': '20:50',
+                    'integer_field': '1234',
+                }
+            )
             self.assertTrue(form5.is_valid())
             self.assertEqual(decimal.Decimal('66666.666'), form5.cleaned_data['decimal_field'])
             self.assertEqual(99999.999, form5.cleaned_data['float_field'])
@@ -897,11 +892,7 @@ class FormattingTests(SimpleTestCase):
             self.assertEqual(datetime.time(20, 50), form5.cleaned_data['time_field'])
             self.assertEqual(1234, form5.cleaned_data['integer_field'])
 
-            form6 = SelectDateForm({
-                'date_field_month': '12',
-                'date_field_day': '31',
-                'date_field_year': '2009'
-            })
+            form6 = SelectDateForm({'date_field_month': '12', 'date_field_day': '31', 'date_field_year': '2009'})
             self.assertTrue(form6.is_valid())
             self.assertEqual(datetime.date(2009, 12, 31), form6.cleaned_data['date_field'])
             self.assertHTMLEqual(
@@ -967,7 +958,7 @@ class FormattingTests(SimpleTestCase):
                 '<option value="2017">2017</option>'
                 '<option value="2018">2018</option>'
                 '</select>',
-                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31))
+                forms.SelectDateWidget(years=range(2009, 2019)).render('mydate', datetime.date(2009, 12, 31)),
             )
 
     def test_sub_locales(self):
@@ -986,12 +977,14 @@ class FormattingTests(SimpleTestCase):
         """
         self.maxDiff = 1200
         with translation.override('de-at', deactivate=True):
-            form6 = CompanyForm({
-                'name': 'acme',
-                'date_added': datetime.datetime(2009, 12, 31, 6, 0, 0),
-                'cents_paid': decimal.Decimal('59.47'),
-                'products_delivered': 12000,
-            })
+            form6 = CompanyForm(
+                {
+                    'name': 'acme',
+                    'date_added': datetime.datetime(2009, 12, 31, 6, 0, 0),
+                    'cents_paid': decimal.Decimal('59.47'),
+                    'products_delivered': 12000,
+                }
+            )
             self.assertTrue(form6.is_valid())
             self.assertHTMLEqual(
                 form6.as_ul(),
@@ -1003,7 +996,7 @@ class FormattingTests(SimpleTestCase):
                 '<input type="text" name="cents_paid" value="59,47" id="id_cents_paid" required></li>'
                 '<li><label for="id_products_delivered">Products delivered:</label>'
                 '<input type="text" name="products_delivered" value="12000" id="id_products_delivered" required>'
-                '</li>'
+                '</li>',
             )
             self.assertEqual(localize_input(datetime.datetime(2009, 12, 31, 6, 0, 0)), '31.12.2009 06:00:00')
             self.assertEqual(datetime.datetime(2009, 12, 31, 6, 0, 0), form6.cleaned_data['date_added'])
@@ -1012,7 +1005,7 @@ class FormattingTests(SimpleTestCase):
                 self.assertInHTML(
                     '<input type="text" name="products_delivered" '
                     'value="12.000" id="id_products_delivered" required>',
-                    form6.as_ul()
+                    form6.as_ul(),
                 )
 
     def test_localized_input_func(self):
@@ -1054,10 +1047,7 @@ class FormattingTests(SimpleTestCase):
             self.assertEqual(sanitize_separators('1001,10'), '1001.10')
             self.assertEqual(sanitize_separators('1001.10'), '1001.10')
 
-        with self.settings(
-            USE_L10N=False, DECIMAL_SEPARATOR=',', USE_THOUSAND_SEPARATOR=True,
-            THOUSAND_SEPARATOR='.'
-        ):
+        with self.settings(USE_L10N=False, DECIMAL_SEPARATOR=',', USE_THOUSAND_SEPARATOR=True, THOUSAND_SEPARATOR='.'):
             self.assertEqual(sanitize_separators('1.001,10'), '1001.10')
             self.assertEqual(sanitize_separators('1001,10'), '1001.10')
             self.assertEqual(sanitize_separators('1001.10'), '1001.10')
@@ -1079,15 +1069,14 @@ class FormattingTests(SimpleTestCase):
 
             # When the setting is a string, should return the given module and
             # the default module
-            self.assertEqual(
-                list(iter_format_modules('de', 'i18n.other.locale')),
-                [test_mod, default_mod])
+            self.assertEqual(list(iter_format_modules('de', 'i18n.other.locale')), [test_mod, default_mod])
 
             # When setting is a list of strings, should return the given
             # modules and the default module
             self.assertEqual(
                 list(iter_format_modules('de', ['i18n.other.locale', 'i18n.other2.locale'])),
-                [test_mod, test_mod2, default_mod])
+                [test_mod, test_mod2, default_mod],
+            )
 
     def test_iter_format_modules_stability(self):
         """
@@ -1158,29 +1147,31 @@ class FormattingTests(SimpleTestCase):
             template_as_hidden = Template(
                 '{% load l10n %}{{ form.date_added.as_hidden }}; {{ form.cents_paid.as_hidden }}'
             )
-            form = CompanyForm({
-                'name': 'acme',
-                'date_added': datetime.datetime(2009, 12, 31, 6, 0, 0),
-                'cents_paid': decimal.Decimal('59.47'),
-                'products_delivered': 12000,
-            })
+            form = CompanyForm(
+                {
+                    'name': 'acme',
+                    'date_added': datetime.datetime(2009, 12, 31, 6, 0, 0),
+                    'cents_paid': decimal.Decimal('59.47'),
+                    'products_delivered': 12000,
+                }
+            )
             context = Context({'form': form})
             self.assertTrue(form.is_valid())
 
             self.assertHTMLEqual(
                 template.render(context),
                 '<input id="id_date_added" name="date_added" type="text" value="31.12.2009 06:00:00" required>;'
-                '<input id="id_cents_paid" name="cents_paid" type="text" value="59,47" required>'
+                '<input id="id_cents_paid" name="cents_paid" type="text" value="59,47" required>',
             )
             self.assertHTMLEqual(
                 template_as_text.render(context),
                 '<input id="id_date_added" name="date_added" type="text" value="31.12.2009 06:00:00" required>;'
-                ' <input id="id_cents_paid" name="cents_paid" type="text" value="59,47" required>'
+                ' <input id="id_cents_paid" name="cents_paid" type="text" value="59,47" required>',
             )
             self.assertHTMLEqual(
                 template_as_hidden.render(context),
                 '<input id="id_date_added" name="date_added" type="hidden" value="31.12.2009 06:00:00">;'
-                '<input id="id_cents_paid" name="cents_paid" type="hidden" value="59,47">'
+                '<input id="id_cents_paid" name="cents_paid" type="hidden" value="59,47">',
             )
 
     def test_format_arbitrary_settings(self):
@@ -1203,8 +1194,9 @@ class FormattingTests(SimpleTestCase):
                 with self.subTest(language=language_code, format=format_name):
                     formatter = get_format(format_name, lang=language_code)[0]
                     self.assertEqual(
-                        regex.findall(formatter), [],
-                        "%s locale's %s uses an unsupported format code." % (language_code, format_name)
+                        regex.findall(formatter),
+                        [],
+                        "%s locale's %s uses an unsupported format code." % (language_code, format_name),
                     )
 
 
@@ -1243,8 +1235,10 @@ class MiscTests(SimpleTestCase):
             ('en-au;q=1.0', [('en-au', 1.0)]),
             ('da, en-gb;q=0.25, en;q=0.5', [('da', 1.0), ('en', 0.5), ('en-gb', 0.25)]),
             ('en-au-xx', [('en-au-xx', 1.0)]),
-            ('de,en-au;q=0.75,en-us;q=0.5,en;q=0.25,es;q=0.125,fa;q=0.125',
-             [('de', 1.0), ('en-au', 0.75), ('en-us', 0.5), ('en', 0.25), ('es', 0.125), ('fa', 0.125)]),
+            (
+                'de,en-au;q=0.75,en-us;q=0.5,en;q=0.25,es;q=0.125,fa;q=0.125',
+                [('de', 1.0), ('en-au', 0.75), ('en-us', 0.5), ('en', 0.25), ('es', 0.125), ('fa', 0.125)],
+            ),
             ('*', [('*', 1.0)]),
             ('de;q=0.', [('de', 0.0)]),
             ('en; q=1,', [('en', 1.0)]),
@@ -1321,11 +1315,7 @@ class MiscTests(SimpleTestCase):
         self.assertEqual('zh-hant', g(r))
 
     @override_settings(
-        LANGUAGES=[
-            ('en', 'English'),
-            ('zh-hans', 'Simplified Chinese'),
-            ('zh-hant', 'Traditional Chinese'),
-        ]
+        LANGUAGES=[('en', 'English'), ('zh-hans', 'Simplified Chinese'), ('zh-hant', 'Traditional Chinese')]
     )
     def test_support_for_deprecated_chinese_language_codes(self):
         """
@@ -1434,14 +1424,7 @@ class MiscTests(SimpleTestCase):
         with self.assertRaises(LookupError):
             g('xyz')
 
-    @override_settings(
-        LANGUAGES=[
-            ('en', 'English'),
-            ('de', 'German'),
-            ('de-at', 'Austrian German'),
-            ('pl', 'Polish'),
-        ],
-    )
+    @override_settings(LANGUAGES=[('en', 'English'), ('de', 'German'), ('de-at', 'Austrian German'), ('pl', 'Polish')])
     def test_get_language_from_path_real(self):
         g = trans_real.get_language_from_path
         self.assertEqual(g('/pl/'), 'pl')
@@ -1481,7 +1464,6 @@ class MiscTests(SimpleTestCase):
 
 
 class ResolutionOrderI18NTests(SimpleTestCase):
-
     def setUp(self):
         super().setUp()
         activate('de')
@@ -1493,14 +1475,13 @@ class ResolutionOrderI18NTests(SimpleTestCase):
     def assertGettext(self, msgid, msgstr):
         result = gettext(msgid)
         self.assertIn(
-            msgstr, result,
-            "The string '%s' isn't in the translation of '%s'; the actual result is '%s'."
-            % (msgstr, msgid, result)
+            msgstr,
+            result,
+            "The string '%s' isn't in the translation of '%s'; the actual result is '%s'." % (msgstr, msgid, result),
         )
 
 
 class AppResolutionOrderI18NTests(ResolutionOrderI18NTests):
-
     @override_settings(LANGUAGE_CODE='de')
     def test_app_translation(self):
         # Original translation.
@@ -1524,7 +1505,6 @@ class AppResolutionOrderI18NTests(ResolutionOrderI18NTests):
 
 @override_settings(LOCALE_PATHS=extended_locale_paths)
 class LocalePathsResolutionOrderI18NTests(ResolutionOrderI18NTests):
-
     def test_locale_paths_translation(self):
         self.assertGettext('Time', 'LOCALE_PATHS')
 
@@ -1534,14 +1514,12 @@ class LocalePathsResolutionOrderI18NTests(ResolutionOrderI18NTests):
 
 
 class DjangoFallbackResolutionOrderI18NTests(ResolutionOrderI18NTests):
-
     def test_django_fallback(self):
         self.assertEqual(gettext('Date/time'), 'Datum/Zeit')
 
 
 @override_settings(INSTALLED_APPS=['i18n.territorial_fallback'])
 class TranslationFallbackI18NTests(ResolutionOrderI18NTests):
-
     def test_sparse_territory_catalog(self):
         """
         Untranslated strings for territorial language variants use the
@@ -1604,18 +1582,11 @@ class TestLanguageInfo(SimpleTestCase):
 
 @override_settings(
     USE_I18N=True,
-    LANGUAGES=[
-        ('en', 'English'),
-        ('fr', 'French'),
-    ],
-    MIDDLEWARE=[
-        'django.middleware.locale.LocaleMiddleware',
-        'django.middleware.common.CommonMiddleware',
-    ],
+    LANGUAGES=[('en', 'English'), ('fr', 'French')],
+    MIDDLEWARE=['django.middleware.locale.LocaleMiddleware', 'django.middleware.common.CommonMiddleware'],
     ROOT_URLCONF='i18n.urls',
 )
 class LocaleMiddlewareTests(TestCase):
-
     def test_streaming_response(self):
         # Regression test for #5241
         response = self.client.get('/fr/streaming/')
@@ -1628,7 +1599,7 @@ class LocaleMiddlewareTests(TestCase):
             'django.contrib.sessions.middleware.SessionMiddleware',
             'django.middleware.locale.LocaleMiddleware',
             'django.middleware.common.CommonMiddleware',
-        ],
+        ]
     )
     def test_language_not_saved_to_session(self):
         """
@@ -1641,15 +1612,8 @@ class LocaleMiddlewareTests(TestCase):
 
 @override_settings(
     USE_I18N=True,
-    LANGUAGES=[
-        ('en', 'English'),
-        ('de', 'German'),
-        ('fr', 'French'),
-    ],
-    MIDDLEWARE=[
-        'django.middleware.locale.LocaleMiddleware',
-        'django.middleware.common.CommonMiddleware',
-    ],
+    LANGUAGES=[('en', 'English'), ('de', 'German'), ('fr', 'French')],
+    MIDDLEWARE=['django.middleware.locale.LocaleMiddleware', 'django.middleware.common.CommonMiddleware'],
     ROOT_URLCONF='i18n.urls_default_unprefixed',
     LANGUAGE_CODE='en',
 )
@@ -1692,16 +1656,9 @@ class UnprefixedDefaultLanguageTests(SimpleTestCase):
 
 @override_settings(
     USE_I18N=True,
-    LANGUAGES=[
-        ('bg', 'Bulgarian'),
-        ('en-us', 'English'),
-        ('pt-br', 'Portuguese (Brazil)'),
-    ],
-    MIDDLEWARE=[
-        'django.middleware.locale.LocaleMiddleware',
-        'django.middleware.common.CommonMiddleware',
-    ],
-    ROOT_URLCONF='i18n.urls'
+    LANGUAGES=[('bg', 'Bulgarian'), ('en-us', 'English'), ('pt-br', 'Portuguese (Brazil)')],
+    MIDDLEWARE=['django.middleware.locale.LocaleMiddleware', 'django.middleware.common.CommonMiddleware'],
+    ROOT_URLCONF='i18n.urls',
 )
 class CountrySpecificLanguageTests(SimpleTestCase):
     rf = RequestFactory()
@@ -1762,7 +1719,6 @@ class CountrySpecificLanguageTests(SimpleTestCase):
 
 
 class TranslationFilesMissing(SimpleTestCase):
-
     def setUp(self):
         super().setUp()
         self.gettext_find_builtin = gettext_module.find
@@ -1787,12 +1743,10 @@ class NonDjangoLanguageTests(SimpleTestCase):
     A language non present in default Django languages can still be
     installed/used by a Django project.
     """
+
     @override_settings(
         USE_I18N=True,
-        LANGUAGES=[
-            ('en-us', 'English'),
-            ('xxx', 'Somelanguage'),
-        ],
+        LANGUAGES=[('en-us', 'English'), ('xxx', 'Somelanguage')],
         LANGUAGE_CODE='xxx',
         LOCALE_PATHS=[os.path.join(here, 'commands', 'locale')],
     )

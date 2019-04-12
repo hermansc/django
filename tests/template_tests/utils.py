@@ -33,11 +33,7 @@ def setup(templates, *args, **kwargs):
     # add this in here for simplicity
     templates["inclusion.html"] = "{{ result }}"
 
-    loaders = [
-        ('django.template.loaders.cached.Loader', [
-            ('django.template.loaders.locmem.Loader', templates),
-        ]),
-    ]
+    loaders = [('django.template.loaders.cached.Loader', [('django.template.loaders.locmem.Loader', templates)])]
 
     def decorator(func):
         # Make Engine.get_default() raise an exception to ensure that tests
@@ -48,28 +44,17 @@ def setup(templates, *args, **kwargs):
             # Set up custom template tag libraries if specified
             libraries = getattr(self, 'libraries', {})
 
-            self.engine = Engine(
-                libraries=libraries,
-                loaders=loaders,
-            )
+            self.engine = Engine(libraries=libraries, loaders=loaders)
             func(self)
             if test_once:
                 return
             func(self)
 
-            self.engine = Engine(
-                libraries=libraries,
-                loaders=loaders,
-                string_if_invalid='INVALID',
-            )
+            self.engine = Engine(libraries=libraries, loaders=loaders, string_if_invalid='INVALID')
             func(self)
             func(self)
 
-            self.engine = Engine(
-                debug=True,
-                libraries=libraries,
-                loaders=loaders,
-            )
+            self.engine = Engine(debug=True, libraries=libraries, loaders=loaders)
             func(self)
             func(self)
 
@@ -160,11 +145,13 @@ class SilentGetItemClass:
 class SilentAttrClass:
     def b(self):
         raise SomeException
+
     b = property(b)
 
 
 class UTF8Class:
     "Class whose __str__ returns non-ASCII data"
+
     def __str__(self):
         return 'ŠĐĆŽćžšđ'
 

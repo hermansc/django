@@ -19,10 +19,7 @@ POSTGIS_HEADER_STRUCTURE = 'B H H d d d d d d i H H'
 
 # Lookup values to convert GDAL pixel types to struct characters. This is
 # used to pack and unpack the pixel values of PostGIS raster bands.
-GDAL_TO_STRUCT = [
-    None, 'B', 'H', 'h', 'L', 'l', 'f', 'd',
-    None, None, None, None,
-]
+GDAL_TO_STRUCT = [None, 'B', 'H', 'h', 'L', 'l', 'f', 'd', None, None, None, None]
 
 # Size of the packed value in bytes for different numerical types.
 # This is needed to cut chunks of band data out of PostGIS raster strings

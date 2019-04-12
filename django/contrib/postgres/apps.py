@@ -1,6 +1,4 @@
-from psycopg2.extras import (
-    DateRange, DateTimeRange, DateTimeTZRange, NumericRange,
-)
+from psycopg2.extras import DateRange, DateTimeRange, DateTimeTZRange, NumericRange
 
 from django.apps import AppConfig
 from django.db import connections
@@ -46,14 +44,16 @@ class PostgresConfig(AppConfig):
         # Connections may already exist before we are called.
         for conn in connections.all():
             if conn.vendor == 'postgresql':
-                conn.introspection.data_types_reverse.update({
-                    3802: 'django.contrib.postgres.fields.JSONField',
-                    3904: 'django.contrib.postgres.fields.IntegerRangeField',
-                    3906: 'django.contrib.postgres.fields.DecimalRangeField',
-                    3910: 'django.contrib.postgres.fields.DateTimeRangeField',
-                    3912: 'django.contrib.postgres.fields.DateRangeField',
-                    3926: 'django.contrib.postgres.fields.BigIntegerRangeField',
-                })
+                conn.introspection.data_types_reverse.update(
+                    {
+                        3802: 'django.contrib.postgres.fields.JSONField',
+                        3904: 'django.contrib.postgres.fields.IntegerRangeField',
+                        3906: 'django.contrib.postgres.fields.DecimalRangeField',
+                        3910: 'django.contrib.postgres.fields.DateTimeRangeField',
+                        3912: 'django.contrib.postgres.fields.DateRangeField',
+                        3926: 'django.contrib.postgres.fields.BigIntegerRangeField',
+                    }
+                )
                 if conn.connection is not None:
                     register_type_handlers(conn)
         connection_created.connect(register_type_handlers)

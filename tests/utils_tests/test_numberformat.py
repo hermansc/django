@@ -6,7 +6,6 @@ from django.utils.numberformat import format as nformat
 
 
 class TestNumberFormat(SimpleTestCase):
-
     def test_format_number(self):
         self.assertEqual(nformat(1234, '.'), '1234')
         self.assertEqual(nformat(1234.2, '.'), '1234.2')
@@ -58,7 +57,7 @@ class TestNumberFormat(SimpleTestCase):
         # A float without a fractional part (3.) results in a ".0" when no
         # deimal_pos is given. Contrast that with the Decimal('3.') case in
         # test_decimal_numbers which doesn't return a fractional part.
-        self.assertEqual(nformat(3., '.'), '3.0')
+        self.assertEqual(nformat(3.0, '.'), '3.0')
 
     def test_decimal_numbers(self):
         self.assertEqual(nformat(Decimal('1234'), '.'), '1234')
@@ -71,12 +70,11 @@ class TestNumberFormat(SimpleTestCase):
         self.assertEqual(nformat(Decimal('9e-19'), '.', decimal_pos=2), '0.00')
         self.assertEqual(nformat(Decimal('.00000000000099'), '.', decimal_pos=0), '0')
         self.assertEqual(
-            nformat(Decimal('1e16'), '.', thousand_sep=',', grouping=3, force_grouping=True),
-            '10,000,000,000,000,000'
+            nformat(Decimal('1e16'), '.', thousand_sep=',', grouping=3, force_grouping=True), '10,000,000,000,000,000'
         )
         self.assertEqual(
             nformat(Decimal('1e16'), '.', decimal_pos=2, thousand_sep=',', grouping=3, force_grouping=True),
-            '10,000,000,000,000,000.00'
+            '10,000,000,000,000,000.00',
         )
         self.assertEqual(nformat(Decimal('3.'), '.'), '3')
         self.assertEqual(nformat(Decimal('3.0'), '.'), '3.0')
@@ -105,6 +103,7 @@ class TestNumberFormat(SimpleTestCase):
             """
             Wrapper for Decimal which prefixes each amount with the € symbol.
             """
+
             def __format__(self, specifier, **kwargs):
                 amount = super().__format__(specifier, **kwargs)
                 return '€ {}'.format(amount)

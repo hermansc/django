@@ -9,12 +9,8 @@ from django.shortcuts import render
 from django.template import TemplateDoesNotExist
 from django.urls import get_resolver
 from django.views import View
-from django.views.debug import (
-    SafeExceptionReporterFilter, technical_500_response,
-)
-from django.views.decorators.debug import (
-    sensitive_post_parameters, sensitive_variables,
-)
+from django.views.debug import SafeExceptionReporterFilter, technical_500_response
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 
 
 def index_page(request):
@@ -31,6 +27,7 @@ def raises(request):
     # local vars won't hijack the technical 500 response (#15025).
     def callable():
         raise Exception
+
     try:
         raise Exception
     except Exception:
@@ -101,17 +98,12 @@ def send_log(request, exc_info):
     # only sent with DEBUG=False, but since someone might choose to remove that
     # filter, we still want to be able to test the behavior of error emails
     # with DEBUG=True. So we need to remove the filter temporarily.
-    admin_email_handler = [
-        h for h in logger.handlers
-        if h.__class__.__name__ == "AdminEmailHandler"
-    ][0]
+    admin_email_handler = [h for h in logger.handlers if h.__class__.__name__ == "AdminEmailHandler"][0]
     orig_filters = admin_email_handler.filters
     admin_email_handler.filters = []
     admin_email_handler.include_html = True
     logger.error(
-        'Internal Server Error: %s', request.path,
-        exc_info=exc_info,
-        extra={'status_code': 500, 'request': request},
+        'Internal Server Error: %s', request.path, exc_info=exc_info, extra={'status_code': 500, 'request': request}
     )
     admin_email_handler.filters = orig_filters
 
@@ -228,7 +220,6 @@ def custom_exception_reporter_filter_view(request):
 
 
 class Klass:
-
     @sensitive_variables('sauce')
     def method(self, request):
         # Do not just use plain strings for the variables' values in the code
@@ -262,10 +253,12 @@ def multivalue_dict_key_error(request):
 
 
 def json_response_view(request):
-    return JsonResponse({
-        'a': [1, 2, 3],
-        'foo': {'bar': 'baz'},
-        # Make sure datetime and Decimal objects would be serialized properly
-        'timestamp': datetime.datetime(2013, 5, 19, 20),
-        'value': decimal.Decimal('3.14'),
-    })
+    return JsonResponse(
+        {
+            'a': [1, 2, 3],
+            'foo': {'bar': 'baz'},
+            # Make sure datetime and Decimal objects would be serialized properly
+            'timestamp': datetime.datetime(2013, 5, 19, 20),
+            'value': decimal.Decimal('3.14'),
+        }
+    )

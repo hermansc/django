@@ -131,6 +131,7 @@ class Feed(BaseFeed):
     methods on their own subclasses so that geo-referenced information may
     placed in the feed.
     """
+
     feed_type = GeoRSSFeed
 
     def feed_extra_kwargs(self, obj):

@@ -9,6 +9,7 @@ class SingleObjectMixin(ContextMixin):
     """
     Provide the ability to retrieve a single object for further manipulation.
     """
+
     model = None
     queryset = None
     slug_field = 'slug'
@@ -51,8 +52,9 @@ class SingleObjectMixin(ContextMixin):
             # Get the single item from the filtered queryset
             obj = queryset.get()
         except queryset.model.DoesNotExist:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
-                          {'verbose_name': queryset.model._meta.verbose_name})
+            raise Http404(
+                _("No %(verbose_name)s found matching the query") % {'verbose_name': queryset.model._meta.verbose_name}
+            )
         return obj
 
     def get_queryset(self):
@@ -69,9 +71,7 @@ class SingleObjectMixin(ContextMixin):
                 raise ImproperlyConfigured(
                     "%(cls)s is missing a QuerySet. Define "
                     "%(cls)s.model, %(cls)s.queryset, or override "
-                    "%(cls)s.get_queryset()." % {
-                        'cls': self.__class__.__name__
-                    }
+                    "%(cls)s.get_queryset()." % {'cls': self.__class__.__name__}
                 )
         return self.queryset.all()
 
@@ -102,6 +102,7 @@ class SingleObjectMixin(ContextMixin):
 
 class BaseDetailView(SingleObjectMixin, View):
     """A base view for displaying a single object."""
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
@@ -141,17 +142,14 @@ class SingleObjectTemplateResponseMixin(TemplateResponseMixin):
             # only use this if the object in question is a model.
             if isinstance(self.object, models.Model):
                 object_meta = self.object._meta
-                names.append("%s/%s%s.html" % (
-                    object_meta.app_label,
-                    object_meta.model_name,
-                    self.template_name_suffix
-                ))
+                names.append(
+                    "%s/%s%s.html" % (object_meta.app_label, object_meta.model_name, self.template_name_suffix)
+                )
             elif getattr(self, 'model', None) is not None and issubclass(self.model, models.Model):
-                names.append("%s/%s%s.html" % (
-                    self.model._meta.app_label,
-                    self.model._meta.model_name,
-                    self.template_name_suffix
-                ))
+                names.append(
+                    "%s/%s%s.html"
+                    % (self.model._meta.app_label, self.model._meta.model_name, self.template_name_suffix)
+                )
 
             # If we still haven't managed to find any template names, we should
             # re-raise the ImproperlyConfigured to alert the user.

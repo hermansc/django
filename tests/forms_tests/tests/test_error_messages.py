@@ -1,10 +1,26 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import (
-    BooleanField, CharField, ChoiceField, DateField, DateTimeField,
-    DecimalField, EmailField, FileField, FloatField, Form,
-    GenericIPAddressField, IntegerField, ModelChoiceField,
-    ModelMultipleChoiceField, MultipleChoiceField, RegexField,
-    SplitDateTimeField, TimeField, URLField, ValidationError, utils,
+    BooleanField,
+    CharField,
+    ChoiceField,
+    DateField,
+    DateTimeField,
+    DecimalField,
+    EmailField,
+    FileField,
+    FloatField,
+    Form,
+    GenericIPAddressField,
+    IntegerField,
+    ModelChoiceField,
+    ModelMultipleChoiceField,
+    MultipleChoiceField,
+    RegexField,
+    SplitDateTimeField,
+    TimeField,
+    URLField,
+    ValidationError,
+    utils,
 )
 from django.template import Context, Template
 from django.test import SimpleTestCase, TestCase
@@ -80,28 +96,19 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
         self.assertFormErrors(['MAX DIGITS BEFORE DP IS 2'], f2.clean, '123.4')
 
     def test_datefield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid': 'INVALID',
-        }
+        e = {'required': 'REQUIRED', 'invalid': 'INVALID'}
         f = DateField(error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID'], f.clean, 'abc')
 
     def test_timefield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid': 'INVALID',
-        }
+        e = {'required': 'REQUIRED', 'invalid': 'INVALID'}
         f = TimeField(error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID'], f.clean, 'abc')
 
     def test_datetimefield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid': 'INVALID',
-        }
+        e = {'required': 'REQUIRED', 'invalid': 'INVALID'}
         f = DateTimeField(error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID'], f.clean, 'abc')
@@ -133,12 +140,7 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
         self.assertFormErrors(['LENGTH 11, MAX LENGTH 10'], f.clean, 'aye@bee.com')
 
     def test_filefield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid': 'INVALID',
-            'missing': 'MISSING',
-            'empty': 'EMPTY FILE',
-        }
+        e = {'required': 'REQUIRED', 'invalid': 'INVALID', 'missing': 'MISSING', 'empty': 'EMPTY FILE'}
         f = FileField(error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID'], f.clean, 'abc')
@@ -155,53 +157,35 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID'], f.clean, 'abc.c')
         self.assertFormErrors(
-            ['"http://djangoproject.com" has more than 17 characters.'],
-            f.clean,
-            'djangoproject.com'
+            ['"http://djangoproject.com" has more than 17 characters.'], f.clean, 'djangoproject.com'
         )
 
     def test_booleanfield(self):
-        e = {
-            'required': 'REQUIRED',
-        }
+        e = {'required': 'REQUIRED'}
         f = BooleanField(error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
 
     def test_choicefield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid_choice': '%(value)s IS INVALID CHOICE',
-        }
+        e = {'required': 'REQUIRED', 'invalid_choice': '%(value)s IS INVALID CHOICE'}
         f = ChoiceField(choices=[('a', 'aye')], error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['b IS INVALID CHOICE'], f.clean, 'b')
 
     def test_multiplechoicefield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid_choice': '%(value)s IS INVALID CHOICE',
-            'invalid_list': 'NOT A LIST',
-        }
+        e = {'required': 'REQUIRED', 'invalid_choice': '%(value)s IS INVALID CHOICE', 'invalid_list': 'NOT A LIST'}
         f = MultipleChoiceField(choices=[('a', 'aye')], error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['NOT A LIST'], f.clean, 'b')
         self.assertFormErrors(['b IS INVALID CHOICE'], f.clean, ['b'])
 
     def test_splitdatetimefield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid_date': 'INVALID DATE',
-            'invalid_time': 'INVALID TIME',
-        }
+        e = {'required': 'REQUIRED', 'invalid_date': 'INVALID DATE', 'invalid_time': 'INVALID TIME'}
         f = SplitDateTimeField(error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID DATE', 'INVALID TIME'], f.clean, ['a', 'b'])
 
     def test_generic_ipaddressfield(self):
-        e = {
-            'required': 'REQUIRED',
-            'invalid': 'INVALID IP ADDRESS',
-        }
+        e = {'required': 'REQUIRED', 'invalid': 'INVALID IP ADDRESS'}
         f = GenericIPAddressField(error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID IP ADDRESS'], f.clean, '127.0.0')
@@ -227,12 +211,10 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
         # This form should print errors the default way.
         form1 = TestForm({'first_name': 'John'})
         self.assertHTMLEqual(
-            str(form1['last_name'].errors),
-            '<ul class="errorlist"><li>This field is required.</li></ul>'
+            str(form1['last_name'].errors), '<ul class="errorlist"><li>This field is required.</li></ul>'
         )
         self.assertHTMLEqual(
-            str(form1.errors['__all__']),
-            '<ul class="errorlist nonfield"><li>I like to be awkward.</li></ul>'
+            str(form1.errors['__all__']), '<ul class="errorlist nonfield"><li>I like to be awkward.</li></ul>'
         )
 
         # This one should wrap error groups in the customized way.
@@ -255,7 +237,7 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
             t.render(Context({'form': f})),
             '<ul class="errorlist"><li>field<ul class="errorlist">'
             '<li>Select a valid choice. &lt;script&gt; is not one of the '
-            'available choices.</li></ul></li></ul>'
+            'available choices.</li></ul></li></ul>',
         )
 
         class SomeForm(Form):
@@ -266,7 +248,7 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
             t.render(Context({'form': f})),
             '<ul class="errorlist"><li>field<ul class="errorlist">'
             '<li>Select a valid choice. &lt;script&gt; is not one of the '
-            'available choices.</li></ul></li></ul>'
+            'available choices.</li></ul></li></ul>',
         )
 
         class SomeForm(Form):
@@ -277,7 +259,7 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
             t.render(Context({'form': f})),
             '<ul class="errorlist"><li>field<ul class="errorlist">'
             '<li>&quot;&lt;script&gt;&quot; is not a valid value.</li>'
-            '</ul></li></ul>'
+            '</ul></li></ul>',
         )
 
 
@@ -289,20 +271,13 @@ class ModelChoiceFieldErrorMessagesTestCase(TestCase, AssertFormErrorsMixin):
         ChoiceModel.objects.create(pk=3, name='c')
 
         # ModelChoiceField
-        e = {
-            'required': 'REQUIRED',
-            'invalid_choice': 'INVALID CHOICE',
-        }
+        e = {'required': 'REQUIRED', 'invalid_choice': 'INVALID CHOICE'}
         f = ModelChoiceField(queryset=ChoiceModel.objects.all(), error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['INVALID CHOICE'], f.clean, '4')
 
         # ModelMultipleChoiceField
-        e = {
-            'required': 'REQUIRED',
-            'invalid_choice': '%(value)s IS INVALID CHOICE',
-            'list': 'NOT A LIST OF VALUES',
-        }
+        e = {'required': 'REQUIRED', 'invalid_choice': '%(value)s IS INVALID CHOICE', 'list': 'NOT A LIST OF VALUES'}
         f = ModelMultipleChoiceField(queryset=ChoiceModel.objects.all(), error_messages=e)
         self.assertFormErrors(['REQUIRED'], f.clean, '')
         self.assertFormErrors(['NOT A LIST OF VALUES'], f.clean, '3')

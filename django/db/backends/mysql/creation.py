@@ -7,7 +7,6 @@ from .client import DatabaseClient
 
 
 class DatabaseCreation(BaseDatabaseCreation):
-
     def sql_table_creation_suffix(self):
         suffix = []
         test_settings = self.connection.settings_dict['TEST']
@@ -44,9 +43,10 @@ class DatabaseCreation(BaseDatabaseCreation):
                     return
                 try:
                     if verbosity >= 1:
-                        self.log('Destroying old test database for alias %s...' % (
-                            self._get_database_display_str(verbosity, target_database_name),
-                        ))
+                        self.log(
+                            'Destroying old test database for alias %s...'
+                            % (self._get_database_display_str(verbosity, target_database_name),)
+                        )
                     cursor.execute('DROP DATABASE %(dbname)s' % test_db_params)
                     self._execute_create_test_db(cursor, test_db_params, keepdb)
                 except Exception as e:

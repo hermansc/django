@@ -19,9 +19,7 @@ class Group(models.Model):
     members = models.ManyToManyField(Person, through='Membership')
     custom_members = models.ManyToManyField(Person, through='CustomMembership', related_name="custom")
     nodefaultsnonulls = models.ManyToManyField(
-        Person,
-        through='TestNoDefaultsOrNulls',
-        related_name="testnodefaultsnonulls",
+        Person, through='TestNoDefaultsOrNulls', related_name="testnodefaultsnonulls"
     )
 
     class Meta:
@@ -46,10 +44,7 @@ class Membership(models.Model):
 
 class CustomMembership(models.Model):
     person = models.ForeignKey(
-        Person,
-        models.CASCADE,
-        db_column="custom_person_column",
-        related_name="custom_person_related_name",
+        Person, models.CASCADE, db_column="custom_person_column", related_name="custom_person_related_name"
     )
     group = models.ForeignKey(Group, models.CASCADE)
     weird_fk = models.ForeignKey(Membership, models.SET_NULL, null=True)
@@ -87,9 +82,7 @@ class Friendship(models.Model):
 class Event(models.Model):
     title = models.CharField(max_length=50)
     invitees = models.ManyToManyField(
-        Person, through='Invitation',
-        through_fields=('event', 'invitee'),
-        related_name='events_invited',
+        Person, through='Invitation', through_fields=('event', 'invitee'), related_name='events_invited'
     )
 
     def __str__(self):
@@ -106,10 +99,7 @@ class Invitation(models.Model):
 class Employee(models.Model):
     name = models.CharField(max_length=5)
     subordinates = models.ManyToManyField(
-        'self',
-        through="Relationship",
-        through_fields=('source', 'target'),
-        symmetrical=False,
+        'self', through="Relationship", through_fields=('source', 'target'), symmetrical=False
     )
 
     class Meta:
@@ -135,9 +125,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     rname = models.CharField(max_length=20, unique=True)
-    ingredients = models.ManyToManyField(
-        Ingredient, through='RecipeIngredient', related_name='recipes',
-    )
+    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
 
     class Meta:
         ordering = ('rname',)

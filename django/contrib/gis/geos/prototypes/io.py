@@ -2,12 +2,8 @@ import threading
 from ctypes import POINTER, Structure, byref, c_byte, c_char_p, c_int, c_size_t
 
 from django.contrib.gis.geos.base import GEOSBase
-from django.contrib.gis.geos.libgeos import (
-    GEOM_PTR, GEOSFuncFactory, geos_version_tuple,
-)
-from django.contrib.gis.geos.prototypes.errcheck import (
-    check_geom, check_sized_string, check_string,
-)
+from django.contrib.gis.geos.libgeos import GEOM_PTR, GEOSFuncFactory, geos_version_tuple
+from django.contrib.gis.geos.prototypes.errcheck import check_geom, check_sized_string, check_string
 from django.contrib.gis.geos.prototypes.geom import c_uchar_p, geos_char_p
 from django.utils.encoding import force_bytes
 
@@ -49,12 +45,8 @@ wkt_writer_write = GEOSFuncFactory(
     'GEOSWKTWriter_write', argtypes=[WKT_WRITE_PTR, GEOM_PTR], restype=geos_char_p, errcheck=check_string
 )
 
-wkt_writer_get_outdim = GEOSFuncFactory(
-    'GEOSWKTWriter_getOutputDimension', argtypes=[WKT_WRITE_PTR], restype=c_int
-)
-wkt_writer_set_outdim = GEOSFuncFactory(
-    'GEOSWKTWriter_setOutputDimension', argtypes=[WKT_WRITE_PTR, c_int]
-)
+wkt_writer_get_outdim = GEOSFuncFactory('GEOSWKTWriter_getOutputDimension', argtypes=[WKT_WRITE_PTR], restype=c_int)
+wkt_writer_set_outdim = GEOSFuncFactory('GEOSWKTWriter_setOutputDimension', argtypes=[WKT_WRITE_PTR, c_int])
 
 wkt_writer_set_trim = GEOSFuncFactory('GEOSWKTWriter_setTrim', argtypes=[WKT_WRITE_PTR, c_byte])
 wkt_writer_set_precision = GEOSFuncFactory('GEOSWKTWriter_setRoundingPrecision', argtypes=[WKT_WRITE_PTR, c_int])
@@ -115,12 +107,14 @@ wkb_writer_set_include_srid = WKBWriterSet('GEOSWKBWriter_setIncludeSRID', argty
 # ### Base I/O Class ###
 class IOBase(GEOSBase):
     "Base class for GEOS I/O objects."
+
     def __init__(self):
         # Getting the pointer with the constructor.
         self.ptr = self._constructor()
         # Loading the real destructor function at this point as doing it in
         # __del__ is too late (import error).
         self.destructor.func
+
 
 # ### Base WKB/WKT Reading and Writing objects ###
 
@@ -221,6 +215,7 @@ class WKBWriter(IOBase):
 
     def _handle_empty_point(self, geom):
         from django.contrib.gis.geos import Point
+
         if isinstance(geom, Point) and geom.empty:
             if self.srid:
                 # PostGIS uses POINT(NaN NaN) for WKB representation of empty
@@ -234,6 +229,7 @@ class WKBWriter(IOBase):
     def write(self, geom):
         "Return the WKB representation of the given geometry."
         from django.contrib.gis.geos import Polygon
+
         geom = self._handle_empty_point(geom)
         wkb = wkb_writer_write(self.ptr, geom.ptr, byref(c_size_t()))
         if self.geos_version < (3, 6, 1) and isinstance(geom, Polygon) and geom.empty:
@@ -245,6 +241,7 @@ class WKBWriter(IOBase):
     def write_hex(self, geom):
         "Return the HEXEWKB representation of the given geometry."
         from django.contrib.gis.geos.polygon import Polygon
+
         geom = self._handle_empty_point(geom)
         wkb = wkb_writer_write_hex(self.ptr, geom.ptr, byref(c_size_t()))
         if self.geos_version < (3, 6, 1) and isinstance(geom, Polygon) and geom.empty:

@@ -7,10 +7,7 @@ from ..utils import setup
 
 
 class WordwrapTests(SimpleTestCase):
-
-    @setup({
-        'wordwrap01': '{% autoescape off %}{{ a|wordwrap:"3" }} {{ b|wordwrap:"3" }}{% endautoescape %}'
-    })
+    @setup({'wordwrap01': '{% autoescape off %}{{ a|wordwrap:"3" }} {{ b|wordwrap:"3" }}{% endautoescape %}'})
     def test_wordwrap01(self):
         output = self.engine.render_to_string('wordwrap01', {'a': 'a & b', 'b': mark_safe('a & b')})
         self.assertEqual(output, 'a &\nb a &\nb')
@@ -22,7 +19,6 @@ class WordwrapTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_wrap(self):
         self.assertEqual(
             wordwrap('this is a long paragraph of text that really needs to be wrapped I\'m afraid', 14),
@@ -46,8 +42,6 @@ class FunctionTests(SimpleTestCase):
 
     def test_wrap_lazy_string(self):
         self.assertEqual(
-            wordwrap(lazystr(
-                'this is a long paragraph of text that really needs to be wrapped I\'m afraid'
-            ), 14),
+            wordwrap(lazystr('this is a long paragraph of text that really needs to be wrapped I\'m afraid'), 14),
             'this is a long\nparagraph of\ntext that\nreally needs\nto be wrapped\nI\'m afraid',
         )

@@ -46,7 +46,6 @@ class DjangoTemplates(BaseEngine):
 
 
 class Template:
-
     def __init__(self, template, backend):
         self.template = template
         self.backend = backend
@@ -93,9 +92,7 @@ def get_installed_libraries():
     """
     libraries = {}
     candidates = ['django.templatetags']
-    candidates.extend(
-        '%s.templatetags' % app_config.name
-        for app_config in apps.get_app_configs())
+    candidates.extend('%s.templatetags' % app_config.name for app_config in apps.get_app_configs())
 
     for candidate in candidates:
         try:
@@ -106,7 +103,7 @@ def get_installed_libraries():
 
         if hasattr(pkg, '__path__'):
             for name in get_package_libraries(pkg):
-                libraries[name[len(candidate) + 1:]] = name
+                libraries[name[len(candidate) + 1 :]] = name
 
     return libraries
 

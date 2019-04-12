@@ -5,9 +5,7 @@ from django.http import Http404
 from django.template import TemplateDoesNotExist
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
-from django.views.defaults import (
-    bad_request, page_not_found, permission_denied, server_error,
-)
+from django.views.defaults import bad_request, page_not_found, permission_denied, server_error
 
 from ..models import Article, Author, UrlArticle
 
@@ -15,30 +13,36 @@ from ..models import Article, Author, UrlArticle
 @override_settings(ROOT_URLCONF='view_tests.urls')
 class DefaultsTests(TestCase):
     """Test django views in django/views/defaults.py"""
-    nonexistent_urls = [
-        '/nonexistent_url/',  # this is in urls.py
-        '/other_nonexistent_url/',  # this NOT in urls.py
-    ]
+
+    nonexistent_urls = ['/nonexistent_url/', '/other_nonexistent_url/']  # this is in urls.py  # this NOT in urls.py
     request_factory = RequestFactory()
 
     @classmethod
     def setUpTestData(cls):
         Author.objects.create(name='Boris')
         Article.objects.create(
-            title='Old Article', slug='old_article', author_id=1,
-            date_created=datetime.datetime(2001, 1, 1, 21, 22, 23)
+            title='Old Article',
+            slug='old_article',
+            author_id=1,
+            date_created=datetime.datetime(2001, 1, 1, 21, 22, 23),
         )
         Article.objects.create(
-            title='Current Article', slug='current_article', author_id=1,
-            date_created=datetime.datetime(2007, 9, 17, 21, 22, 23)
+            title='Current Article',
+            slug='current_article',
+            author_id=1,
+            date_created=datetime.datetime(2007, 9, 17, 21, 22, 23),
         )
         Article.objects.create(
-            title='Future Article', slug='future_article', author_id=1,
-            date_created=datetime.datetime(3000, 1, 1, 21, 22, 23)
+            title='Future Article',
+            slug='future_article',
+            author_id=1,
+            date_created=datetime.datetime(3000, 1, 1, 21, 22, 23),
         )
         UrlArticle.objects.create(
-            title='Old Article', slug='old_article', author_id=1,
-            date_created=datetime.datetime(2001, 1, 1, 21, 22, 23)
+            title='Old Article',
+            slug='old_article',
+            author_id=1,
+            date_created=datetime.datetime(2001, 1, 1, 21, 22, 23),
         )
         Site(id=1, domain='testserver', name='testserver').save()
 
@@ -48,16 +52,14 @@ class DefaultsTests(TestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 404)
 
-    @override_settings(TEMPLATES=[{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {
-            'loaders': [
-                ('django.template.loaders.locmem.Loader', {
-                    '404.html': '{{ csrf_token }}',
-                }),
-            ],
-        },
-    }])
+    @override_settings(
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'OPTIONS': {'loaders': [('django.template.loaders.locmem.Loader', {'404.html': '{{ csrf_token }}'})]},
+            }
+        ]
+    )
     def test_csrf_token_in_404(self):
         """
         The 404 page should have the csrf_token available in the context
@@ -79,18 +81,25 @@ class DefaultsTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, b'<h1>Bad Request (400)</h1>')
 
-    @override_settings(TEMPLATES=[{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {
-            'loaders': [
-                ('django.template.loaders.locmem.Loader', {
-                    '404.html': 'This is a test template for a 404 error '
+    @override_settings(
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'OPTIONS': {
+                    'loaders': [
+                        (
+                            'django.template.loaders.locmem.Loader',
+                            {
+                                '404.html': 'This is a test template for a 404 error '
                                 '(path: {{ request_path }}, exception: {{ exception }}).',
-                    '500.html': 'This is a test template for a 500 error.',
-                }),
-            ],
-        },
-    }])
+                                '500.html': 'This is a test template for a 500 error.',
+                            },
+                        )
+                    ]
+                },
+            }
+        ]
+    )
     def test_custom_templates(self):
         """
         404.html and 500.html templates are picked by their respective handler.
@@ -105,11 +114,15 @@ class DefaultsTests(TestCase):
 
     def test_get_absolute_url_attributes(self):
         "A model can set attributes on the get_absolute_url method"
-        self.assertTrue(getattr(UrlArticle.get_absolute_url, 'purge', False),
-                        'The attributes of the original get_absolute_url must be added.')
+        self.assertTrue(
+            getattr(UrlArticle.get_absolute_url, 'purge', False),
+            'The attributes of the original get_absolute_url must be added.',
+        )
         article = UrlArticle.objects.get(pk=1)
-        self.assertTrue(getattr(article.get_absolute_url, 'purge', False),
-                        'The attributes of the original get_absolute_url must be added.')
+        self.assertTrue(
+            getattr(article.get_absolute_url, 'purge', False),
+            'The attributes of the original get_absolute_url must be added.',
+        )
 
     def test_custom_templates_wrong(self):
         """

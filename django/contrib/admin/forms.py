@@ -7,6 +7,7 @@ class AdminAuthenticationForm(AuthenticationForm):
     """
     A custom authentication form used in the admin app.
     """
+
     error_messages = {
         **AuthenticationForm.error_messages,
         'invalid_login': _(
@@ -22,7 +23,7 @@ class AdminAuthenticationForm(AuthenticationForm):
             raise forms.ValidationError(
                 self.error_messages['invalid_login'],
                 code='invalid_login',
-                params={'username': self.username_field.verbose_name}
+                params={'username': self.username_field.verbose_name},
             )
 
 

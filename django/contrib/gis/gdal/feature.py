@@ -15,6 +15,7 @@ class Feature(GDALBase):
     This class that wraps an OGR Feature, needs to be instantiated
     from a Layer object.
     """
+
     destructor = capi.destroy_feature
 
     def __init__(self, feat, layer):
@@ -79,10 +80,9 @@ class Feature(GDALBase):
         "Return a list of fields in the Feature."
         return [
             force_str(
-                capi.get_field_name(capi.get_field_defn(self._layer._ldefn, i)),
-                self.encoding,
-                strings_only=True
-            ) for i in range(self.num_fields)
+                capi.get_field_name(capi.get_field_defn(self._layer._ldefn, i)), self.encoding, strings_only=True
+            )
+            for i in range(self.num_fields)
         ]
 
     @property

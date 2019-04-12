@@ -55,9 +55,7 @@ def auth(request):
         user = request.user
     else:
         from django.contrib.auth.models import AnonymousUser
+
         user = AnonymousUser()
 
-    return {
-        'user': user,
-        'perms': PermWrapper(user),
-    }
+    return {'user': user, 'perms': PermWrapper(user)}

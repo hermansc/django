@@ -9,9 +9,7 @@
 """
 import re
 
-from django.contrib.gis.db.backends.base.operations import (
-    BaseSpatialOperations,
-)
+from django.contrib.gis.db.backends.base.operations import BaseSpatialOperations
 from django.contrib.gis.db.backends.oracle.adapter import OracleSpatialAdapter
 from django.contrib.gis.db.backends.utils import SpatialOperator
 from django.contrib.gis.db.models import aggregates
@@ -106,9 +104,19 @@ class OracleOperations(BaseSpatialOperations, DatabaseOperations):
     }
 
     unsupported_functions = {
-        'AsGeoJSON', 'AsKML', 'AsSVG', 'Azimuth', 'ForcePolygonCW', 'GeoHash',
-        'GeometryDistance', 'LineLocatePoint', 'MakeValid', 'MemSize',
-        'Scale', 'SnapToGrid', 'Translate',
+        'AsGeoJSON',
+        'AsKML',
+        'AsSVG',
+        'Azimuth',
+        'ForcePolygonCW',
+        'GeoHash',
+        'GeometryDistance',
+        'LineLocatePoint',
+        'MakeValid',
+        'MemSize',
+        'Scale',
+        'SnapToGrid',
+        'Translate',
     }
 
     def geo_quote_name(self, name):
@@ -184,10 +192,12 @@ class OracleOperations(BaseSpatialOperations, DatabaseOperations):
     # Routines for getting the OGC-compliant models.
     def geometry_columns(self):
         from django.contrib.gis.db.backends.oracle.models import OracleGeometryColumns
+
         return OracleGeometryColumns
 
     def spatial_ref_sys(self):
         from django.contrib.gis.db.backends.oracle.models import OracleSpatialRefSys
+
         return OracleSpatialRefSys
 
     def modify_insert_params(self, placeholder, params):
@@ -211,6 +221,7 @@ class OracleOperations(BaseSpatialOperations, DatabaseOperations):
                 if srid:
                     geom.srid = srid
                 return geom
+
         return converter
 
     def get_area_att_for_field(self, field):

@@ -15,8 +15,7 @@ if HAS_GEOIP2:
 # should contain links or the actual database files 'GeoLite2-City.mmdb' and
 # 'GeoLite2-City.mmdb'.
 @skipUnless(
-    HAS_GEOIP2 and getattr(settings, "GEOIP_PATH", None),
-    "GeoIP is required along with the GEOIP_PATH setting."
+    HAS_GEOIP2 and getattr(settings, "GEOIP_PATH", None), "GeoIP is required along with the GEOIP_PATH setting."
 )
 class GeoIPTest(SimpleTestCase):
     addr = '128.249.1.1'
@@ -81,20 +80,11 @@ class GeoIPTest(SimpleTestCase):
         g = GeoIP2(city='<foo>')
 
         for query in (self.fqdn, self.addr):
+            self.assertEqual('US', g.country_code(query), 'Failed for func country_code and query %s' % query)
             self.assertEqual(
-                'US',
-                g.country_code(query),
-                'Failed for func country_code and query %s' % query
+                'United States', g.country_name(query), 'Failed for func country_name and query %s' % query
             )
-            self.assertEqual(
-                'United States',
-                g.country_name(query),
-                'Failed for func country_name and query %s' % query
-            )
-            self.assertEqual(
-                {'country_code': 'US', 'country_name': 'United States'},
-                g.country(query)
-            )
+            self.assertEqual({'country_code': 'US', 'country_name': 'United States'}, g.country(query))
 
     @mock.patch('socket.gethostbyname')
     def test04_city(self, gethostbyname):
@@ -104,20 +94,11 @@ class GeoIPTest(SimpleTestCase):
 
         for query in (self.fqdn, self.addr):
             # Country queries should still work.
+            self.assertEqual('US', g.country_code(query), 'Failed for func country_code and query %s' % query)
             self.assertEqual(
-                'US',
-                g.country_code(query),
-                'Failed for func country_code and query %s' % query
+                'United States', g.country_name(query), 'Failed for func country_name and query %s' % query
             )
-            self.assertEqual(
-                'United States',
-                g.country_name(query),
-                'Failed for func country_name and query %s' % query
-            )
-            self.assertEqual(
-                {'country_code': 'US', 'country_name': 'United States'},
-                g.country(query)
-            )
+            self.assertEqual({'country_code': 'US', 'country_name': 'United States'}, g.country(query))
 
             # City information dictionary.
             d = g.city(query)

@@ -9,21 +9,14 @@ from django.test.utils import extend_sys_path
 from .templatetags import custom, inclusion
 from .utils import ROOT
 
-LIBRARIES = {
-    'custom': 'template_tests.templatetags.custom',
-    'inclusion': 'template_tests.templatetags.inclusion',
-}
+LIBRARIES = {'custom': 'template_tests.templatetags.custom', 'inclusion': 'template_tests.templatetags.inclusion'}
 
 
 class CustomFilterTests(SimpleTestCase):
-
     def test_filter(self):
         engine = Engine(libraries=LIBRARIES)
         t = engine.from_string("{% load custom %}{{ string|trim:5 }}")
-        self.assertEqual(
-            t.render(Context({"string": "abcdefghijklmnopqrstuvwxyz"})),
-            "abcde"
-        )
+        self.assertEqual(t.render(Context({"string": "abcdefghijklmnopqrstuvwxyz"})), "abcde")
 
     def test_decorated_filter(self):
         engine = Engine(libraries=LIBRARIES)
@@ -32,7 +25,6 @@ class CustomFilterTests(SimpleTestCase):
 
 
 class TagTestCase(SimpleTestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.engine = Engine(app_dirs=True, libraries=LIBRARIES)
@@ -45,7 +37,6 @@ class TagTestCase(SimpleTestCase):
 
 
 class SimpleTagTests(TagTestCase):
-
     def test_simple_tags(self):
         c = Context({'value': 42})
 
@@ -53,30 +44,47 @@ class SimpleTagTests(TagTestCase):
             ('{% load custom %}{% no_params %}', 'no_params - Expected result'),
             ('{% load custom %}{% one_param 37 %}', 'one_param - Expected result: 37'),
             ('{% load custom %}{% explicit_no_context 37 %}', 'explicit_no_context - Expected result: 37'),
-            ('{% load custom %}{% no_params_with_context %}',
-                'no_params_with_context - Expected result (context value: 42)'),
-            ('{% load custom %}{% params_and_context 37 %}',
-                'params_and_context - Expected result (context value: 42): 37'),
+            (
+                '{% load custom %}{% no_params_with_context %}',
+                'no_params_with_context - Expected result (context value: 42)',
+            ),
+            (
+                '{% load custom %}{% params_and_context 37 %}',
+                'params_and_context - Expected result (context value: 42): 37',
+            ),
             ('{% load custom %}{% simple_two_params 37 42 %}', 'simple_two_params - Expected result: 37, 42'),
-            ('{% load custom %}{% simple_keyword_only_param kwarg=37 %}',
-                'simple_keyword_only_param - Expected result: 37'),
-            ('{% load custom %}{% simple_keyword_only_default %}',
-                'simple_keyword_only_default - Expected result: 42'),
+            (
+                '{% load custom %}{% simple_keyword_only_param kwarg=37 %}',
+                'simple_keyword_only_param - Expected result: 37',
+            ),
+            (
+                '{% load custom %}{% simple_keyword_only_default %}',
+                'simple_keyword_only_default - Expected result: 42',
+            ),
             ('{% load custom %}{% simple_one_default 37 %}', 'simple_one_default - Expected result: 37, hi'),
-            ('{% load custom %}{% simple_one_default 37 two="hello" %}',
-                'simple_one_default - Expected result: 37, hello'),
-            ('{% load custom %}{% simple_one_default one=99 two="hello" %}',
-                'simple_one_default - Expected result: 99, hello'),
-            ('{% load custom %}{% simple_one_default 37 42 %}',
-                'simple_one_default - Expected result: 37, 42'),
+            (
+                '{% load custom %}{% simple_one_default 37 two="hello" %}',
+                'simple_one_default - Expected result: 37, hello',
+            ),
+            (
+                '{% load custom %}{% simple_one_default one=99 two="hello" %}',
+                'simple_one_default - Expected result: 99, hello',
+            ),
+            ('{% load custom %}{% simple_one_default 37 42 %}', 'simple_one_default - Expected result: 37, 42'),
             ('{% load custom %}{% simple_unlimited_args 37 %}', 'simple_unlimited_args - Expected result: 37, hi'),
-            ('{% load custom %}{% simple_unlimited_args 37 42 56 89 %}',
-                'simple_unlimited_args - Expected result: 37, 42, 56, 89'),
+            (
+                '{% load custom %}{% simple_unlimited_args 37 42 56 89 %}',
+                'simple_unlimited_args - Expected result: 37, 42, 56, 89',
+            ),
             ('{% load custom %}{% simple_only_unlimited_args %}', 'simple_only_unlimited_args - Expected result: '),
-            ('{% load custom %}{% simple_only_unlimited_args 37 42 56 89 %}',
-                'simple_only_unlimited_args - Expected result: 37, 42, 56, 89'),
-            ('{% load custom %}{% simple_unlimited_args_kwargs 37 40|add:2 56 eggs="scrambled" four=1|add:3 %}',
-                'simple_unlimited_args_kwargs - Expected result: 37, 42, 56 / eggs=scrambled, four=4'),
+            (
+                '{% load custom %}{% simple_only_unlimited_args 37 42 56 89 %}',
+                'simple_only_unlimited_args - Expected result: 37, 42, 56, 89',
+            ),
+            (
+                '{% load custom %}{% simple_unlimited_args_kwargs 37 40|add:2 56 eggs="scrambled" four=1|add:3 %}',
+                'simple_unlimited_args_kwargs - Expected result: 37, 42, 56 / eggs=scrambled, four=4',
+            ),
         ]
 
         for entry in templates:
@@ -89,18 +97,30 @@ class SimpleTagTests(TagTestCase):
 
     def test_simple_tag_errors(self):
         errors = [
-            ("'simple_one_default' received unexpected keyword argument 'three'",
-                '{% load custom %}{% simple_one_default 99 two="hello" three="foo" %}'),
-            ("'simple_two_params' received too many positional arguments",
-                '{% load custom %}{% simple_two_params 37 42 56 %}'),
-            ("'simple_one_default' received too many positional arguments",
-                '{% load custom %}{% simple_one_default 37 42 56 %}'),
-            ("'simple_keyword_only_param' did not receive value(s) for the argument(s): 'kwarg'",
-                '{% load custom %}{% simple_keyword_only_param %}'),
-            ("'simple_unlimited_args_kwargs' received some positional argument(s) after some keyword argument(s)",
-                '{% load custom %}{% simple_unlimited_args_kwargs 37 40|add:2 eggs="scrambled" 56 four=1|add:3 %}'),
-            ("'simple_unlimited_args_kwargs' received multiple values for keyword argument 'eggs'",
-                '{% load custom %}{% simple_unlimited_args_kwargs 37 eggs="scrambled" eggs="scrambled" %}'),
+            (
+                "'simple_one_default' received unexpected keyword argument 'three'",
+                '{% load custom %}{% simple_one_default 99 two="hello" three="foo" %}',
+            ),
+            (
+                "'simple_two_params' received too many positional arguments",
+                '{% load custom %}{% simple_two_params 37 42 56 %}',
+            ),
+            (
+                "'simple_one_default' received too many positional arguments",
+                '{% load custom %}{% simple_one_default 37 42 56 %}',
+            ),
+            (
+                "'simple_keyword_only_param' did not receive value(s) for the argument(s): 'kwarg'",
+                '{% load custom %}{% simple_keyword_only_param %}',
+            ),
+            (
+                "'simple_unlimited_args_kwargs' received some positional argument(s) after some keyword argument(s)",
+                '{% load custom %}{% simple_unlimited_args_kwargs 37 40|add:2 eggs="scrambled" 56 four=1|add:3 %}',
+            ),
+            (
+                "'simple_unlimited_args_kwargs' received multiple values for keyword argument 'eggs'",
+                '{% load custom %}{% simple_unlimited_args_kwargs 37 eggs="scrambled" eggs="scrambled" %}',
+            ),
         ]
 
         for entry in errors:
@@ -155,41 +175,64 @@ class SimpleTagTests(TagTestCase):
 
 
 class InclusionTagTests(TagTestCase):
-
     def test_inclusion_tags(self):
         c = Context({'value': 42})
 
         templates = [
             ('{% load inclusion %}{% inclusion_no_params %}', 'inclusion_no_params - Expected result\n'),
             ('{% load inclusion %}{% inclusion_one_param 37 %}', 'inclusion_one_param - Expected result: 37\n'),
-            ('{% load inclusion %}{% inclusion_explicit_no_context 37 %}',
-                'inclusion_explicit_no_context - Expected result: 37\n'),
-            ('{% load inclusion %}{% inclusion_no_params_with_context %}',
-                'inclusion_no_params_with_context - Expected result (context value: 42)\n'),
-            ('{% load inclusion %}{% inclusion_params_and_context 37 %}',
-                'inclusion_params_and_context - Expected result (context value: 42): 37\n'),
-            ('{% load inclusion %}{% inclusion_two_params 37 42 %}',
-                'inclusion_two_params - Expected result: 37, 42\n'),
+            (
+                '{% load inclusion %}{% inclusion_explicit_no_context 37 %}',
+                'inclusion_explicit_no_context - Expected result: 37\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_no_params_with_context %}',
+                'inclusion_no_params_with_context - Expected result (context value: 42)\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_params_and_context 37 %}',
+                'inclusion_params_and_context - Expected result (context value: 42): 37\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_two_params 37 42 %}',
+                'inclusion_two_params - Expected result: 37, 42\n',
+            ),
             (
                 '{% load inclusion %}{% inclusion_one_default 37 %}',
-                'inclusion_one_default - Expected result: 37, hi\n'
+                'inclusion_one_default - Expected result: 37, hi\n',
             ),
-            ('{% load inclusion %}{% inclusion_one_default 37 two="hello" %}',
-                'inclusion_one_default - Expected result: 37, hello\n'),
-            ('{% load inclusion %}{% inclusion_one_default one=99 two="hello" %}',
-                'inclusion_one_default - Expected result: 99, hello\n'),
-            ('{% load inclusion %}{% inclusion_one_default 37 42 %}',
-                'inclusion_one_default - Expected result: 37, 42\n'),
-            ('{% load inclusion %}{% inclusion_unlimited_args 37 %}',
-                'inclusion_unlimited_args - Expected result: 37, hi\n'),
-            ('{% load inclusion %}{% inclusion_unlimited_args 37 42 56 89 %}',
-                'inclusion_unlimited_args - Expected result: 37, 42, 56, 89\n'),
-            ('{% load inclusion %}{% inclusion_only_unlimited_args %}',
-                'inclusion_only_unlimited_args - Expected result: \n'),
-            ('{% load inclusion %}{% inclusion_only_unlimited_args 37 42 56 89 %}',
-                'inclusion_only_unlimited_args - Expected result: 37, 42, 56, 89\n'),
-            ('{% load inclusion %}{% inclusion_unlimited_args_kwargs 37 40|add:2 56 eggs="scrambled" four=1|add:3 %}',
-                'inclusion_unlimited_args_kwargs - Expected result: 37, 42, 56 / eggs=scrambled, four=4\n'),
+            (
+                '{% load inclusion %}{% inclusion_one_default 37 two="hello" %}',
+                'inclusion_one_default - Expected result: 37, hello\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_one_default one=99 two="hello" %}',
+                'inclusion_one_default - Expected result: 99, hello\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_one_default 37 42 %}',
+                'inclusion_one_default - Expected result: 37, 42\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_unlimited_args 37 %}',
+                'inclusion_unlimited_args - Expected result: 37, hi\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_unlimited_args 37 42 56 89 %}',
+                'inclusion_unlimited_args - Expected result: 37, 42, 56, 89\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_only_unlimited_args %}',
+                'inclusion_only_unlimited_args - Expected result: \n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_only_unlimited_args 37 42 56 89 %}',
+                'inclusion_only_unlimited_args - Expected result: 37, 42, 56, 89\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_unlimited_args_kwargs 37 40|add:2 56 eggs="scrambled" four=1|add:3 %}',
+                'inclusion_unlimited_args_kwargs - Expected result: 37, 42, 56 / eggs=scrambled, four=4\n',
+            ),
         ]
 
         for entry in templates:
@@ -198,23 +241,35 @@ class InclusionTagTests(TagTestCase):
 
     def test_inclusion_tag_errors(self):
         errors = [
-            ("'inclusion_one_default' received unexpected keyword argument 'three'",
-                '{% load inclusion %}{% inclusion_one_default 99 two="hello" three="foo" %}'),
-            ("'inclusion_two_params' received too many positional arguments",
-                '{% load inclusion %}{% inclusion_two_params 37 42 56 %}'),
-            ("'inclusion_one_default' received too many positional arguments",
-                '{% load inclusion %}{% inclusion_one_default 37 42 56 %}'),
-            ("'inclusion_one_default' did not receive value(s) for the argument(s): 'one'",
-                '{% load inclusion %}{% inclusion_one_default %}'),
-            ("'inclusion_unlimited_args' did not receive value(s) for the argument(s): 'one'",
-                '{% load inclusion %}{% inclusion_unlimited_args %}'),
+            (
+                "'inclusion_one_default' received unexpected keyword argument 'three'",
+                '{% load inclusion %}{% inclusion_one_default 99 two="hello" three="foo" %}',
+            ),
+            (
+                "'inclusion_two_params' received too many positional arguments",
+                '{% load inclusion %}{% inclusion_two_params 37 42 56 %}',
+            ),
+            (
+                "'inclusion_one_default' received too many positional arguments",
+                '{% load inclusion %}{% inclusion_one_default 37 42 56 %}',
+            ),
+            (
+                "'inclusion_one_default' did not receive value(s) for the argument(s): 'one'",
+                '{% load inclusion %}{% inclusion_one_default %}',
+            ),
+            (
+                "'inclusion_unlimited_args' did not receive value(s) for the argument(s): 'one'",
+                '{% load inclusion %}{% inclusion_unlimited_args %}',
+            ),
             (
                 "'inclusion_unlimited_args_kwargs' received some positional argument(s) "
                 "after some keyword argument(s)",
                 '{% load inclusion %}{% inclusion_unlimited_args_kwargs 37 40|add:2 eggs="boiled" 56 four=1|add:3 %}',
             ),
-            ("'inclusion_unlimited_args_kwargs' received multiple values for keyword argument 'eggs'",
-                '{% load inclusion %}{% inclusion_unlimited_args_kwargs 37 eggs="scrambled" eggs="scrambled" %}'),
+            (
+                "'inclusion_unlimited_args_kwargs' received multiple values for keyword argument 'eggs'",
+                '{% load inclusion %}{% inclusion_unlimited_args_kwargs 37 eggs="scrambled" eggs="scrambled" %}',
+            ),
         ]
 
         for entry in errors:
@@ -234,30 +289,54 @@ class InclusionTagTests(TagTestCase):
         c = Context({'value': 42})
 
         templates = [
-            ('{% load inclusion %}{% inclusion_no_params_from_template %}',
-                'inclusion_no_params_from_template - Expected result\n'),
-            ('{% load inclusion %}{% inclusion_one_param_from_template 37 %}',
-                'inclusion_one_param_from_template - Expected result: 37\n'),
-            ('{% load inclusion %}{% inclusion_explicit_no_context_from_template 37 %}',
-                'inclusion_explicit_no_context_from_template - Expected result: 37\n'),
-            ('{% load inclusion %}{% inclusion_no_params_with_context_from_template %}',
-                'inclusion_no_params_with_context_from_template - Expected result (context value: 42)\n'),
-            ('{% load inclusion %}{% inclusion_params_and_context_from_template 37 %}',
-                'inclusion_params_and_context_from_template - Expected result (context value: 42): 37\n'),
-            ('{% load inclusion %}{% inclusion_two_params_from_template 37 42 %}',
-                'inclusion_two_params_from_template - Expected result: 37, 42\n'),
-            ('{% load inclusion %}{% inclusion_one_default_from_template 37 %}',
-                'inclusion_one_default_from_template - Expected result: 37, hi\n'),
-            ('{% load inclusion %}{% inclusion_one_default_from_template 37 42 %}',
-                'inclusion_one_default_from_template - Expected result: 37, 42\n'),
-            ('{% load inclusion %}{% inclusion_unlimited_args_from_template 37 %}',
-                'inclusion_unlimited_args_from_template - Expected result: 37, hi\n'),
-            ('{% load inclusion %}{% inclusion_unlimited_args_from_template 37 42 56 89 %}',
-                'inclusion_unlimited_args_from_template - Expected result: 37, 42, 56, 89\n'),
-            ('{% load inclusion %}{% inclusion_only_unlimited_args_from_template %}',
-                'inclusion_only_unlimited_args_from_template - Expected result: \n'),
-            ('{% load inclusion %}{% inclusion_only_unlimited_args_from_template 37 42 56 89 %}',
-                'inclusion_only_unlimited_args_from_template - Expected result: 37, 42, 56, 89\n'),
+            (
+                '{% load inclusion %}{% inclusion_no_params_from_template %}',
+                'inclusion_no_params_from_template - Expected result\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_one_param_from_template 37 %}',
+                'inclusion_one_param_from_template - Expected result: 37\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_explicit_no_context_from_template 37 %}',
+                'inclusion_explicit_no_context_from_template - Expected result: 37\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_no_params_with_context_from_template %}',
+                'inclusion_no_params_with_context_from_template - Expected result (context value: 42)\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_params_and_context_from_template 37 %}',
+                'inclusion_params_and_context_from_template - Expected result (context value: 42): 37\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_two_params_from_template 37 42 %}',
+                'inclusion_two_params_from_template - Expected result: 37, 42\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_one_default_from_template 37 %}',
+                'inclusion_one_default_from_template - Expected result: 37, hi\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_one_default_from_template 37 42 %}',
+                'inclusion_one_default_from_template - Expected result: 37, 42\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_unlimited_args_from_template 37 %}',
+                'inclusion_unlimited_args_from_template - Expected result: 37, hi\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_unlimited_args_from_template 37 42 56 89 %}',
+                'inclusion_unlimited_args_from_template - Expected result: 37, 42, 56, 89\n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_only_unlimited_args_from_template %}',
+                'inclusion_only_unlimited_args_from_template - Expected result: \n',
+            ),
+            (
+                '{% load inclusion %}{% inclusion_only_unlimited_args_from_template 37 42 56 89 %}',
+                'inclusion_only_unlimited_args_from_template - Expected result: 37, 42, 56, 89\n',
+            ),
         ]
 
         for entry in templates:
@@ -314,7 +393,6 @@ class InclusionTagTests(TagTestCase):
 
 
 class TemplateTagLoadingTests(SimpleTestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.egg_dir = os.path.join(ROOT, 'eggs')
@@ -344,12 +422,8 @@ class TemplateTagLoadingTests(SimpleTestCase):
         ttext = "{% load working_egg %}"
         egg_name = '%s/tagsegg.egg' % self.egg_dir
         with extend_sys_path(egg_name):
-            engine = Engine(libraries={
-                'working_egg': 'tagsegg.templatetags.working_egg',
-            })
+            engine = Engine(libraries={'working_egg': 'tagsegg.templatetags.working_egg'})
             engine.from_string(ttext)
 
     def test_load_annotated_function(self):
-        Engine(libraries={
-            'annotated_tag_function': 'template_tests.annotated_tag_function',
-        })
+        Engine(libraries={'annotated_tag_function': 'template_tests.annotated_tag_function'})

@@ -21,11 +21,7 @@ class WSGIRequestHandlerTestCase(SimpleTestCase):
         request = WSGIRequest(self.request_factory.get('/').environ)
         request.makefile = lambda *args, **kwargs: BytesIO()
         handler = WSGIRequestHandler(request, '192.168.0.2', None)
-        level_status_codes = {
-            'info': [200, 301, 304],
-            'warning': [400, 403, 404],
-            'error': [500, 503],
-        }
+        level_status_codes = {'info': [200, 301, 304], 'warning': [400, 403, 404], 'error': [500, 503]}
         for level, status_codes in level_status_codes.items():
             for status_code in status_codes:
                 # The correct level gets the message.
@@ -48,9 +44,8 @@ class WSGIRequestHandlerTestCase(SimpleTestCase):
         with self.assertLogs('django.server', 'ERROR') as cm:
             handler.log_message("GET %s %s", '\x16\x03', "4")
         self.assertIn(
-            "You're accessing the development server over HTTPS, "
-            "but it only supports HTTP.",
-            cm.records[0].getMessage()
+            "You're accessing the development server over HTTPS, " "but it only supports HTTP.",
+            cm.records[0].getMessage(),
         )
 
     def test_strips_underscore_headers(self):
@@ -60,13 +55,11 @@ class WSGIRequestHandlerTestCase(SimpleTestCase):
         ambiguity between dashes and underscores in mapping to WSGI environ,
         which can have security implications.
         """
+
         def test_app(environ, start_response):
             """A WSGI app that just reflects its HTTP environ."""
             start_response('200 OK', [])
-            http_environ_items = sorted(
-                '%s:%s' % (k, v) for k, v in environ.items()
-                if k.startswith('HTTP_')
-            )
+            http_environ_items = sorted('%s:%s' % (k, v) for k, v in environ.items() if k.startswith('HTTP_'))
             yield (','.join(http_environ_items)).encode()
 
         rfile = BytesIO()

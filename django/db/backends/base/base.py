@@ -24,6 +24,7 @@ NO_DB_ALIAS = '__no_db__'
 
 class BaseDatabaseWrapper:
     """Represent a database connection."""
+
     # Mapping of Field objects to their column types.
     data_types = {}
     # Mapping of Field objects to their SQL suffix such as AUTOINCREMENT.
@@ -154,7 +155,8 @@ class BaseDatabaseWrapper:
         if len(self.queries_log) == self.queries_log.maxlen:
             warnings.warn(
                 "Limit for query logging exceeded, only the last {} queries "
-                "will be returned.".format(self.queries_log.maxlen))
+                "will be returned.".format(self.queries_log.maxlen)
+            )
         return list(self.queries_log)
 
     # ##### Backend-specific methods for creating connections and cursors #####
@@ -203,12 +205,13 @@ class BaseDatabaseWrapper:
         if self.settings_dict['TIME_ZONE'] is not None:
             if not settings.USE_TZ:
                 raise ImproperlyConfigured(
-                    "Connection '%s' cannot set TIME_ZONE because USE_TZ is "
-                    "False." % self.alias)
+                    "Connection '%s' cannot set TIME_ZONE because USE_TZ is " "False." % self.alias
+                )
             elif self.features.supports_timezones:
                 raise ImproperlyConfigured(
                     "Connection '%s' cannot set TIME_ZONE because its engine "
-                    "handles time zones conversions natively." % self.alias)
+                    "handles time zones conversions natively." % self.alias
+                )
 
     def ensure_connection(self):
         """Guarantee that a connection to the database is established."""
@@ -344,9 +347,7 @@ class BaseDatabaseWrapper:
         self._savepoint_rollback(sid)
 
         # Remove any callbacks registered while this savepoint was active.
-        self.run_on_commit = [
-            (sids, func) for (sids, func) in self.run_on_commit if sid not in sids
-        ]
+        self.run_on_commit = [(sids, func) for (sids, func) in self.run_on_commit if sid not in sids]
 
     def savepoint_commit(self, sid):
         """
@@ -395,8 +396,9 @@ class BaseDatabaseWrapper:
         self.ensure_connection()
 
         start_transaction_under_autocommit = (
-            force_begin_transaction_with_broken_autocommit and not autocommit and
-            hasattr(self, '_start_transaction_under_autocommit')
+            force_begin_transaction_with_broken_autocommit
+            and not autocommit
+            and hasattr(self, '_start_transaction_under_autocommit')
         )
 
         if start_transaction_under_autocommit:
@@ -413,8 +415,7 @@ class BaseDatabaseWrapper:
     def get_rollback(self):
         """Get the "needs rollback" flag -- for *advanced use* only."""
         if not self.in_atomic_block:
-            raise TransactionManagementError(
-                "The rollback flag doesn't work outside of an 'atomic' block.")
+            raise TransactionManagementError("The rollback flag doesn't work outside of an 'atomic' block.")
         return self.needs_rollback
 
     def set_rollback(self, rollback):
@@ -422,21 +423,20 @@ class BaseDatabaseWrapper:
         Set or unset the "needs rollback" flag -- for *advanced use* only.
         """
         if not self.in_atomic_block:
-            raise TransactionManagementError(
-                "The rollback flag doesn't work outside of an 'atomic' block.")
+            raise TransactionManagementError("The rollback flag doesn't work outside of an 'atomic' block.")
         self.needs_rollback = rollback
 
     def validate_no_atomic_block(self):
         """Raise an error if an atomic block is active."""
         if self.in_atomic_block:
-            raise TransactionManagementError(
-                "This is forbidden when an 'atomic' block is active.")
+            raise TransactionManagementError("This is forbidden when an 'atomic' block is active.")
 
     def validate_no_broken_transaction(self):
         if self.needs_rollback:
             raise TransactionManagementError(
                 "An error occurred in the current transaction. You can't "
-                "execute queries until the end of the 'atomic' block.")
+                "execute queries until the end of the 'atomic' block."
+            )
 
     # ##### Foreign key constraints checks handling #####
 
@@ -486,8 +486,7 @@ class BaseDatabaseWrapper:
         Actual implementations should take care not to raise exceptions
         as that may prevent Django from recycling unusable connections.
         """
-        raise NotImplementedError(
-            "subclasses of BaseDatabaseWrapper may require an is_usable() method")
+        raise NotImplementedError("subclasses of BaseDatabaseWrapper may require an is_usable() method")
 
     def close_if_unusable_or_obsolete(self):
         """
@@ -543,8 +542,7 @@ class BaseDatabaseWrapper:
                 "DatabaseWrapper objects created in a "
                 "thread can only be used in that same thread. The object "
                 "with alias '%s' was created in thread id %s and this is "
-                "thread id %s."
-                % (self.alias, self._thread_ident, _thread.get_ident())
+                "thread id %s." % (self.alias, self._thread_ident, _thread.get_ident())
             )
 
     # ##### Miscellaneous #####
@@ -612,8 +610,7 @@ class BaseDatabaseWrapper:
         Return a new instance of this backend's SchemaEditor.
         """
         if self.SchemaEditorClass is None:
-            raise NotImplementedError(
-                'The SchemaEditorClass attribute of this database wrapper is still None')
+            raise NotImplementedError('The SchemaEditorClass attribute of this database wrapper is still None')
         return self.SchemaEditorClass(self, *args, **kwargs)
 
     def on_commit(self, func):

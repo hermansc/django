@@ -23,9 +23,7 @@ class Book(models.Model):
     title = models.CharField(max_length=100)
 
     class Meta:
-        unique_together = (
-            ('author', 'title'),
-        )
+        unique_together = (('author', 'title'),)
         ordering = ['id']
 
     def __str__(self):
@@ -56,9 +54,7 @@ class BookWithOptionalAltEditor(models.Model):
     title = models.CharField(max_length=100)
 
     class Meta:
-        unique_together = (
-            ('author', 'title', 'alt_editor'),
-        )
+        unique_together = (('author', 'title', 'alt_editor'),)
 
     def __str__(self):
         return self.title

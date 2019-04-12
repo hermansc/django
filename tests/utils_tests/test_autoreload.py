@@ -133,12 +133,7 @@ class TestIterModulesAndFiles(SimpleTestCase):
 
 class TestCommonRoots(SimpleTestCase):
     def test_common_roots(self):
-        paths = (
-            Path('/first/second'),
-            Path('/first/second/third'),
-            Path('/first/'),
-            Path('/root/first/'),
-        )
+        paths = (Path('/first/second'), Path('/first/second/third'), Path('/first/'), Path('/root/first/'))
         results = autoreload.common_roots(paths)
         self.assertCountEqual(results, [Path('/first/'), Path('/root/first/')])
 
@@ -211,10 +206,7 @@ class RunWithReloaderTests(SimpleTestCase):
         mocked_reloader.return_value = mock.sentinel.RELOADER
         autoreload.run_with_reloader(mock.sentinel.METHOD)
         self.assertEqual(mocked_start_django.call_count, 1)
-        self.assertSequenceEqual(
-            mocked_start_django.call_args[0],
-            [mock.sentinel.RELOADER, mock.sentinel.METHOD]
-        )
+        self.assertSequenceEqual(mocked_start_django.call_args[0], [mock.sentinel.RELOADER, mock.sentinel.METHOD])
 
 
 class StartDjangoTests(SimpleTestCase):
@@ -252,8 +244,7 @@ class StartDjangoTests(SimpleTestCase):
         autoreload.start_django(fake_reloader, fake_main_func, 123, abc=123)
         self.assertEqual(mocked_thread.call_count, 1)
         self.assertEqual(
-            mocked_thread.call_args[1],
-            {'target': fake_main_func, 'args': (123,), 'kwargs': {'abc': 123}}
+            mocked_thread.call_args[1], {'target': fake_main_func, 'args': (123,), 'kwargs': {'abc': 123}}
         )
         self.assertSequenceEqual(fake_thread.setDaemon.call_args[0], [True])
         self.assertTrue(fake_thread.start.called)
@@ -567,9 +558,10 @@ class WatchmanReloaderTests(ReloaderTests, IntegrationTests):
         self.assertSequenceEqual(
             mocked_subscribe.call_args[0],
             [
-                self.tempdir, 'glob-parent-does_not_exist:%s' % self.tempdir,
-                ['anyof', ['match', 'does_not_exist/*', 'wholename']]
-            ]
+                self.tempdir,
+                'glob-parent-does_not_exist:%s' % self.tempdir,
+                ['anyof', ['match', 'does_not_exist/*', 'wholename']],
+            ],
         )
 
     def test_watch_glob_multiple_patterns(self):
@@ -578,9 +570,10 @@ class WatchmanReloaderTests(ReloaderTests, IntegrationTests):
         self.assertSequenceEqual(
             mocked_subscribe.call_args[0],
             [
-                self.tempdir, 'glob:%s' % self.tempdir,
-                ['anyof', ['match', '*', 'wholename'], ['match', '*.py', 'wholename']]
-            ]
+                self.tempdir,
+                'glob:%s' % self.tempdir,
+                ['anyof', ['match', '*', 'wholename'], ['match', '*.py', 'wholename']],
+            ],
         )
 
     def test_watched_roots_contains_files(self):
@@ -658,8 +651,9 @@ class StatReloaderTests(ReloaderTests, IntegrationTests):
             self.assertNotEqual(snapshot1[self.existing_file], snapshot2[self.existing_file])
 
     def test_does_not_fire_without_changes(self):
-        with mock.patch.object(self.reloader, 'watched_files', return_value=[self.existing_file]), \
-                mock.patch.object(self.reloader, 'notify_file_changed') as notifier:
+        with mock.patch.object(self.reloader, 'watched_files', return_value=[self.existing_file]), mock.patch.object(
+            self.reloader, 'notify_file_changed'
+        ) as notifier:
             mtime = self.existing_file.stat().st_mtime
             initial_snapshot = {self.existing_file: mtime}
             second_snapshot = self.reloader.loop_files(initial_snapshot, time.time())
@@ -667,8 +661,9 @@ class StatReloaderTests(ReloaderTests, IntegrationTests):
             notifier.assert_not_called()
 
     def test_fires_when_created(self):
-        with mock.patch.object(self.reloader, 'watched_files', return_value=[self.nonexistent_file]), \
-                mock.patch.object(self.reloader, 'notify_file_changed') as notifier:
+        with mock.patch.object(
+            self.reloader, 'watched_files', return_value=[self.nonexistent_file]
+        ), mock.patch.object(self.reloader, 'notify_file_changed') as notifier:
             self.nonexistent_file.touch()
             mtime = self.nonexistent_file.stat().st_mtime
             second_snapshot = self.reloader.loop_files({}, mtime - 1)
@@ -676,8 +671,9 @@ class StatReloaderTests(ReloaderTests, IntegrationTests):
             notifier.assert_called_once_with(self.nonexistent_file)
 
     def test_fires_with_changes(self):
-        with mock.patch.object(self.reloader, 'watched_files', return_value=[self.existing_file]), \
-                mock.patch.object(self.reloader, 'notify_file_changed') as notifier:
+        with mock.patch.object(self.reloader, 'watched_files', return_value=[self.existing_file]), mock.patch.object(
+            self.reloader, 'notify_file_changed'
+        ) as notifier:
             initial_snapshot = {self.existing_file: 1}
             second_snapshot = self.reloader.loop_files(initial_snapshot, time.time())
             notifier.assert_called_once_with(self.existing_file)

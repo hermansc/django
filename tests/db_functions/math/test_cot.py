@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class CotTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_cot=Cot('normal')).first()
@@ -35,9 +34,7 @@ class CotTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-5, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_cot=Cot('small'),
-            normal_cot=Cot('normal'),
-            big_cot=Cot('big'),
+            small_cot=Cot('small'), normal_cot=Cot('normal'), big_cot=Cot('big')
         ).first()
         self.assertIsInstance(obj.small_cot, float)
         self.assertIsInstance(obj.normal_cot, float)

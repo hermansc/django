@@ -8,9 +8,7 @@ from urllib.parse import unquote, urldefrag, urlsplit, urlunsplit
 
 from django.conf import settings
 from django.contrib.staticfiles.utils import check_settings, matches_patterns
-from django.core.cache import (
-    InvalidCacheBackendError, cache as default_cache, caches,
-)
+from django.core.cache import InvalidCacheBackendError, cache as default_cache, caches
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage, get_storage_class
@@ -25,6 +23,7 @@ class StaticFilesStorage(FileSystemStorage):
     The defaults for ``location`` and ``base_url`` are
     ``STATIC_ROOT`` and ``STATIC_URL``.
     """
+
     def __init__(self, location=None, base_url=None, *args, **kwargs):
         if location is None:
             location = settings.STATIC_ROOT
@@ -40,9 +39,11 @@ class StaticFilesStorage(FileSystemStorage):
 
     def path(self, name):
         if not self.location:
-            raise ImproperlyConfigured("You're using the staticfiles app "
-                                       "without having set the STATIC_ROOT "
-                                       "setting to a filesystem path.")
+            raise ImproperlyConfigured(
+                "You're using the staticfiles app "
+                "without having set the STATIC_ROOT "
+                "setting to a filesystem path."
+            )
         return super().path(name)
 
 
@@ -50,10 +51,13 @@ class HashedFilesMixin:
     default_template = """url("%s")"""
     max_post_process_passes = 5
     patterns = (
-        ("*.css", (
-            r"""(url\(['"]{0,1}\s*(.*?)["']{0,1}\))""",
-            (r"""(@import\s*["']\s*(.*?)["'])""", """@import url("%s")"""),
-        )),
+        (
+            "*.css",
+            (
+                r"""(url\(['"]{0,1}\s*(.*?)["']{0,1}\))""",
+                (r"""(@import\s*["']\s*(.*?)["'])""", """@import url("%s")"""),
+            ),
+        ),
     )
 
     def __init__(self, *args, **kwargs):
@@ -104,8 +108,7 @@ class HashedFilesMixin:
         root, ext = os.path.splitext(filename)
         if file_hash is not None:
             file_hash = ".%s" % file_hash
-        hashed_name = os.path.join(path, "%s%s%s" %
-                                   (root, file_hash, ext))
+        hashed_name = os.path.join(path, "%s%s%s" % (root, file_hash, ext))
         unparsed_name = list(parsed_name)
         unparsed_name[2] = hashed_name
         # Special casing for a @font-face hack, like url(myfont.eot?#iefix")
@@ -182,17 +185,14 @@ class HashedFilesMixin:
             if url_path.startswith('/'):
                 # Otherwise the condition above would have returned prematurely.
                 assert url_path.startswith(settings.STATIC_URL)
-                target_name = url_path[len(settings.STATIC_URL):]
+                target_name = url_path[len(settings.STATIC_URL) :]
             else:
                 # We're using the posixpath module to mix paths and URLs conveniently.
                 source_name = name if os.sep == '/' else name.replace(os.sep, '/')
                 target_name = posixpath.join(posixpath.dirname(source_name), url_path)
 
             # Determine the hashed name of the target file with the storage backend.
-            hashed_url = self._url(
-                self._stored_name, unquote(target_name),
-                force=True, hashed_files=hashed_files,
-            )
+            hashed_url = self._url(self._stored_name, unquote(target_name), force=True, hashed_files=hashed_files)
 
             transformed_url = '/'.join(url_path.split('/')[:-1] + hashed_url.split('/')[-1:])
 
@@ -227,10 +227,7 @@ class HashedFilesMixin:
         hashed_files = {}
 
         # build a list of adjustable files
-        adjustable_paths = [
-            path for path in paths
-            if matches_patterns(path, self._patterns)
-        ]
+        adjustable_paths = [path for path in paths if matches_patterns(path, self._patterns)]
         # Do a single pass first. Post-process all files once, then repeat for
         # adjustable files.
         for name, hashed_name, processed, _ in self._post_process(paths, adjustable_paths, hashed_files):
@@ -351,9 +348,7 @@ class HashedFilesMixin:
         # No cached name found, recalculate it from the files.
         intermediate_name = name
         for i in range(self.max_post_process_passes + 1):
-            cache_name = self.clean_name(
-                self.hashed_name(name, content=None, filename=intermediate_name)
-            )
+            cache_name = self.clean_name(self.hashed_name(name, content=None, filename=intermediate_name))
             if intermediate_name == cache_name:
                 # Store the hashed name if there was a miss.
                 self.hashed_files[hash_key] = cache_name
@@ -394,8 +389,7 @@ class ManifestFilesMixin(HashedFilesMixin):
             version = stored.get('version')
             if version == '1.0':
                 return stored.get('paths', {})
-        raise ValueError("Couldn't load manifest '%s' (version %s)" %
-                         (self.manifest_name, self.manifest_version))
+        raise ValueError("Couldn't load manifest '%s' (version %s)" % (self.manifest_name, self.manifest_version))
 
     def post_process(self, *args, **kwargs):
         self.hashed_files = {}
@@ -431,6 +425,7 @@ class _MappingCache:
     """
     A small dict-like wrapper for a given cache backend instance.
     """
+
     def __init__(self, cache):
         self.cache = cache
 
@@ -475,11 +470,12 @@ class CachedStaticFilesStorage(CachedFilesMixin, StaticFilesStorage):
     A static file system storage backend which also saves
     hashed copies of the files it saves.
     """
+
     def __init__(self, *args, **kwargs):
         warnings.warn(
-            'CachedStaticFilesStorage is deprecated in favor of '
-            'ManifestStaticFilesStorage.',
-            RemovedInDjango31Warning, stacklevel=2,
+            'CachedStaticFilesStorage is deprecated in favor of ' 'ManifestStaticFilesStorage.',
+            RemovedInDjango31Warning,
+            stacklevel=2,
         )
         super().__init__(*args, **kwargs)
 
@@ -489,6 +485,7 @@ class ManifestStaticFilesStorage(ManifestFilesMixin, StaticFilesStorage):
     A static file system storage backend which also saves
     hashed copies of the files it saves.
     """
+
     pass
 
 

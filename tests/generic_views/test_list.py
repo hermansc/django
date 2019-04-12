@@ -9,7 +9,6 @@ from .models import Artist, Author, Book, Page
 
 @override_settings(ROOT_URLCONF='generic_views.urls')
 class ListViewTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.artist1 = Artist.objects.create(name='Rene Magritte')
@@ -134,16 +133,13 @@ class ListViewTests(TestCase):
         res = self.client.get('/list/authors/paginated-orphaned/')
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.context['page_obj'].number, 1)
-        res = self.client.get(
-            '/list/authors/paginated-orphaned/', {'page': 'last'})
+        res = self.client.get('/list/authors/paginated-orphaned/', {'page': 'last'})
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.context['page_obj'].number, 3)
-        res = self.client.get(
-            '/list/authors/paginated-orphaned/', {'page': '3'})
+        res = self.client.get('/list/authors/paginated-orphaned/', {'page': '3'})
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.context['page_obj'].number, 3)
-        res = self.client.get(
-            '/list/authors/paginated-orphaned/', {'page': '4'})
+        res = self.client.get('/list/authors/paginated-orphaned/', {'page': '4'})
         self.assertEqual(res.status_code, 404)
 
     def test_paginated_non_queryset(self):

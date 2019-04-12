@@ -31,30 +31,24 @@ class Command(BaseCommand):
         self.username_field = self.UserModel._meta.get_field(self.UserModel.USERNAME_FIELD)
 
     def add_arguments(self, parser):
+        parser.add_argument('--%s' % self.UserModel.USERNAME_FIELD, help='Specifies the login for the superuser.')
         parser.add_argument(
-            '--%s' % self.UserModel.USERNAME_FIELD,
-            help='Specifies the login for the superuser.',
-        )
-        parser.add_argument(
-            '--noinput', '--no-input', action='store_false', dest='interactive',
+            '--noinput',
+            '--no-input',
+            action='store_false',
+            dest='interactive',
             help=(
                 'Tells Django to NOT prompt the user for input of any kind. '
                 'You must use --%s with --noinput, along with an option for '
                 'any other required field. Superusers created with --noinput will '
-                'not be able to log in until they\'re given a valid password.' %
-                self.UserModel.USERNAME_FIELD
+                'not be able to log in until they\'re given a valid password.' % self.UserModel.USERNAME_FIELD
             ),
         )
         parser.add_argument(
-            '--database',
-            default=DEFAULT_DB_ALIAS,
-            help='Specifies the database to use. Default is "default".',
+            '--database', default=DEFAULT_DB_ALIAS, help='Specifies the database to use. Default is "default".'
         )
         for field in self.UserModel.REQUIRED_FIELDS:
-            parser.add_argument(
-                '--%s' % field,
-                help='Specifies the %s for the superuser.' % field,
-            )
+            parser.add_argument('--%s' % field, help='Specifies the %s for the superuser.' % field)
 
     def execute(self, *args, **options):
         self.stdin = options.get('stdin', sys.stdin)  # Used for testing
@@ -99,8 +93,7 @@ class Command(BaseCommand):
                             continue
                 user_data[self.UserModel.USERNAME_FIELD] = username
                 fake_user_data[self.UserModel.USERNAME_FIELD] = (
-                    self.username_field.remote_field.model(username)
-                    if self.username_field.remote_field else username
+                    self.username_field.remote_field.model(username) if self.username_field.remote_field else username
                 )
                 # Prompt for required fields.
                 for field_name in self.UserModel.REQUIRED_FIELDS:
@@ -188,10 +181,9 @@ class Command(BaseCommand):
         return '%s%s%s: ' % (
             capfirst(field.verbose_name),
             " (leave blank to use '%s')" % default if default else '',
-            ' (%s.%s)' % (
-                field.remote_field.model._meta.object_name,
-                field.remote_field.field_name,
-            ) if field.remote_field else '',
+            ' (%s.%s)' % (field.remote_field.model._meta.object_name, field.remote_field.field_name)
+            if field.remote_field
+            else '',
         )
 
     def _validate_username(self, username, verbose_field_name, database):

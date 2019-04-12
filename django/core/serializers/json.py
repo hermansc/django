@@ -8,9 +8,7 @@ import json
 import uuid
 
 from django.core.serializers.base import DeserializationError
-from django.core.serializers.python import (
-    Deserializer as PythonDeserializer, Serializer as PythonSerializer,
-)
+from django.core.serializers.python import Deserializer as PythonDeserializer, Serializer as PythonSerializer
 from django.utils.duration import duration_iso_string
 from django.utils.functional import Promise
 from django.utils.timezone import is_aware
@@ -18,6 +16,7 @@ from django.utils.timezone import is_aware
 
 class Serializer(PythonSerializer):
     """Convert a queryset to JSON."""
+
     internal_use_only = False
 
     def _init_options(self):
@@ -78,6 +77,7 @@ class DjangoJSONEncoder(json.JSONEncoder):
     JSONEncoder subclass that knows how to encode date/time, decimal types, and
     UUIDs.
     """
+
     def default(self, o):
         # See "Date Time String Format" in the ECMA-262 specification.
         if isinstance(o, datetime.datetime):

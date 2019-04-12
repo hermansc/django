@@ -18,10 +18,7 @@ from django.utils.functional import cached_property
 
 class DatabaseOperations(BaseDatabaseOperations):
     cast_char_field_without_max_length = 'text'
-    cast_data_types = {
-        'DateField': 'TEXT',
-        'DateTimeField': 'TEXT',
-    }
+    cast_data_types = {'DateField': 'TEXT', 'DateTimeField': 'TEXT'}
     explain_prefix = 'EXPLAIN QUERY PLAN'
 
     def bulk_batch_size(self, fields, objs):
@@ -59,8 +56,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                         )
         if isinstance(expression, aggregates.Aggregate) and len(expression.source_expressions) > 1:
             raise utils.NotSupportedError(
-                "SQLite doesn't support DISTINCT on aggregate functions "
-                "accepting multiple arguments."
+                "SQLite doesn't support DISTINCT on aggregate functions " "accepting multiple arguments."
             )
 
     def date_extract_sql(self, lookup_type, field_name):
@@ -90,23 +86,23 @@ class DatabaseOperations(BaseDatabaseOperations):
         return 'NULL', 'NULL'
 
     def datetime_cast_date_sql(self, field_name, tzname):
-        return 'django_datetime_cast_date(%s, %s, %s)' % (
-            field_name, *self._convert_tznames_to_sql(tzname),
-        )
+        return 'django_datetime_cast_date(%s, %s, %s)' % (field_name, *self._convert_tznames_to_sql(tzname))
 
     def datetime_cast_time_sql(self, field_name, tzname):
-        return 'django_datetime_cast_time(%s, %s, %s)' % (
-            field_name, *self._convert_tznames_to_sql(tzname),
-        )
+        return 'django_datetime_cast_time(%s, %s, %s)' % (field_name, *self._convert_tznames_to_sql(tzname))
 
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
         return "django_datetime_extract('%s', %s, %s, %s)" % (
-            lookup_type.lower(), field_name, *self._convert_tznames_to_sql(tzname),
+            lookup_type.lower(),
+            field_name,
+            *self._convert_tznames_to_sql(tzname),
         )
 
     def datetime_trunc_sql(self, lookup_type, field_name, tzname):
         return "django_datetime_trunc('%s', %s, %s, %s)" % (
-            lookup_type.lower(), field_name, *self._convert_tznames_to_sql(tzname),
+            lookup_type.lower(),
+            field_name,
+            *self._convert_tznames_to_sql(tzname),
         )
 
     def time_extract_sql(self, lookup_type, field_name):
@@ -128,7 +124,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if len(params) > BATCH_SIZE:
             results = ()
             for index in range(0, len(params), BATCH_SIZE):
-                chunk = params[index:index + BATCH_SIZE]
+                chunk = params[index : index + BATCH_SIZE]
                 results += self._quote_params_for_last_executed_query(chunk)
             return results
 
@@ -178,11 +174,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             JOIN tables ON (sql REGEXP %s || tables.name || %s)
         ) SELECT name FROM tables;
         """
-        params = (
-            table_name,
-            r'(?i)\s+references\s+("|\')?',
-            r'("|\')?\s*\(',
-        )
+        params = (table_name, r'(?i)\s+references\s+("|\')?', r'("|\')?\s*\(')
         with self.connection.cursor() as cursor:
             results = cursor.execute(query, params)
             return [row[0] for row in results.fetchall()]
@@ -198,11 +190,11 @@ class DatabaseOperations(BaseDatabaseOperations):
             # Simulate TRUNCATE CASCADE by recursively collecting the tables
             # referencing the tables to be flushed.
             tables = set(chain.from_iterable(self._references_graph(table) for table in tables))
-        sql = ['%s %s %s;' % (
-            style.SQL_KEYWORD('DELETE'),
-            style.SQL_KEYWORD('FROM'),
-            style.SQL_FIELD(self.quote_name(table))
-        ) for table in tables]
+        sql = [
+            '%s %s %s;'
+            % (style.SQL_KEYWORD('DELETE'), style.SQL_KEYWORD('FROM'), style.SQL_FIELD(self.quote_name(table)))
+            for table in tables
+        ]
         # Note: No requirement for reset of auto-incremented indices (cf. other
         # sql_flush() implementations). Just return SQL at this point
         return sql
@@ -285,10 +277,13 @@ class DatabaseOperations(BaseDatabaseOperations):
             def converter(value, expression, connection):
                 if value is not None:
                     return create_decimal(value).quantize(quantize_value, context=expression.output_field.context)
+
         else:
+
             def converter(value, expression, connection):
                 if value is not None:
                     return create_decimal(value)
+
         return converter
 
     def convert_uuidfield_value(self, value, expression, connection):
@@ -300,10 +295,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         return bool(value) if value in (1, 0) else value
 
     def bulk_insert_sql(self, fields, placeholder_rows):
-        return " UNION ALL ".join(
-            "SELECT %s" % ", ".join(row)
-            for row in placeholder_rows
-        )
+        return " UNION ALL ".join("SELECT %s" % ", ".join(row) for row in placeholder_rows)
 
     def combine_expression(self, connector, sub_expressions):
         # SQLite doesn't have a ^ operator, so use the user-defined POWER

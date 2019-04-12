@@ -76,8 +76,7 @@ class I18nTransTagTests(SimpleTestCase):
             output = self.engine.render_to_string('i18n35')
         self.assertEqual(output, 'Seite nicht gefunden')
 
-    @setup({'i18n36': '{% load i18n %}'
-                      '{% trans "Page not found" noop as page_not_found %}{{ page_not_found }}'})
+    @setup({'i18n36': '{% load i18n %}' '{% trans "Page not found" noop as page_not_found %}{{ page_not_found }}'})
     def test_i18n36(self):
         with translation.override('de'):
             output = self.engine.render_to_string('i18n36')
@@ -132,7 +131,6 @@ class I18nTransTagTests(SimpleTestCase):
 
 
 class TranslationTransTagTests(SimpleTestCase):
-
     @override_settings(LOCALE_PATHS=extended_locale_paths)
     def test_template_tags_pgettext(self):
         """{% trans %} takes message contexts into account (#14806)."""
@@ -178,7 +176,6 @@ class TranslationTransTagTests(SimpleTestCase):
 
 
 class MultipleLocaleActivationTransTagTests(MultipleLocaleActivationTestCase):
-
     def test_single_locale_activation(self):
         """
         Simple baseline behavior with one locale for all the supported i18n

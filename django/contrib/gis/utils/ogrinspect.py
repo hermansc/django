@@ -4,10 +4,7 @@ models for GeoDjango and/or mapping dictionaries for use with the
 `LayerMapping` utility.
 """
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.gdal.field import (
-    OFTDate, OFTDateTime, OFTInteger, OFTInteger64, OFTReal, OFTString,
-    OFTTime,
-)
+from django.contrib.gis.gdal.field import OFTDate, OFTDateTime, OFTInteger, OFTInteger64, OFTReal, OFTString, OFTTime
 
 
 def mapping(data_source, geom_name='geom', layer_key=0, multi_geom=False):
@@ -119,9 +116,19 @@ def ogrinspect(*args, **kwargs):
     return '\n'.join(_ogrinspect(*args, **kwargs))
 
 
-def _ogrinspect(data_source, model_name, geom_name='geom', layer_key=0, srid=None,
-                multi_geom=False, name_field=None, imports=True,
-                decimal=False, blank=False, null=False):
+def _ogrinspect(
+    data_source,
+    model_name,
+    geom_name='geom',
+    layer_key=0,
+    srid=None,
+    multi_geom=False,
+    name_field=None,
+    imports=True,
+    decimal=False,
+    blank=False,
+    null=False,
+):
     """
     Helper routine for `ogrinspect` that generates GeoDjango models corresponding
     to the given data source.  See the `ogrinspect` docstring for more details.
@@ -148,6 +155,7 @@ def _ogrinspect(data_source, model_name, geom_name='geom', layer_key=0, srid=Non
             return [s.lower() for s in ogr_fields]
         else:
             return []
+
     null_fields = process_kwarg(null)
     blank_fields = process_kwarg(blank)
     decimal_fields = process_kwarg(decimal)
@@ -174,7 +182,8 @@ def _ogrinspect(data_source, model_name, geom_name='geom', layer_key=0, srid=Non
     yield 'class %s(models.Model):' % model_name
 
     for field_name, width, precision, field_type in zip(
-            ogr_fields, layer.field_widths, layer.field_precisions, layer.field_types):
+        ogr_fields, layer.field_widths, layer.field_precisions, layer.field_types
+    ):
         # The model field name.
         mfield = field_name.lower()
         if mfield[-1:] == '_':
@@ -189,7 +198,10 @@ def _ogrinspect(data_source, model_name, geom_name='geom', layer_key=0, srid=Non
             # `decimal` keyword.
             if field_name.lower() in decimal_fields:
                 yield '    %s = models.DecimalField(max_digits=%d, decimal_places=%d%s)' % (
-                    mfield, width, precision, kwargs_str
+                    mfield,
+                    width,
+                    precision,
+                    kwargs_str,
                 )
             else:
                 yield '    %s = models.FloatField(%s)' % (mfield, kwargs_str[2:])

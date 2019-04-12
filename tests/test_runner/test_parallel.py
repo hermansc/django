@@ -15,6 +15,7 @@ class ExceptionThatFailsUnpickling(Exception):
     After pickling, this class fails unpickling with an error about incorrect
     arguments passed to __init__().
     """
+
     def __init__(self, arg):
         super().__init__()
 
@@ -51,7 +52,6 @@ class SampleFailingSubtest(SimpleTestCase):
 
 
 class RemoteTestResultTest(SimpleTestCase):
-
     def test_pickle_errors_detection(self):
         picklable_error = RuntimeError('This is fine')
         not_unpicklable_error = ExceptionThatFailsUnpickling('arg')

@@ -11,9 +11,7 @@ from django.template import Context, Engine
 from django.urls import translate_url
 from django.utils.formats import get_format
 from django.utils.http import is_safe_url
-from django.utils.translation import (
-    LANGUAGE_SESSION_KEY, check_for_language, get_language,
-)
+from django.utils.translation import LANGUAGE_SESSION_KEY, check_for_language, get_language
 from django.utils.translation.trans_real import DjangoTranslation
 from django.views.generic import View
 
@@ -32,8 +30,9 @@ def set_language(request):
     any state.
     """
     next = request.POST.get('next', request.GET.get('next'))
-    if ((next or not request.is_ajax()) and
-            not is_safe_url(url=next, allowed_hosts={request.get_host()}, require_https=request.is_secure())):
+    if (next or not request.is_ajax()) and not is_safe_url(
+        url=next, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
         next = request.META.get('HTTP_REFERER')
         next = next and unquote(next)  # HTTP_REFERER may be encoded.
         if not is_safe_url(url=next, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
@@ -51,7 +50,8 @@ def set_language(request):
                 # (RemovedInDjango40Warning)
                 request.session[LANGUAGE_SESSION_KEY] = lang_code
             response.set_cookie(
-                settings.LANGUAGE_COOKIE_NAME, lang_code,
+                settings.LANGUAGE_COOKIE_NAME,
+                lang_code,
                 max_age=settings.LANGUAGE_COOKIE_AGE,
                 path=settings.LANGUAGE_COOKIE_PATH,
                 domain=settings.LANGUAGE_COOKIE_DOMAIN,
@@ -65,11 +65,20 @@ def set_language(request):
 def get_formats():
     """Return all formats strings required for i18n to work."""
     FORMAT_SETTINGS = (
-        'DATE_FORMAT', 'DATETIME_FORMAT', 'TIME_FORMAT',
-        'YEAR_MONTH_FORMAT', 'MONTH_DAY_FORMAT', 'SHORT_DATE_FORMAT',
-        'SHORT_DATETIME_FORMAT', 'FIRST_DAY_OF_WEEK', 'DECIMAL_SEPARATOR',
-        'THOUSAND_SEPARATOR', 'NUMBER_GROUPING',
-        'DATE_INPUT_FORMATS', 'TIME_INPUT_FORMATS', 'DATETIME_INPUT_FORMATS'
+        'DATE_FORMAT',
+        'DATETIME_FORMAT',
+        'TIME_FORMAT',
+        'YEAR_MONTH_FORMAT',
+        'MONTH_DAY_FORMAT',
+        'SHORT_DATE_FORMAT',
+        'SHORT_DATETIME_FORMAT',
+        'FIRST_DAY_OF_WEEK',
+        'DECIMAL_SEPARATOR',
+        'THOUSAND_SEPARATOR',
+        'NUMBER_GROUPING',
+        'DATE_INPUT_FORMATS',
+        'TIME_INPUT_FORMATS',
+        'DATETIME_INPUT_FORMATS',
     )
     return {attr: get_format(attr) for attr in FORMAT_SETTINGS}
 
@@ -192,6 +201,7 @@ class JavaScriptCatalog(View):
     want to do that as JavaScript messages go to the djangojs domain. This
     might be needed if you deliver your JavaScript source from Django templates.
     """
+
     domain = 'djangojs'
     packages = None
 
@@ -212,9 +222,7 @@ class JavaScriptCatalog(View):
         app_configs = [allowable_packages[p] for p in packages if p in allowable_packages]
         if len(app_configs) < len(packages):
             excluded = [p for p in packages if p not in allowable_packages]
-            raise ValueError(
-                'Invalid package(s) provided to JavaScriptCatalog: %s' % ','.join(excluded)
-            )
+            raise ValueError('Invalid package(s) provided to JavaScriptCatalog: %s' % ','.join(excluded))
         # paths of requested packages
         return [os.path.join(app.path, 'locale') for app in app_configs]
 
@@ -273,20 +281,16 @@ class JavaScriptCatalog(View):
         return catalog
 
     def get_context_data(self, **kwargs):
-        return {
-            'catalog': self.get_catalog(),
-            'formats': get_formats(),
-            'plural': self.get_plural(),
-        }
+        return {'catalog': self.get_catalog(), 'formats': get_formats(), 'plural': self.get_plural()}
 
     def render_to_response(self, context, **response_kwargs):
         def indent(s):
             return s.replace('\n', '\n  ')
 
         template = Engine().from_string(js_catalog_template)
-        context['catalog_str'] = indent(
-            json.dumps(context['catalog'], sort_keys=True, indent=2)
-        ) if context['catalog'] else None
+        context['catalog_str'] = (
+            indent(json.dumps(context['catalog'], sort_keys=True, indent=2)) if context['catalog'] else None
+        )
         context['formats_str'] = indent(json.dumps(context['formats'], sort_keys=True, indent=2))
 
         return HttpResponse(template.render(Context(context)), 'text/javascript; charset="utf-8"')
@@ -309,5 +313,6 @@ class JSONCatalog(JavaScriptCatalog):
             "plural": '...'  # Expression for plural forms, or null.
         }
     """
+
     def render_to_response(self, context, **response_kwargs):
         return JsonResponse(context)

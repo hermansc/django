@@ -6,10 +6,7 @@ from ..utils import setup
 
 
 class UrlizetruncTests(SimpleTestCase):
-
-    @setup({
-        'urlizetrunc01': '{% autoescape off %}{{ a|urlizetrunc:"8" }} {{ b|urlizetrunc:"8" }}{% endautoescape %}'
-    })
+    @setup({'urlizetrunc01': '{% autoescape off %}{{ a|urlizetrunc:"8" }} {{ b|urlizetrunc:"8" }}{% endautoescape %}'})
     def test_urlizetrunc01(self):
         output = self.engine.render_to_string(
             'urlizetrunc01',
@@ -21,7 +18,7 @@ class UrlizetruncTests(SimpleTestCase):
         self.assertEqual(
             output,
             '"Unsafe" <a href="http://example.com/x=&amp;y=" rel="nofollow">http://…</a> '
-            '&quot;Safe&quot; <a href="http://example.com?x=&amp;y=" rel="nofollow">http://…</a>'
+            '&quot;Safe&quot; <a href="http://example.com?x=&amp;y=" rel="nofollow">http://…</a>',
         )
 
     @setup({'urlizetrunc02': '{{ a|urlizetrunc:"8" }} {{ b|urlizetrunc:"8" }}'})
@@ -36,38 +33,30 @@ class UrlizetruncTests(SimpleTestCase):
         self.assertEqual(
             output,
             '&quot;Unsafe&quot; <a href="http://example.com/x=&amp;y=" rel="nofollow">http://…</a> '
-            '&quot;Safe&quot; <a href="http://example.com?x=&amp;y=" rel="nofollow">http://…</a>'
+            '&quot;Safe&quot; <a href="http://example.com?x=&amp;y=" rel="nofollow">http://…</a>',
         )
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_truncate(self):
         uri = 'http://31characteruri.com/test/'
         self.assertEqual(len(uri), 31)
 
         self.assertEqual(
             urlizetrunc(uri, 31),
-            '<a href="http://31characteruri.com/test/" rel="nofollow">'
-            'http://31characteruri.com/test/</a>',
+            '<a href="http://31characteruri.com/test/" rel="nofollow">' 'http://31characteruri.com/test/</a>',
         )
 
         self.assertEqual(
             urlizetrunc(uri, 30),
-            '<a href="http://31characteruri.com/test/" rel="nofollow">'
-            'http://31characteruri.com/tes…</a>',
+            '<a href="http://31characteruri.com/test/" rel="nofollow">' 'http://31characteruri.com/tes…</a>',
         )
 
-        self.assertEqual(
-            urlizetrunc(uri, 1),
-            '<a href="http://31characteruri.com/test/"'
-            ' rel="nofollow">…</a>',
-        )
+        self.assertEqual(urlizetrunc(uri, 1), '<a href="http://31characteruri.com/test/"' ' rel="nofollow">…</a>')
 
     def test_overtruncate(self):
         self.assertEqual(
-            urlizetrunc('http://short.com/', 20), '<a href='
-            '"http://short.com/" rel="nofollow">http://short.com/</a>',
+            urlizetrunc('http://short.com/', 20), '<a href=' '"http://short.com/" rel="nofollow">http://short.com/</a>'
         )
 
     def test_query_string(self):
@@ -83,7 +72,7 @@ class FunctionTests(SimpleTestCase):
     def test_autoescape(self):
         self.assertEqual(
             urlizetrunc('foo<a href=" google.com ">bar</a>buz', 10),
-            'foo&lt;a href=&quot; <a href="http://google.com" rel="nofollow">google.com</a> &quot;&gt;bar&lt;/a&gt;buz'
+            'foo&lt;a href=&quot; <a href="http://google.com" rel="nofollow">google.com</a> &quot;&gt;bar&lt;/a&gt;buz',
         )
 
     def test_autoescape_off(self):

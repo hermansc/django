@@ -7,12 +7,10 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class PowerTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create(big=100)
         obj = IntegerModel.objects.annotate(
-            null_power_small=Power('small', 'normal'),
-            null_power_normal=Power('normal', 'big'),
+            null_power_small=Power('small', 'normal'), null_power_normal=Power('normal', 'big')
         ).first()
         self.assertIsNone(obj.null_power_small)
         self.assertIsNone(obj.null_power_normal)
@@ -32,9 +30,7 @@ class PowerTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-1, normal=20, big=3)
         obj = IntegerModel.objects.annotate(
-            small_power=Power('small', 'normal'),
-            normal_power=Power('normal', 'big'),
-            big_power=Power('big', 'small'),
+            small_power=Power('small', 'normal'), normal_power=Power('normal', 'big'), big_power=Power('big', 'small')
         ).first()
         self.assertIsInstance(obj.small_power, float)
         self.assertIsInstance(obj.normal_power, float)

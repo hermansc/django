@@ -5,7 +5,6 @@ from ..utils import setup
 
 
 class RandomTests(SimpleTestCase):
-
     @setup({'random01': '{{ a|random }} {{ b|random }}'})
     def test_random01(self):
         output = self.engine.render_to_string(

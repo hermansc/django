@@ -34,8 +34,16 @@ class ForeignObjectRel(FieldCacheMixin):
     # foreign key on the related model points to this model).
     null = True
 
-    def __init__(self, field, to, related_name=None, related_query_name=None,
-                 limit_choices_to=None, parent_link=False, on_delete=None):
+    def __init__(
+        self,
+        field,
+        to,
+        related_name=None,
+        related_query_name=None,
+        limit_choices_to=None,
+        parent_link=False,
+        on_delete=None,
+    ):
         self.field = field
         self.model = to
         self.related_name = related_name
@@ -78,7 +86,8 @@ class ForeignObjectRel(FieldCacheMixin):
     def related_model(self):
         if not self.field.model:
             raise AttributeError(
-                "This property can't be accessed before self.field.contribute_to_class has been called.")
+                "This property can't be accessed before self.field.contribute_to_class has been called."
+            )
         return self.field.model
 
     @cached_property
@@ -189,10 +198,20 @@ class ManyToOneRel(ForeignObjectRel):
     reverse relations into actual fields.
     """
 
-    def __init__(self, field, to, field_name, related_name=None, related_query_name=None,
-                 limit_choices_to=None, parent_link=False, on_delete=None):
+    def __init__(
+        self,
+        field,
+        to,
+        field_name,
+        related_name=None,
+        related_query_name=None,
+        limit_choices_to=None,
+        parent_link=False,
+        on_delete=None,
+    ):
         super().__init__(
-            field, to,
+            field,
+            to,
             related_name=related_name,
             related_query_name=related_query_name,
             limit_choices_to=limit_choices_to,
@@ -228,10 +247,21 @@ class OneToOneRel(ManyToOneRel):
     flags for the reverse relation.
     """
 
-    def __init__(self, field, to, field_name, related_name=None, related_query_name=None,
-                 limit_choices_to=None, parent_link=False, on_delete=None):
+    def __init__(
+        self,
+        field,
+        to,
+        field_name,
+        related_name=None,
+        related_query_name=None,
+        limit_choices_to=None,
+        parent_link=False,
+        on_delete=None,
+    ):
         super().__init__(
-            field, to, field_name,
+            field,
+            to,
+            field_name,
             related_name=related_name,
             related_query_name=related_query_name,
             limit_choices_to=limit_choices_to,
@@ -250,11 +280,21 @@ class ManyToManyRel(ForeignObjectRel):
     flags for the reverse relation.
     """
 
-    def __init__(self, field, to, related_name=None, related_query_name=None,
-                 limit_choices_to=None, symmetrical=True, through=None,
-                 through_fields=None, db_constraint=True):
+    def __init__(
+        self,
+        field,
+        to,
+        related_name=None,
+        related_query_name=None,
+        limit_choices_to=None,
+        symmetrical=True,
+        through=None,
+        through_fields=None,
+        db_constraint=True,
+    ):
         super().__init__(
-            field, to,
+            field,
+            to,
             related_name=related_name,
             related_query_name=related_query_name,
             limit_choices_to=limit_choices_to,

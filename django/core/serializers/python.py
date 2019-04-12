@@ -62,14 +62,16 @@ class Serializer(base.Serializer):
     def handle_m2m_field(self, obj, field):
         if field.remote_field.through._meta.auto_created:
             if self.use_natural_foreign_keys and hasattr(field.remote_field.model, 'natural_key'):
+
                 def m2m_value(value):
                     return value.natural_key()
+
             else:
+
                 def m2m_value(value):
                     return self._value_from_field(value, value._meta.pk)
-            self._current[field.name] = [
-                m2m_value(related) for related in getattr(obj, field.name).iterator()
-            ]
+
+            self._current[field.name] = [m2m_value(related) for related in getattr(obj, field.name).iterator()]
 
     def getvalue(self):
         return self.objects

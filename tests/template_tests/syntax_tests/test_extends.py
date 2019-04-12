@@ -8,7 +8,7 @@ from ..utils import setup
 inheritance_templates = {
     'inheritance01': "1{% block first %}&{% endblock %}3{% block second %}_{% endblock %}",
     'inheritance02': "{% extends 'inheritance01' %}"
-                     "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
+    "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
     'inheritance03': "{% extends 'inheritance02' %}",
     'inheritance04': "{% extends 'inheritance01' %}",
     'inheritance05': "{% extends 'inheritance02' %}",
@@ -18,26 +18,26 @@ inheritance_templates = {
     'inheritance09': "{% extends 'inheritance04' %}",
     'inheritance10': "{% extends 'inheritance04' %}      ",
     'inheritance11': "{% extends 'inheritance04' %}"
-                     "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
+    "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
     'inheritance12': "{% extends 'inheritance07' %}{% block first %}2{% endblock %}",
     'inheritance13': "{% extends 'inheritance02' %}"
-                     "{% block first %}a{% endblock %}{% block second %}b{% endblock %}",
+    "{% block first %}a{% endblock %}{% block second %}b{% endblock %}",
     'inheritance14': "{% extends 'inheritance01' %}{% block newblock %}NO DISPLAY{% endblock %}",
     'inheritance15': "{% extends 'inheritance01' %}"
-                     "{% block first %}2{% block inner %}inner{% endblock %}{% endblock %}",
+    "{% block first %}2{% block inner %}inner{% endblock %}{% endblock %}",
     'inheritance16': "{% extends 'inheritance15' %}{% block inner %}out{% endblock %}",
     'inheritance17': "{% load testtags %}{% block first %}1234{% endblock %}",
     'inheritance18': "{% load testtags %}{% echo this that theother %}5678",
     'inheritance19': "{% extends 'inheritance01' %}"
-                     "{% block first %}{% load testtags %}{% echo 400 %}5678{% endblock %}",
+    "{% block first %}{% load testtags %}{% echo 400 %}5678{% endblock %}",
     'inheritance20': "{% extends 'inheritance01' %}{% block first %}{{ block.super }}a{% endblock %}",
     'inheritance21': "{% extends 'inheritance02' %}{% block first %}{{ block.super }}a{% endblock %}",
     'inheritance22': "{% extends 'inheritance04' %}{% block first %}{{ block.super }}a{% endblock %}",
     'inheritance23': "{% extends 'inheritance20' %}{% block first %}{{ block.super }}b{% endblock %}",
     'inheritance24': "{% extends context_template %}"
-                     "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
+    "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
     'inheritance25': "{% extends context_template.1 %}"
-                     "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
+    "{% block first %}2{% endblock %}{% block second %}4{% endblock %}",
     'inheritance26': "no tags",
     'inheritance27': "{% extends 'inheritance26' %}",
     'inheritance 28': "{% block first %}!{% endblock %}",
@@ -423,9 +423,5 @@ class InheritanceTests(SimpleTestCase):
 
 class ExtendsNodeTests(SimpleTestCase):
     def test_extends_node_repr(self):
-        extends_node = ExtendsNode(
-            nodelist=NodeList([]),
-            parent_name=Node(),
-            template_dirs=[],
-        )
+        extends_node = ExtendsNode(nodelist=NodeList([]), parent_name=Node(), template_dirs=[])
         self.assertEqual(repr(extends_node), '<ExtendsNode: extends None>')

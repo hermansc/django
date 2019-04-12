@@ -3,13 +3,42 @@ from django.contrib import admin
 from django.db import models
 
 from .models import (
-    Author, BinaryTree, CapoFamiglia, Chapter, ChildModel1, ChildModel2,
-    Consigliere, EditablePKBook, ExtraTerrestrial, Fashionista, Holder,
-    Holder2, Holder3, Holder4, Inner, Inner2, Inner3, Inner4Stacked,
-    Inner4Tabular, NonAutoPKBook, NonAutoPKBookChild, Novel,
-    NovelReadonlyChapter, ParentModelWithCustomPk, Poll, Profile,
-    ProfileCollection, Question, ReadOnlyInline, ShoppingWeakness, Sighting,
-    SomeChildModel, SomeParentModel, SottoCapo, Title, TitleCollection,
+    Author,
+    BinaryTree,
+    CapoFamiglia,
+    Chapter,
+    ChildModel1,
+    ChildModel2,
+    Consigliere,
+    EditablePKBook,
+    ExtraTerrestrial,
+    Fashionista,
+    Holder,
+    Holder2,
+    Holder3,
+    Holder4,
+    Inner,
+    Inner2,
+    Inner3,
+    Inner4Stacked,
+    Inner4Tabular,
+    NonAutoPKBook,
+    NonAutoPKBookChild,
+    Novel,
+    NovelReadonlyChapter,
+    ParentModelWithCustomPk,
+    Poll,
+    Profile,
+    ProfileCollection,
+    Question,
+    ReadOnlyInline,
+    ShoppingWeakness,
+    Sighting,
+    SomeChildModel,
+    SomeParentModel,
+    SottoCapo,
+    Title,
+    TitleCollection,
 )
 
 site = admin.AdminSite(name="admin")
@@ -44,8 +73,11 @@ class EditablePKBookStackedInline(admin.StackedInline):
 
 class AuthorAdmin(admin.ModelAdmin):
     inlines = [
-        BookInline, NonAutoPKBookTabularInline, NonAutoPKBookStackedInline,
-        EditablePKBookTabularInline, EditablePKBookStackedInline,
+        BookInline,
+        NonAutoPKBookTabularInline,
+        NonAutoPKBookStackedInline,
+        EditablePKBookTabularInline,
+        EditablePKBookStackedInline,
         NonAutoPKBookChildTabularInline,
     ]
 
@@ -57,7 +89,6 @@ class InnerInline(admin.StackedInline):
 
 
 class HolderAdmin(admin.ModelAdmin):
-
     class Media:
         js = ('my_awesome_admin_scripts.js',)
 
@@ -85,9 +116,7 @@ class CustomNumberWidget(forms.NumberInput):
 
 class InnerInline3(admin.StackedInline):
     model = Inner3
-    formfield_overrides = {
-        models.IntegerField: {'widget': CustomNumberWidget},
-    }
+    formfield_overrides = {models.IntegerField: {'widget': CustomNumberWidget}}
 
     class Media:
         js = ('my_awesome_inline_scripts.js',)
@@ -214,13 +243,10 @@ class SightingInline(admin.TabularInline):
 
 # admin and form for #18263
 class SomeChildModelForm(forms.ModelForm):
-
     class Meta:
         fields = '__all__'
         model = SomeChildModel
-        widgets = {
-            'position': forms.HiddenInput,
-        }
+        widgets = {'position': forms.HiddenInput}
         labels = {'readonly_field': 'Label from ModelForm.Meta'}
         help_texts = {'readonly_field': 'Help text from ModelForm.Meta'}
 

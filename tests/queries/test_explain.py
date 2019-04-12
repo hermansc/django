@@ -2,9 +2,7 @@ import unittest
 
 from django.db import NotSupportedError, connection, transaction
 from django.db.models import Count
-from django.test import (
-    TestCase, ignore_warnings, skipIfDBFeature, skipUnlessDBFeature,
-)
+from django.test import TestCase, ignore_warnings, skipIfDBFeature, skipUnlessDBFeature
 from django.test.utils import CaptureQueriesContext
 from django.utils.deprecation import RemovedInDjango31Warning
 
@@ -13,7 +11,6 @@ from .models import Tag
 
 @skipUnlessDBFeature('supports_explaining_query_execution')
 class ExplainTests(TestCase):
-
     @ignore_warnings(category=RemovedInDjango31Warning)
     def test_basic(self):
         querysets = [
@@ -99,7 +96,6 @@ class ExplainTests(TestCase):
 
 @skipIfDBFeature('supports_explaining_query_execution')
 class ExplainUnsupportedTests(TestCase):
-
     def test_message(self):
         msg = 'This backend does not support explaining query execution.'
         with self.assertRaisesMessage(NotSupportedError, msg):

@@ -6,14 +6,10 @@ from urllib.parse import quote, urlencode, urljoin, urlsplit
 
 from django.conf import settings
 from django.core import signing
-from django.core.exceptions import (
-    DisallowedHost, ImproperlyConfigured, RequestDataTooBig,
-)
+from django.core.exceptions import DisallowedHost, ImproperlyConfigured, RequestDataTooBig
 from django.core.files import uploadhandler
 from django.http.multipartparser import MultiPartParser, MultiPartParserError
-from django.utils.datastructures import (
-    CaseInsensitiveMapping, ImmutableList, MultiValueDict,
-)
+from django.utils.datastructures import CaseInsensitiveMapping, ImmutableList, MultiValueDict
 from django.utils.encoding import escape_uri_path, iri_to_uri
 from django.utils.functional import cached_property
 from django.utils.http import is_same_domain, limited_parse_qsl
@@ -32,6 +28,7 @@ class RawPostDataException(Exception):
     multipart/* POST data if it has been accessed via POST,
     FILES, etc..
     """
+
     pass
 
 
@@ -75,8 +72,7 @@ class HttpRequest:
         allowed hosts protection, so may return an insecure host.
         """
         # We try three options, in order of decreasing preference.
-        if settings.USE_X_FORWARDED_HOST and (
-                'HTTP_X_FORWARDED_HOST' in self.META):
+        if settings.USE_X_FORWARDED_HOST and ('HTTP_X_FORWARDED_HOST' in self.META):
             host = self.META['HTTP_X_FORWARDED_HOST']
         elif 'HTTP_HOST' in self.META:
             host = self.META['HTTP_HOST']
@@ -128,7 +124,7 @@ class HttpRequest:
         return '%s%s%s' % (
             escape_uri_path(path),
             '/' if force_append_slash and not path.endswith('/') else '',
-            ('?' + iri_to_uri(self.META.get('QUERY_STRING', ''))) if self.META.get('QUERY_STRING', '') else ''
+            ('?' + iri_to_uri(self.META.get('QUERY_STRING', ''))) if self.META.get('QUERY_STRING', '') else '',
         )
 
     def get_signed_cookie(self, key, default=RAISE_ERROR, salt='', max_age=None):
@@ -145,8 +141,7 @@ class HttpRequest:
             else:
                 raise
         try:
-            value = signing.get_cookie_signer(salt=key + salt).unsign(
-                cookie_value, max_age=max_age)
+            value = signing.get_cookie_signer(salt=key + salt).unsign(cookie_value, max_age=max_age)
         except signing.BadSignature:
             if default is not RAISE_ERROR:
                 return default
@@ -160,9 +155,7 @@ class HttpRequest:
         allowed hosts protection, so may return insecure URI.
         """
         return '{scheme}://{host}{path}'.format(
-            scheme=self.scheme,
-            host=self._get_raw_host(),
-            path=self.get_full_path(),
+            scheme=self.scheme, host=self._get_raw_host(), path=self.get_full_path()
         )
 
     def build_absolute_uri(self, location=None):
@@ -183,8 +176,13 @@ class HttpRequest:
             # Handle the simple, most common case. If the location is absolute
             # and a scheme or host (netloc) isn't provided, skip an expensive
             # urljoin() as long as no path segments are '.' or '..'.
-            if (bits.path.startswith('/') and not bits.scheme and not bits.netloc and
-                    '/./' not in bits.path and '/../' not in bits.path):
+            if (
+                bits.path.startswith('/')
+                and not bits.scheme
+                and not bits.netloc
+                and '/./' not in bits.path
+                and '/../' not in bits.path
+            ):
                 # If location starts with '//' but has no netloc, reuse the
                 # schema and netloc from the current request. Strip the double
                 # slashes and continue as if it wasn't specified.
@@ -246,8 +244,9 @@ class HttpRequest:
             del self._post
 
     def _initialize_handlers(self):
-        self._upload_handlers = [uploadhandler.load_handler(handler, self)
-                                 for handler in settings.FILE_UPLOAD_HANDLERS]
+        self._upload_handlers = [
+            uploadhandler.load_handler(handler, self) for handler in settings.FILE_UPLOAD_HANDLERS
+        ]
 
     @property
     def upload_handlers(self):
@@ -265,8 +264,7 @@ class HttpRequest:
     def parse_file_upload(self, META, post_data):
         """Return a tuple of (POST QueryDict, FILES MultiValueDict)."""
         self.upload_handlers = ImmutableList(
-            self.upload_handlers,
-            warning="You cannot alter upload handlers after the upload has been processed."
+            self.upload_handlers, warning="You cannot alter upload handlers after the upload has been processed."
         )
         parser = MultiPartParser(META, post_data, self.upload_handlers, self.encoding)
         return parser.parse()
@@ -278,8 +276,10 @@ class HttpRequest:
                 raise RawPostDataException("You cannot access body after reading from request's data stream")
 
             # Limit the maximum request data size that will be handled in-memory.
-            if (settings.DATA_UPLOAD_MAX_MEMORY_SIZE is not None and
-                    int(self.META.get('CONTENT_LENGTH') or 0) > settings.DATA_UPLOAD_MAX_MEMORY_SIZE):
+            if (
+                settings.DATA_UPLOAD_MAX_MEMORY_SIZE is not None
+                and int(self.META.get('CONTENT_LENGTH') or 0) > settings.DATA_UPLOAD_MAX_MEMORY_SIZE
+            ):
                 raise RequestDataTooBig('Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.')
 
             try:
@@ -372,7 +372,7 @@ class HttpHeaders(CaseInsensitiveMapping):
     @classmethod
     def parse_header_name(cls, header):
         if header.startswith(cls.HTTP_PREFIX):
-            header = header[len(cls.HTTP_PREFIX):]
+            header = header[len(cls.HTTP_PREFIX) :]
         elif header not in cls.UNPREFIXED_HEADERS:
             return None
         return header.replace('_', '-').title()
@@ -525,14 +525,14 @@ class QueryDict(MultiValueDict):
 
             def encode(k, v):
                 return '%s=%s' % ((quote(k, safe), quote(v, safe)))
+
         else:
+
             def encode(k, v):
                 return urlencode({k: v})
+
         for k, list_ in self.lists():
-            output.extend(
-                encode(k.encode(self.encoding), str(v).encode(self.encoding))
-                for v in list_
-            )
+            output.extend(encode(k.encode(self.encoding), str(v).encode(self.encoding)) for v in list_)
         return '&'.join(output)
 
 

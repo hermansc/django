@@ -51,7 +51,7 @@ class SeleniumTestCaseBase(type(LiveServerTestCase)):
                         'host': host,
                         'external_host': cls.external_host,
                         '__module__': test_class.__module__,
-                    }
+                    },
                 )
                 setattr(module, browser_test_class.__name__, browser_test_class)
             return test_class
@@ -65,14 +65,15 @@ class SeleniumTestCaseBase(type(LiveServerTestCase)):
     @classmethod
     def get_capability(cls, browser):
         from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
         return getattr(DesiredCapabilities, browser.upper())
 
     def create_webdriver(self):
         if self.selenium_hub:
             from selenium import webdriver
+
             return webdriver.Remote(
-                command_executor=self.selenium_hub,
-                desired_capabilities=self.get_capability(self.browser),
+                command_executor=self.selenium_hub, desired_capabilities=self.get_capability(self.browser)
             )
         return self.import_webdriver(self.browser)()
 

@@ -7,19 +7,14 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.admindocs import utils
-from django.contrib.admindocs.utils import (
-    replace_named_groups, replace_unnamed_groups,
-)
+from django.contrib.admindocs.utils import replace_named_groups, replace_unnamed_groups
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.db import models
 from django.http import Http404
 from django.template.engine import Engine
 from django.urls import get_mod_func, get_resolver, get_urlconf
 from django.utils.decorators import method_decorator
-from django.utils.inspect import (
-    func_accepts_kwargs, func_accepts_var_args, get_func_full_args,
-    method_has_no_args,
-)
+from django.utils.inspect import func_accepts_kwargs, func_accepts_var_args, get_func_full_args, method_has_no_args
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
@@ -33,6 +28,7 @@ class BaseAdminDocsView(TemplateView):
     """
     Base view for admindocs views.
     """
+
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
         if not utils.docutils_is_available:
@@ -42,10 +38,7 @@ class BaseAdminDocsView(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**{
-            **kwargs,
-            **admin.site.each_context(self.request),
-        })
+        return super().get_context_data(**{**kwargs, **admin.site.each_context(self.request)})
 
 
 class BookmarkletsView(BaseAdminDocsView):
@@ -73,13 +66,9 @@ class TemplateTagIndexView(BaseAdminDocsView):
                     for key in metadata:
                         metadata[key] = utils.parse_rst(metadata[key], 'tag', _('tag:') + tag_name)
                     tag_library = module_name.split('.')[-1]
-                    tags.append({
-                        'name': tag_name,
-                        'title': title,
-                        'body': body,
-                        'meta': metadata,
-                        'library': tag_library,
-                    })
+                    tags.append(
+                        {'name': tag_name, 'title': title, 'body': body, 'meta': metadata, 'library': tag_library}
+                    )
         return super().get_context_data(**{**kwargs, 'tags': tags})
 
 
@@ -104,13 +93,9 @@ class TemplateFilterIndexView(BaseAdminDocsView):
                     for key in metadata:
                         metadata[key] = utils.parse_rst(metadata[key], 'filter', _('filter:') + filter_name)
                     tag_library = module_name.split('.')[-1]
-                    filters.append({
-                        'name': filter_name,
-                        'title': title,
-                        'body': body,
-                        'meta': metadata,
-                        'library': tag_library,
-                    })
+                    filters.append(
+                        {'name': filter_name, 'title': title, 'body': body, 'meta': metadata, 'library': tag_library}
+                    )
         return super().get_context_data(**{**kwargs, 'filters': filters})
 
 
@@ -122,13 +107,15 @@ class ViewIndexView(BaseAdminDocsView):
         urlconf = import_module(settings.ROOT_URLCONF)
         view_functions = extract_views_from_urlpatterns(urlconf.urlpatterns)
         for (func, regex, namespace, name) in view_functions:
-            views.append({
-                'full_name': get_view_name(func),
-                'url': simplify_regex(regex),
-                'url_name': ':'.join((namespace or []) + (name and [name] or [])),
-                'namespace': ':'.join((namespace or [])),
-                'name': name,
-            })
+            views.append(
+                {
+                    'full_name': get_view_name(func),
+                    'url': simplify_regex(regex),
+                    'url_name': ':'.join((namespace or []) + (name and [name] or [])),
+                    'namespace': ':'.join((namespace or [])),
+                    'name': name,
+                }
+            )
         return super().get_context_data(**{**kwargs, 'views': views})
 
 
@@ -162,13 +149,7 @@ class ViewDetailView(BaseAdminDocsView):
         body = body and utils.parse_rst(body, 'view', _('view:') + view)
         for key in metadata:
             metadata[key] = utils.parse_rst(metadata[key], 'model', _('view:') + view)
-        return super().get_context_data(**{
-            **kwargs,
-            'name': view,
-            'summary': title,
-            'body': body,
-            'meta': metadata,
-        })
+        return super().get_context_data(**{**kwargs, 'name': view, 'summary': title, 'body': body, 'meta': metadata})
 
 
 class ModelIndexView(BaseAdminDocsView):
@@ -209,21 +190,19 @@ class ModelDetailView(BaseAdminDocsView):
                 data_type = field.remote_field.model.__name__
                 app_label = field.remote_field.model._meta.app_label
                 verbose = utils.parse_rst(
-                    (_("the related `%(app_label)s.%(data_type)s` object") % {
-                        'app_label': app_label, 'data_type': data_type,
-                    }),
+                    (
+                        _("the related `%(app_label)s.%(data_type)s` object")
+                        % {'app_label': app_label, 'data_type': data_type}
+                    ),
                     'model',
                     _('model:') + data_type,
                 )
             else:
                 data_type = get_readable_field_data_type(field)
                 verbose = field.verbose_name
-            fields.append({
-                'name': field.name,
-                'data_type': data_type,
-                'verbose': verbose or '',
-                'help_text': field.help_text,
-            })
+            fields.append(
+                {'name': field.name, 'data_type': data_type, 'verbose': verbose or '', 'help_text': field.help_text}
+            )
 
         # Gather many-to-many fields.
         for field in opts.many_to_many:
@@ -233,16 +212,20 @@ class ModelDetailView(BaseAdminDocsView):
                 'app_label': app_label,
                 'object_name': data_type,
             }
-            fields.append({
-                'name': "%s.all" % field.name,
-                "data_type": 'List',
-                'verbose': utils.parse_rst(_("all %s") % verbose, 'model', _('model:') + opts.model_name),
-            })
-            fields.append({
-                'name': "%s.count" % field.name,
-                'data_type': 'Integer',
-                'verbose': utils.parse_rst(_("number of %s") % verbose, 'model', _('model:') + opts.model_name),
-            })
+            fields.append(
+                {
+                    'name': "%s.all" % field.name,
+                    "data_type": 'List',
+                    'verbose': utils.parse_rst(_("all %s") % verbose, 'model', _('model:') + opts.model_name),
+                }
+            )
+            fields.append(
+                {
+                    'name': "%s.count" % field.name,
+                    'data_type': 'Integer',
+                    'verbose': utils.parse_rst(_("number of %s") % verbose, 'model', _('model:') + opts.model_name),
+                }
+            )
 
         methods = []
         # Gather model methods.
@@ -261,31 +244,22 @@ class ModelDetailView(BaseAdminDocsView):
                 # Show properties and methods without arguments as fields.
                 # Otherwise, show as a 'method with arguments'.
                 if isinstance(func, property):
-                    fields.append({
-                        'name': func_name,
-                        'data_type': get_return_data_type(func_name),
-                        'verbose': verbose or ''
-                    })
+                    fields.append(
+                        {'name': func_name, 'data_type': get_return_data_type(func_name), 'verbose': verbose or ''}
+                    )
                 elif method_has_no_args(func) and not func_accepts_kwargs(func) and not func_accepts_var_args(func):
-                    fields.append({
-                        'name': func_name,
-                        'data_type': get_return_data_type(func_name),
-                        'verbose': verbose or '',
-                    })
+                    fields.append(
+                        {'name': func_name, 'data_type': get_return_data_type(func_name), 'verbose': verbose or ''}
+                    )
                 else:
                     arguments = get_func_full_args(func)
                     # Join arguments with ', ' and in case of default value,
                     # join it with '='. Use repr() so that strings will be
                     # correctly displayed.
-                    print_arguments = ', '.join([
-                        '='.join([arg_el[0], *map(repr, arg_el[1:])])
-                        for arg_el in arguments
-                    ])
-                    methods.append({
-                        'name': func_name,
-                        'arguments': print_arguments,
-                        'verbose': verbose or '',
-                    })
+                    print_arguments = ', '.join(
+                        ['='.join([arg_el[0], *map(repr, arg_el[1:])]) for arg_el in arguments]
+                    )
+                    methods.append({'name': func_name, 'arguments': print_arguments, 'verbose': verbose or ''})
 
         # Gather related objects
         for rel in opts.related_objects:
@@ -294,24 +268,30 @@ class ModelDetailView(BaseAdminDocsView):
                 'object_name': rel.related_model._meta.object_name,
             }
             accessor = rel.get_accessor_name()
-            fields.append({
-                'name': "%s.all" % accessor,
-                'data_type': 'List',
-                'verbose': utils.parse_rst(_("all %s") % verbose, 'model', _('model:') + opts.model_name),
-            })
-            fields.append({
-                'name': "%s.count" % accessor,
-                'data_type': 'Integer',
-                'verbose': utils.parse_rst(_("number of %s") % verbose, 'model', _('model:') + opts.model_name),
-            })
-        return super().get_context_data(**{
-            **kwargs,
-            'name': '%s.%s' % (opts.app_label, opts.object_name),
-            'summary': title,
-            'description': body,
-            'fields': fields,
-            'methods': methods,
-        })
+            fields.append(
+                {
+                    'name': "%s.all" % accessor,
+                    'data_type': 'List',
+                    'verbose': utils.parse_rst(_("all %s") % verbose, 'model', _('model:') + opts.model_name),
+                }
+            )
+            fields.append(
+                {
+                    'name': "%s.count" % accessor,
+                    'data_type': 'Integer',
+                    'verbose': utils.parse_rst(_("number of %s") % verbose, 'model', _('model:') + opts.model_name),
+                }
+            )
+        return super().get_context_data(
+            **{
+                **kwargs,
+                'name': '%s.%s' % (opts.app_label, opts.object_name),
+                'summary': title,
+                'description': body,
+                'fields': fields,
+                'methods': methods,
+            }
+        )
 
 
 class TemplateDetailView(BaseAdminDocsView):
@@ -334,17 +314,15 @@ class TemplateDetailView(BaseAdminDocsView):
                         template_contents = f.read()
                 else:
                     template_contents = ''
-                templates.append({
-                    'file': template_file,
-                    'exists': template_file.exists(),
-                    'contents': template_contents,
-                    'order': index,
-                })
-        return super().get_context_data(**{
-            **kwargs,
-            'name': template,
-            'templates': templates,
-        })
+                templates.append(
+                    {
+                        'file': template_file,
+                        'exists': template_file.exists(),
+                        'contents': template_contents,
+                        'order': index,
+                    }
+                )
+        return super().get_context_data(**{**kwargs, 'name': template, 'templates': templates})
 
 
 ####################
@@ -384,11 +362,11 @@ def extract_views_from_urlpatterns(urlpatterns, base='', namespace=None):
                 patterns = p.url_patterns
             except ImportError:
                 continue
-            views.extend(extract_views_from_urlpatterns(
-                patterns,
-                base + str(p.pattern),
-                (namespace or []) + (p.namespace and [p.namespace] or [])
-            ))
+            views.extend(
+                extract_views_from_urlpatterns(
+                    patterns, base + str(p.pattern), (namespace or []) + (p.namespace and [p.namespace] or [])
+                )
+            )
         elif hasattr(p, 'callback'):
             try:
                 views.append((p.callback, base + str(p.pattern), namespace, p.name))

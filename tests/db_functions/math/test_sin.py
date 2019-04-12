@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class SinTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_sin=Sin('normal')).first()
@@ -35,9 +34,7 @@ class SinTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_sin=Sin('small'),
-            normal_sin=Sin('normal'),
-            big_sin=Sin('big'),
+            small_sin=Sin('small'), normal_sin=Sin('normal'), big_sin=Sin('big')
         ).first()
         self.assertIsInstance(obj.small_sin, float)
         self.assertIsInstance(obj.normal_sin, float)

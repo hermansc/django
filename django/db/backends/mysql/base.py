@@ -14,22 +14,19 @@ from django.utils.functional import cached_property
 try:
     import MySQLdb as Database
 except ImportError as err:
-    raise ImproperlyConfigured(
-        'Error loading MySQLdb module.\n'
-        'Did you install mysqlclient?'
-    ) from err
+    raise ImproperlyConfigured('Error loading MySQLdb module.\n' 'Did you install mysqlclient?') from err
 
-from MySQLdb.constants import CLIENT, FIELD_TYPE                # isort:skip
-from MySQLdb.converters import conversions                      # isort:skip
+from MySQLdb.constants import CLIENT, FIELD_TYPE  # isort:skip
+from MySQLdb.converters import conversions  # isort:skip
 
 # Some of these import MySQLdb, so import them after checking if it's installed.
-from .client import DatabaseClient                          # isort:skip
-from .creation import DatabaseCreation                      # isort:skip
-from .features import DatabaseFeatures                      # isort:skip
-from .introspection import DatabaseIntrospection            # isort:skip
-from .operations import DatabaseOperations                  # isort:skip
-from .schema import DatabaseSchemaEditor                    # isort:skip
-from .validation import DatabaseValidation                  # isort:skip
+from .client import DatabaseClient  # isort:skip
+from .creation import DatabaseCreation  # isort:skip
+from .features import DatabaseFeatures  # isort:skip
+from .introspection import DatabaseIntrospection  # isort:skip
+from .operations import DatabaseOperations  # isort:skip
+from .schema import DatabaseSchemaEditor  # isort:skip
+from .validation import DatabaseValidation  # isort:skip
 
 version = Database.version_info
 if version < (1, 3, 13):
@@ -39,10 +36,7 @@ if version < (1, 3, 13):
 # MySQLdb returns TIME columns as timedelta -- they are more like timedelta in
 # terms of actual behavior as they are signed and include days -- and Django
 # expects time.
-django_conversions = {
-    **conversions,
-    **{FIELD_TYPE.TIME: backend_utils.typecast_time},
-}
+django_conversions = {**conversions, **{FIELD_TYPE.TIME: backend_utils.typecast_time}}
 
 # This should match the numerical portion of the version numbers (we can treat
 # versions like 5.0.24 and 5.0.24a as the same).
@@ -57,10 +51,8 @@ class CursorWrapper:
     Implemented as a wrapper, rather than a subclass, so that it isn't stuck
     to the particular underlying representation returned by Connection.cursor().
     """
-    codes_for_integrityerror = (
-        1048,  # Column cannot be null
-        1690,  # BIGINT UNSIGNED value is out of range
-    )
+
+    codes_for_integrityerror = (1048, 1690)  # Column cannot be null  # BIGINT UNSIGNED value is out of range
 
     def __init__(self, cursor):
         self.cursor = cursor
@@ -132,8 +124,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # - accept default values and implicitly treats these columns as nullable
     # - support a database index
     _limited_data_types = (
-        'tinyblob', 'blob', 'mediumblob', 'longblob', 'tinytext', 'text',
-        'mediumtext', 'longtext', 'json',
+        'tinyblob',
+        'blob',
+        'mediumblob',
+        'longblob',
+        'tinytext',
+        'text',
+        'mediumtext',
+        'longtext',
+        'json',
     )
 
     operators = {
@@ -169,12 +168,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'iendswith': "LIKE CONCAT('%%', {})",
     }
 
-    isolation_levels = {
-        'read uncommitted',
-        'read committed',
-        'repeatable read',
-        'serializable',
-    }
+    isolation_levels = {'read uncommitted', 'read committed', 'repeatable read', 'serializable'}
 
     Database = Database
     SchemaEditorClass = DatabaseSchemaEditor
@@ -187,10 +181,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     validation_class = DatabaseValidation
 
     def get_connection_params(self):
-        kwargs = {
-            'conv': django_conversions,
-            'charset': 'utf8',
-        }
+        kwargs = {'conv': django_conversions, 'charset': 'utf8'}
         settings_dict = self.settings_dict
         if settings_dict['USER']:
             kwargs['user'] = settings_dict['USER']
@@ -215,10 +206,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             if isolation_level not in self.isolation_levels:
                 raise ImproperlyConfigured(
                     "Invalid transaction isolation level '%s' specified.\n"
-                    "Use one of %s, or None." % (
-                        isolation_level,
-                        ', '.join("'%s'" % s for s in sorted(self.isolation_levels))
-                    ))
+                    "Use one of %s, or None."
+                    % (isolation_level, ', '.join("'%s'" % s for s in sorted(self.isolation_levels)))
+                )
         self.isolation_level = isolation_level
         kwargs.update(options)
         return kwargs
@@ -300,10 +290,16 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                         LEFT JOIN `%s` as REFERRED
                         ON (REFERRING.`%s` = REFERRED.`%s`)
                         WHERE REFERRING.`%s` IS NOT NULL AND REFERRED.`%s` IS NULL
-                        """ % (
-                            primary_key_column_name, column_name, table_name,
-                            referenced_table_name, column_name, referenced_column_name,
-                            column_name, referenced_column_name,
+                        """
+                        % (
+                            primary_key_column_name,
+                            column_name,
+                            table_name,
+                            referenced_table_name,
+                            column_name,
+                            referenced_column_name,
+                            column_name,
+                            referenced_column_name,
                         )
                     )
                     for bad_row in cursor.fetchall():
@@ -312,8 +308,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                             "foreign key: %s.%s contains a value '%s' that does not "
                             "have a corresponding value in %s.%s."
                             % (
-                                table_name, bad_row[0], table_name, column_name,
-                                bad_row[1], referenced_table_name, referenced_column_name,
+                                table_name,
+                                bad_row[0],
+                                table_name,
+                                column_name,
+                                bad_row[1],
+                                referenced_table_name,
+                                referenced_column_name,
                             )
                         )
 

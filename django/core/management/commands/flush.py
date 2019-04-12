@@ -16,11 +16,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--noinput', '--no-input', action='store_false', dest='interactive',
+            '--noinput',
+            '--no-input',
+            action='store_false',
+            dest='interactive',
             help='Tells Django to NOT prompt the user for input of any kind.',
         )
         parser.add_argument(
-            '--database', default=DEFAULT_DB_ALIAS,
+            '--database',
+            default=DEFAULT_DB_ALIAS,
             help='Nominates a database to flush. Defaults to the "default" database.',
         )
 
@@ -44,17 +48,20 @@ class Command(BaseCommand):
             except ImportError:
                 pass
 
-        sql_list = sql_flush(self.style, connection, only_django=True,
-                             reset_sequences=reset_sequences,
-                             allow_cascade=allow_cascade)
+        sql_list = sql_flush(
+            self.style, connection, only_django=True, reset_sequences=reset_sequences, allow_cascade=allow_cascade
+        )
 
         if interactive:
-            confirm = input("""You have requested a flush of the database.
+            confirm = input(
+                """You have requested a flush of the database.
 This will IRREVERSIBLY DESTROY all data currently in the %r database,
 and return each table to an empty state.
 Are you sure you want to do this?
 
-    Type 'yes' to continue, or 'no' to cancel: """ % connection.settings_dict['NAME'])
+    Type 'yes' to continue, or 'no' to cancel: """
+                % connection.settings_dict['NAME']
+            )
         else:
             confirm = 'yes'
 
@@ -68,9 +75,7 @@ Are you sure you want to do this?
                     "  * At least one of the expected database tables doesn't exist.\n"
                     "  * The SQL was invalid.\n"
                     "Hint: Look at the output of 'django-admin sqlflush'. "
-                    "That's the SQL this command wasn't able to run.\n" % (
-                        connection.settings_dict['NAME'],
-                    )
+                    "That's the SQL this command wasn't able to run.\n" % (connection.settings_dict['NAME'],)
                 ) from exc
 
             # Empty sql_list may signify an empty database and post_migrate would then crash

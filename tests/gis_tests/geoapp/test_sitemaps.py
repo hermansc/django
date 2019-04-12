@@ -12,7 +12,6 @@ from .models import City, Country
 @modify_settings(INSTALLED_APPS={'append': ['django.contrib.sites', 'django.contrib.sitemaps']})
 @override_settings(ROOT_URLCONF='gis_tests.geoapp.urls')
 class GeoSitemapTest(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         Site(id=settings.SITE_ID, domain="example.com", name="example.com").save()

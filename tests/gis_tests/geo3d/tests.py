@@ -2,16 +2,22 @@ import os
 import re
 
 from django.contrib.gis.db.models import Extent3D, Union
-from django.contrib.gis.db.models.functions import (
-    AsGeoJSON, AsKML, Length, Perimeter, Scale, Translate,
-)
+from django.contrib.gis.db.models.functions import AsGeoJSON, AsKML, Length, Perimeter, Scale, Translate
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point, Polygon
 from django.test import TestCase, skipUnlessDBFeature
 
 from ..utils import FuncTestMixin
 from .models import (
-    City3D, Interstate2D, Interstate3D, InterstateProj2D, InterstateProj3D,
-    MultiPoint3D, Point2D, Point3D, Polygon2D, Polygon3D,
+    City3D,
+    Interstate2D,
+    Interstate3D,
+    InterstateProj2D,
+    InterstateProj3D,
+    MultiPoint3D,
+    Point2D,
+    Point3D,
+    Polygon2D,
+    Polygon3D,
 )
 
 data_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data'))
@@ -37,23 +43,44 @@ city_dict = {name: coords for name, coords in city_data}
 # 3D freeway data derived from the National Elevation Dataset:
 #  http://seamless.usgs.gov/products/9arc.php
 interstate_data = (
-    ('I-45',
-     'LINESTRING(-95.3708481 29.7765870 11.339,-95.3694580 29.7787980 4.536,'
-     '-95.3690305 29.7797359 9.762,-95.3691886 29.7812450 12.448,'
-     '-95.3696447 29.7850144 10.457,-95.3702511 29.7868518 9.418,'
-     '-95.3706724 29.7881286 14.858,-95.3711632 29.7896157 15.386,'
-     '-95.3714525 29.7936267 13.168,-95.3717848 29.7955007 15.104,'
-     '-95.3717719 29.7969804 16.516,-95.3717305 29.7982117 13.923,'
-     '-95.3717254 29.8000778 14.385,-95.3719875 29.8013539 15.160,'
-     '-95.3720575 29.8026785 15.544,-95.3721321 29.8040912 14.975,'
-     '-95.3722074 29.8050998 15.688,-95.3722779 29.8060430 16.099,'
-     '-95.3733818 29.8076750 15.197,-95.3741563 29.8103686 17.268,'
-     '-95.3749458 29.8129927 19.857,-95.3763564 29.8144557 15.435)',
-     (11.339, 4.536, 9.762, 12.448, 10.457, 9.418, 14.858,
-      15.386, 13.168, 15.104, 16.516, 13.923, 14.385, 15.16,
-      15.544, 14.975, 15.688, 16.099, 15.197, 17.268, 19.857,
-      15.435),
-     ),
+    (
+        'I-45',
+        'LINESTRING(-95.3708481 29.7765870 11.339,-95.3694580 29.7787980 4.536,'
+        '-95.3690305 29.7797359 9.762,-95.3691886 29.7812450 12.448,'
+        '-95.3696447 29.7850144 10.457,-95.3702511 29.7868518 9.418,'
+        '-95.3706724 29.7881286 14.858,-95.3711632 29.7896157 15.386,'
+        '-95.3714525 29.7936267 13.168,-95.3717848 29.7955007 15.104,'
+        '-95.3717719 29.7969804 16.516,-95.3717305 29.7982117 13.923,'
+        '-95.3717254 29.8000778 14.385,-95.3719875 29.8013539 15.160,'
+        '-95.3720575 29.8026785 15.544,-95.3721321 29.8040912 14.975,'
+        '-95.3722074 29.8050998 15.688,-95.3722779 29.8060430 16.099,'
+        '-95.3733818 29.8076750 15.197,-95.3741563 29.8103686 17.268,'
+        '-95.3749458 29.8129927 19.857,-95.3763564 29.8144557 15.435)',
+        (
+            11.339,
+            4.536,
+            9.762,
+            12.448,
+            10.457,
+            9.418,
+            14.858,
+            15.386,
+            13.168,
+            15.104,
+            16.516,
+            13.923,
+            14.385,
+            15.16,
+            15.544,
+            14.975,
+            15.688,
+            16.099,
+            15.197,
+            17.268,
+            19.857,
+            15.435,
+        ),
+    ),
 )
 
 # Bounding box polygon for inner-loop of Houston (in projected coordinate
@@ -62,7 +89,7 @@ interstate_data = (
 bbox_data = (
     'POLYGON((941527.97 4225693.20,962596.48 4226349.75,963152.57 4209023.95,'
     '942051.75 4208366.38,941527.97 4225693.20))',
-    (21.71, 13.21, 9.12, 16.40, 21.71)
+    (21.71, 13.21, 9.12, 16.40, 21.71),
 )
 
 
@@ -82,9 +109,7 @@ class Geo3DLoadingHelper:
 
     def _load_city_data(self):
         for name, pnt_data in city_data:
-            City3D.objects.create(
-                name=name, point=Point(*pnt_data, srid=4326), pointg=Point(*pnt_data, srid=4326),
-            )
+            City3D.objects.create(name=name, point=Point(*pnt_data, srid=4326), pointg=Point(*pnt_data, srid=4326))
 
     def _load_polygon_data(self):
         bbox_wkt, bbox_z = bbox_data

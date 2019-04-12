@@ -54,6 +54,7 @@ def render_flatpage(request, f):
     # logged in, redirect to the login page.
     if f.registration_required and not request.user.is_authenticated:
         from django.contrib.auth.views import redirect_to_login
+
         return redirect_to_login(request.path)
     if f.template_name:
         template = loader.select_template((f.template_name, DEFAULT_TEMPLATE))

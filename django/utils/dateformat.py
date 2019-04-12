@@ -15,9 +15,7 @@ import datetime
 import re
 import time
 
-from django.utils.dates import (
-    MONTHS, MONTHS_3, MONTHS_ALT, MONTHS_AP, WEEKDAYS, WEEKDAYS_ABBR,
-)
+from django.utils.dates import MONTHS, MONTHS_3, MONTHS_ALT, MONTHS_AP, WEEKDAYS, WEEKDAYS_ABBR
 from django.utils.timezone import get_default_timezone, is_aware, is_naive
 from django.utils.translation import gettext as _
 
@@ -42,7 +40,6 @@ class Formatter:
 
 
 class TimeFormat(Formatter):
-
     def __init__(self, obj):
         self.data = obj
         self.timezone = None

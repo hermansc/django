@@ -35,6 +35,7 @@ class Person(models.Model):
 
     .. include:: admin_docs/evilfile.txt
     """
+
     first_name = models.CharField(max_length=200, help_text="The person's first name")
     last_name = models.CharField(max_length=200, help_text="The person's last name")
     company = models.ForeignKey(Company, models.CASCADE, help_text="place of work")

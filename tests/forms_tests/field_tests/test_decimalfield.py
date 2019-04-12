@@ -8,7 +8,6 @@ from . import FormFieldAssertionsMixin
 
 
 class DecimalFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
-
     def test_decimalfield_1(self):
         f = DecimalField(max_digits=4, decimal_places=2)
         self.assertWidgetRendersTo(f, '<input id="id_f" step="0.01" type="number" name="f" required>')
@@ -50,11 +49,22 @@ class DecimalFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
     def test_enter_a_number_error(self):
         f = DecimalField(max_digits=4, decimal_places=2)
         values = (
-            '-NaN', 'NaN', '+NaN',
-            '-sNaN', 'sNaN', '+sNaN',
-            '-Inf', 'Inf', '+Inf',
-            '-Infinity', 'Infinity', '+Infinity',
-            'a', 'łąść', '1.0a', '--0.12',
+            '-NaN',
+            'NaN',
+            '+NaN',
+            '-sNaN',
+            'sNaN',
+            '+sNaN',
+            '-Inf',
+            'Inf',
+            '+Inf',
+            '-Infinity',
+            'Infinity',
+            '+Infinity',
+            'a',
+            'łąść',
+            '1.0a',
+            '--0.12',
         )
         for value in values:
             with self.subTest(value=value), self.assertRaisesMessage(ValidationError, "'Enter a number.'"):
@@ -72,13 +82,10 @@ class DecimalFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
 
     def test_decimalfield_3(self):
         f = DecimalField(
-            max_digits=4, decimal_places=2,
-            max_value=decimal.Decimal('1.5'),
-            min_value=decimal.Decimal('0.5')
+            max_digits=4, decimal_places=2, max_value=decimal.Decimal('1.5'), min_value=decimal.Decimal('0.5')
         )
         self.assertWidgetRendersTo(
-            f,
-            '<input step="0.01" name="f" min="0.5" max="1.5" type="number" id="id_f" required>',
+            f, '<input step="0.01" name="f" min="0.5" max="1.5" type="number" id="id_f" required>'
         )
         with self.assertRaisesMessage(ValidationError, "'Ensure this value is less than or equal to 1.5.'"):
             f.clean('1.6')
@@ -163,8 +170,7 @@ class DecimalFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
         self.assertEqual(f.clean('1001,10'), decimal.Decimal("1001.10"))
         self.assertEqual(f.clean('1001.10'), decimal.Decimal("1001.10"))
 
-    @override_settings(USE_L10N=False, DECIMAL_SEPARATOR=',', USE_THOUSAND_SEPARATOR=True,
-                       THOUSAND_SEPARATOR='.')
+    @override_settings(USE_L10N=False, DECIMAL_SEPARATOR=',', USE_THOUSAND_SEPARATOR=True, THOUSAND_SEPARATOR='.')
     def test_decimalfield_support_thousands_separator(self):
         f = DecimalField(localize=True)
         self.assertEqual(f.clean('1.001,10'), decimal.Decimal("1001.10"))

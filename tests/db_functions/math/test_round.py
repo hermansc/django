@@ -9,7 +9,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class RoundTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_round=Round('normal')).first()
@@ -34,9 +33,7 @@ class RoundTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-20, normal=15, big=-1)
         obj = IntegerModel.objects.annotate(
-            small_round=Round('small'),
-            normal_round=Round('normal'),
-            big_round=Round('big'),
+            small_round=Round('small'), normal_round=Round('normal'), big_round=Round('big')
         ).first()
         self.assertIsInstance(obj.small_round, int)
         self.assertIsInstance(obj.normal_round, int)

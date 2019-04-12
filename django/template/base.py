@@ -56,14 +56,15 @@ from enum import Enum
 from inspect import getcallargs, getfullargspec, unwrap
 
 from django.template.context import (  # NOQA: imported for backwards compatibility
-    BaseContext, Context, ContextPopException, RequestContext,
+    BaseContext,
+    Context,
+    ContextPopException,
+    RequestContext,
 )
 from django.utils.formats import localize
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import SafeData, mark_safe
-from django.utils.text import (
-    get_text_list, smart_split, unescape_string_literal,
-)
+from django.utils.text import get_text_list, smart_split, unescape_string_literal
 from django.utils.timezone import template_localtime
 from django.utils.translation import gettext_lazy, pgettext_lazy
 
@@ -89,10 +90,17 @@ UNKNOWN_SOURCE = '<unknown source>'
 
 # match a variable or block tag and capture the entire tag, including start/end
 # delimiters
-tag_re = (re.compile('(%s.*?%s|%s.*?%s|%s.*?%s)' %
-          (re.escape(BLOCK_TAG_START), re.escape(BLOCK_TAG_END),
-           re.escape(VARIABLE_TAG_START), re.escape(VARIABLE_TAG_END),
-           re.escape(COMMENT_TAG_START), re.escape(COMMENT_TAG_END))))
+tag_re = re.compile(
+    '(%s.*?%s|%s.*?%s|%s.*?%s)'
+    % (
+        re.escape(BLOCK_TAG_START),
+        re.escape(BLOCK_TAG_END),
+        re.escape(VARIABLE_TAG_START),
+        re.escape(VARIABLE_TAG_END),
+        re.escape(COMMENT_TAG_START),
+        re.escape(COMMENT_TAG_END),
+    )
+)
 
 logger = logging.getLogger('django.template')
 
@@ -105,7 +113,6 @@ class TokenType(Enum):
 
 
 class VariableDoesNotExist(Exception):
-
     def __init__(self, msg, params=()):
         self.msg = msg
         self.params = params
@@ -124,18 +131,12 @@ class Origin:
         return self.name
 
     def __eq__(self, other):
-        return (
-            isinstance(other, Origin) and
-            self.name == other.name and
-            self.loader == other.loader
-        )
+        return isinstance(other, Origin) and self.name == other.name and self.loader == other.loader
 
     @property
     def loader_name(self):
         if self.loader:
-            return '%s.%s' % (
-                self.loader.__module__, self.loader.__class__.__name__,
-            )
+            return '%s.%s' % (self.loader.__module__, self.loader.__class__.__name__)
 
 
 class Template:
@@ -146,6 +147,7 @@ class Template:
         # e.g. Template('...').render(Context({...}))
         if engine is None:
             from .engine import Engine
+
             engine = Engine.get_default()
         if origin is None:
             origin = Origin(UNKNOWN_SOURCE)
@@ -185,10 +187,7 @@ class Template:
             lexer = Lexer(self.source)
 
         tokens = lexer.tokenize()
-        parser = Parser(
-            tokens, self.engine.template_libraries, self.engine.template_builtins,
-            self.origin,
-        )
+        parser = Parser(tokens, self.engine.template_libraries, self.engine.template_builtins, self.origin)
 
         try:
             return parser.parse()
@@ -311,8 +310,7 @@ class Token:
 
     def __str__(self):
         token_name = self.token_type.name.capitalize()
-        return ('<%s token: "%s...">' %
-                (token_name, self.contents[:20].replace('\n', '')))
+        return '<%s token: "%s...">' % (token_name, self.contents[:20].replace('\n', ''))
 
     def split_contents(self):
         split = []
@@ -493,9 +491,7 @@ class Parser:
     def extend_nodelist(self, nodelist, node, token):
         # Check that non-text nodes don't appear before an extends tag.
         if node.must_be_first and nodelist.contains_nontext:
-            raise self.error(
-                token, '%r must be the first tag in the template.' % node,
-            )
+            raise self.error(token, '%r must be the first tag in the template.' % node)
         if isinstance(nodelist, NodeList) and not isinstance(node, TextNode):
             nodelist.contains_nontext = True
         # Set origin and token here since we can't modify the node __init__()
@@ -522,16 +518,13 @@ class Parser:
             raise self.error(
                 token,
                 "Invalid block tag on line %d: '%s', expected %s. Did you "
-                "forget to register or load this tag?" % (
-                    token.lineno,
-                    command,
-                    get_text_list(["'%s'" % p for p in parse_until], 'or'),
-                ),
+                "forget to register or load this tag?"
+                % (token.lineno, command, get_text_list(["'%s'" % p for p in parse_until], 'or')),
             )
         raise self.error(
             token,
             "Invalid block tag on line %d: '%s'. Did you forget to register "
-            "or load this tag?" % (token.lineno, command)
+            "or load this tag?" % (token.lineno, command),
         )
 
     def unclosed_block_tag(self, parse_until):
@@ -621,6 +614,7 @@ class FilterExpression:
         >>> fe.var
         <Variable: 'variable'>
     """
+
     def __init__(self, token, parser):
         self.token = token
         matches = filter_re.finditer(token)
@@ -630,10 +624,9 @@ class FilterExpression:
         for match in matches:
             start = match.start()
             if upto != start:
-                raise TemplateSyntaxError("Could not parse some characters: "
-                                          "%s|%s|%s" %
-                                          (token[:upto], token[upto:start],
-                                           token[start:]))
+                raise TemplateSyntaxError(
+                    "Could not parse some characters: " "%s|%s|%s" % (token[:upto], token[upto:start], token[start:])
+                )
             if var_obj is None:
                 var, constant = match.group("var", "constant")
                 if constant:
@@ -642,8 +635,7 @@ class FilterExpression:
                     except VariableDoesNotExist:
                         var_obj = None
                 elif var is None:
-                    raise TemplateSyntaxError("Could not find variable at "
-                                              "start of %s." % token)
+                    raise TemplateSyntaxError("Could not find variable at " "start of %s." % token)
                 else:
                     var_obj = Variable(var)
             else:
@@ -659,8 +651,7 @@ class FilterExpression:
                 filters.append((filter_func, args))
             upto = match.end()
         if upto != len(token):
-            raise TemplateSyntaxError("Could not parse the remainder: '%s' "
-                                      "from '%s'" % (token[upto:], token))
+            raise TemplateSyntaxError("Could not parse the remainder: '%s' " "from '%s'" % (token[upto:], token))
 
         self.filters = filters
         self.var = var_obj
@@ -714,10 +705,10 @@ class FilterExpression:
         dlen = len(defaults or [])
         # Not enough OR Too many
         if plen < (alen - dlen) or plen > alen:
-            raise TemplateSyntaxError("%s requires %d arguments, %d provided" %
-                                      (name, alen - dlen, plen))
+            raise TemplateSyntaxError("%s requires %d arguments, %d provided" % (name, alen - dlen, plen))
 
         return True
+
     args_check = staticmethod(args_check)
 
     def __str__(self):
@@ -751,8 +742,7 @@ class Variable:
         self.message_context = None
 
         if not isinstance(var, str):
-            raise TypeError(
-                "Variable must be a string or number, got %s" % type(var))
+            raise TypeError("Variable must be a string or number, got %s" % type(var))
         try:
             # First try to treat this variable as a number.
             #
@@ -784,9 +774,7 @@ class Variable:
                 # Otherwise we'll set self.lookups so that resolve() knows we're
                 # dealing with a bonafide variable
                 if var.find(VARIABLE_ATTRIBUTE_SEPARATOR + '_') > -1 or var[0] == '_':
-                    raise TemplateSyntaxError("Variables and attributes may "
-                                              "not begin with underscores: '%s'" %
-                                              var)
+                    raise TemplateSyntaxError("Variables and attributes may " "not begin with underscores: '%s'" % var)
                 self.lookups = tuple(var.split(VARIABLE_ATTRIBUTE_SEPARATOR))
 
     def resolve(self, context):
@@ -841,13 +829,15 @@ class Variable:
                             raise
                         try:  # list-index lookup
                             current = current[int(bit)]
-                        except (IndexError,  # list index out of range
-                                ValueError,  # invalid literal for int()
-                                KeyError,    # current is a dict without `int(bit)` key
-                                TypeError):  # unsubscriptable object
-                            raise VariableDoesNotExist("Failed lookup for key "
-                                                       "[%s] in %r",
-                                                       (bit, current))  # missing attribute
+                        except (
+                            IndexError,  # list index out of range
+                            ValueError,  # invalid literal for int()
+                            KeyError,  # current is a dict without `int(bit)` key
+                            TypeError,
+                        ):  # unsubscriptable object
+                            raise VariableDoesNotExist(
+                                "Failed lookup for key " "[%s] in %r", (bit, current)
+                            )  # missing attribute
                 if callable(current):
                     if getattr(current, 'do_not_call_in_templates', False):
                         pass
@@ -866,10 +856,7 @@ class Variable:
         except Exception as e:
             template_name = getattr(context, 'template_name', None) or 'unknown'
             logger.debug(
-                "Exception while resolving variable '%s' in template '%s'.",
-                bit,
-                template_name,
-                exc_info=True,
+                "Exception while resolving variable '%s' in template '%s'.", bit, template_name, exc_info=True
             )
 
             if getattr(e, 'silent_variable_failure', False):

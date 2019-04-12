@@ -6,6 +6,7 @@ class GDALRasterBase(GDALBase):
     """
     Attributes that exist on both GDALRaster and GDALBand.
     """
+
     @property
     def metadata(self):
         """
@@ -36,10 +37,7 @@ class GDALRasterBase(GDALBase):
         result = {}
         for domain in domain_list:
             # Get metadata for this domain.
-            data = capi.get_ds_metadata(
-                self._ptr,
-                (None if domain == 'DEFAULT' else domain.encode()),
-            )
+            data = capi.get_ds_metadata(self._ptr, (None if domain == 'DEFAULT' else domain.encode()))
             if not data:
                 continue
             # The number of metadata items is unknown, so retrieve data until
@@ -69,7 +67,5 @@ class GDALRasterBase(GDALBase):
             # Set each metadata entry separately.
             for meta_name, meta_value in metadata.items():
                 capi.set_ds_metadata_item(
-                    self._ptr, meta_name.encode(),
-                    meta_value.encode() if meta_value else None,
-                    domain,
+                    self._ptr, meta_name.encode(), meta_value.encode() if meta_value else None, domain
                 )

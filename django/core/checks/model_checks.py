@@ -21,10 +21,9 @@ def check_all_models(app_configs=None, **kwargs):
         if not inspect.ismethod(model.check):
             errors.append(
                 Error(
-                    "The '%s.check()' class method is currently overridden by %r."
-                    % (model.__name__, model.check),
+                    "The '%s.check()' class method is currently overridden by %r." % (model.__name__, model.check),
                     obj=model,
-                    id='models.E020'
+                    id='models.E020',
                 )
             )
         else:
@@ -33,8 +32,7 @@ def check_all_models(app_configs=None, **kwargs):
         if len(model_labels) != 1:
             errors.append(
                 Error(
-                    "db_table '%s' is used by multiple models: %s."
-                    % (db_table, ', '.join(db_table_models[db_table])),
+                    "db_table '%s' is used by multiple models: %s." % (db_table, ', '.join(db_table_models[db_table])),
                     obj=db_table,
                     id='models.E028',
                 )
@@ -60,10 +58,8 @@ def _check_lazy_references(apps, ignore=None):
         return []
 
     from django.db.models import signals
-    model_signals = {
-        signal: name for name, signal in vars(signals).items()
-        if isinstance(signal, signals.ModelSignal)
-    }
+
+    model_signals = {signal: name for name, signal in vars(signals).items() if isinstance(signal, signals.ModelSignal)}
 
     def extract_operation(obj):
         """
@@ -97,15 +93,8 @@ def _check_lazy_references(apps, ignore=None):
     # determined by extract_operation().
 
     def field_error(model_key, func, args, keywords):
-        error_msg = (
-            "The field %(field)s was declared with a lazy reference "
-            "to '%(model)s', but %(model_error)s."
-        )
-        params = {
-            'model': '.'.join(model_key),
-            'field': keywords['field'],
-            'model_error': app_model_error(model_key),
-        }
+        error_msg = "The field %(field)s was declared with a lazy reference " "to '%(model)s', but %(model_error)s."
+        params = {'model': '.'.join(model_key), 'field': keywords['field'], 'model_error': app_model_error(model_key)}
         return Error(error_msg % params, obj=keywords['field'], id='fields.E307')
 
     def signal_connect_error(model_key, func, args, keywords):
@@ -133,11 +122,7 @@ def _check_lazy_references(apps, ignore=None):
 
     def default_error(model_key, func, args, keywords):
         error_msg = "%(op)s contains a lazy reference to %(model)s, but %(model_error)s."
-        params = {
-            'op': func,
-            'model': '.'.join(model_key),
-            'model_error': app_model_error(model_key),
-        }
+        params = {'op': func, 'model': '.'.join(model_key), 'model_error': app_model_error(model_key)}
         return Error(error_msg % params, obj=func, id='models.E022')
 
     # Maps common uses of lazy operations to corresponding error functions
@@ -154,11 +139,17 @@ def _check_lazy_references(apps, ignore=None):
         error_fn = known_lazy.get(key, default_error)
         return error_fn(model_key, func, args, keywords) if error_fn else None
 
-    return sorted(filter(None, (
-        build_error(model_key, *extract_operation(func))
-        for model_key in pending_models
-        for func in apps._pending_operations[model_key]
-    )), key=lambda error: error.msg)
+    return sorted(
+        filter(
+            None,
+            (
+                build_error(model_key, *extract_operation(func))
+                for model_key in pending_models
+                for func in apps._pending_operations[model_key]
+            ),
+        ),
+        key=lambda error: error.msg,
+    )
 
 
 @register(Tags.models)

@@ -9,18 +9,16 @@ E001 = Error(
     "in OPTIONS. Either remove APP_DIRS or remove the 'loaders' option.",
     id='templates.E001',
 )
-E002 = Error(
-    "'string_if_invalid' in TEMPLATES OPTIONS must be a string but got: {} ({}).",
-    id="templates.E002",
-)
+E002 = Error("'string_if_invalid' in TEMPLATES OPTIONS must be a string but got: {} ({}).", id="templates.E002")
 
 
 @register(Tags.templates)
 def check_setting_app_dirs_loaders(app_configs, **kwargs):
-    return [E001] if any(
-        conf.get('APP_DIRS') and 'loaders' in conf.get('OPTIONS', {})
-        for conf in settings.TEMPLATES
-    ) else []
+    return (
+        [E001]
+        if any(conf.get('APP_DIRS') and 'loaders' in conf.get('OPTIONS', {}) for conf in settings.TEMPLATES)
+        else []
+    )
 
 
 @register(Tags.templates)

@@ -11,6 +11,7 @@ from .tests import SerializersTestBase, SerializersTransactionTestBase
 
 try:
     import yaml
+
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
@@ -29,6 +30,7 @@ class YamlImportModuleMock:
 
     Refs: #12756
     """
+
     def __init__(self):
         self._import_module = importlib.import_module
 
@@ -44,6 +46,7 @@ class NoYamlSerializerTestCase(SimpleTestCase):
 
     Refs: #12756
     """
+
     @classmethod
     def setUpClass(cls):
         """Removes imported yaml and stubs importlib.import_module"""
@@ -109,17 +112,23 @@ class YamlSerializerTestCase(SerializersTestBase, TestCase):
     name: Non-fiction
   model: serializers.category"""
 
-    mapping_ordering_str = """- model: serializers.article
+    mapping_ordering_str = (
+        """- model: serializers.article
   pk: %(article_pk)s
   fields:
     author: %(author_pk)s
     headline: Poker has no place on ESPN
     pub_date: 2006-06-16 11:00:00
-    categories:""" + (
-        ' [%(first_category_pk)s, %(second_category_pk)s]' if HAS_YAML and yaml.__version__ < '5.1'
-        else '\n    - %(first_category_pk)s\n    - %(second_category_pk)s') + """
+    categories:"""
+        + (
+            ' [%(first_category_pk)s, %(second_category_pk)s]'
+            if HAS_YAML and yaml.__version__ < '5.1'
+            else '\n    - %(first_category_pk)s\n    - %(second_category_pk)s'
+        )
+        + """
     meta_data: []
 """
+    )
 
     @staticmethod
     def _validate_output(serial_str):

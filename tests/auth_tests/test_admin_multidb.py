@@ -20,9 +20,7 @@ class Router:
 site = admin.AdminSite(name='test_adminsite')
 site.register(User, admin_class=UserAdmin)
 
-urlpatterns = [
-    path('admin/', site.urls),
-]
+urlpatterns = [path('admin/', site.urls)]
 
 
 @override_settings(ROOT_URLCONF=__name__, DATABASE_ROUTERS=['%s.Router' % __name__])
@@ -35,7 +33,7 @@ class MultiDatabaseTests(TestCase):
         for db in connections:
             Router.target_db = db
             cls.superusers[db] = User.objects.create_superuser(
-                username='admin', password='something', email='test@test.org',
+                username='admin', password='something', email='test@test.org'
             )
 
     @mock.patch('django.contrib.auth.admin.transaction')
@@ -44,9 +42,8 @@ class MultiDatabaseTests(TestCase):
             with self.subTest(db_connection=db):
                 Router.target_db = db
                 self.client.force_login(self.superusers[db])
-                self.client.post(reverse('test_adminsite:auth_user_add'), {
-                    'username': 'some_user',
-                    'password1': 'helloworld',
-                    'password2': 'helloworld',
-                })
+                self.client.post(
+                    reverse('test_adminsite:auth_user_add'),
+                    {'username': 'some_user', 'password1': 'helloworld', 'password2': 'helloworld'},
+                )
                 mock.atomic.assert_called_with(using=db)

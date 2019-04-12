@@ -7,12 +7,8 @@ from .models import Bar, Business, Employee, Foo
 class BasicCustomPKTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.dan = Employee.objects.create(
-            employee_code=123, first_name="Dan", last_name="Jones",
-        )
-        cls.fran = Employee.objects.create(
-            employee_code=456, first_name="Fran", last_name="Bones",
-        )
+        cls.dan = Employee.objects.create(employee_code=123, first_name="Dan", last_name="Jones")
+        cls.fran = Employee.objects.create(employee_code=456, first_name="Fran", last_name="Bones")
         cls.business = Business.objects.create(name="Sears")
         cls.business.employees.add(cls.dan, cls.fran)
 
@@ -20,104 +16,36 @@ class BasicCustomPKTests(TestCase):
         """
         Both pk and custom attribute_name can be used in filter and friends
         """
-        self.assertQuerysetEqual(
-            Employee.objects.filter(pk=123), [
-                "Dan Jones",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(Employee.objects.filter(pk=123), ["Dan Jones"], str)
 
-        self.assertQuerysetEqual(
-            Employee.objects.filter(employee_code=123), [
-                "Dan Jones",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(Employee.objects.filter(employee_code=123), ["Dan Jones"], str)
 
-        self.assertQuerysetEqual(
-            Employee.objects.filter(pk__in=[123, 456]), [
-                "Fran Bones",
-                "Dan Jones",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(Employee.objects.filter(pk__in=[123, 456]), ["Fran Bones", "Dan Jones"], str)
 
-        self.assertQuerysetEqual(
-            Employee.objects.all(), [
-                "Fran Bones",
-                "Dan Jones",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(Employee.objects.all(), ["Fran Bones", "Dan Jones"], str)
 
-        self.assertQuerysetEqual(
-            Business.objects.filter(name="Sears"), [
-                "Sears"
-            ],
-            lambda b: b.name
-        )
-        self.assertQuerysetEqual(
-            Business.objects.filter(pk="Sears"), [
-                "Sears",
-            ],
-            lambda b: b.name
-        )
+        self.assertQuerysetEqual(Business.objects.filter(name="Sears"), ["Sears"], lambda b: b.name)
+        self.assertQuerysetEqual(Business.objects.filter(pk="Sears"), ["Sears"], lambda b: b.name)
 
     def test_querysets_related_name(self):
         """
         Custom pk doesn't affect related_name based lookups
         """
-        self.assertQuerysetEqual(
-            self.business.employees.all(), [
-                "Fran Bones",
-                "Dan Jones",
-            ],
-            str
-        )
-        self.assertQuerysetEqual(
-            self.fran.business_set.all(), [
-                "Sears",
-            ],
-            lambda b: b.name
-        )
+        self.assertQuerysetEqual(self.business.employees.all(), ["Fran Bones", "Dan Jones"], str)
+        self.assertQuerysetEqual(self.fran.business_set.all(), ["Sears"], lambda b: b.name)
 
     def test_querysets_relational(self):
         """
         Queries across tables, involving primary key
         """
-        self.assertQuerysetEqual(
-            Employee.objects.filter(business__name="Sears"), [
-                "Fran Bones",
-                "Dan Jones",
-            ],
-            str,
-        )
-        self.assertQuerysetEqual(
-            Employee.objects.filter(business__pk="Sears"), [
-                "Fran Bones",
-                "Dan Jones",
-            ],
-            str,
-        )
+        self.assertQuerysetEqual(Employee.objects.filter(business__name="Sears"), ["Fran Bones", "Dan Jones"], str)
+        self.assertQuerysetEqual(Employee.objects.filter(business__pk="Sears"), ["Fran Bones", "Dan Jones"], str)
+
+        self.assertQuerysetEqual(Business.objects.filter(employees__employee_code=123), ["Sears"], lambda b: b.name)
+        self.assertQuerysetEqual(Business.objects.filter(employees__pk=123), ["Sears"], lambda b: b.name)
 
         self.assertQuerysetEqual(
-            Business.objects.filter(employees__employee_code=123), [
-                "Sears",
-            ],
-            lambda b: b.name
-        )
-        self.assertQuerysetEqual(
-            Business.objects.filter(employees__pk=123), [
-                "Sears",
-            ],
-            lambda b: b.name,
-        )
-
-        self.assertQuerysetEqual(
-            Business.objects.filter(employees__first_name__startswith="Fran"), [
-                "Sears",
-            ],
-            lambda b: b.name
+            Business.objects.filter(employees__first_name__startswith="Fran"), ["Sears"], lambda b: b.name
         )
 
     def test_get(self):
@@ -155,9 +83,7 @@ class BasicCustomPKTests(TestCase):
         emps = Employee.objects.in_bulk([123, 456])
         self.assertEqual(emps[123], self.dan)
 
-        self.assertEqual(Business.objects.in_bulk(["Sears"]), {
-            "Sears": self.business,
-        })
+        self.assertEqual(Business.objects.in_bulk(["Sears"]), {"Sears": self.business})
 
     def test_save(self):
         """
@@ -167,13 +93,7 @@ class BasicCustomPKTests(TestCase):
         fran.last_name = "Jones"
         fran.save()
 
-        self.assertQuerysetEqual(
-            Employee.objects.filter(last_name="Jones"), [
-                "Dan Jones",
-                "Fran Jones",
-            ],
-            str
-        )
+        self.assertQuerysetEqual(Employee.objects.filter(last_name="Jones"), ["Dan Jones", "Fran Jones"], str)
 
 
 class CustomPKTests(TestCase):
@@ -193,17 +113,13 @@ class CustomPKTests(TestCase):
     def test_unique_pk(self):
         # The primary key must also obviously be unique, so trying to create a
         # new object with the same primary key will fail.
-        Employee.objects.create(
-            employee_code=123, first_name="Frank", last_name="Jones"
-        )
+        Employee.objects.create(employee_code=123, first_name="Frank", last_name="Jones")
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Employee.objects.create(employee_code=123, first_name="Fred", last_name="Jones")
 
     def test_zero_non_autoincrement_pk(self):
-        Employee.objects.create(
-            employee_code=0, first_name="Frank", last_name="Jones"
-        )
+        Employee.objects.create(employee_code=0, first_name="Frank", last_name="Jones")
         employee = Employee.objects.get(pk=0)
         self.assertEqual(employee.employee_code, 0)
 

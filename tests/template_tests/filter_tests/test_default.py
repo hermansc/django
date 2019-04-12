@@ -36,7 +36,6 @@ class DefaultTests(SimpleTestCase):
 
 
 class DefaultIfNoneTests(SimpleTestCase):
-
     @setup({'default_if_none01': '{{ a|default:"x<" }}'})
     def test_default_if_none01(self):
         output = self.engine.render_to_string('default_if_none01', {"a": None})
@@ -49,7 +48,6 @@ class DefaultIfNoneTests(SimpleTestCase):
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_value(self):
         self.assertEqual(default('val', 'default'), 'val')
 

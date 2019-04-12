@@ -12,11 +12,14 @@ class HTTPSSitemapTests(SitemapTestsBase):
     def test_secure_sitemap_index(self):
         "A secure sitemap index can be rendered"
         response = self.client.get('/secure/index.xml')
-        expected_content = """<?xml version="1.0" encoding="UTF-8"?>
+        expected_content = (
+            """<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <sitemap><loc>%s/secure/sitemap-simple.xml</loc></sitemap>
 </sitemapindex>
-""" % self.base_url
+"""
+            % self.base_url
+        )
         self.assertXMLEqual(response.content.decode(), expected_content)
 
     def test_secure_sitemap_section(self):
@@ -26,7 +29,10 @@ class HTTPSSitemapTests(SitemapTestsBase):
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>%s/location/</loc><lastmod>%s</lastmod><changefreq>never</changefreq><priority>0.5</priority></url>
 </urlset>
-""" % (self.base_url, date.today())
+""" % (
+            self.base_url,
+            date.today(),
+        )
         self.assertXMLEqual(response.content.decode(), expected_content)
 
 
@@ -41,7 +47,9 @@ class HTTPSDetectionSitemapTests(SitemapTestsBase):
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <sitemap><loc>%s/simple/sitemap-simple.xml</loc></sitemap>
 </sitemapindex>
-""" % self.base_url.replace('http://', 'https://')
+""" % self.base_url.replace(
+            'http://', 'https://'
+        )
         self.assertXMLEqual(response.content.decode(), expected_content)
 
     def test_sitemap_section_with_https_request(self):
@@ -51,5 +59,8 @@ class HTTPSDetectionSitemapTests(SitemapTestsBase):
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>%s/location/</loc><lastmod>%s</lastmod><changefreq>never</changefreq><priority>0.5</priority></url>
 </urlset>
-""" % (self.base_url.replace('http://', 'https://'), date.today())
+""" % (
+            self.base_url.replace('http://', 'https://'),
+            date.today(),
+        )
         self.assertXMLEqual(response.content.decode(), expected_content)

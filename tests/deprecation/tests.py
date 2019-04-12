@@ -1,15 +1,11 @@
 import warnings
 
 from django.test import SimpleTestCase
-from django.utils.deprecation import (
-    DeprecationInstanceCheck, RemovedInNextVersionWarning, RenameMethodsBase,
-)
+from django.utils.deprecation import DeprecationInstanceCheck, RemovedInNextVersionWarning, RenameMethodsBase
 
 
 class RenameManagerMethods(RenameMethodsBase):
-    renamed_methods = (
-        ('old', 'new', DeprecationWarning),
-    )
+    renamed_methods = (('old', 'new', DeprecationWarning),)
 
 
 class RenameMethodsTests(SimpleTestCase):
@@ -25,6 +21,7 @@ class RenameMethodsTests(SimpleTestCase):
         """
         msg = '`Manager.old` method should be renamed `new`.'
         with self.assertWarnsMessage(DeprecationWarning, msg):
+
             class Manager(metaclass=RenameManagerMethods):
                 def old(self):
                     pass
@@ -33,9 +30,11 @@ class RenameMethodsTests(SimpleTestCase):
         """
         Ensure `old` complains and not `new` when only `new` is defined.
         """
+
         class Manager(metaclass=RenameManagerMethods):
             def new(self):
                 pass
+
         manager = Manager()
 
         with warnings.catch_warnings(record=True) as recorded:
@@ -53,9 +52,11 @@ class RenameMethodsTests(SimpleTestCase):
         """
         msg = '`Manager.old` method should be renamed `new`.'
         with self.assertWarnsMessage(DeprecationWarning, msg):
+
             class Manager(metaclass=RenameManagerMethods):
                 def old(self):
                     pass
+
         manager = Manager()
 
         with warnings.catch_warnings(record=True) as recorded:
@@ -72,12 +73,14 @@ class RenameMethodsTests(SimpleTestCase):
         Ensure the correct warnings are raised when a class that didn't rename
         `old` subclass one that did.
         """
+
         class Renamed(metaclass=RenameManagerMethods):
             def new(self):
                 pass
 
         msg = '`Deprecated.old` method should be renamed `new`.'
         with self.assertWarnsMessage(DeprecationWarning, msg):
+
             class Deprecated(Renamed):
                 def old(self):
                     super().old()
@@ -99,6 +102,7 @@ class RenameMethodsTests(SimpleTestCase):
         """
         msg = '`Deprecated.old` method should be renamed `new`.'
         with self.assertWarnsMessage(DeprecationWarning, msg):
+
             class Deprecated(metaclass=RenameManagerMethods):
                 def old(self):
                     pass
@@ -124,6 +128,7 @@ class RenameMethodsTests(SimpleTestCase):
         class that renamed `old` and mixins that may or may not have renamed
         `new`.
         """
+
         class Renamed(metaclass=RenameManagerMethods):
             def new(self):
                 pass
@@ -138,6 +143,7 @@ class RenameMethodsTests(SimpleTestCase):
 
         msg = '`DeprecatedMixin.old` method should be renamed `new`.'
         with self.assertWarnsMessage(DeprecationWarning, msg):
+
             class Deprecated(DeprecatedMixin, RenamedMixin, Renamed):
                 pass
 

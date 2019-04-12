@@ -1,23 +1,16 @@
 from datetime import date
 from unittest import mock
 
-from django.contrib.auth import (
-    BACKEND_SESSION_KEY, SESSION_KEY, authenticate, get_user, signals,
-)
+from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, authenticate, get_user, signals
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.hashers import MD5PasswordHasher
 from django.contrib.auth.models import AnonymousUser, Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import HttpRequest
-from django.test import (
-    SimpleTestCase, TestCase, modify_settings, override_settings,
-)
+from django.test import SimpleTestCase, TestCase, modify_settings, override_settings
 
-from .models import (
-    CustomPermissionsUser, CustomUser, CustomUserWithoutIsActiveField,
-    ExtensionUser, UUIDUser,
-)
+from .models import CustomPermissionsUser, CustomUser, CustomUserWithoutIsActiveField, ExtensionUser, UUIDUser
 
 
 class CountingMD5PasswordHasher(MD5PasswordHasher):
@@ -37,12 +30,11 @@ class BaseModelBackendTest:
     level UserModel attribute, and a create_users() method to
     construct two users for test purposes.
     """
+
     backend = 'django.contrib.auth.backends.ModelBackend'
 
     def setUp(self):
-        self.patched_settings = modify_settings(
-            AUTHENTICATION_BACKENDS={'append': self.backend},
-        )
+        self.patched_settings = modify_settings(AUTHENTICATION_BACKENDS={'append': self.backend})
         self.patched_settings.enable()
         self.create_users()
 
@@ -200,16 +192,13 @@ class ModelBackendTest(BaseModelBackendTest, TestCase):
     """
     Tests for the ModelBackend using the default User model.
     """
+
     UserModel = User
     user_credentials = {'username': 'test', 'password': 'test'}
 
     def create_users(self):
         self.user = User.objects.create_user(email='test@example.com', **self.user_credentials)
-        self.superuser = User.objects.create_superuser(
-            username='test2',
-            email='test2@example.com',
-            password='test',
-        )
+        self.superuser = User.objects.create_superuser(username='test2', email='test2@example.com', password='test')
 
     def test_authenticate_inactive(self):
         """
@@ -226,7 +215,7 @@ class ModelBackendTest(BaseModelBackendTest, TestCase):
         A custom user without an `is_active` field is allowed to authenticate.
         """
         user = CustomUserWithoutIsActiveField.objects._create_user(
-            username='test', email='test@example.com', password='test',
+            username='test', email='test@example.com', password='test'
         )
         self.assertEqual(authenticate(username='test', password='test'), user)
 
@@ -253,16 +242,10 @@ class ExtensionUserModelBackendTest(BaseModelBackendTest, TestCase):
 
     def create_users(self):
         self.user = ExtensionUser._default_manager.create_user(
-            username='test',
-            email='test@example.com',
-            password='test',
-            date_of_birth=date(2006, 4, 25)
+            username='test', email='test@example.com', password='test', date_of_birth=date(2006, 4, 25)
         )
         self.superuser = ExtensionUser._default_manager.create_superuser(
-            username='test2',
-            email='test2@example.com',
-            password='test',
-            date_of_birth=date(1976, 11, 8)
+            username='test2', email='test2@example.com', password='test', date_of_birth=date(1976, 11, 8)
         )
 
 
@@ -280,14 +263,10 @@ class CustomPermissionsUserModelBackendTest(BaseModelBackendTest, TestCase):
 
     def create_users(self):
         self.user = CustomPermissionsUser._default_manager.create_user(
-            email='test@example.com',
-            password='test',
-            date_of_birth=date(2006, 4, 25)
+            email='test@example.com', password='test', date_of_birth=date(2006, 4, 25)
         )
         self.superuser = CustomPermissionsUser._default_manager.create_superuser(
-            email='test2@example.com',
-            password='test',
-            date_of_birth=date(1976, 11, 8)
+            email='test2@example.com', password='test', date_of_birth=date(1976, 11, 8)
         )
 
 
@@ -300,9 +279,7 @@ class CustomUserModelBackendAuthenticateTest(TestCase):
 
     def test_authenticate(self):
         test_user = CustomUser._default_manager.create_user(
-            email='test@example.com',
-            password='test',
-            date_of_birth=date(2006, 4, 25)
+            email='test@example.com', password='test', date_of_birth=date(2006, 4, 25)
         )
         authenticated_user = authenticate(email='test@example.com', password='test')
         self.assertEqual(test_user, authenticated_user)
@@ -310,7 +287,6 @@ class CustomUserModelBackendAuthenticateTest(TestCase):
 
 @override_settings(AUTH_USER_MODEL='auth_tests.UUIDUser')
 class UUIDUserTests(TestCase):
-
     def test_login(self):
         """
         A custom user with a UUID primary key should be able to login.
@@ -368,9 +344,7 @@ class SimpleRowlevelBackend:
             return ['none']
 
 
-@modify_settings(AUTHENTICATION_BACKENDS={
-    'append': 'auth_tests.test_auth_backends.SimpleRowlevelBackend',
-})
+@modify_settings(AUTHENTICATION_BACKENDS={'append': 'auth_tests.test_auth_backends.SimpleRowlevelBackend'})
 class RowlevelBackendTest(TestCase):
     """
     Tests for auth backend that supports object level permissions
@@ -408,9 +382,7 @@ class RowlevelBackendTest(TestCase):
         self.assertEqual(self.user3.get_group_permissions(TestObj()), {'group_perm'})
 
 
-@override_settings(
-    AUTHENTICATION_BACKENDS=['auth_tests.test_auth_backends.SimpleRowlevelBackend'],
-)
+@override_settings(AUTHENTICATION_BACKENDS=['auth_tests.test_auth_backends.SimpleRowlevelBackend'])
 class AnonymousUserBackendTest(SimpleTestCase):
     """
     Tests for AnonymousUser delegating to backend.
@@ -440,15 +412,13 @@ class NoBackendsTest(TestCase):
     """
     An appropriate error is raised if no auth backends are provided.
     """
+
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user('test', 'test@example.com', 'test')
 
     def test_raises_exception(self):
-        msg = (
-            'No authentication backends have been defined. '
-            'Does AUTHENTICATION_BACKENDS contain anything?'
-        )
+        msg = 'No authentication backends have been defined. ' 'Does AUTHENTICATION_BACKENDS contain anything?'
         with self.assertRaisesMessage(ImproperlyConfigured, msg):
             self.user.has_perm(('perm', TestObj()))
 
@@ -493,6 +463,7 @@ class PermissionDeniedBackendTest(TestCase):
     """
     Other backends are not checked once a backend raises PermissionDenied
     """
+
     backend = 'auth_tests.test_auth_backends.PermissionDeniedBackend'
 
     @classmethod
@@ -547,6 +518,7 @@ class ChangedBackendSettingsTest(TestCase):
     """
     Tests for changes in the settings.AUTHENTICATION_BACKENDS
     """
+
     backend = 'auth_tests.test_auth_backends.NewModelBackend'
 
     TEST_USERNAME = 'test_user'
@@ -564,16 +536,12 @@ class ChangedBackendSettingsTest(TestCase):
         logged-in users disconnect.
         """
         # Get a session for the test user
-        self.assertTrue(self.client.login(
-            username=self.TEST_USERNAME,
-            password=self.TEST_PASSWORD,
-        ))
+        self.assertTrue(self.client.login(username=self.TEST_USERNAME, password=self.TEST_PASSWORD))
         # Prepare a request object
         request = HttpRequest()
         request.session = self.client.session
         # Remove NewModelBackend
-        with self.settings(AUTHENTICATION_BACKENDS=[
-                'django.contrib.auth.backends.ModelBackend']):
+        with self.settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend']):
             # Get the user from the request
             user = get_user(request)
 
@@ -609,10 +577,12 @@ class AuthenticateTests(TestCase):
         with self.assertRaises(TypeError):
             authenticate(username='test', password='test')
 
-    @override_settings(AUTHENTICATION_BACKENDS=(
-        'auth_tests.test_auth_backends.SkippedBackend',
-        'django.contrib.auth.backends.ModelBackend',
-    ))
+    @override_settings(
+        AUTHENTICATION_BACKENDS=(
+            'auth_tests.test_auth_backends.SkippedBackend',
+            'django.contrib.auth.backends.ModelBackend',
+        )
+    )
     def test_skips_backends_without_arguments(self):
         """
         A backend (SkippedBackend) is ignored if it doesn't accept the
@@ -626,6 +596,7 @@ class ImproperlyConfiguredUserModelTest(TestCase):
     An exception from within get_user_model() is propagated and doesn't
     raise an UnboundLocalError (#21439).
     """
+
     @classmethod
     def setUpTestData(cls):
         cls.user1 = User.objects.create_user('test', 'test@example.com', 'test')
@@ -639,10 +610,7 @@ class ImproperlyConfiguredUserModelTest(TestCase):
         request = HttpRequest()
         request.session = self.client.session
 
-        msg = (
-            "AUTH_USER_MODEL refers to model 'thismodel.doesntexist' "
-            "that has not been installed"
-        )
+        msg = "AUTH_USER_MODEL refers to model 'thismodel.doesntexist' " "that has not been installed"
         with self.assertRaisesMessage(ImproperlyConfigured, msg):
             get_user(request)
 
@@ -727,14 +695,12 @@ class AllowAllUsersModelBackendTest(TestCase):
     """
     Inactive users may authenticate with the AllowAllUsersModelBackend.
     """
+
     user_credentials = {'username': 'test', 'password': 'test'}
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(
-            email='test@example.com', is_active=False,
-            **cls.user_credentials
-        )
+        cls.user = User.objects.create_user(email='test@example.com', is_active=False, **cls.user_credentials)
 
     def test_authenticate(self):
         self.assertFalse(self.user.is_active)

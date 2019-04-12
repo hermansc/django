@@ -12,9 +12,7 @@ from admin_scripts.tests import AdminScriptTestCase
 from django.core import management
 from django.core.management import execute_from_command_line
 from django.core.management.base import CommandError
-from django.core.management.commands.makemessages import (
-    Command as MakeMessagesCommand, write_pot_file,
-)
+from django.core.management.commands.makemessages import Command as MakeMessagesCommand, write_pot_file
 from django.core.management.utils import find_command
 from django.test import SimpleTestCase, override_settings
 from django.test.utils import captured_stderr, captured_stdout
@@ -127,7 +125,6 @@ class ExtractorTests(POFileAssertionMixin, RunInTmpDirMixin, SimpleTestCase):
 
 
 class BasicExtractorTests(ExtractorTests):
-
     @override_settings(USE_I18N=False)
     def test_use_i18n_false(self):
         """
@@ -151,9 +148,7 @@ class BasicExtractorTests(ExtractorTests):
             # Comments in templates
             self.assertIn('#. Translators: This comment should be extracted', po_contents)
             self.assertIn(
-                "#. Translators: Django comment block for translators\n#. "
-                "string's meaning unveiled",
-                po_contents
+                "#. Translators: Django comment block for translators\n#. " "string's meaning unveiled", po_contents
             )
             self.assertIn('#. Translators: One-line translator comment #1', po_contents)
             self.assertIn('#. Translators: Two-line translator comment #1\n#. continued here.', po_contents)
@@ -164,14 +159,12 @@ class BasicExtractorTests(ExtractorTests):
             self.assertIn('#. Translators: One-line translator comment #4', po_contents)
             self.assertIn('#. Translators: Two-line translator comment #4\n#. continued here.', po_contents)
             self.assertIn(
-                '#. Translators: One-line translator comment #5 -- with '
-                'non ASCII characters: áéíóúö',
-                po_contents
+                '#. Translators: One-line translator comment #5 -- with ' 'non ASCII characters: áéíóúö', po_contents
             )
             self.assertIn(
                 '#. Translators: Two-line translator comment #5 -- with '
                 'non ASCII characters: áéíóúö\n#. continued here.',
-                po_contents
+                po_contents,
             )
 
     def test_special_char_extracted(self):
@@ -195,9 +188,8 @@ class BasicExtractorTests(ExtractorTests):
         self.assertLocationCommentPresent(self.PO_FILE, 'Get my line number', 'templates', 'test.html')
 
     def test_extraction_error(self):
-        msg = (
-            'Translation blocks must not include other block tags: blocktrans '
-            '(file %s, line 3)' % os.path.join('templates', 'template_with_error.tpl')
+        msg = 'Translation blocks must not include other block tags: blocktrans ' '(file %s, line 3)' % os.path.join(
+            'templates', 'template_with_error.tpl'
         )
         with self.assertRaisesMessage(SyntaxError, msg):
             management.call_command('makemessages', locale=[LOCALE], extensions=['tpl'], verbosity=0)
@@ -282,19 +274,19 @@ class BasicExtractorTests(ExtractorTests):
                 str(ws[0].message),
                 r"The translator-targeted comment 'Translators: ignored i18n "
                 r"comment #1' \(file templates[/\\]comments.thtml, line 4\) "
-                r"was ignored, because it wasn't the last item on the line\."
+                r"was ignored, because it wasn't the last item on the line\.",
             )
             self.assertRegex(
                 str(ws[1].message),
                 r"The translator-targeted comment 'Translators: ignored i18n "
                 r"comment #3' \(file templates[/\\]comments.thtml, line 6\) "
-                r"was ignored, because it wasn't the last item on the line\."
+                r"was ignored, because it wasn't the last item on the line\.",
             )
             self.assertRegex(
                 str(ws[2].message),
                 r"The translator-targeted comment 'Translators: ignored i18n "
                 r"comment #4' \(file templates[/\\]comments.thtml, line 8\) "
-                r"was ignored, because it wasn't the last item on the line\."
+                r"was ignored, because it wasn't the last item on the line\.",
             )
         # Now test .po file contents
         self.assertTrue(os.path.exists(self.PO_FILE))
@@ -364,19 +356,20 @@ class BasicExtractorTests(ExtractorTests):
             "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
             "This is free software: you are free to change and redistribute it.\n"
             "There is NO WARRANTY, to the extent permitted by law.\n"
-            "Written by Ulrich Drepper.\n", '', 0)
+            "Written by Ulrich Drepper.\n",
+            '',
+            0,
+        )
         cmd = MakeMessagesCommand()
         self.assertEqual(cmd.gettext_version, (0, 18, 1))
 
         # Version number with only 2 parts (#23788)
-        mocked_popen_wrapper.return_value = (
-            "xgettext (GNU gettext-tools) 0.17\n", '', 0)
+        mocked_popen_wrapper.return_value = ("xgettext (GNU gettext-tools) 0.17\n", '', 0)
         cmd = MakeMessagesCommand()
         self.assertEqual(cmd.gettext_version, (0, 17))
 
         # Bad version output
-        mocked_popen_wrapper.return_value = (
-            "any other return value\n", '', 0)
+        mocked_popen_wrapper.return_value = ("any other return value\n", '', 0)
         cmd = MakeMessagesCommand()
         with self.assertRaisesMessage(CommandError, "Unable to get gettext version. Is it installed?"):
             cmd.gettext_version
@@ -440,8 +433,9 @@ class JavascriptExtractorTests(ExtractorTests):
         """
         Regression test for #23583.
         """
-        with override_settings(STATIC_ROOT=os.path.join(self.test_dir, 'static/'),
-                               MEDIA_ROOT=os.path.join(self.test_dir, 'media_root/')):
+        with override_settings(
+            STATIC_ROOT=os.path.join(self.test_dir, 'static/'), MEDIA_ROOT=os.path.join(self.test_dir, 'media_root/')
+        ):
             _, po_contents = self._run_makemessages(domain='djangojs')
             self.assertMsgId("Static content inside app should be included.", po_contents)
             self.assertNotMsgId("Content from STATIC_ROOT should not be included", po_contents)
@@ -456,40 +450,32 @@ class JavascriptExtractorTests(ExtractorTests):
 
 
 class IgnoredExtractorTests(ExtractorTests):
-
     def test_ignore_directory(self):
-        out, po_contents = self._run_makemessages(ignore_patterns=[
-            os.path.join('ignore_dir', '*'),
-        ])
+        out, po_contents = self._run_makemessages(ignore_patterns=[os.path.join('ignore_dir', '*')])
         self.assertIn("ignoring directory ignore_dir", out)
         self.assertMsgId('This literal should be included.', po_contents)
         self.assertNotMsgId('This should be ignored.', po_contents)
 
     def test_ignore_subdirectory(self):
-        out, po_contents = self._run_makemessages(ignore_patterns=[
-            'templates/*/ignore.html',
-            'templates/subdir/*',
-        ])
+        out, po_contents = self._run_makemessages(ignore_patterns=['templates/*/ignore.html', 'templates/subdir/*'])
         self.assertIn("ignoring directory subdir", out)
         self.assertNotMsgId('This subdir should be ignored too.', po_contents)
 
     def test_ignore_file_patterns(self):
-        out, po_contents = self._run_makemessages(ignore_patterns=[
-            'xxx_*',
-        ])
+        out, po_contents = self._run_makemessages(ignore_patterns=['xxx_*'])
         self.assertIn("ignoring file xxx_ignored.html", out)
         self.assertNotMsgId('This should be ignored too.', po_contents)
 
     def test_media_static_dirs_ignored(self):
-        with override_settings(STATIC_ROOT=os.path.join(self.test_dir, 'static/'),
-                               MEDIA_ROOT=os.path.join(self.test_dir, 'media_root/')):
+        with override_settings(
+            STATIC_ROOT=os.path.join(self.test_dir, 'static/'), MEDIA_ROOT=os.path.join(self.test_dir, 'media_root/')
+        ):
             out, _ = self._run_makemessages()
             self.assertIn("ignoring directory static", out)
             self.assertIn("ignoring directory media_root", out)
 
 
 class SymlinkExtractorTests(ExtractorTests):
-
     def setUp(self):
         super().setUp()
         self.symlinked_dir = os.path.join(self.test_dir, 'templates_symlinked')
@@ -543,7 +529,6 @@ class CopyPluralFormsExtractorTests(ExtractorTests):
 
 
 class NoWrapExtractorTests(ExtractorTests):
-
     def test_no_wrap_enabled(self):
         management.call_command('makemessages', locale=[LOCALE], verbosity=0, no_wrap=True)
         self.assertTrue(os.path.exists(self.PO_FILE))
@@ -552,7 +537,7 @@ class NoWrapExtractorTests(ExtractorTests):
             self.assertMsgId(
                 'This literal should also be included wrapped or not wrapped '
                 'depending on the use of the --no-wrap option.',
-                po_contents
+                po_contents,
             )
 
     def test_no_wrap_disabled(self):
@@ -564,12 +549,11 @@ class NoWrapExtractorTests(ExtractorTests):
                 '""\n"This literal should also be included wrapped or not '
                 'wrapped depending on the "\n"use of the --no-wrap option."',
                 po_contents,
-                use_quotes=False
+                use_quotes=False,
             )
 
 
 class LocationCommentsTests(ExtractorTests):
-
     def test_no_location_enabled(self):
         """Behavior is correct if --no-location switch is specified. See #16903."""
         management.call_command('makemessages', locale=[LOCALE], verbosity=0, no_location=True)
@@ -718,8 +702,7 @@ class ExcludedLocaleExtractionTests(ExtractorTests):
         self.assertNotRecentlyModified(self.PO_FILE % 'it')
 
     def test_multiple_locales_excluded_with_locale(self):
-        management.call_command('makemessages', locale=['en', 'fr', 'it'], exclude=['fr', 'it'],
-                                stdout=StringIO())
+        management.call_command('makemessages', locale=['en', 'fr', 'it'], exclude=['fr', 'it'], stdout=StringIO())
         self.assertRecentlyModified(self.PO_FILE % 'en')
         self.assertNotRecentlyModified(self.PO_FILE % 'fr')
         self.assertNotRecentlyModified(self.PO_FILE % 'it')
@@ -741,10 +724,8 @@ class CustomLayoutExtractionTests(ExtractorTests):
         """
         with override_settings(LOCALE_PATHS=[os.path.join(self.test_dir, 'project_locale')]):
             management.call_command('makemessages', locale=[LOCALE], verbosity=0)
-            project_de_locale = os.path.join(
-                self.test_dir, 'project_locale', 'de', 'LC_MESSAGES', 'django.po')
-            app_de_locale = os.path.join(
-                self.test_dir, 'app_with_locale', 'locale', 'de', 'LC_MESSAGES', 'django.po')
+            project_de_locale = os.path.join(self.test_dir, 'project_locale', 'de', 'LC_MESSAGES', 'django.po')
+            app_de_locale = os.path.join(self.test_dir, 'app_with_locale', 'locale', 'de', 'LC_MESSAGES', 'django.po')
             self.assertTrue(os.path.exists(project_de_locale))
             self.assertTrue(os.path.exists(app_de_locale))
 

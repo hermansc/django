@@ -123,8 +123,7 @@ class Sitemap:
             lastmod = self.__get('lastmod', item)
             if all_items_lastmod:
                 all_items_lastmod = lastmod is not None
-                if (all_items_lastmod and
-                        (latest_lastmod is None or lastmod > latest_lastmod)):
+                if all_items_lastmod and (latest_lastmod is None or lastmod > latest_lastmod):
                     latest_lastmod = lastmod
             url_info = {
                 'item': item,

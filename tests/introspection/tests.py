@@ -23,8 +23,7 @@ class IntrospectionTests(TransactionTestCase):
             cursor.execute('CREATE TABLE django_ixn_test_table (id INTEGER);')
             tl = connection.introspection.django_table_names()
             cursor.execute("DROP TABLE django_ixn_test_table;")
-            self.assertNotIn('django_ixn_test_table', tl,
-                             "django_table_names() returned a non-Django table")
+            self.assertNotIn('django_ixn_test_table', tl, "django_table_names() returned a non-Django table")
 
     def test_django_table_names_retval_type(self):
         # Table name is a list #15216
@@ -37,8 +36,8 @@ class IntrospectionTests(TransactionTestCase):
         with connection.cursor() as cursor:
             try:
                 cursor.execute(
-                    'CREATE VIEW introspection_article_view AS SELECT headline '
-                    'from introspection_article;')
+                    'CREATE VIEW introspection_article_view AS SELECT headline ' 'from introspection_article;'
+                )
             except DatabaseError as e:
                 if 'insufficient privileges' in str(e):
                     self.fail("The test user has no CREATE VIEW privileges")
@@ -69,8 +68,7 @@ class IntrospectionTests(TransactionTestCase):
     def test_get_table_description_names(self):
         with connection.cursor() as cursor:
             desc = connection.introspection.get_table_description(cursor, Reporter._meta.db_table)
-        self.assertEqual([r[0] for r in desc],
-                         [f.column for f in Reporter._meta.fields])
+        self.assertEqual([r[0] for r in desc], [f.column for f in Reporter._meta.fields])
 
     def test_get_table_description_types(self):
         with connection.cursor() as cursor:
@@ -86,15 +84,14 @@ class IntrospectionTests(TransactionTestCase):
                 'BinaryField' if connection.features.can_introspect_binary_field else 'TextField',
                 'SmallIntegerField' if connection.features.can_introspect_small_integer_field else 'IntegerField',
                 'DurationField' if connection.features.can_introspect_duration_field else 'BigIntegerField',
-            ]
+            ],
         )
 
     def test_get_table_description_col_lengths(self):
         with connection.cursor() as cursor:
             desc = connection.introspection.get_table_description(cursor, Reporter._meta.db_table)
         self.assertEqual(
-            [r[3] for r in desc if connection.introspection.get_field_type(r[1], r) == 'CharField'],
-            [30, 30, 254]
+            [r[3] for r in desc if connection.introspection.get_field_type(r[1], r) == 'CharField'], [30, 30, 254]
         )
 
     def test_get_table_description_nullable(self):
@@ -103,7 +100,7 @@ class IntrospectionTests(TransactionTestCase):
         nullable_by_backend = connection.features.interprets_empty_strings_as_nulls
         self.assertEqual(
             [r[6] for r in desc],
-            [False, nullable_by_backend, nullable_by_backend, nullable_by_backend, True, True, False, False]
+            [False, nullable_by_backend, nullable_by_backend, nullable_by_backend, True, True, False, False],
         )
 
     @skipUnlessDBFeature('can_introspect_autofield')
@@ -154,7 +151,7 @@ class IntrospectionTests(TransactionTestCase):
         """
         create_table_statements = [
             "CREATE TABLE track(id, art_id INTEGER, FOREIGN KEY(art_id) REFERENCES {}(id));",
-            "CREATE TABLE track(id, art_id INTEGER, FOREIGN KEY (art_id) REFERENCES {}(id));"
+            "CREATE TABLE track(id, art_id INTEGER, FOREIGN KEY (art_id) REFERENCES {}(id));",
         ]
         for statement in create_table_statements:
             with connection.cursor() as cursor:
@@ -166,10 +163,10 @@ class IntrospectionTests(TransactionTestCase):
     def test_get_key_columns(self):
         with connection.cursor() as cursor:
             key_columns = connection.introspection.get_key_columns(cursor, Article._meta.db_table)
-        self.assertEqual(set(key_columns), {
-            ('reporter_id', Reporter._meta.db_table, 'id'),
-            ('response_to_id', Article._meta.db_table, 'id'),
-        })
+        self.assertEqual(
+            set(key_columns),
+            {('reporter_id', Reporter._meta.db_table, 'id'), ('response_to_id', Article._meta.db_table, 'id')},
+        )
 
     def test_get_primary_key_column(self):
         with connection.cursor() as cursor:
@@ -233,10 +230,7 @@ class IntrospectionTests(TransactionTestCase):
         with connection.cursor() as cursor:
             constraints = connection.introspection.get_constraints(cursor, Comment._meta.db_table)
         # Test custom constraints
-        custom_constraints = {
-            'article_email_pub_date_uniq',
-            'email_pub_date_idx',
-        }
+        custom_constraints = {'article_email_pub_date_uniq', 'email_pub_date_idx'}
         if connection.features.supports_column_check_constraints:
             custom_constraints.add('up_votes_gte_0_check')
             assertDetails(constraints['up_votes_gte_0_check'], ['up_votes'], check=True)

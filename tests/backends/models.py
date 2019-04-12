@@ -1,6 +1,4 @@
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
@@ -66,12 +64,7 @@ class Article(models.Model):
     headline = models.CharField(max_length=100)
     pub_date = models.DateField()
     reporter = models.ForeignKey(Reporter, models.CASCADE)
-    reporter_proxy = models.ForeignKey(
-        ReporterProxy,
-        models.SET_NULL,
-        null=True,
-        related_name='reporter_proxy',
-    )
+    reporter_proxy = models.ForeignKey(ReporterProxy, models.SET_NULL, null=True, related_name='reporter_proxy')
 
     def __str__(self):
         return self.headline

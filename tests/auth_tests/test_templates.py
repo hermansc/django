@@ -2,8 +2,11 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.views import (
-    PasswordChangeDoneView, PasswordChangeView, PasswordResetCompleteView,
-    PasswordResetDoneView, PasswordResetView,
+    PasswordChangeDoneView,
+    PasswordChangeView,
+    PasswordResetCompleteView,
+    PasswordResetDoneView,
+    PasswordResetView,
 )
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse

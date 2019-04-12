@@ -14,21 +14,25 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--all', action='store_true',
+            '--all',
+            action='store_true',
             help=(
                 'Display all settings, regardless of their value. In "hash" '
                 'mode, default values are prefixed by "###".'
             ),
         )
         parser.add_argument(
-            '--default', metavar='MODULE',
+            '--default',
+            metavar='MODULE',
             help=(
                 "The settings module to compare the current settings against. Leave empty to "
                 "compare against Django's default settings."
             ),
         )
         parser.add_argument(
-            '--output', default='hash', choices=('hash', 'unified'),
+            '--output',
+            default='hash',
+            choices=('hash', 'unified'),
             help=(
                 "Selects the output format. 'hash' mode displays each changed "
                 "setting, with the settings that don't appear in the defaults "
@@ -48,10 +52,7 @@ class Command(BaseCommand):
         user_settings = module_to_dict(settings._wrapped)
         default = options['default']
         default_settings = module_to_dict(Settings(default) if default else global_settings)
-        output_func = {
-            'hash': self.output_hash,
-            'unified': self.output_unified,
-        }[options['output']]
+        output_func = {'hash': self.output_hash, 'unified': self.output_unified}[options['output']]
         return '\n'.join(output_func(user_settings, default_settings, **options))
 
     def output_hash(self, user_settings, default_settings, **options):

@@ -1,14 +1,10 @@
-from django.forms import (
-    CharField, HiddenInput, PasswordInput, Textarea, TextInput,
-    ValidationError,
-)
+from django.forms import CharField, HiddenInput, PasswordInput, Textarea, TextInput, ValidationError
 from django.test import SimpleTestCase
 
 from . import FormFieldAssertionsMixin
 
 
 class CharFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
-
     def test_charfield_1(self):
         f = CharField()
         self.assertEqual('1', f.clean(1))
@@ -130,6 +126,7 @@ class CharFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
 
     def test_clean_non_string(self):
         """CharField.clean() calls str(value) before stripping it."""
+
         class StringWrapper:
             def __init__(self, v):
                 self.v = v

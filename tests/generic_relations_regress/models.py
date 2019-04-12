@@ -1,13 +1,23 @@
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.deletion import ProtectedError
 
-__all__ = ('Link', 'Place', 'Restaurant', 'Person', 'Address',
-           'CharLink', 'TextLink', 'OddRelation1', 'OddRelation2',
-           'Contact', 'Organization', 'Note', 'Company')
+__all__ = (
+    'Link',
+    'Place',
+    'Restaurant',
+    'Person',
+    'Address',
+    'CharLink',
+    'TextLink',
+    'OddRelation1',
+    'OddRelation2',
+    'Contact',
+    'Organization',
+    'Note',
+    'Company',
+)
 
 
 class Link(models.Model):
@@ -197,6 +207,7 @@ class D(models.Model):
 
 
 # Ticket #22998
+
 
 class Node(models.Model):
     content_type = models.ForeignKey(ContentType, models.CASCADE)

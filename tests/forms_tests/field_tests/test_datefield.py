@@ -1,8 +1,6 @@
 from datetime import date, datetime
 
-from django.forms import (
-    DateField, Form, HiddenInput, SelectDateWidget, ValidationError,
-)
+from django.forms import DateField, Form, HiddenInput, SelectDateWidget, ValidationError
 from django.test import SimpleTestCase, override_settings
 from django.utils import translation
 
@@ -12,7 +10,6 @@ class GetDate(Form):
 
 
 class DateFieldTest(SimpleTestCase):
-
     def test_form_field(self):
         a = GetDate({'mydate_month': '4', 'mydate_day': '1', 'mydate_year': '2008'})
         self.assertTrue(a.is_valid())
@@ -21,8 +18,7 @@ class DateFieldTest(SimpleTestCase):
         # As with any widget that implements get_value_from_datadict(), we must
         # accept the input from the "as_hidden" rendering as well.
         self.assertHTMLEqual(
-            a['mydate'].as_hidden(),
-            '<input type="hidden" name="mydate" value="2008-4-1" id="id_mydate">',
+            a['mydate'].as_hidden(), '<input type="hidden" name="mydate" value="2008-4-1" id="id_mydate">'
         )
 
         b = GetDate({'mydate': '2008-4-1'})
@@ -46,54 +42,62 @@ class DateFieldTest(SimpleTestCase):
         date format (#17165).
         """
         # With Field.show_hidden_initial=False
-        b = GetDate({
-            'mydate_year': '2008',
-            'mydate_month': '4',
-            'mydate_day': '1',
-        }, initial={'mydate': date(2008, 4, 1)})
+        b = GetDate(
+            {'mydate_year': '2008', 'mydate_month': '4', 'mydate_day': '1'}, initial={'mydate': date(2008, 4, 1)}
+        )
         self.assertFalse(b.has_changed())
 
-        b = GetDate({
-            'mydate_year': '2008',
-            'mydate_month': '4',
-            'mydate_day': '2',
-        }, initial={'mydate': date(2008, 4, 1)})
+        b = GetDate(
+            {'mydate_year': '2008', 'mydate_month': '4', 'mydate_day': '2'}, initial={'mydate': date(2008, 4, 1)}
+        )
         self.assertTrue(b.has_changed())
 
         # With Field.show_hidden_initial=True
         class GetDateShowHiddenInitial(Form):
             mydate = DateField(widget=SelectDateWidget, show_hidden_initial=True)
 
-        b = GetDateShowHiddenInitial({
-            'mydate_year': '2008',
-            'mydate_month': '4',
-            'mydate_day': '1',
-            'initial-mydate': HiddenInput().format_value(date(2008, 4, 1)),
-        }, initial={'mydate': date(2008, 4, 1)})
+        b = GetDateShowHiddenInitial(
+            {
+                'mydate_year': '2008',
+                'mydate_month': '4',
+                'mydate_day': '1',
+                'initial-mydate': HiddenInput().format_value(date(2008, 4, 1)),
+            },
+            initial={'mydate': date(2008, 4, 1)},
+        )
         self.assertFalse(b.has_changed())
 
-        b = GetDateShowHiddenInitial({
-            'mydate_year': '2008',
-            'mydate_month': '4',
-            'mydate_day': '22',
-            'initial-mydate': HiddenInput().format_value(date(2008, 4, 1)),
-        }, initial={'mydate': date(2008, 4, 1)})
+        b = GetDateShowHiddenInitial(
+            {
+                'mydate_year': '2008',
+                'mydate_month': '4',
+                'mydate_day': '22',
+                'initial-mydate': HiddenInput().format_value(date(2008, 4, 1)),
+            },
+            initial={'mydate': date(2008, 4, 1)},
+        )
         self.assertTrue(b.has_changed())
 
-        b = GetDateShowHiddenInitial({
-            'mydate_year': '2008',
-            'mydate_month': '4',
-            'mydate_day': '22',
-            'initial-mydate': HiddenInput().format_value(date(2008, 4, 1)),
-        }, initial={'mydate': date(2008, 4, 22)})
+        b = GetDateShowHiddenInitial(
+            {
+                'mydate_year': '2008',
+                'mydate_month': '4',
+                'mydate_day': '22',
+                'initial-mydate': HiddenInput().format_value(date(2008, 4, 1)),
+            },
+            initial={'mydate': date(2008, 4, 22)},
+        )
         self.assertTrue(b.has_changed())
 
-        b = GetDateShowHiddenInitial({
-            'mydate_year': '2008',
-            'mydate_month': '4',
-            'mydate_day': '22',
-            'initial-mydate': HiddenInput().format_value(date(2008, 4, 22)),
-        }, initial={'mydate': date(2008, 4, 1)})
+        b = GetDateShowHiddenInitial(
+            {
+                'mydate_year': '2008',
+                'mydate_month': '4',
+                'mydate_day': '22',
+                'initial-mydate': HiddenInput().format_value(date(2008, 4, 22)),
+            },
+            initial={'mydate': date(2008, 4, 1)},
+        )
         self.assertFalse(b.has_changed())
 
     @override_settings(USE_L10N=True)

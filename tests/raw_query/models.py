@@ -12,8 +12,7 @@ class Author(models.Model):
         # this'll make the test suite get angry if annotations aren't
         # treated differently than fields.
         for k in kwargs:
-            assert k in [f.attname for f in self._meta.fields], \
-                "Author.__init__ got an unexpected parameter: %s" % k
+            assert k in [f.attname for f in self._meta.fields], "Author.__init__ got an unexpected parameter: %s" % k
 
 
 class Book(models.Model):

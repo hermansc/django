@@ -8,16 +8,12 @@ from django.test import SimpleTestCase, TestCase
 
 
 class ConnectionHandlerTests(SimpleTestCase):
-
     def test_connection_handler_no_databases(self):
         """
         Empty DATABASES and empty 'default' settings default to the dummy
         backend.
         """
-        for DATABASES in (
-            {},  # Empty DATABASES setting.
-            {'default': {}},  # Empty 'default' database.
-        ):
+        for DATABASES in ({}, {'default': {}}):  # Empty DATABASES setting.  # Empty 'default' database.
             with self.subTest(DATABASES=DATABASES):
                 self.assertImproperlyConfigured(DATABASES)
 
@@ -40,7 +36,6 @@ class ConnectionHandlerTests(SimpleTestCase):
 
 
 class DatabaseErrorWrapperTests(TestCase):
-
     @unittest.skipUnless(connection.vendor == 'postgresql', 'PostgreSQL test')
     def test_reraising_backend_specific_database_exception(self):
         with connection.cursor() as cursor:
@@ -54,7 +49,6 @@ class DatabaseErrorWrapperTests(TestCase):
 
 
 class LoadBackendTests(SimpleTestCase):
-
     def test_load_backend_invalid_name(self):
         msg = (
             "'foo' isn't an available database backend.\n"

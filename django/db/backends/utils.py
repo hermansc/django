@@ -49,10 +49,7 @@ class CursorWrapper:
         # Keyword parameters for callproc aren't supported in PEP 249, but the
         # database driver may support them (e.g. cx_Oracle).
         if kparams is not None and not self.db.features.supports_callproc_kwargs:
-            raise NotSupportedError(
-                'Keyword parameters for callproc are not supported on this '
-                'database backend.'
-            )
+            raise NotSupportedError('Keyword parameters for callproc are not supported on this ' 'database backend.')
         self.db.validate_no_broken_transaction()
         with self.db.wrap_database_errors:
             if params is None and kparams is None:
@@ -101,13 +98,9 @@ class CursorDebugWrapper(CursorWrapper):
             stop = time()
             duration = stop - start
             sql = self.db.ops.last_executed_query(self.cursor, sql, params)
-            self.db.queries_log.append({
-                'sql': sql,
-                'time': "%.3f" % duration,
-            })
+            self.db.queries_log.append({'sql': sql, 'time': "%.3f" % duration})
             logger.debug(
-                '(%.3f) %s; args=%s', duration, sql, params,
-                extra={'duration': duration, 'sql': sql, 'params': params}
+                '(%.3f) %s; args=%s', duration, sql, params, extra={'duration': duration, 'sql': sql, 'params': params}
             )
 
     def executemany(self, sql, param_list):
@@ -119,21 +112,22 @@ class CursorDebugWrapper(CursorWrapper):
             duration = stop - start
             try:
                 times = len(param_list)
-            except TypeError:           # param_list could be an iterator
+            except TypeError:  # param_list could be an iterator
                 times = '?'
-            self.db.queries_log.append({
-                'sql': '%s times: %s' % (times, sql),
-                'time': "%.3f" % duration,
-            })
+            self.db.queries_log.append({'sql': '%s times: %s' % (times, sql), 'time': "%.3f" % duration})
             logger.debug(
-                '(%.3f) %s; args=%s', duration, sql, param_list,
-                extra={'duration': duration, 'sql': sql, 'params': param_list}
+                '(%.3f) %s; args=%s',
+                duration,
+                sql,
+                param_list,
+                extra={'duration': duration, 'sql': sql, 'params': param_list},
             )
 
 
 ###############################################
 # Converters from database (string) to Python #
 ###############################################
+
 
 def typecast_date(s):
     return datetime.date(*map(int, s.split('-'))) if s else None  # return None if s is null
@@ -172,15 +166,21 @@ def typecast_timestamp(s):  # does NOT store time zone information
         microseconds = '0'
     tzinfo = utc if settings.USE_TZ else None
     return datetime.datetime(
-        int(dates[0]), int(dates[1]), int(dates[2]),
-        int(times[0]), int(times[1]), int(seconds),
-        int((microseconds + '000000')[:6]), tzinfo
+        int(dates[0]),
+        int(dates[1]),
+        int(dates[2]),
+        int(times[0]),
+        int(times[1]),
+        int(seconds),
+        int((microseconds + '000000')[:6]),
+        tzinfo,
     )
 
 
 ###############################################
 # Converters from Python to database (string) #
 ###############################################
+
 
 def split_identifier(identifier):
     """
@@ -210,7 +210,7 @@ def truncate_name(identifier, length=None, hash_len=4):
         return identifier
 
     digest = names_digest(name, length=hash_len)
-    return '%s%s%s' % ('%s"."' % namespace if namespace else '', name[:length - hash_len], digest)
+    return '%s%s%s' % ('%s"."' % namespace if namespace else '', name[: length - hash_len], digest)
 
 
 def names_digest(*args, length):

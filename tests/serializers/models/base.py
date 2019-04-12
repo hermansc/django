@@ -10,7 +10,6 @@ from django.db import models
 
 
 class CategoryMetaDataManager(models.Manager):
-
     def get_by_natural_key(self, kind, name):
         return self.get(kind=kind, name=name)
 
@@ -112,7 +111,6 @@ class Team:
 
 
 class TeamField(models.CharField):
-
     def __init__(self):
         super().__init__(max_length=100)
 

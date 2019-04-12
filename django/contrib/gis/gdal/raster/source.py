@@ -2,9 +2,7 @@ import json
 import os
 import sys
 import uuid
-from ctypes import (
-    addressof, byref, c_buffer, c_char_p, c_double, c_int, c_void_p, string_at,
-)
+from ctypes import addressof, byref, c_buffer, c_char_p, c_double, c_int, c_void_p, string_at
 
 from django.contrib.gis.gdal.driver import Driver
 from django.contrib.gis.gdal.error import GDALException
@@ -12,8 +10,10 @@ from django.contrib.gis.gdal.prototypes import raster as capi
 from django.contrib.gis.gdal.raster.band import BandList
 from django.contrib.gis.gdal.raster.base import GDALRasterBase
 from django.contrib.gis.gdal.raster.const import (
-    GDAL_RESAMPLE_ALGORITHMS, VSI_DELETE_BUFFER_ON_READ,
-    VSI_FILESYSTEM_BASE_PATH, VSI_TAKE_BUFFER_OWNERSHIP,
+    GDAL_RESAMPLE_ALGORITHMS,
+    VSI_DELETE_BUFFER_ON_READ,
+    VSI_FILESYSTEM_BASE_PATH,
+    VSI_TAKE_BUFFER_OWNERSHIP,
 )
 from django.contrib.gis.gdal.srs import SpatialReference, SRSException
 from django.contrib.gis.geometry import json_regex
@@ -22,11 +22,7 @@ from django.utils.functional import cached_property
 
 
 class TransformPoint(list):
-    indices = {
-        'origin': (0, 3),
-        'scale': (1, 5),
-        'skew': (2, 4),
-    }
+    indices = {'origin': (0, 3), 'scale': (1, 5), 'skew': (2, 4)}
 
     def __init__(self, raster, prop):
         x = raster.geotransform[self.indices[prop][0]]
@@ -60,6 +56,7 @@ class GDALRaster(GDALRasterBase):
     """
     Wrap a raster GDAL Data Source object.
     """
+
     destructor = capi.close_ds
 
     def __init__(self, ds_input, write=False):
@@ -91,10 +88,7 @@ class GDALRaster(GDALRasterBase):
             vsi_path = os.path.join(VSI_FILESYSTEM_BASE_PATH, str(uuid.uuid4()))
             # Create vsimem file from buffer.
             capi.create_vsi_file_from_mem_buffer(
-                force_bytes(vsi_path),
-                byref(self._ds_input),
-                size,
-                VSI_TAKE_BUFFER_OWNERSHIP,
+                force_bytes(vsi_path), byref(self._ds_input), size, VSI_TAKE_BUFFER_OWNERSHIP
             )
             # Open the new vsimem file as a GDALRaster.
             try:
@@ -151,9 +145,8 @@ class GDALRaster(GDALRasterBase):
                     # Instantiate band filled with nodata values if only
                     # partial input data has been provided.
                     if band.nodata_value is not None and (
-                            'data' not in band_input or
-                            'size' in band_input or
-                            'shape' in band_input):
+                        'data' not in band_input or 'size' in band_input or 'shape' in band_input
+                    ):
                         band.data(data=(band.nodata_value,), shape=(1, 1))
                 # Set band data values from input.
                 band.data(
@@ -215,11 +208,7 @@ class GDALRaster(GDALRasterBase):
         # Prepare an integer that will contain the buffer length.
         out_length = c_int()
         # Get the data using the vsi file name.
-        dat = capi.get_mem_buffer_from_vsi_file(
-            force_bytes(self.name),
-            byref(out_length),
-            VSI_DELETE_BUFFER_ON_READ,
-        )
+        dat = capi.get_mem_buffer_from_vsi_file(force_bytes(self.name), byref(out_length), VSI_DELETE_BUFFER_ON_READ)
         # Read the full buffer pointer.
         return string_at(dat, out_length.value)
 
@@ -407,10 +396,16 @@ class GDALRaster(GDALRasterBase):
 
         # Reproject image
         capi.reproject_image(
-            self._ptr, self.srs.wkt.encode(),
-            target._ptr, target.srs.wkt.encode(),
-            algorithm, 0.0, max_error,
-            c_void_p(), c_void_p(), c_void_p()
+            self._ptr,
+            self.srs.wkt.encode(),
+            target._ptr,
+            target.srs.wkt.encode(),
+            algorithm,
+            0.0,
+            max_error,
+            c_void_p(),
+            c_void_p(),
+            c_void_p(),
         )
 
         # Make sure all data is written to file
@@ -418,8 +413,7 @@ class GDALRaster(GDALRasterBase):
 
         return target
 
-    def transform(self, srid, driver=None, name=None, resampling='NearestNeighbour',
-                  max_error=0.0):
+    def transform(self, srid, driver=None, name=None, resampling='NearestNeighbour', max_error=0.0):
         """
         Return a copy of this raster reprojected into the given SRID.
         """
@@ -431,8 +425,7 @@ class GDALRaster(GDALRasterBase):
 
         # Create warped virtual dataset in the target reference system
         target = capi.auto_create_warped_vrt(
-            self._ptr, self.srs.wkt.encode(), target_srs.wkt.encode(),
-            algorithm, max_error, c_void_p()
+            self._ptr, self.srs.wkt.encode(), target_srs.wkt.encode(), algorithm, max_error, c_void_p()
         )
         target = GDALRaster(target)
 

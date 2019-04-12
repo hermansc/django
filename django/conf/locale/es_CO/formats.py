@@ -8,11 +8,7 @@ MONTH_DAY_FORMAT = r'j \d\e F'
 SHORT_DATE_FORMAT = 'd/m/Y'
 SHORT_DATETIME_FORMAT = 'd/m/Y H:i'
 FIRST_DAY_OF_WEEK = 1
-DATE_INPUT_FORMATS = [
-    '%d/%m/%Y', '%d/%m/%y',  # '25/10/2006', '25/10/06'
-    '%Y%m%d',                # '20061025'
-
-]
+DATE_INPUT_FORMATS = ['%d/%m/%Y', '%d/%m/%y', '%Y%m%d']  # '25/10/2006', '25/10/06'  # '20061025'
 DATETIME_INPUT_FORMATS = [
     '%d/%m/%Y %H:%M:%S',
     '%d/%m/%Y %H:%M:%S.%f',

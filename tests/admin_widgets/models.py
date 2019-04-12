@@ -59,16 +59,10 @@ class Inventory(models.Model):
 
 class Event(models.Model):
     main_band = models.ForeignKey(
-        Band,
-        models.CASCADE,
-        limit_choices_to=models.Q(pk__gt=0),
-        related_name='events_main_band_at',
+        Band, models.CASCADE, limit_choices_to=models.Q(pk__gt=0), related_name='events_main_band_at'
     )
     supporting_bands = models.ManyToManyField(
-        Band,
-        blank=True,
-        related_name='events_supporting_band_at',
-        help_text='Supporting Bands.',
+        Band, blank=True, related_name='events_supporting_band_at', help_text='Supporting Bands.'
     )
     start_date = models.DateField(blank=True, null=True)
     start_time = models.TimeField(blank=True, null=True)
@@ -90,6 +84,7 @@ class CarTire(models.Model):
     """
     A single car tire. This to test that a user can only select their own cars.
     """
+
     car = models.ForeignKey(Car, models.CASCADE)
 
 
@@ -104,6 +99,7 @@ class Bee(models.Model):
     (Honeycomb) so the corresponding raw ID widget won't have a magnifying
     glass link to select related honeycomb instances.
     """
+
     honeycomb = models.ForeignKey(Honeycomb, models.CASCADE)
 
 
@@ -113,6 +109,7 @@ class Individual(models.Model):
     corresponding raw ID widget won't have a magnifying glass link to select
     related instances (rendering will be called programmatically in this case).
     """
+
     name = models.CharField(max_length=20)
     parent = models.ForeignKey('self', models.SET_NULL, null=True)
     soulmate = models.ForeignKey('self', models.CASCADE, null=True, related_name='soulmates')
@@ -128,6 +125,7 @@ class Advisor(models.Model):
     (Company) so the corresponding raw ID widget won't have a magnifying
     glass link to select related company instances.
     """
+
     name = models.CharField(max_length=20)
     companies = models.ManyToManyField(Company)
 

@@ -100,10 +100,7 @@ class BookWeak(models.Model):
 
 
 class BookWithLongName(models.Model):
-    author_foreign_key_with_really_long_field_name = models.ForeignKey(
-        AuthorWithEvenLongerName,
-        models.CASCADE,
-    )
+    author_foreign_key_with_really_long_field_name = models.ForeignKey(AuthorWithEvenLongerName, models.CASCADE)
 
     class Meta:
         apps = new_apps

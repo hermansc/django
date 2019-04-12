@@ -5,10 +5,20 @@ from django.contrib.gis.gdal import Driver, GDALException
 
 valid_drivers = (
     # vector
-    'ESRI Shapefile', 'MapInfo File', 'TIGER', 'S57', 'DGN', 'Memory', 'CSV',
-    'GML', 'KML',
+    'ESRI Shapefile',
+    'MapInfo File',
+    'TIGER',
+    'S57',
+    'DGN',
+    'Memory',
+    'CSV',
+    'GML',
+    'KML',
     # raster
-    'GTiff', 'JPEG', 'MEM', 'PNG',
+    'GTiff',
+    'JPEG',
+    'MEM',
+    'PNG',
 )
 
 invalid_drivers = ('Foo baz', 'clucka', 'ESRI Shp', 'ESRI rast')
@@ -26,7 +36,6 @@ aliases = {
 
 
 class DriverTest(unittest.TestCase):
-
     def test01_valid_driver(self):
         "Testing valid GDAL/OGR Data Source Drivers."
         for d in valid_drivers:
@@ -54,6 +63,7 @@ class DriverTest(unittest.TestCase):
         Prototypes are registered only if their respective driver counts are
         zero.
         """
+
         def check(rcount_val, vcount_val):
             vreg.reset_mock()
             rreg.reset_mock()

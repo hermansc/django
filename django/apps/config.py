@@ -70,12 +70,14 @@ class AppConfig:
             raise ImproperlyConfigured(
                 "The app module %r has multiple filesystem locations (%r); "
                 "you must configure this app with an AppConfig subclass "
-                "with a 'path' class attribute." % (module, paths))
+                "with a 'path' class attribute." % (module, paths)
+            )
         elif not paths:
             raise ImproperlyConfigured(
                 "The app module %r has no filesystem location, "
                 "you must configure this app with an AppConfig subclass "
-                "with a 'path' class attribute." % (module,))
+                "with a 'path' class attribute." % (module,)
+            )
         return paths[0]
 
     @classmethod
@@ -123,10 +125,9 @@ class AppConfig:
                 # Otherwise, that error probably contains the most informative
                 # traceback, so trigger it again.
                 candidates = sorted(
-                    repr(name) for name, candidate in mod.__dict__.items()
-                    if isinstance(candidate, type) and
-                    issubclass(candidate, AppConfig) and
-                    candidate is not AppConfig
+                    repr(name)
+                    for name, candidate in mod.__dict__.items()
+                    if isinstance(candidate, type) and issubclass(candidate, AppConfig) and candidate is not AppConfig
                 )
                 if candidates:
                     raise ImproperlyConfigured(
@@ -140,25 +141,21 @@ class AppConfig:
         # Check for obvious errors. (This check prevents duck typing, but
         # it could be removed if it became a problem in practice.)
         if not issubclass(cls, AppConfig):
-            raise ImproperlyConfigured(
-                "'%s' isn't a subclass of AppConfig." % entry)
+            raise ImproperlyConfigured("'%s' isn't a subclass of AppConfig." % entry)
 
         # Obtain app name here rather than in AppClass.__init__ to keep
         # all error checking for entries in INSTALLED_APPS in one place.
         try:
             app_name = cls.name
         except AttributeError:
-            raise ImproperlyConfigured(
-                "'%s' must supply a name attribute." % entry)
+            raise ImproperlyConfigured("'%s' must supply a name attribute." % entry)
 
         # Ensure app_name points to a valid module.
         try:
             app_module = import_module(app_name)
         except ImportError:
             raise ImproperlyConfigured(
-                "Cannot import '%s'. Check that '%s.%s.name' is correct." % (
-                    app_name, mod_path, cls_name,
-                )
+                "Cannot import '%s'. Check that '%s.%s.name' is correct." % (app_name, mod_path, cls_name)
             )
 
         # Entry is a path to an app config class.
@@ -177,8 +174,7 @@ class AppConfig:
         try:
             return self.models[model_name.lower()]
         except KeyError:
-            raise LookupError(
-                "App '%s' doesn't have a '%s' model." % (self.label, model_name))
+            raise LookupError("App '%s' doesn't have a '%s' model." % (self.label, model_name))
 
     def get_models(self, include_auto_created=False, include_swapped=False):
         """

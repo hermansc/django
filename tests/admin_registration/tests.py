@@ -93,6 +93,7 @@ class TestRegistrationDecorator(SimpleTestCase):
 
         AuthorAdmin = register(Person)(AuthorAdmin)
     """
+
     def setUp(self):
         self.default_site = site
         self.custom_site = CustomSite()

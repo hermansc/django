@@ -9,6 +9,7 @@ class InsertIdVar:
     as a parameter, in order to receive the id of the row created by an
     insert statement.
     """
+
     def bind_parameter(self, cursor):
         param = cursor.cursor.var(int)
         cursor._insert_id_var = param
@@ -20,14 +21,12 @@ class Oracle_datetime(datetime.datetime):
     A datetime object, with an additional class attribute
     to tell cx_Oracle to save the microseconds too.
     """
+
     input_size = Database.TIMESTAMP
 
     @classmethod
     def from_datetime(cls, dt):
-        return Oracle_datetime(
-            dt.year, dt.month, dt.day,
-            dt.hour, dt.minute, dt.second, dt.microsecond,
-        )
+        return Oracle_datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, dt.microsecond)
 
 
 class BulkInsertMapper:

@@ -91,9 +91,7 @@ class ListMixin:
             indexRange = range(*index.indices(origLen))
 
         newLen = origLen - len(indexRange)
-        newItems = (self._get_single_internal(i)
-                    for i in range(origLen)
-                    if i not in indexRange)
+        newItems = (self._get_single_internal(i) for i in range(origLen) if i not in indexRange)
 
         self._rebuild(newLen, newItems)
 
@@ -184,11 +182,11 @@ class ListMixin:
     # ## Mutating ##
     def append(self, val):
         "Standard list append method"
-        self[len(self):] = [val]
+        self[len(self) :] = [val]
 
     def extend(self, vals):
         "Standard list extend method"
-        self[len(self):] = vals
+        self[len(self) :] = vals
 
     def insert(self, index, val):
         "Standard list insert method"
@@ -263,9 +261,10 @@ class ListMixin:
         indexList = range(start, stop, step)
         # extended slice, only allow assigning slice of same size
         if len(valueList) != len(indexList):
-            raise ValueError('attempt to assign sequence of size %d '
-                             'to extended slice of size %d'
-                             % (len(valueList), len(indexList)))
+            raise ValueError(
+                'attempt to assign sequence of size %d '
+                'to extended slice of size %d' % (len(valueList), len(indexList))
+            )
 
         # we're not changing the length of the sequence
         newLen = len(self)
@@ -285,9 +284,10 @@ class ListMixin:
         indexList = range(start, stop, step)
         # extended slice, only allow assigning slice of same size
         if len(valueList) != len(indexList):
-            raise ValueError('attempt to assign sequence of size %d '
-                             'to extended slice of size %d'
-                             % (len(valueList), len(indexList)))
+            raise ValueError(
+                'attempt to assign sequence of size %d '
+                'to extended slice of size %d' % (len(valueList), len(indexList))
+            )
 
         for i, val in zip(indexList, valueList):
             self._set_single(i, val)

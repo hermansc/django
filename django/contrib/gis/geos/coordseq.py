@@ -183,8 +183,7 @@ class GEOSCoordSeq(GEOSBase):
             substr = '%s,%s,%s '
         else:
             substr = '%s,%s,0 '
-        return '<coordinates>%s</coordinates>' % \
-            ''.join(substr % self[i] for i in range(len(self))).strip()
+        return '<coordinates>%s</coordinates>' % ''.join(substr % self[i] for i in range(len(self))).strip()
 
     @property
     def tuple(self):

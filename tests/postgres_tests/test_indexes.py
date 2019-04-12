@@ -1,8 +1,6 @@
 from unittest import mock
 
-from django.contrib.postgres.indexes import (
-    BrinIndex, BTreeIndex, GinIndex, GistIndex, HashIndex, SpGistIndex,
-)
+from django.contrib.postgres.indexes import BrinIndex, BTreeIndex, GinIndex, GistIndex, HashIndex, SpGistIndex
 from django.db import connection
 from django.db.models import CharField
 from django.db.models.functions import Length
@@ -16,7 +14,6 @@ from .models import CharFieldModel, IntegerArrayModel
 
 
 class IndexTestMixin:
-
     def test_name_auto_generation(self):
         index = self.index_class(fields=['field'])
         index.set_name_with_model(CharFieldModel)
@@ -41,12 +38,9 @@ class BrinIndexTests(IndexTestMixin, PostgreSQLSimpleTestCase):
         path, args, kwargs = index.deconstruct()
         self.assertEqual(path, 'django.contrib.postgres.indexes.BrinIndex')
         self.assertEqual(args, ())
-        self.assertEqual(kwargs, {
-            'fields': ['title'],
-            'name': 'test_title_brin',
-            'autosummarize': True,
-            'pages_per_range': 16,
-        })
+        self.assertEqual(
+            kwargs, {'fields': ['title'], 'name': 'test_title_brin', 'autosummarize': True, 'pages_per_range': 16}
+        )
 
     def test_invalid_pages_per_range(self):
         with self.assertRaisesMessage(ValueError, 'pages_per_range must be None or a positive integer'):
@@ -74,21 +68,13 @@ class GinIndexTests(IndexTestMixin, PostgreSQLSimpleTestCase):
         self.assertEqual(GinIndex.suffix, 'gin')
 
     def test_deconstruction(self):
-        index = GinIndex(
-            fields=['title'],
-            name='test_title_gin',
-            fastupdate=True,
-            gin_pending_list_limit=128,
-        )
+        index = GinIndex(fields=['title'], name='test_title_gin', fastupdate=True, gin_pending_list_limit=128)
         path, args, kwargs = index.deconstruct()
         self.assertEqual(path, 'django.contrib.postgres.indexes.GinIndex')
         self.assertEqual(args, ())
-        self.assertEqual(kwargs, {
-            'fields': ['title'],
-            'name': 'test_title_gin',
-            'fastupdate': True,
-            'gin_pending_list_limit': 128,
-        })
+        self.assertEqual(
+            kwargs, {'fields': ['title'], 'name': 'test_title_gin', 'fastupdate': True, 'gin_pending_list_limit': 128}
+        )
 
 
 class GistIndexTests(IndexTestMixin, PostgreSQLSimpleTestCase):
@@ -102,12 +88,9 @@ class GistIndexTests(IndexTestMixin, PostgreSQLSimpleTestCase):
         path, args, kwargs = index.deconstruct()
         self.assertEqual(path, 'django.contrib.postgres.indexes.GistIndex')
         self.assertEqual(args, ())
-        self.assertEqual(kwargs, {
-            'fields': ['title'],
-            'name': 'test_title_gist',
-            'buffering': False,
-            'fillfactor': 80,
-        })
+        self.assertEqual(
+            kwargs, {'fields': ['title'], 'name': 'test_title_gist', 'buffering': False, 'fillfactor': 80}
+        )
 
 
 class HashIndexTests(IndexTestMixin, PostgreSQLSimpleTestCase):
@@ -139,7 +122,6 @@ class SpGistIndexTests(IndexTestMixin, PostgreSQLSimpleTestCase):
 
 
 class SchemaTests(PostgreSQLTestCase):
-
     def get_constraints(self, table):
         """
         Get the indexes on the table using a new cursor.
@@ -191,10 +173,7 @@ class SchemaTests(PostgreSQLTestCase):
         with register_lookup(CharField, Length):
             index_name = 'char_field_gin_partial_idx'
             index = GinIndex(
-                fields=['field'],
-                name=index_name,
-                condition=Q(field__length=40),
-                db_tablespace='pg_default',
+                fields=['field'], name=index_name, condition=Q(field__length=40), db_tablespace='pg_default'
             )
             with connection.schema_editor() as editor:
                 editor.add_index(CharFieldModel, index)

@@ -6,7 +6,6 @@ from .test_extends import inheritance_templates
 
 
 class ExceptionsTests(SimpleTestCase):
-
     @setup({'exception01': "{% extends 'nonexistent' %}"})
     def test_exception01(self):
         """
@@ -28,8 +27,10 @@ class ExceptionsTests(SimpleTestCase):
                 self.engine.render_to_string('exception02')
 
     @setup(
-        {'exception03': "{% extends 'inheritance01' %}"
-                        "{% block first %}2{% endblock %}{% extends 'inheritance16' %}"},
+        {
+            'exception03': "{% extends 'inheritance01' %}"
+            "{% block first %}2{% endblock %}{% extends 'inheritance16' %}"
+        },
         inheritance_templates,
     )
     def test_exception03(self):

@@ -125,20 +125,18 @@ class QuerySetSetOperationTests(TestCase):
         self.assertEqual(reserved_name[:2], ('a', 2))
 
     def test_union_with_two_annotated_values_list(self):
-        qs1 = Number.objects.filter(num=1).annotate(
-            count=Value(0, IntegerField()),
-        ).values_list('num', 'count')
-        qs2 = Number.objects.filter(num=2).values('pk').annotate(
-            count=F('num'),
-        ).annotate(
-            num=Value(1, IntegerField()),
-        ).values_list('num', 'count')
+        qs1 = Number.objects.filter(num=1).annotate(count=Value(0, IntegerField())).values_list('num', 'count')
+        qs2 = (
+            Number.objects.filter(num=2)
+            .values('pk')
+            .annotate(count=F('num'))
+            .annotate(num=Value(1, IntegerField()))
+            .values_list('num', 'count')
+        )
         self.assertCountEqual(qs1.union(qs2), [(1, 0), (2, 1)])
 
     def test_union_with_extra_and_values_list(self):
-        qs1 = Number.objects.filter(num=1).extra(
-            select={'count': 0},
-        ).values_list('num', 'count')
+        qs1 = Number.objects.filter(num=1).extra(select={'count': 0}).values_list('num', 'count')
         qs2 = Number.objects.filter(num=2).extra(select={'count': 1})
         self.assertCountEqual(qs1.union(qs2), [(1, 0), (2, 1)])
 
@@ -203,9 +201,7 @@ class QuerySetSetOperationTests(TestCase):
         self.assertEqual(list(qs1.union(qs2).order_by('num')), [1, 99])
 
     def test_order_raises_on_non_selected_column(self):
-        qs1 = Number.objects.filter().annotate(
-            annotation=Value(1, IntegerField()),
-        ).values('annotation', num2=F('num'))
+        qs1 = Number.objects.filter().annotate(annotation=Value(1, IntegerField())).values('annotation', num2=F('num'))
         qs2 = Number.objects.filter().values('id', 'num')
         # Should not raise
         list(qs1.union(qs2).order_by('annotation'))

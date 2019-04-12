@@ -2,9 +2,7 @@ from collections import namedtuple
 
 from MySQLdb.constants import FIELD_TYPE
 
-from django.db.backends.base.introspection import (
-    BaseDatabaseIntrospection, FieldInfo as BaseFieldInfo, TableInfo,
-)
+from django.db.backends.base.introspection import BaseDatabaseIntrospection, FieldInfo as BaseFieldInfo, TableInfo
 from django.db.models.indexes import Index
 from django.utils.datastructures import OrderedSet
 
@@ -53,8 +51,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     def get_table_list(self, cursor):
         """Return a list of table and view names in the current database."""
         cursor.execute("SHOW FULL TABLES")
-        return [TableInfo(row[0], {'BASE TABLE': 't', 'VIEW': 'v'}.get(row[1]))
-                for row in cursor.fetchall()]
+        return [TableInfo(row[0], {'BASE TABLE': 't', 'VIEW': 'v'}.get(row[1])) for row in cursor.fetchall()]
 
     def get_table_description(self, cursor, table_name):
         """
@@ -66,7 +63,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         #   not visible length (#5725)
         # - precision and scale (for decimal fields) (#5014)
         # - auto_increment is not available in cursor.description
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 column_name, data_type, character_maximum_length,
                 numeric_precision, numeric_scale, extra, column_default,
@@ -75,7 +73,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     ELSE 0
                 END AS is_unsigned
             FROM information_schema.columns
-            WHERE table_name = %s AND table_schema = DATABASE()""", [table_name])
+            WHERE table_name = %s AND table_schema = DATABASE()""",
+            [table_name],
+        )
         field_info = {line[0]: InfoLine(*line) for line in cursor.fetchall()}
 
         cursor.execute("SELECT * FROM %s LIMIT 1" % self.connection.ops.quote_name(table_name))
@@ -86,16 +86,18 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         fields = []
         for line in cursor.description:
             info = field_info[line[0]]
-            fields.append(FieldInfo(
-                *line[:3],
-                to_int(info.max_len) or line[3],
-                to_int(info.num_prec) or line[4],
-                to_int(info.num_scale) or line[5],
-                line[6],
-                info.column_default,
-                info.extra,
-                info.is_unsigned,
-            ))
+            fields.append(
+                FieldInfo(
+                    *line[:3],
+                    to_int(info.max_len) or line[3],
+                    to_int(info.num_prec) or line[4],
+                    to_int(info.num_scale) or line[5],
+                    line[6],
+                    info.column_default,
+                    info.extra,
+                    info.is_unsigned,
+                )
+            )
         return fields
 
     def get_sequences(self, cursor, table_name, table_fields=()):
@@ -122,13 +124,16 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         for all key columns in the given table.
         """
         key_columns = []
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT column_name, referenced_table_name, referenced_column_name
             FROM information_schema.key_column_usage
             WHERE table_name = %s
                 AND table_schema = DATABASE()
                 AND referenced_table_name IS NOT NULL
-                AND referenced_column_name IS NOT NULL""", [table_name])
+                AND referenced_column_name IS NOT NULL""",
+            [table_name],
+        )
         key_columns.extend(cursor.fetchall())
         return key_columns
 
@@ -137,10 +142,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         Retrieve the storage engine for a given table. Return the default
         storage engine if the table doesn't exist.
         """
-        cursor.execute(
-            "SELECT engine "
-            "FROM information_schema.tables "
-            "WHERE table_name = %s", [table_name])
+        cursor.execute("SELECT engine " "FROM information_schema.tables " "WHERE table_name = %s", [table_name])
         result = cursor.fetchone()
         if not result:
             return self.connection.features._mysql_storage_engine

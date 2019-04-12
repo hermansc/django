@@ -17,10 +17,7 @@ class CITextTestCase(PostgreSQLTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.john = CITestModel.objects.create(
-            name='JoHn',
-            email='joHn@johN.com',
-            description='Average Joe named JoHn',
-            array_field=['JoE', 'jOhn'],
+            name='JoHn', email='joHn@johN.com', description='Average Joe named JoHn', array_field=['JoE', 'jOhn']
         )
 
     def test_equal_lowercase(self):

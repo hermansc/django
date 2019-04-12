@@ -14,6 +14,7 @@ class Node:
     connection (the root) with the children being either leaf nodes or other
     Node instances.
     """
+
     # Standard connector type. Clients usually won't use this at all and
     # subclasses will usually override the value.
     default = 'DEFAULT'
@@ -67,9 +68,9 @@ class Node:
 
     def __eq__(self, other):
         return (
-            self.__class__ == other.__class__ and
-            (self.connector, self.negated) == (other.connector, other.negated) and
-            self.children == other.children
+            self.__class__ == other.__class__
+            and (self.connector, self.negated) == (other.connector, other.negated)
+            and self.children == other.children
         )
 
     def __hash__(self):
@@ -97,8 +98,7 @@ class Node:
             return data
         if self.connector == conn_type:
             # We can reuse self.children to append or squash the node other.
-            if (isinstance(data, Node) and not data.negated and
-                    (data.connector == conn_type or len(data) == 1)):
+            if isinstance(data, Node) and not data.negated and (data.connector == conn_type or len(data) == 1):
                 # We can squash the other node's children directly into this
                 # node. We are just doing (AB)(CD) == (ABCD) here, with the
                 # addition that if the length of the other node is 1 the
@@ -113,8 +113,7 @@ class Node:
                 self.children.append(data)
                 return data
         else:
-            obj = self._new_instance(self.children, self.connector,
-                                     self.negated)
+            obj = self._new_instance(self.children, self.connector, self.negated)
             self.connector = conn_type
             self.children = [obj, data]
             return data

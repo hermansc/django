@@ -9,9 +9,7 @@ There are two reasons you might want to customize a ``Manager``: to add extra
 returns.
 """
 
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.db import models
 
 
@@ -27,9 +25,7 @@ class PublishedBookManager(models.Manager):
 
 class AnnotatedBookManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().annotate(
-            favorite_avg=models.Avg('favorite_books__favorite_thing_id')
-        )
+        return super().get_queryset().annotate(favorite_avg=models.Avg('favorite_books__favorite_thing_id'))
 
 
 class CustomQuerySet(models.QuerySet):
@@ -46,10 +42,12 @@ class CustomQuerySet(models.QuerySet):
 
     def optout_public_method(self, *args, **kwargs):
         return self.all()
+
     optout_public_method.queryset_only = True
 
     def _optin_private_method(self, *args, **kwargs):
         return self.all()
+
     _optin_private_method.queryset_only = False
 
 
@@ -77,7 +75,6 @@ class CustomInitQuerySet(models.QuerySet):
 
 
 class DeconstructibleCustomManager(BaseCustomManager.from_queryset(CustomQuerySet)):
-
     def __init__(self, a, b, c=1, d=2):
         super().__init__(a)
 
@@ -118,12 +115,7 @@ class FunPerson(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     fun = models.BooleanField(default=True)
-    favorite_book = models.ForeignKey(
-        'Book',
-        models.SET_NULL,
-        null=True,
-        related_name='fun_people_favorite_books',
-    )
+    favorite_book = models.ForeignKey('Book', models.SET_NULL, null=True, related_name='fun_people_favorite_books')
     favorite_thing_type = models.ForeignKey('contenttypes.ContentType', models.SET_NULL, null=True)
     favorite_thing_id = models.IntegerField(null=True)
     favorite_thing = GenericForeignKey('favorite_thing_type', 'favorite_thing_id')
@@ -141,14 +133,10 @@ class Book(models.Model):
     authors = models.ManyToManyField(Person, related_name='books')
     fun_authors = models.ManyToManyField(FunPerson, related_name='books')
     favorite_things = GenericRelation(
-        Person,
-        content_type_field='favorite_thing_type',
-        object_id_field='favorite_thing_id',
+        Person, content_type_field='favorite_thing_type', object_id_field='favorite_thing_id'
     )
     fun_people_favorite_things = GenericRelation(
-        FunPerson,
-        content_type_field='favorite_thing_type',
-        object_id_field='favorite_thing_id',
+        FunPerson, content_type_field='favorite_thing_type', object_id_field='favorite_thing_id'
     )
 
     published_objects = PublishedBookManager()

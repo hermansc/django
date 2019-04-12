@@ -66,21 +66,18 @@ class GetCurrentLanguageBidiNode(Node):
 
 
 class TranslateNode(Node):
-    def __init__(self, filter_expression, noop, asvar=None,
-                 message_context=None):
+    def __init__(self, filter_expression, noop, asvar=None, message_context=None):
         self.noop = noop
         self.asvar = asvar
         self.message_context = message_context
         self.filter_expression = filter_expression
         if isinstance(self.filter_expression.var, str):
-            self.filter_expression.var = Variable("'%s'" %
-                                                  self.filter_expression.var)
+            self.filter_expression.var = Variable("'%s'" % self.filter_expression.var)
 
     def render(self, context):
         self.filter_expression.var.translate = not self.noop
         if self.message_context:
-            self.filter_expression.var.message_context = (
-                self.message_context.resolve(context))
+            self.filter_expression.var.message_context = self.message_context.resolve(context)
         output = self.filter_expression.resolve(context)
         value = render_value_in_context(output, context)
         # Restore percent signs. Percent signs in template text are doubled
@@ -96,9 +93,17 @@ class TranslateNode(Node):
 
 
 class BlockTranslateNode(Node):
-
-    def __init__(self, extra_context, singular, plural=None, countervar=None,
-                 counter=None, message_context=None, trimmed=False, asvar=None):
+    def __init__(
+        self,
+        extra_context,
+        singular,
+        plural=None,
+        countervar=None,
+        counter=None,
+        message_context=None,
+        trimmed=False,
+        asvar=None,
+    ):
         self.extra_context = extra_context
         self.singular = singular
         self.plural = plural
@@ -136,8 +141,7 @@ class BlockTranslateNode(Node):
             context[self.countervar] = count
             plural, plural_vars = self.render_token_list(self.plural)
             if message_context:
-                result = translation.npgettext(message_context, singular,
-                                               plural, count)
+                result = translation.npgettext(message_context, singular, plural, count)
             else:
                 result = translation.ngettext(singular, plural, count)
             vars.extend(plural_vars)
@@ -163,8 +167,7 @@ class BlockTranslateNode(Node):
             if nested:
                 # Either string is malformed, or it's a bug
                 raise TemplateSyntaxError(
-                    "'blocktrans' is unable to format string returned by gettext: %r using %r"
-                    % (result, data)
+                    "'blocktrans' is unable to format string returned by gettext: %r using %r" % (result, data)
                 )
             with translation.override(None):
                 result = self.render(context, nested=True)
@@ -369,37 +372,29 @@ def do_translate(parser, token):
     while remaining:
         option = remaining.pop(0)
         if option in seen:
-            raise TemplateSyntaxError(
-                "The '%s' option was specified more than once." % option,
-            )
+            raise TemplateSyntaxError("The '%s' option was specified more than once." % option)
         elif option == 'noop':
             noop = True
         elif option == 'context':
             try:
                 value = remaining.pop(0)
             except IndexError:
-                raise TemplateSyntaxError(
-                    "No argument provided to the '%s' tag for the context option." % bits[0]
-                )
+                raise TemplateSyntaxError("No argument provided to the '%s' tag for the context option." % bits[0])
             if value in invalid_context:
                 raise TemplateSyntaxError(
-                    "Invalid argument '%s' provided to the '%s' tag for the context option" % (value, bits[0]),
+                    "Invalid argument '%s' provided to the '%s' tag for the context option" % (value, bits[0])
                 )
             message_context = parser.compile_filter(value)
         elif option == 'as':
             try:
                 value = remaining.pop(0)
             except IndexError:
-                raise TemplateSyntaxError(
-                    "No argument provided to the '%s' tag for the as option." % bits[0]
-                )
+                raise TemplateSyntaxError("No argument provided to the '%s' tag for the as option." % bits[0])
             asvar = value
         else:
             raise TemplateSyntaxError(
                 "Unknown argument for '%s' tag: '%s'. The only options "
-                "available are 'noop', 'context' \"xxx\", and 'as VAR'." % (
-                    bits[0], option,
-                )
+                "available are 'noop', 'context' \"xxx\", and 'as VAR'." % (bits[0], option)
             )
         seen.add(option)
 
@@ -456,39 +451,31 @@ def do_block_translate(parser, token):
     while remaining_bits:
         option = remaining_bits.pop(0)
         if option in options:
-            raise TemplateSyntaxError('The %r option was specified more '
-                                      'than once.' % option)
+            raise TemplateSyntaxError('The %r option was specified more ' 'than once.' % option)
         if option == 'with':
             value = token_kwargs(remaining_bits, parser, support_legacy=True)
             if not value:
-                raise TemplateSyntaxError('"with" in %r tag needs at least '
-                                          'one keyword argument.' % bits[0])
+                raise TemplateSyntaxError('"with" in %r tag needs at least ' 'one keyword argument.' % bits[0])
         elif option == 'count':
             value = token_kwargs(remaining_bits, parser, support_legacy=True)
             if len(value) != 1:
-                raise TemplateSyntaxError('"count" in %r tag expected exactly '
-                                          'one keyword argument.' % bits[0])
+                raise TemplateSyntaxError('"count" in %r tag expected exactly ' 'one keyword argument.' % bits[0])
         elif option == "context":
             try:
                 value = remaining_bits.pop(0)
                 value = parser.compile_filter(value)
             except Exception:
-                raise TemplateSyntaxError(
-                    '"context" in %r tag expected exactly one argument.' % bits[0]
-                )
+                raise TemplateSyntaxError('"context" in %r tag expected exactly one argument.' % bits[0])
         elif option == "trimmed":
             value = True
         elif option == "asvar":
             try:
                 value = remaining_bits.pop(0)
             except IndexError:
-                raise TemplateSyntaxError(
-                    "No argument provided to the '%s' tag for the asvar option." % bits[0]
-                )
+                raise TemplateSyntaxError("No argument provided to the '%s' tag for the asvar option." % bits[0])
             asvar = value
         else:
-            raise TemplateSyntaxError('Unknown argument for %r tag: %r.' %
-                                      (bits[0], option))
+            raise TemplateSyntaxError('Unknown argument for %r tag: %r.' % (bits[0], option))
         options[option] = value
 
     if 'count' in options:
@@ -523,9 +510,9 @@ def do_block_translate(parser, token):
     if token.contents.strip() != 'endblocktrans':
         raise TemplateSyntaxError("'blocktrans' doesn't allow other block tags (seen %r) inside it" % token.contents)
 
-    return BlockTranslateNode(extra_context, singular, plural, countervar,
-                              counter, message_context, trimmed=trimmed,
-                              asvar=asvar)
+    return BlockTranslateNode(
+        extra_context, singular, plural, countervar, counter, message_context, trimmed=trimmed, asvar=asvar
+    )
 
 
 @register.tag

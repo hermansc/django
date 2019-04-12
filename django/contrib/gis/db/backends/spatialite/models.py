@@ -9,6 +9,7 @@ class SpatialiteGeometryColumns(models.Model):
     """
     The 'geometry_columns' table from SpatiaLite.
     """
+
     f_table_name = models.CharField(max_length=256)
     f_geometry_column = models.CharField(max_length=256)
     coord_dimension = models.IntegerField()
@@ -51,6 +52,7 @@ class SpatialiteSpatialRefSys(models.Model, SpatialRefSysMixin):
     """
     The 'spatial_ref_sys' table from SpatiaLite.
     """
+
     srid = models.IntegerField(primary_key=True)
     auth_name = models.CharField(max_length=256)
     auth_srid = models.IntegerField()

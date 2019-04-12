@@ -61,8 +61,7 @@ class BaseManager:
                 raise ValueError(
                     "Could not find manager %s in %s.\n"
                     "Please note that you need to inherit from managers you "
-                    "dynamically generated with 'from_queryset()'."
-                    % (name, module_name)
+                    "dynamically generated with 'from_queryset()'." % (name, module_name)
                 )
             return (
                 False,  # as_manager
@@ -80,6 +79,7 @@ class BaseManager:
         def create_method(name, method):
             def manager_method(self, *args, **kwargs):
                 return getattr(self.get_queryset(), name)(*args, **kwargs)
+
             manager_method.__name__ = method.__name__
             manager_method.__doc__ = method.__doc__
             return manager_method
@@ -101,10 +101,9 @@ class BaseManager:
     def from_queryset(cls, queryset_class, class_name=None):
         if class_name is None:
             class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__)
-        return type(class_name, (cls,), {
-            '_queryset_class': queryset_class,
-            **cls._get_queryset_methods(queryset_class),
-        })
+        return type(
+            class_name, (cls,), {'_queryset_class': queryset_class, **cls._get_queryset_methods(queryset_class)}
+        )
 
     def contribute_to_class(self, model, name):
         self.name = self.name or name
@@ -153,10 +152,7 @@ class BaseManager:
         return self.get_queryset()
 
     def __eq__(self, other):
-        return (
-            isinstance(other, self.__class__) and
-            self._constructor_args == other._constructor_args
-        )
+        return isinstance(other, self.__class__) and self._constructor_args == other._constructor_args
 
     def __hash__(self):
         return id(self)
@@ -167,7 +163,6 @@ class Manager(BaseManager.from_queryset(QuerySet)):
 
 
 class ManagerDescriptor:
-
     def __init__(self, manager):
         self.manager = manager
 
@@ -176,17 +171,12 @@ class ManagerDescriptor:
             raise AttributeError("Manager isn't accessible via %s instances" % cls.__name__)
 
         if cls._meta.abstract:
-            raise AttributeError("Manager isn't available; %s is abstract" % (
-                cls._meta.object_name,
-            ))
+            raise AttributeError("Manager isn't available; %s is abstract" % (cls._meta.object_name,))
 
         if cls._meta.swapped:
             raise AttributeError(
-                "Manager isn't available; '%s.%s' has been swapped for '%s'" % (
-                    cls._meta.app_label,
-                    cls._meta.object_name,
-                    cls._meta.swapped,
-                )
+                "Manager isn't available; '%s.%s' has been swapped for '%s'"
+                % (cls._meta.app_label, cls._meta.object_name, cls._meta.swapped)
             )
 
         return cls._meta.managers_map[self.manager.name]

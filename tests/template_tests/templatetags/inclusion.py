@@ -150,9 +150,7 @@ def inclusion_unlimited_args(one, two='hi', *args):
     """Expected inclusion_unlimited_args __doc__"""
     return {
         "result": (
-            "inclusion_unlimited_args - Expected result: %s" % (
-                ', '.join(str(arg) for arg in [one, two, *args])
-            )
+            "inclusion_unlimited_args - Expected result: %s" % (', '.join(str(arg) for arg in [one, two, *args]))
         )
     }
 
@@ -165,9 +163,8 @@ def inclusion_unlimited_args_from_template(one, two='hi', *args):
     """Expected inclusion_unlimited_args_from_template __doc__"""
     return {
         "result": (
-            "inclusion_unlimited_args_from_template - Expected result: %s" % (
-                ', '.join(str(arg) for arg in [one, two, *args])
-            )
+            "inclusion_unlimited_args_from_template - Expected result: %s"
+            % (', '.join(str(arg) for arg in [one, two, *args]))
         )
     }
 
@@ -178,11 +175,7 @@ inclusion_unlimited_args_from_template.anything = "Expected inclusion_unlimited_
 @register.inclusion_tag('inclusion.html')
 def inclusion_only_unlimited_args(*args):
     """Expected inclusion_only_unlimited_args __doc__"""
-    return {
-        "result": "inclusion_only_unlimited_args - Expected result: %s" % (
-            ', '.join(str(arg) for arg in args)
-        )
-    }
+    return {"result": "inclusion_only_unlimited_args - Expected result: %s" % (', '.join(str(arg) for arg in args))}
 
 
 inclusion_only_unlimited_args.anything = "Expected inclusion_only_unlimited_args __dict__"
@@ -192,9 +185,8 @@ inclusion_only_unlimited_args.anything = "Expected inclusion_only_unlimited_args
 def inclusion_only_unlimited_args_from_template(*args):
     """Expected inclusion_only_unlimited_args_from_template __doc__"""
     return {
-        "result": "inclusion_only_unlimited_args_from_template - Expected result: %s" % (
-            ', '.join(str(arg) for arg in args)
-        )
+        "result": "inclusion_only_unlimited_args_from_template - Expected result: %s"
+        % (', '.join(str(arg) for arg in args))
     }
 
 
@@ -215,10 +207,10 @@ def inclusion_unlimited_args_kwargs(one, two='hi', *args, **kwargs):
     """Expected inclusion_unlimited_args_kwargs __doc__"""
     # Sort the dictionary by key to guarantee the order for testing.
     sorted_kwarg = sorted(kwargs.items(), key=operator.itemgetter(0))
-    return {"result": "inclusion_unlimited_args_kwargs - Expected result: %s / %s" % (
-        ', '.join(str(arg) for arg in [one, two, *args]),
-        ', '.join('%s=%s' % (k, v) for (k, v) in sorted_kwarg)
-    )}
+    return {
+        "result": "inclusion_unlimited_args_kwargs - Expected result: %s / %s"
+        % (', '.join(str(arg) for arg in [one, two, *args]), ', '.join('%s=%s' % (k, v) for (k, v) in sorted_kwarg))
+    }
 
 
 inclusion_unlimited_args_kwargs.anything = "Expected inclusion_unlimited_args_kwargs __dict__"

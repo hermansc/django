@@ -4,6 +4,7 @@ from django.db.models.expressions import Func, Value
 
 class Cast(Func):
     """Coerce an expression to a new field type."""
+
     function = 'CAST'
     template = '%(function)s(%(expressions)s AS %(db_type)s)'
 
@@ -42,6 +43,7 @@ class Cast(Func):
 
 class Coalesce(Func):
     """Return, from left to right, the first non-null expression."""
+
     function = 'COALESCE'
 
     def __init__(self, *expressions, **extra):
@@ -54,9 +56,9 @@ class Coalesce(Func):
         # so convert all fields to NCLOB when that type is expected.
         if self.output_field.get_internal_type() == 'TextField':
             clone = self.copy()
-            clone.set_source_expressions([
-                Func(expression, function='TO_NCLOB') for expression in self.get_source_expressions()
-            ])
+            clone.set_source_expressions(
+                [Func(expression, function='TO_NCLOB') for expression in self.get_source_expressions()]
+            )
             return super(Coalesce, clone).as_sql(compiler, connection, **extra_context)
         return self.as_sql(compiler, connection, **extra_context)
 
@@ -69,6 +71,7 @@ class Greatest(Func):
     On PostgreSQL, the maximum not-null expression is returned.
     On MySQL, Oracle, and SQLite, if any expression is null, null is returned.
     """
+
     function = 'GREATEST'
 
     def __init__(self, *expressions, **extra):
@@ -89,6 +92,7 @@ class Least(Func):
     On PostgreSQL, return the minimum not-null expression.
     On MySQL, Oracle, and SQLite, if any expression is null, return null.
     """
+
     function = 'LEAST'
 
     def __init__(self, *expressions, **extra):

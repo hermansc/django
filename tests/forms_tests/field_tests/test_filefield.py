@@ -6,7 +6,6 @@ from django.test import SimpleTestCase
 
 
 class FileFieldTest(SimpleTestCase):
-
     def test_filefield_1(self):
         f = FileField()
         with self.assertRaisesMessage(ValidationError, "'This field is required.'"):
@@ -34,11 +33,10 @@ class FileFieldTest(SimpleTestCase):
         self.assertEqual(SimpleUploadedFile, type(f.clean(SimpleUploadedFile('name', b'Some File Content'))))
         self.assertIsInstance(
             f.clean(SimpleUploadedFile('我隻氣墊船裝滿晒鱔.txt', 'मेरी मँडराने वाली नाव सर्पमीनों से भरी ह'.encode())),
-            SimpleUploadedFile
+            SimpleUploadedFile,
         )
         self.assertIsInstance(
-            f.clean(SimpleUploadedFile('name', b'Some File Content'), 'files/test4.pdf'),
-            SimpleUploadedFile
+            f.clean(SimpleUploadedFile('name', b'Some File Content'), 'files/test4.pdf'), SimpleUploadedFile
         )
 
     def test_filefield_2(self):

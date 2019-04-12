@@ -11,7 +11,6 @@ basic_templates = {
 
 
 class BasicSyntaxTests(SimpleTestCase):
-
     @setup(basic_templates)
     def test_basic_syntax01(self):
         """
@@ -247,42 +246,29 @@ class BasicSyntaxTests(SimpleTestCase):
     # as a lookup.
     @setup({'basic-syntax30': "{{ 1.2.3 }}"})
     def test_basic_syntax30(self):
-        output = self.engine.render_to_string(
-            'basic-syntax30',
-            {"1": {"2": {"3": "d"}}}
-        )
+        output = self.engine.render_to_string('basic-syntax30', {"1": {"2": {"3": "d"}}})
         self.assertEqual(output, 'd')
 
     @setup({'basic-syntax31': "{{ 1.2.3 }}"})
     def test_basic_syntax31(self):
-        output = self.engine.render_to_string(
-            'basic-syntax31',
-            {"1": {"2": ("a", "b", "c", "d")}},
-        )
+        output = self.engine.render_to_string('basic-syntax31', {"1": {"2": ("a", "b", "c", "d")}})
         self.assertEqual(output, 'd')
 
     @setup({'basic-syntax32': "{{ 1.2.3 }}"})
     def test_basic_syntax32(self):
         output = self.engine.render_to_string(
-            'basic-syntax32',
-            {"1": (("x", "x", "x", "x"), ("y", "y", "y", "y"), ("a", "b", "c", "d"))},
+            'basic-syntax32', {"1": (("x", "x", "x", "x"), ("y", "y", "y", "y"), ("a", "b", "c", "d"))}
         )
         self.assertEqual(output, 'd')
 
     @setup({'basic-syntax33': "{{ 1.2.3 }}"})
     def test_basic_syntax33(self):
-        output = self.engine.render_to_string(
-            'basic-syntax33',
-            {"1": ("xxxx", "yyyy", "abcd")},
-        )
+        output = self.engine.render_to_string('basic-syntax33', {"1": ("xxxx", "yyyy", "abcd")})
         self.assertEqual(output, 'd')
 
     @setup({'basic-syntax34': "{{ 1.2.3 }}"})
     def test_basic_syntax34(self):
-        output = self.engine.render_to_string(
-            'basic-syntax34',
-            {"1": ({"x": "x"}, {"y": "y"}, {"z": "z", "3": "d"})}
-        )
+        output = self.engine.render_to_string('basic-syntax34', {"1": ({"x": "x"}, {"y": "y"}, {"z": "z", "3": "d"})})
         self.assertEqual(output, 'd')
 
     # Numbers are numbers even if their digits are in the context.

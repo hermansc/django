@@ -4,7 +4,6 @@ from django.utils.version import get_version_tuple
 
 
 class VersionTests(SimpleTestCase):
-
     def test_development(self):
         ver_tuple = (1, 4, 0, 'alpha', 0)
         # This will return a different result when it's run within or outside

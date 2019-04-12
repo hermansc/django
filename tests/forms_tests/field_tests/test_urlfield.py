@@ -5,7 +5,6 @@ from . import FormFieldAssertionsMixin
 
 
 class URLFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
-
     def test_urlfield_1(self):
         f = URLField()
         self.assertWidgetRendersTo(f, '<input type="url" name="f" id="id_f" required>')
@@ -47,11 +46,11 @@ class URLFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
         self.assertEqual('http://valid-----hyphens.com', f.clean('http://valid-----hyphens.com'))
         self.assertEqual(
             'http://some.idn.xyz\xe4\xf6\xfc\xdfabc.domain.com:123/blah',
-            f.clean('http://some.idn.xyzäöüßabc.domain.com:123/blah')
+            f.clean('http://some.idn.xyzäöüßabc.domain.com:123/blah'),
         )
         self.assertEqual(
             'http://www.example.com/s/http://code.djangoproject.com/ticket/13804',
-            f.clean('www.example.com/s/http://code.djangoproject.com/ticket/13804')
+            f.clean('www.example.com/s/http://code.djangoproject.com/ticket/13804'),
         )
         with self.assertRaisesMessage(ValidationError, "'Enter a valid URL.'"):
             f.clean('[a')
@@ -106,8 +105,7 @@ class URLFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
         self.assertEqual('http://example.com', f.clean('http://example.com'))
         self.assertEqual('http://example.com/test', f.clean('http://example.com/test'))
         self.assertEqual(
-            'http://example.com?some_param=some_value',
-            f.clean('http://example.com?some_param=some_value')
+            'http://example.com?some_param=some_value', f.clean('http://example.com?some_param=some_value')
         )
 
     def test_urlfield_9(self):
@@ -134,10 +132,7 @@ class URLFieldTest(FormFieldAssertionsMixin, SimpleTestCase):
     def test_urlfield_10(self):
         """URLField correctly validates IPv6 (#18779)."""
         f = URLField()
-        urls = (
-            'http://[12:34::3a53]/',
-            'http://[a34:9238::]:8080/',
-        )
+        urls = ('http://[12:34::3a53]/', 'http://[a34:9238::]:8080/')
         for url in urls:
             with self.subTest(url=url):
                 self.assertEqual(url, f.clean(url))

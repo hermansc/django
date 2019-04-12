@@ -9,7 +9,6 @@ RECURSIVE = os.path.join(ROOT, 'recursive_templates')
 
 
 class ExtendsBehaviorTests(SimpleTestCase):
-
     def test_normal_extend(self):
         engine = Engine(dirs=[os.path.join(RECURSIVE, 'fs')])
         template = engine.get_template('one.html')
@@ -17,11 +16,9 @@ class ExtendsBehaviorTests(SimpleTestCase):
         self.assertEqual(output.strip(), 'three two one')
 
     def test_extend_recursive(self):
-        engine = Engine(dirs=[
-            os.path.join(RECURSIVE, 'fs'),
-            os.path.join(RECURSIVE, 'fs2'),
-            os.path.join(RECURSIVE, 'fs3'),
-        ])
+        engine = Engine(
+            dirs=[os.path.join(RECURSIVE, 'fs'), os.path.join(RECURSIVE, 'fs2'), os.path.join(RECURSIVE, 'fs3')]
+        )
         template = engine.get_template('recursive.html')
         output = template.render(Context({}))
         self.assertEqual(output.strip(), 'fs3/recursive fs2/recursive fs/recursive')
@@ -39,19 +36,23 @@ class ExtendsBehaviorTests(SimpleTestCase):
     def test_recursive_multiple_loaders(self):
         engine = Engine(
             dirs=[os.path.join(RECURSIVE, 'fs')],
-            loaders=[(
-                'django.template.loaders.locmem.Loader', {
-                    'one.html': (
-                        '{% extends "one.html" %}{% block content %}{{ block.super }} locmem-one{% endblock %}'
-                    ),
-                    'two.html': (
-                        '{% extends "two.html" %}{% block content %}{{ block.super }} locmem-two{% endblock %}'
-                    ),
-                    'three.html': (
-                        '{% extends "three.html" %}{% block content %}{{ block.super }} locmem-three{% endblock %}'
-                    ),
-                }
-            ), 'django.template.loaders.filesystem.Loader'],
+            loaders=[
+                (
+                    'django.template.loaders.locmem.Loader',
+                    {
+                        'one.html': (
+                            '{% extends "one.html" %}{% block content %}{{ block.super }} locmem-one{% endblock %}'
+                        ),
+                        'two.html': (
+                            '{% extends "two.html" %}{% block content %}{{ block.super }} locmem-two{% endblock %}'
+                        ),
+                        'three.html': (
+                            '{% extends "three.html" %}{% block content %}{{ block.super }} locmem-three{% endblock %}'
+                        ),
+                    },
+                ),
+                'django.template.loaders.filesystem.Loader',
+            ],
         )
         template = engine.get_template('one.html')
         output = template.render(Context({}))
@@ -69,16 +70,8 @@ class ExtendsBehaviorTests(SimpleTestCase):
 
     def test_extend_cached(self):
         engine = Engine(
-            dirs=[
-                os.path.join(RECURSIVE, 'fs'),
-                os.path.join(RECURSIVE, 'fs2'),
-                os.path.join(RECURSIVE, 'fs3'),
-            ],
-            loaders=[
-                ('django.template.loaders.cached.Loader', [
-                    'django.template.loaders.filesystem.Loader',
-                ]),
-            ],
+            dirs=[os.path.join(RECURSIVE, 'fs'), os.path.join(RECURSIVE, 'fs2'), os.path.join(RECURSIVE, 'fs3')],
+            loaders=[('django.template.loaders.cached.Loader', ['django.template.loaders.filesystem.Loader'])],
         )
         template = engine.get_template('recursive.html')
         output = template.render(Context({}))
@@ -106,12 +99,13 @@ class ExtendsBehaviorTests(SimpleTestCase):
         """
         engine = Engine(
             loaders=[
-                ['django.template.loaders.locmem.Loader', {
-                    'base.html': '{% extends "base.html" %}{% block content %}{{ block.super }} loader1{% endblock %}',
-                }],
-                ['django.template.loaders.locmem.Loader', {
-                    'base.html': '{% block content %}loader2{% endblock %}',
-                }],
+                [
+                    'django.template.loaders.locmem.Loader',
+                    {
+                        'base.html': '{% extends "base.html" %}{% block content %}{{ block.super }} loader1{% endblock %}'
+                    },
+                ],
+                ['django.template.loaders.locmem.Loader', {'base.html': '{% block content %}loader2{% endblock %}'}],
             ]
         )
         template = engine.get_template('base.html')
@@ -125,16 +119,21 @@ class ExtendsBehaviorTests(SimpleTestCase):
         """
         engine = Engine(
             loaders=[
-                ['django.template.loaders.locmem.Loader', {
-                    'base.html': "{% extends 'base.html' %}{% block base %}{{ block.super }}2{% endblock %}",
-                    'included.html':
-                        "{% extends 'included.html' %}{% block included %}{{ block.super }}B{% endblock %}",
-                }],
-                ['django.template.loaders.locmem.Loader', {
-                    'base.html': "{% block base %}1{% endblock %}{% include 'included.html' %}",
-                    'included.html': "{% block included %}A{% endblock %}",
-                }],
-            ],
+                [
+                    'django.template.loaders.locmem.Loader',
+                    {
+                        'base.html': "{% extends 'base.html' %}{% block base %}{{ block.super }}2{% endblock %}",
+                        'included.html': "{% extends 'included.html' %}{% block included %}{{ block.super }}B{% endblock %}",
+                    },
+                ],
+                [
+                    'django.template.loaders.locmem.Loader',
+                    {
+                        'base.html': "{% block base %}1{% endblock %}{% include 'included.html' %}",
+                        'included.html': "{% block included %}A{% endblock %}",
+                    },
+                ],
+            ]
         )
         template = engine.get_template('base.html')
         self.assertEqual(template.render(Context({})), '12AB')

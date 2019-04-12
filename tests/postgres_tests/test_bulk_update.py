@@ -2,8 +2,13 @@ from datetime import date
 
 from . import PostgreSQLTestCase
 from .models import (
-    HStoreModel, IntegerArrayModel, JSONModel, NestedIntegerArrayModel,
-    NullableIntegerArrayModel, OtherTypesArrayModel, RangesModel,
+    HStoreModel,
+    IntegerArrayModel,
+    JSONModel,
+    NestedIntegerArrayModel,
+    NullableIntegerArrayModel,
+    OtherTypesArrayModel,
+    RangesModel,
 )
 
 try:
@@ -23,7 +28,7 @@ class BulkSaveTests(PostgreSQLTestCase):
             (RangesModel, 'ints', None, NumericRange(lower=1, upper=10)),
             (RangesModel, 'dates', None, DateRange(lower=date.today(), upper=date.today())),
             (OtherTypesArrayModel, 'ips', [], ['1.2.3.4']),
-            (OtherTypesArrayModel, 'json', [], [{'a': 'b'}])
+            (OtherTypesArrayModel, 'json', [], [{'a': 'b'}]),
         ]
         for Model, field, initial, new in test_data:
             with self.subTest(model=Model, field=field):

@@ -15,8 +15,7 @@ class RedirectFallbackMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
         if not apps.is_installed('django.contrib.sites'):
             raise ImproperlyConfigured(
-                "You cannot use RedirectFallbackMiddleware when "
-                "django.contrib.sites is not installed."
+                "You cannot use RedirectFallbackMiddleware when " "django.contrib.sites is not installed."
             )
         super().__init__(get_response)
 
@@ -35,10 +34,7 @@ class RedirectFallbackMiddleware(MiddlewareMixin):
             pass
         if r is None and settings.APPEND_SLASH and not request.path.endswith('/'):
             try:
-                r = Redirect.objects.get(
-                    site=current_site,
-                    old_path=request.get_full_path(force_append_slash=True),
-                )
+                r = Redirect.objects.get(site=current_site, old_path=request.get_full_path(force_append_slash=True))
             except Redirect.DoesNotExist:
                 pass
         if r is not None:

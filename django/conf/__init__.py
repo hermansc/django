@@ -32,6 +32,7 @@ class SettingsReference(str):
     String subclass which references a current settings value. It's treated as
     the value in memory but serializes to a settings.NAME attribute reference.
     """
+
     def __new__(self, value, setting_name):
         return str.__new__(self, value)
 
@@ -45,6 +46,7 @@ class LazySettings(LazyObject):
     The user can manually configure settings prior to using them. Otherwise,
     Django uses the settings module pointed to by DJANGO_SETTINGS_MODULE.
     """
+
     def _setup(self, name=None):
         """
         Load the settings module pointed to by the environment variable. This
@@ -57,8 +59,8 @@ class LazySettings(LazyObject):
             raise ImproperlyConfigured(
                 "Requested %s, but settings are not configured. "
                 "You must either define the environment variable %s "
-                "or call settings.configure() before accessing settings."
-                % (desc, ENVIRONMENT_VARIABLE))
+                "or call settings.configure() before accessing settings." % (desc, ENVIRONMENT_VARIABLE)
+            )
 
         self._wrapped = Settings(settings_module)
 
@@ -66,9 +68,7 @@ class LazySettings(LazyObject):
         # Hardcode the class name as otherwise it yields 'Settings'.
         if self._wrapped is empty:
             return '<LazySettings [Unevaluated]>'
-        return '<LazySettings "%(settings_module)s">' % {
-            'settings_module': self._wrapped.SETTINGS_MODULE,
-        }
+        return '<LazySettings "%(settings_module)s">' % {'settings_module': self._wrapped.SETTINGS_MODULE}
 
     def __getattr__(self, name):
         """Return the value of a setting and cache it in self.__dict__."""
@@ -121,11 +121,7 @@ class LazySettings(LazyObject):
         # Stack index: -1 this line, -2 the caller.
         filename, _line_number, _function_name, _text = stack[-2]
         if not filename.startswith(os.path.dirname(django.__file__)):
-            warnings.warn(
-                FILE_CHARSET_DEPRECATED_MSG,
-                RemovedInDjango31Warning,
-                stacklevel=2,
-            )
+            warnings.warn(FILE_CHARSET_DEPRECATED_MSG, RemovedInDjango31Warning, stacklevel=2)
         return self.__getattr__('FILE_CHARSET')
 
 
@@ -141,18 +137,13 @@ class Settings:
 
         mod = importlib.import_module(self.SETTINGS_MODULE)
 
-        tuple_settings = (
-            "INSTALLED_APPS",
-            "TEMPLATE_DIRS",
-            "LOCALE_PATHS",
-        )
+        tuple_settings = ("INSTALLED_APPS", "TEMPLATE_DIRS", "LOCALE_PATHS")
         self._explicit_settings = set()
         for setting in dir(mod):
             if setting.isupper():
                 setting_value = getattr(mod, setting)
 
-                if (setting in tuple_settings and
-                        not isinstance(setting_value, (list, tuple))):
+                if setting in tuple_settings and not isinstance(setting_value, (list, tuple)):
                     raise ImproperlyConfigured("The %s setting must be a list or a tuple. " % setting)
                 setattr(self, setting, setting_value)
                 self._explicit_settings.add(setting)
@@ -187,6 +178,7 @@ class Settings:
 
 class UserSettingsHolder:
     """Holder for user configured settings."""
+
     # SETTINGS_MODULE doesn't make much sense in the manually configured
     # (standalone) case.
     SETTINGS_MODULE = None
@@ -216,21 +208,16 @@ class UserSettingsHolder:
             super().__delattr__(name)
 
     def __dir__(self):
-        return sorted(
-            s for s in [*self.__dict__, *dir(self.default_settings)]
-            if s not in self._deleted
-        )
+        return sorted(s for s in [*self.__dict__, *dir(self.default_settings)] if s not in self._deleted)
 
     def is_overridden(self, setting):
-        deleted = (setting in self._deleted)
-        set_locally = (setting in self.__dict__)
+        deleted = setting in self._deleted
+        set_locally = setting in self.__dict__
         set_on_default = getattr(self.default_settings, 'is_overridden', lambda s: False)(setting)
         return deleted or set_locally or set_on_default
 
     def __repr__(self):
-        return '<%(cls)s>' % {
-            'cls': self.__class__.__name__,
-        }
+        return '<%(cls)s>' % {'cls': self.__class__.__name__}
 
 
 settings = LazySettings()

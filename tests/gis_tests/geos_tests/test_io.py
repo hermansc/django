@@ -1,13 +1,10 @@
 import binascii
 
-from django.contrib.gis.geos import (
-    GEOSGeometry, Point, Polygon, WKBReader, WKBWriter, WKTReader, WKTWriter,
-)
+from django.contrib.gis.geos import GEOSGeometry, Point, Polygon, WKBReader, WKBWriter, WKTReader, WKTWriter
 from django.test import SimpleTestCase
 
 
 class GEOSIOTest(SimpleTestCase):
-
     def test01_wktreader(self):
         # Creating a WKTReader instance
         wkt_r = WKTReader()
@@ -125,7 +122,7 @@ class GEOSIOTest(SimpleTestCase):
         self.assertTrue(wkt_w.trim)
         self.assertEqual(wkt_w.write(Point(1, 1)), b'POINT (1 1)')
         self.assertEqual(wkt_w.write(Point(1.1, 1)), b'POINT (1.1 1)')
-        self.assertEqual(wkt_w.write(Point(1. / 3, 1)), b'POINT (0.3333333333333333 1)')
+        self.assertEqual(wkt_w.write(Point(1.0 / 3, 1)), b'POINT (0.3333333333333333 1)')
 
         wkt_w.trim = False
         self.assertFalse(wkt_w.trim)
@@ -134,19 +131,19 @@ class GEOSIOTest(SimpleTestCase):
     def test_wkt_writer_precision(self):
         wkt_w = WKTWriter()
         self.assertIsNone(wkt_w.precision)
-        self.assertEqual(wkt_w.write(Point(1. / 3, 2. / 3)), b'POINT (0.3333333333333333 0.6666666666666666)')
+        self.assertEqual(wkt_w.write(Point(1.0 / 3, 2.0 / 3)), b'POINT (0.3333333333333333 0.6666666666666666)')
 
         wkt_w.precision = 1
         self.assertEqual(wkt_w.precision, 1)
-        self.assertEqual(wkt_w.write(Point(1. / 3, 2. / 3)), b'POINT (0.3 0.7)')
+        self.assertEqual(wkt_w.write(Point(1.0 / 3, 2.0 / 3)), b'POINT (0.3 0.7)')
 
         wkt_w.precision = 0
         self.assertEqual(wkt_w.precision, 0)
-        self.assertEqual(wkt_w.write(Point(1. / 3, 2. / 3)), b'POINT (0 1)')
+        self.assertEqual(wkt_w.write(Point(1.0 / 3, 2.0 / 3)), b'POINT (0 1)')
 
         wkt_w.precision = None
         self.assertIsNone(wkt_w.precision)
-        self.assertEqual(wkt_w.write(Point(1. / 3, 2. / 3)), b'POINT (0.3333333333333333 0.6666666666666666)')
+        self.assertEqual(wkt_w.write(Point(1.0 / 3, 2.0 / 3)), b'POINT (0.3333333333333333 0.6666666666666666)')
 
         with self.assertRaisesMessage(AttributeError, 'WKT output rounding precision must be '):
             wkt_w.precision = 'potato'
@@ -162,10 +159,12 @@ class GEOSIOTest(SimpleTestCase):
             wkb_w.write_hex(p)
 
         wkb_w.srid = True
-        for byteorder, hex in enumerate([
-            b'0020000001000010E67FF80000000000007FF8000000000000',
-            b'0101000020E6100000000000000000F87F000000000000F87F',
-        ]):
+        for byteorder, hex in enumerate(
+            [
+                b'0020000001000010E67FF80000000000007FF8000000000000',
+                b'0101000020E6100000000000000000F87F000000000000F87F',
+            ]
+        ):
             wkb_w.byteorder = byteorder
             self.assertEqual(wkb_w.write_hex(p), hex)
             self.assertEqual(GEOSGeometry(wkb_w.write_hex(p)), p)
@@ -177,10 +176,12 @@ class GEOSIOTest(SimpleTestCase):
         p_no_srid = Polygon()
         wkb_w = WKBWriter()
         wkb_w.srid = True
-        for byteorder, hexes in enumerate([
-            (b'000000000300000000', b'0020000003000010E600000000'),
-            (b'010300000000000000', b'0103000020E610000000000000'),
-        ]):
+        for byteorder, hexes in enumerate(
+            [
+                (b'000000000300000000', b'0020000003000010E600000000'),
+                (b'010300000000000000', b'0103000020E610000000000000'),
+            ]
+        ):
             wkb_w.byteorder = byteorder
             for srid, hex in enumerate(hexes):
                 wkb_w.srid = srid

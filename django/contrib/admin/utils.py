@@ -21,6 +21,7 @@ UNQUOTE_RE = re.compile('_(?:%s)' % '|'.join([x[1:] for x in UNQUOTE_MAP]))
 
 class FieldIsAForeignKeyColumnName(Exception):
     """A field is a foreign key attname, i.e. <FK>_id."""
+
     pass
 
 
@@ -94,9 +95,7 @@ def flatten_fieldsets(fieldsets):
     """Return a list of field names from an admin fieldsets structure."""
     field_names = []
     for name, opts in fieldsets:
-        field_names.extend(
-            flatten(opts['fields'])
-        )
+        field_names.extend(flatten(opts['fields']))
     return field_names
 
 
@@ -129,20 +128,15 @@ def get_deleted_objects(objs, request, admin_site):
             if not admin_site._registry[model].has_delete_permission(request, obj):
                 perms_needed.add(opts.verbose_name)
             try:
-                admin_url = reverse('%s:%s_%s_change'
-                                    % (admin_site.name,
-                                       opts.app_label,
-                                       opts.model_name),
-                                    None, (quote(obj.pk),))
+                admin_url = reverse(
+                    '%s:%s_%s_change' % (admin_site.name, opts.app_label, opts.model_name), None, (quote(obj.pk),)
+                )
             except NoReverseMatch:
                 # Change url doesn't exist -- don't display link to edit
                 return no_edit_link
 
             # Display a link to the admin page.
-            return format_html('{}: <a href="{}">{}</a>',
-                               capfirst(opts.verbose_name),
-                               admin_url,
-                               obj)
+            return format_html('{}: <a href="{}">{}</a>', capfirst(opts.verbose_name), admin_url, obj)
         else:
             # Don't display link to edit, because it either has no
             # admin or is edited inline.
@@ -169,10 +163,7 @@ class NestedObjects(Collector):
     def collect(self, objs, source=None, source_attr=None, **kwargs):
         for obj in objs:
             if source_attr and not source_attr.endswith('+'):
-                related_name = source_attr % {
-                    'class': source._meta.model_name,
-                    'app_label': source._meta.app_label,
-                }
+                related_name = source_attr % {'class': source._meta.model_name, 'app_label': source._meta.app_label}
                 self.add_edge(getattr(obj, related_name), obj)
             else:
                 self.add_edge(None, obj)
@@ -232,10 +223,7 @@ def model_format_dict(obj):
         opts = obj.model._meta
     else:
         opts = obj
-    return {
-        'verbose_name': opts.verbose_name,
-        'verbose_name_plural': opts.verbose_name_plural,
-    }
+    return {'verbose_name': opts.verbose_name, 'verbose_name_plural': opts.verbose_name_plural}
 
 
 def model_ngettext(obj, n=None):
@@ -291,9 +279,12 @@ def _get_non_gfk_field(opts, name):
     model (rather something like `foo_set`).
     """
     field = opts.get_field(name)
-    if (field.is_relation and
-            # Generic foreign keys OR reverse relations
-            ((field.many_to_one and not field.related_model) or field.one_to_many)):
+    if (
+        field.is_relation
+        and
+        # Generic foreign keys OR reverse relations
+        ((field.many_to_one and not field.related_model) or field.one_to_many)
+    ):
         raise FieldDoesNotExist()
 
     # Avoid coercing <FK>_id fields to FK
@@ -342,9 +333,7 @@ def label_for_field(name, model, model_admin=None, return_attr=False, form=None)
 
             if hasattr(attr, "short_description"):
                 label = attr.short_description
-            elif (isinstance(attr, property) and
-                  hasattr(attr, "fget") and
-                  hasattr(attr.fget, "short_description")):
+            elif isinstance(attr, property) and hasattr(attr, "fget") and hasattr(attr.fget, "short_description"):
                 label = attr.fget.short_description
             elif callable(attr):
                 if attr.__name__ == "<lambda>":
@@ -499,25 +488,21 @@ def construct_change_message(form, formsets, add):
         with translation_override(None):
             for formset in formsets:
                 for added_object in formset.new_objects:
-                    change_message.append({
-                        'added': {
-                            'name': str(added_object._meta.verbose_name),
-                            'object': str(added_object),
-                        }
-                    })
+                    change_message.append(
+                        {'added': {'name': str(added_object._meta.verbose_name), 'object': str(added_object)}}
+                    )
                 for changed_object, changed_fields in formset.changed_objects:
-                    change_message.append({
-                        'changed': {
-                            'name': str(changed_object._meta.verbose_name),
-                            'object': str(changed_object),
-                            'fields': changed_fields,
+                    change_message.append(
+                        {
+                            'changed': {
+                                'name': str(changed_object._meta.verbose_name),
+                                'object': str(changed_object),
+                                'fields': changed_fields,
+                            }
                         }
-                    })
+                    )
                 for deleted_object in formset.deleted_objects:
-                    change_message.append({
-                        'deleted': {
-                            'name': str(deleted_object._meta.verbose_name),
-                            'object': str(deleted_object),
-                        }
-                    })
+                    change_message.append(
+                        {'deleted': {'name': str(deleted_object._meta.verbose_name), 'object': str(deleted_object)}}
+                    )
     return change_message

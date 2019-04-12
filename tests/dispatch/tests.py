@@ -9,18 +9,25 @@ from django.test import SimpleTestCase
 from django.test.utils import override_settings
 
 if sys.platform.startswith('java'):
+
     def garbage_collect():
         # Some JVM GCs will execute finalizers in a different thread, meaning
         # we need to wait for that to complete before we go on looking for the
         # effects of that.
         gc.collect()
         time.sleep(0.1)
+
+
 elif hasattr(sys, "pypy_version_info"):
+
     def garbage_collect():
         # Collecting weakreferences can take two collections on PyPy.
         gc.collect()
         gc.collect()
+
+
 else:
+
     def garbage_collect():
         gc.collect()
 
@@ -44,7 +51,6 @@ d_signal = Signal(providing_args=["val"], use_caching=True)
 
 
 class DispatcherTests(SimpleTestCase):
-
     def assertTestIsClean(self, signal):
         """Assert that everything has been cleaned up automatically"""
         # Note that dead weakref cleanup happens as side effect of using
@@ -109,8 +115,10 @@ class DispatcherTests(SimpleTestCase):
         Make sure signal caching sender receivers don't prevent garbage
         collection of senders.
         """
+
         class sender:
             pass
+
         wref = weakref.ref(sender)
         d_signal.connect(receiver_1_arg)
         d_signal.send(sender, val='garbage')
@@ -172,6 +180,7 @@ class DispatcherTests(SimpleTestCase):
     def test_send_robust_fail(self):
         def fails(val, **kwargs):
             raise ValueError('this')
+
         a_signal.connect(fails)
         result = a_signal.send_robust(sender=self, val="test")
         err = result[0][1]
@@ -218,11 +227,11 @@ class DispatcherTests(SimpleTestCase):
 
 
 class ReceiverTestCase(SimpleTestCase):
-
     def test_receiver_single_signal(self):
         @receiver(a_signal)
         def f(val, **kwargs):
             self.state = val
+
         self.state = False
         a_signal.send(sender=self, val=True)
         self.assertTrue(self.state)
@@ -231,6 +240,7 @@ class ReceiverTestCase(SimpleTestCase):
         @receiver([a_signal, b_signal, c_signal])
         def f(val, **kwargs):
             self.state.append(val)
+
         self.state = []
         a_signal.send(sender=self, val='a')
         c_signal.send(sender=self, val='c')

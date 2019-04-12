@@ -1,9 +1,7 @@
 from unittest import mock
 from urllib.parse import urlencode
 
-from django.contrib.sitemaps import (
-    SitemapNotFound, _get_sitemap_full_url, ping_google,
-)
+from django.contrib.sitemaps import SitemapNotFound, _get_sitemap_full_url, ping_google
 from django.core.exceptions import ImproperlyConfigured
 from django.test import modify_settings, override_settings
 
@@ -11,7 +9,6 @@ from .base import SitemapTestsBase
 
 
 class PingGoogleTests(SitemapTestsBase):
-
     @mock.patch('django.contrib.sitemaps.urlopen')
     def test_something(self, urlopen):
         ping_google()
@@ -36,10 +33,7 @@ class PingGoogleTests(SitemapTestsBase):
         self.assertEqual(_get_sitemap_full_url('/foo.xml'), 'https://example.com/foo.xml')
 
     def test_get_sitemap_full_url_insecure(self):
-        self.assertEqual(
-            _get_sitemap_full_url('/foo.xml', sitemap_uses_https=False),
-            'http://example.com/foo.xml'
-        )
+        self.assertEqual(_get_sitemap_full_url('/foo.xml', sitemap_uses_https=False), 'http://example.com/foo.xml')
 
     @modify_settings(INSTALLED_APPS={'remove': 'django.contrib.sites'})
     def test_get_sitemap_full_url_no_sites(self):

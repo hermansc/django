@@ -107,8 +107,7 @@ class FileBasedCache(BaseCache):
         if self._cull_frequency == 0:
             return self.clear()  # Clear the cache when CULL_FREQUENCY = 0
         # Delete a random selection of entries
-        filelist = random.sample(filelist,
-                                 int(num_entries / self._cull_frequency))
+        filelist = random.sample(filelist, int(num_entries / self._cull_frequency))
         for fname in filelist:
             self._delete(fname)
 
@@ -122,8 +121,7 @@ class FileBasedCache(BaseCache):
         """
         key = self.make_key(key, version=version)
         self.validate_key(key)
-        return os.path.join(self._dir, ''.join(
-            [hashlib.md5(key.encode()).hexdigest(), self.cache_suffix]))
+        return os.path.join(self._dir, ''.join([hashlib.md5(key.encode()).hexdigest(), self.cache_suffix]))
 
     def clear(self):
         """
@@ -151,7 +149,4 @@ class FileBasedCache(BaseCache):
         Get a list of paths to all the cache files. These are all the files
         in the root cache dir that end on the cache_suffix.
         """
-        return [
-            os.path.join(self._dir, fname)
-            for fname in glob.glob1(self._dir, '*%s' % self.cache_suffix)
-        ]
+        return [os.path.join(self._dir, fname) for fname in glob.glob1(self._dir, '*%s' % self.cache_suffix)]

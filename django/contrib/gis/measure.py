@@ -100,8 +100,7 @@ class MeasureBase:
     def __add__(self, other):
         if isinstance(other, self.__class__):
             return self.__class__(
-                default_unit=self._default_unit,
-                **{self.STANDARD_UNIT: (self.standard + other.standard)}
+                default_unit=self._default_unit, **{self.STANDARD_UNIT: (self.standard + other.standard)}
             )
         else:
             raise TypeError('%(class)s must be added with %(class)s' % {"class": pretty_name(self)})
@@ -116,8 +115,7 @@ class MeasureBase:
     def __sub__(self, other):
         if isinstance(other, self.__class__):
             return self.__class__(
-                default_unit=self._default_unit,
-                **{self.STANDARD_UNIT: (self.standard - other.standard)}
+                default_unit=self._default_unit, **{self.STANDARD_UNIT: (self.standard - other.standard)}
             )
         else:
             raise TypeError('%(class)s must be subtracted from %(class)s' % {"class": pretty_name(self)})
@@ -131,10 +129,7 @@ class MeasureBase:
 
     def __mul__(self, other):
         if isinstance(other, NUMERIC_TYPES):
-            return self.__class__(
-                default_unit=self._default_unit,
-                **{self.STANDARD_UNIT: (self.standard * other)}
-            )
+            return self.__class__(default_unit=self._default_unit, **{self.STANDARD_UNIT: (self.standard * other)})
         else:
             raise TypeError('%(class)s must be multiplied with number' % {"class": pretty_name(self)})
 
@@ -152,10 +147,7 @@ class MeasureBase:
         if isinstance(other, self.__class__):
             return self.standard / other.standard
         if isinstance(other, NUMERIC_TYPES):
-            return self.__class__(
-                default_unit=self._default_unit,
-                **{self.STANDARD_UNIT: (self.standard / other)}
-            )
+            return self.__class__(default_unit=self._default_unit, **{self.STANDARD_UNIT: (self.standard / other)})
         else:
             raise TypeError('%(class)s must be divided with number or %(class)s' % {"class": pretty_name(self)})
 
@@ -290,7 +282,7 @@ class Distance(MeasureBase):
         'US survey foot': 'survey_ft',
         'U.S. Foot': 'survey_ft',
         'Yard (Indian)': 'indian_yd',
-        'Yard (Sears)': 'sears_yd'
+        'Yard (Sears)': 'sears_yd',
     }
     LALIAS = {k.lower(): v for k, v in ALIAS.items()}
 
@@ -301,14 +293,12 @@ class Distance(MeasureBase):
                 **{AREA_PREFIX + self.STANDARD_UNIT: (self.standard * other.standard)}
             )
         elif isinstance(other, NUMERIC_TYPES):
-            return self.__class__(
-                default_unit=self._default_unit,
-                **{self.STANDARD_UNIT: (self.standard * other)}
-            )
+            return self.__class__(default_unit=self._default_unit, **{self.STANDARD_UNIT: (self.standard * other)})
         else:
-            raise TypeError('%(distance)s must be multiplied with number or %(distance)s' % {
-                "distance": pretty_name(self.__class__),
-            })
+            raise TypeError(
+                '%(distance)s must be multiplied with number or %(distance)s'
+                % {"distance": pretty_name(self.__class__)}
+            )
 
 
 class Area(MeasureBase):
@@ -320,10 +310,7 @@ class Area(MeasureBase):
 
     def __truediv__(self, other):
         if isinstance(other, NUMERIC_TYPES):
-            return self.__class__(
-                default_unit=self._default_unit,
-                **{self.STANDARD_UNIT: (self.standard / other)}
-            )
+            return self.__class__(default_unit=self._default_unit, **{self.STANDARD_UNIT: (self.standard / other)})
         else:
             raise TypeError('%(class)s must be divided by a number' % {"class": pretty_name(self)})
 

@@ -6,9 +6,7 @@ from django.db import connection, models
 from django.db.models import Avg
 from django.db.models.expressions import Value
 from django.db.models.functions import Cast
-from django.test import (
-    TestCase, ignore_warnings, override_settings, skipUnlessDBFeature,
-)
+from django.test import TestCase, ignore_warnings, override_settings, skipUnlessDBFeature
 
 from ..models import Author, DTModel, Fan, FloatModel
 
@@ -23,7 +21,7 @@ class CastTests(TestCase):
         self.assertEqual(numbers.get().cast_integer, 0)
 
     def test_cast_from_field(self):
-        numbers = Author.objects.annotate(cast_string=Cast('age', models.CharField(max_length=255)),)
+        numbers = Author.objects.annotate(cast_string=Cast('age', models.CharField(max_length=255)))
         self.assertEqual(numbers.get().cast_string, '1')
 
     def test_cast_to_char_field_without_max_length(self):
@@ -47,7 +45,7 @@ class CastTests(TestCase):
         self.assertEqual(float_obj.cast_f1_decimal, decimal.Decimal('-1.93'))
         self.assertEqual(float_obj.cast_f2_decimal, decimal.Decimal('3.5'))
         author_obj = Author.objects.annotate(
-            cast_alias_decimal=Cast('alias', models.DecimalField(max_digits=8, decimal_places=2)),
+            cast_alias_decimal=Cast('alias', models.DecimalField(max_digits=8, decimal_places=2))
         ).get()
         self.assertEqual(author_obj.cast_alias_decimal, decimal.Decimal('1'))
 
@@ -68,18 +66,14 @@ class CastTests(TestCase):
     def test_cast_from_db_datetime_to_date(self):
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
         DTModel.objects.create(start_datetime=dt_value)
-        dtm = DTModel.objects.annotate(
-            start_datetime_as_date=Cast('start_datetime', models.DateField())
-        ).first()
+        dtm = DTModel.objects.annotate(start_datetime_as_date=Cast('start_datetime', models.DateField())).first()
         self.assertEqual(dtm.start_datetime_as_date, datetime.date(2018, 9, 28))
 
     def test_cast_from_db_datetime_to_time(self):
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
         DTModel.objects.create(start_datetime=dt_value)
-        dtm = DTModel.objects.annotate(
-            start_datetime_as_time=Cast('start_datetime', models.TimeField())
-        ).first()
-        rounded_ms = int(round(.234567, connection.features.time_cast_precision) * 10**6)
+        dtm = DTModel.objects.annotate(start_datetime_as_time=Cast('start_datetime', models.TimeField())).first()
+        rounded_ms = int(round(0.234567, connection.features.time_cast_precision) * 10 ** 6)
         self.assertEqual(dtm.start_datetime_as_time, datetime.time(12, 42, 10, rounded_ms))
 
     def test_cast_from_db_date_to_datetime(self):
@@ -92,10 +86,11 @@ class CastTests(TestCase):
         author = Author.objects.create(name='John Smith', age=45)
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
         Fan.objects.create(name='Margaret', age=50, author=author, fan_since=dt_value)
-        fans = Fan.objects.values('author').annotate(
-            fan_for_day=Cast('fan_since', models.DateField()),
-            fans=models.Count('*')
-        ).values()
+        fans = (
+            Fan.objects.values('author')
+            .annotate(fan_for_day=Cast('fan_since', models.DateField()), fans=models.Count('*'))
+            .values()
+        )
         self.assertEqual(fans[0]['fan_for_day'], datetime.date(2018, 9, 28))
         self.assertEqual(fans[0]['fans'], 1)
 
@@ -107,9 +102,7 @@ class CastTests(TestCase):
     def test_cast_from_python_to_datetime(self):
         now = datetime.datetime.now()
         dates = Author.objects.annotate(cast_datetime=Cast(now, models.DateTimeField()))
-        time_precision = datetime.timedelta(
-            microseconds=10**(6 - connection.features.time_cast_precision)
-        )
+        time_precision = datetime.timedelta(microseconds=10 ** (6 - connection.features.time_cast_precision))
         self.assertAlmostEqual(dates.get().cast_datetime, now, delta=time_precision)
 
     def test_cast_from_python(self):

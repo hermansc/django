@@ -54,8 +54,7 @@ class ManyToOneNullTests(TestCase):
         self.assertQuerysetEqual(self.r.article_set.all(), ['<Article: First>', '<Article: Second>'])
         self.r.article_set.add(a3)
         self.assertQuerysetEqual(
-            self.r.article_set.all(),
-            ['<Article: First>', '<Article: Second>', '<Article: Third>']
+            self.r.article_set.all(), ['<Article: First>', '<Article: Second>', '<Article: Third>']
         )
         # Remove an article from the set, and check that it was removed.
         self.r.article_set.remove(a3)
@@ -82,7 +81,7 @@ class ManyToOneNullTests(TestCase):
         self.assertQuerysetEqual(self.r2.article_set.all(), [])
         self.assertQuerysetEqual(
             Article.objects.filter(reporter__isnull=True),
-            ['<Article: Fourth>', '<Article: Second>', '<Article: Third>']
+            ['<Article: Fourth>', '<Article: Second>', '<Article: Third>'],
         )
 
     def test_set_clear_non_bulk(self):
@@ -100,8 +99,7 @@ class ManyToOneNullTests(TestCase):
         self.r.article_set.clear()
         self.assertQuerysetEqual(self.r.article_set.all(), [])
         self.assertQuerysetEqual(
-            Article.objects.filter(reporter__isnull=True),
-            ['<Article: First>', '<Article: Fourth>']
+            Article.objects.filter(reporter__isnull=True), ['<Article: First>', '<Article: Fourth>']
         )
 
     def test_assign_with_queryset(self):

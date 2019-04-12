@@ -2,9 +2,7 @@
 SQL functions reference lists:
 https://www.gaia-gis.it/gaia-sins/spatialite-sql-4.3.0.html
 """
-from django.contrib.gis.db.backends.base.operations import (
-    BaseSpatialOperations,
-)
+from django.contrib.gis.db.backends.base.operations import BaseSpatialOperations
 from django.contrib.gis.db.backends.spatialite.adapter import SpatiaLiteAdapter
 from django.contrib.gis.db.backends.utils import SpatialOperator
 from django.contrib.gis.db.models import aggregates
@@ -92,9 +90,8 @@ class SpatiaLiteOperations(BaseSpatialOperations, DatabaseOperations):
         except Exception as exc:
             raise ImproperlyConfigured(
                 'Cannot determine the SpatiaLite version for the "%s" database. '
-                'Was the SpatiaLite initialization SQL loaded on this database?' % (
-                    self.connection.settings_dict['NAME'],
-                )
+                'Was the SpatiaLite initialization SQL loaded on this database?'
+                % (self.connection.settings_dict['NAME'],)
             ) from exc
         if version < (4, 3, 0):
             raise ImproperlyConfigured('GeoDjango supports SpatiaLite 4.3.0 and above.')
@@ -130,8 +127,7 @@ class SpatiaLiteOperations(BaseSpatialOperations, DatabaseOperations):
             if f.geodetic(self.connection):
                 if lookup_type == 'dwithin':
                     raise ValueError(
-                        'Only numeric values of degree units are allowed on '
-                        'geographic DWithin queries.'
+                        'Only numeric values of degree units are allowed on ' 'geographic DWithin queries.'
                     )
                 dist_param = value.m
             else:
@@ -189,10 +185,12 @@ class SpatiaLiteOperations(BaseSpatialOperations, DatabaseOperations):
     # Routines for getting the OGC-compliant models.
     def geometry_columns(self):
         from django.contrib.gis.db.backends.spatialite.models import SpatialiteGeometryColumns
+
         return SpatialiteGeometryColumns
 
     def spatial_ref_sys(self):
         from django.contrib.gis.db.backends.spatialite.models import SpatialiteSpatialRefSys
+
         return SpatialiteSpatialRefSys
 
     def get_geometry_converter(self, expression):
@@ -201,4 +199,5 @@ class SpatiaLiteOperations(BaseSpatialOperations, DatabaseOperations):
 
         def converter(value, expression, connection):
             return None if value is None else GEOSGeometryBase(read(value), geom_class)
+
         return converter

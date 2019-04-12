@@ -37,8 +37,7 @@ def kml(request, label, model, field_name=None, compress=False, using=DEFAULT_DB
         # attribute of the lazy geometry instead.
         placemarks = []
         if connection.features.has_Transform_function:
-            qs = klass._default_manager.using(using).annotate(
-                **{'%s_4326' % field_name: Transform(field_name, 4326)})
+            qs = klass._default_manager.using(using).annotate(**{'%s_4326' % field_name: Transform(field_name, 4326)})
             field_name += '_4326'
         else:
             qs = klass._default_manager.using(using).all()

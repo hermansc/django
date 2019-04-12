@@ -10,9 +10,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.core.management.base import BaseCommand, CommandError
-from django.core.management.utils import (
-    find_command, handle_extensions, is_ignored_path, popen_wrapper,
-)
+from django.core.management.utils import find_command, handle_extensions, is_ignored_path, popen_wrapper
 from django.utils.encoding import DEFAULT_LOCALE_ENCODING
 from django.utils.functional import cached_property
 from django.utils.jslex import prepare_js_for_gettext
@@ -28,8 +26,7 @@ def check_programs(*programs):
     for program in programs:
         if find_command(program) is None:
             raise CommandError(
-                "Can't find %s. Make sure you have GNU gettext tools 0.15 or "
-                "newer installed." % program
+                "Can't find %s. Make sure you have GNU gettext tools 0.15 or " "newer installed." % program
             )
 
 
@@ -41,10 +38,7 @@ class TranslatableFile:
         self.locale_dir = locale_dir
 
     def __repr__(self):
-        return "<%s: %s>" % (
-            self.__class__.__name__,
-            os.sep.join([self.dirpath, self.file]),
-        )
+        return "<%s: %s>" % (self.__class__.__name__, os.sep.join([self.dirpath, self.file]))
 
     def __eq__(self, other):
         return self.path == other.path
@@ -61,6 +55,7 @@ class BuildFile:
     """
     Represent the state of a translatable file during the build process.
     """
+
     def __init__(self, command, domain, translatable):
         self.command = command
         self.domain = domain
@@ -87,10 +82,7 @@ class BuildFile:
         """
         if not self.is_templatized:
             return self.path
-        extension = {
-            'djangojs': 'c',
-            'django': 'py',
-        }.get(self.domain)
+        extension = {'djangojs': 'c', 'django': 'py'}.get(self.domain)
         filename = '%s.%s' % (self.translatable.file, extension)
         return os.path.join(self.translatable.dirpath, filename)
 
@@ -137,7 +129,7 @@ class BuildFile:
             r'^(#: .*)(' + re.escape(old_path) + r')',
             lambda match: match.group().replace(old_path, new_path),
             msgs,
-            flags=re.MULTILINE
+            flags=re.MULTILINE,
         )
 
     def cleanup(self):
@@ -215,54 +207,66 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--locale', '-l', default=[], action='append',
+            '--locale',
+            '-l',
+            default=[],
+            action='append',
             help='Creates or updates the message files for the given locale(s) (e.g. pt_BR). '
-                 'Can be used multiple times.',
+            'Can be used multiple times.',
         )
         parser.add_argument(
-            '--exclude', '-x', default=[], action='append',
+            '--exclude',
+            '-x',
+            default=[],
+            action='append',
             help='Locales to exclude. Default is none. Can be used multiple times.',
         )
         parser.add_argument(
-            '--domain', '-d', default='django',
-            help='The domain of the message files (default: "django").',
+            '--domain', '-d', default='django', help='The domain of the message files (default: "django").'
         )
         parser.add_argument(
-            '--all', '-a', action='store_true',
-            help='Updates the message files for all existing locales.',
+            '--all', '-a', action='store_true', help='Updates the message files for all existing locales.'
         )
         parser.add_argument(
-            '--extension', '-e', dest='extensions', action='append',
+            '--extension',
+            '-e',
+            dest='extensions',
+            action='append',
             help='The file extension(s) to examine (default: "html,txt,py", or "js" '
-                 'if the domain is "djangojs"). Separate multiple extensions with '
-                 'commas, or use -e multiple times.',
+            'if the domain is "djangojs"). Separate multiple extensions with '
+            'commas, or use -e multiple times.',
         )
         parser.add_argument(
-            '--symlinks', '-s', action='store_true',
+            '--symlinks',
+            '-s',
+            action='store_true',
             help='Follows symlinks to directories when examining source code '
-                 'and templates for translation strings.',
+            'and templates for translation strings.',
         )
         parser.add_argument(
-            '--ignore', '-i', action='append', dest='ignore_patterns',
-            default=[], metavar='PATTERN',
-            help='Ignore files or directories matching this glob-style pattern. '
-                 'Use multiple times to ignore more.',
+            '--ignore',
+            '-i',
+            action='append',
+            dest='ignore_patterns',
+            default=[],
+            metavar='PATTERN',
+            help='Ignore files or directories matching this glob-style pattern. ' 'Use multiple times to ignore more.',
         )
         parser.add_argument(
-            '--no-default-ignore', action='store_false', dest='use_default_ignore_patterns',
+            '--no-default-ignore',
+            action='store_false',
+            dest='use_default_ignore_patterns',
             help="Don't ignore the common glob-style patterns 'CVS', '.*', '*~' and '*.pyc'.",
         )
         parser.add_argument(
-            '--no-wrap', action='store_true',
-            help="Don't break long message lines into several lines.",
+            '--no-wrap', action='store_true', help="Don't break long message lines into several lines."
         )
-        parser.add_argument(
-            '--no-location', action='store_true',
-            help="Don't write '#: filename:line' lines.",
-        )
+        parser.add_argument('--no-location', action='store_true', help="Don't write '#: filename:line' lines.")
         parser.add_argument(
             '--add-location',
-            choices=('full', 'file', 'never'), const='full', nargs='?',
+            choices=('full', 'file', 'never'),
+            const='full',
+            nargs='?',
             help=(
                 "Controls '#: filename:line' lines. If the option is 'full' "
                 "(the default if not given), the lines  include both file name "
@@ -271,13 +275,9 @@ class Command(BaseCommand):
                 "--add-location requires gettext 0.19 or newer."
             ),
         )
+        parser.add_argument('--no-obsolete', action='store_true', help="Remove obsolete message strings.")
         parser.add_argument(
-            '--no-obsolete', action='store_true',
-            help="Remove obsolete message strings.",
-        )
-        parser.add_argument(
-            '--keep-pot', action='store_true',
-            help="Keep .pot file after making messages. Useful when debugging.",
+            '--keep-pot', action='store_true', help="Keep .pot file after making messages. Useful when debugging."
         )
 
     def handle(self, *args, **options):
@@ -321,8 +321,7 @@ class Command(BaseCommand):
         self.keep_pot = options['keep_pot']
 
         if self.domain not in ('django', 'djangojs'):
-            raise CommandError("currently makemessages only supports domains "
-                               "'django' and 'djangojs'")
+            raise CommandError("currently makemessages only supports domains " "'django' and 'djangojs'")
         if self.domain == 'djangojs':
             exts = extensions or ['js']
         else:
@@ -331,14 +330,12 @@ class Command(BaseCommand):
 
         if (locale is None and not exclude and not process_all) or self.domain is None:
             raise CommandError(
-                "Type '%s help %s' for usage information."
-                % (os.path.basename(sys.argv[0]), sys.argv[1])
+                "Type '%s help %s' for usage information." % (os.path.basename(sys.argv[0]), sys.argv[1])
             )
 
         if self.verbosity > 1:
             self.stdout.write(
-                'examining files with the extensions: %s\n'
-                % get_text_list(list(self.extensions), 'and')
+                'examining files with the extensions: %s\n' % get_text_list(list(self.extensions), 'and')
             )
 
         self.invoked_for_django = False
@@ -362,8 +359,7 @@ class Command(BaseCommand):
         looks_like_locale = re.compile(r'[a-z]{2}')
         locale_dirs = filter(os.path.isdir, glob.glob('%s/*' % self.default_locale_path))
         all_locales = [
-            lang_code for lang_code in map(os.path.basename, locale_dirs)
-            if looks_like_locale.match(lang_code)
+            lang_code for lang_code in map(os.path.basename, locale_dirs) if looks_like_locale.match(lang_code)
         ]
 
         # Account for excluded locales
@@ -395,10 +391,7 @@ class Command(BaseCommand):
     def gettext_version(self):
         # Gettext tools will output system-encoded bytestrings instead of UTF-8,
         # when looking up the version. It's especially a problem on Windows.
-        out, err, status = popen_wrapper(
-            ['xgettext', '--version'],
-            stdout_encoding=DEFAULT_LOCALE_ENCODING,
-        )
+        out, err, status = popen_wrapper(['xgettext', '--version'], stdout_encoding=DEFAULT_LOCALE_ENCODING)
         m = re.search(r'(\d+)\.(\d+)\.?(\d+)?', out)
         if m:
             return tuple(int(d) for d in m.groups() if d is not None)
@@ -431,8 +424,7 @@ class Command(BaseCommand):
             msgs, errors, status = popen_wrapper(args)
             if errors:
                 if status != STATUS_OK:
-                    raise CommandError(
-                        "errors happened while running msguniq\n%s" % errors)
+                    raise CommandError("errors happened while running msguniq\n%s" % errors)
                 elif self.verbosity > 0:
                     self.stdout.write(errors)
             msgs = normalize_eols(msgs)
@@ -458,8 +450,10 @@ class Command(BaseCommand):
             ignored_roots = [os.path.normpath(p) for p in (settings.MEDIA_ROOT, settings.STATIC_ROOT) if p]
         for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=self.symlinks):
             for dirname in dirnames[:]:
-                if (is_ignored_path(os.path.normpath(os.path.join(dirpath, dirname)), self.ignore_patterns) or
-                        os.path.join(os.path.abspath(dirpath), dirname) in ignored_roots):
+                if (
+                    is_ignored_path(os.path.normpath(os.path.join(dirpath, dirname)), self.ignore_patterns)
+                    or os.path.join(os.path.abspath(dirpath), dirname) in ignored_roots
+                ):
                     dirnames.remove(dirname)
                     if self.verbosity > 1:
                         self.stdout.write('ignoring directory %s\n' % dirname)
@@ -504,9 +498,7 @@ class Command(BaseCommand):
         build_files = []
         for translatable in files:
             if self.verbosity > 1:
-                self.stdout.write('processing file %s in %s\n' % (
-                    translatable.file, translatable.dirpath
-                ))
+                self.stdout.write('processing file %s in %s\n' % (translatable.file, translatable.dirpath))
             if self.domain not in ('djangojs', 'django'):
                 continue
             build_file = self.build_file_class(self, self.domain, translatable)
@@ -514,9 +506,8 @@ class Command(BaseCommand):
                 build_file.preprocess()
             except UnicodeDecodeError as e:
                 self.stdout.write(
-                    'UnicodeDecodeError: skipped file %s in %s (reason: %s)' % (
-                        translatable.file, translatable.dirpath, e,
-                    )
+                    'UnicodeDecodeError: skipped file %s in %s (reason: %s)'
+                    % (translatable.file, translatable.dirpath, e)
                 )
                 continue
             build_files.append(build_file)
@@ -525,7 +516,8 @@ class Command(BaseCommand):
             is_templatized = build_file.is_templatized
             args = [
                 'xgettext',
-                '-d', self.domain,
+                '-d',
+                self.domain,
                 '--language=%s' % ('C' if is_templatized else 'JavaScript',),
                 '--keyword=gettext_noop',
                 '--keyword=gettext_lazy',
@@ -537,7 +529,8 @@ class Command(BaseCommand):
         elif self.domain == 'django':
             args = [
                 'xgettext',
-                '-d', self.domain,
+                '-d',
+                self.domain,
                 '--language=Python',
                 '--keyword=gettext_noop',
                 '--keyword=gettext_lazy',
@@ -567,8 +560,7 @@ class Command(BaseCommand):
                 for build_file in build_files:
                     build_file.cleanup()
                 raise CommandError(
-                    'errors happened while running xgettext on %s\n%s' %
-                    ('\n'.join(input_files), errors)
+                    'errors happened while running xgettext on %s\n%s' % ('\n'.join(input_files), errors)
                 )
             elif self.verbosity > 0:
                 # Print warnings
@@ -577,10 +569,7 @@ class Command(BaseCommand):
         if msgs:
             if locale_dir is NO_LOCALE_DIR:
                 file_path = os.path.normpath(build_files[0].path)
-                raise CommandError(
-                    'Unable to find a locale path to store translations for '
-                    'file %s' % file_path
-                )
+                raise CommandError('Unable to find a locale path to store translations for ' 'file %s' % file_path)
             for build_file in build_files:
                 msgs = build_file.postprocess_messages(msgs)
             potfile = os.path.join(locale_dir, '%s.pot' % self.domain)
@@ -605,8 +594,7 @@ class Command(BaseCommand):
             msgs, errors, status = popen_wrapper(args)
             if errors:
                 if status != STATUS_OK:
-                    raise CommandError(
-                        "errors happened while running msgmerge\n%s" % errors)
+                    raise CommandError("errors happened while running msgmerge\n%s" % errors)
                 elif self.verbosity > 0:
                     self.stdout.write(errors)
         else:
@@ -615,8 +603,7 @@ class Command(BaseCommand):
             if not self.invoked_for_django:
                 msgs = self.copy_plural_forms(msgs, locale)
         msgs = normalize_eols(msgs)
-        msgs = msgs.replace(
-            "#. #-#-#-#-#  %s.pot (PACKAGE VERSION)  #-#-#-#-#\n" % self.domain, "")
+        msgs = msgs.replace("#. #-#-#-#-#  %s.pot (PACKAGE VERSION)  #-#-#-#-#\n" % self.domain, "")
         with open(pofile, 'w', encoding='utf-8') as fp:
             fp.write(msgs)
 
@@ -625,8 +612,7 @@ class Command(BaseCommand):
             msgs, errors, status = popen_wrapper(args)
             if errors:
                 if status != STATUS_OK:
-                    raise CommandError(
-                        "errors happened while running msgattrib\n%s" % errors)
+                    raise CommandError("errors happened while running msgattrib\n%s" % errors)
                 elif self.verbosity > 0:
                     self.stdout.write(errors)
 

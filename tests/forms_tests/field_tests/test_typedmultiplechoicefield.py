@@ -5,7 +5,6 @@ from django.test import SimpleTestCase
 
 
 class TypedMultipleChoiceFieldTest(SimpleTestCase):
-
     def test_typedmultiplechoicefield_1(self):
         f = TypedMultipleChoiceField(choices=[(1, "+1"), (-1, "-1")], coerce=int)
         self.assertEqual([1], f.clean(['1']))
@@ -61,11 +60,11 @@ class TypedMultipleChoiceFieldTest(SimpleTestCase):
         A coerce function which results in a value not present in choices
         should raise an appropriate error (#21397).
         """
+
         def coerce_func(val):
             return decimal.Decimal('1.%s' % val)
 
-        f = TypedMultipleChoiceField(
-            choices=[(1, "1"), (2, "2")], coerce=coerce_func, required=True)
+        f = TypedMultipleChoiceField(choices=[(1, "1"), (2, "2")], coerce=coerce_func, required=True)
         self.assertEqual([decimal.Decimal('1.2')], f.clean(['2']))
         with self.assertRaisesMessage(ValidationError, "'This field is required.'"):
             f.clean([])

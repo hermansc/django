@@ -23,16 +23,11 @@ class FilteredSelectMultiple(forms.SelectMultiple):
     Note that the resulting JavaScript assumes that the jsi18n
     catalog has been loaded in the page
     """
+
     @property
     def media(self):
         extra = '' if settings.DEBUG else '.min'
-        js = [
-            'vendor/jquery/jquery%s.js' % extra,
-            'jquery.init.js',
-            'core.js',
-            'SelectBox.js',
-            'SelectFilter2.js',
-        ]
+        js = ['vendor/jquery/jquery%s.js' % extra, 'jquery.init.js', 'core.js', 'SelectBox.js', 'SelectFilter2.js']
         return forms.Media(js=["admin/js/%s" % path for path in js])
 
     def __init__(self, verbose_name, is_stacked, attrs=None, choices=()):
@@ -52,10 +47,7 @@ class FilteredSelectMultiple(forms.SelectMultiple):
 
 class AdminDateWidget(forms.DateInput):
     class Media:
-        js = [
-            'admin/js/calendar.js',
-            'admin/js/admin/DateTimeShortcuts.js',
-        ]
+        js = ['admin/js/calendar.js', 'admin/js/admin/DateTimeShortcuts.js']
 
     def __init__(self, attrs=None, format=None):
         attrs = {'class': 'vDateField', 'size': '10', **(attrs or {})}
@@ -64,10 +56,7 @@ class AdminDateWidget(forms.DateInput):
 
 class AdminTimeWidget(forms.TimeInput):
     class Media:
-        js = [
-            'admin/js/calendar.js',
-            'admin/js/admin/DateTimeShortcuts.js',
-        ]
+        js = ['admin/js/calendar.js', 'admin/js/admin/DateTimeShortcuts.js']
 
     def __init__(self, attrs=None, format=None):
         attrs = {'class': 'vTimeField', 'size': '8', **(attrs or {})}
@@ -78,6 +67,7 @@ class AdminSplitDateTime(forms.SplitDateTimeWidget):
     """
     A SplitDateTime Widget that has some admin-specific styling.
     """
+
     template_name = 'admin/widgets/split_datetime.html'
 
     def __init__(self, attrs=None):
@@ -126,6 +116,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
     A Widget for displaying ForeignKeys in the "raw_id" interface rather than
     in a <select> box.
     """
+
     template_name = 'admin/widgets/foreign_key_raw_id.html'
 
     def __init__(self, rel, admin_site, attrs=None, using=None):
@@ -140,10 +131,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         if rel_to in self.admin_site._registry:
             # The related object is registered with the same AdminSite
             related_url = reverse(
-                'admin:%s_%s_changelist' % (
-                    rel_to._meta.app_label,
-                    rel_to._meta.model_name,
-                ),
+                'admin:%s_%s_changelist' % (rel_to._meta.app_label, rel_to._meta.model_name),
                 current_app=self.admin_site.name,
             )
 
@@ -170,6 +158,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
 
     def url_parameters(self):
         from django.contrib.admin.views.main import TO_FIELD_VAR
+
         params = self.base_url_parameters()
         params.update({TO_FIELD_VAR: self.rel.get_related_field().name})
         return params
@@ -183,12 +172,8 @@ class ForeignKeyRawIdWidget(forms.TextInput):
 
         try:
             url = reverse(
-                '%s:%s_%s_change' % (
-                    self.admin_site.name,
-                    obj._meta.app_label,
-                    obj._meta.object_name.lower(),
-                ),
-                args=(obj.pk,)
+                '%s:%s_%s_change' % (self.admin_site.name, obj._meta.app_label, obj._meta.object_name.lower()),
+                args=(obj.pk,),
             )
         except NoReverseMatch:
             url = ''  # Admin not registered for target model.
@@ -201,6 +186,7 @@ class ManyToManyRawIdWidget(ForeignKeyRawIdWidget):
     A Widget for displaying ManyToMany ids in the "raw_id" interface rather than
     in a <select multiple> box.
     """
+
     template_name = 'admin/widgets/many_to_many_raw_id.html'
 
     def get_context(self, name, value, attrs):
@@ -230,11 +216,19 @@ class RelatedFieldWidgetWrapper(forms.Widget):
     This class is a wrapper to a given widget to add the add icon for the
     admin interface.
     """
+
     template_name = 'admin/widgets/related_widget_wrapper.html'
 
-    def __init__(self, widget, rel, admin_site, can_add_related=None,
-                 can_change_related=False, can_delete_related=False,
-                 can_view_related=False):
+    def __init__(
+        self,
+        widget,
+        rel,
+        admin_site,
+        can_add_related=None,
+        can_change_related=False,
+        can_delete_related=False,
+        can_view_related=False,
+    ):
         self.needs_multipart_form = widget.needs_multipart_form
         self.attrs = widget.attrs
         self.choices = widget.choices
@@ -271,18 +265,17 @@ class RelatedFieldWidgetWrapper(forms.Widget):
         return self.widget.media
 
     def get_related_url(self, info, action, *args):
-        return reverse("admin:%s_%s_%s" % (info + (action,)),
-                       current_app=self.admin_site.name, args=args)
+        return reverse("admin:%s_%s_%s" % (info + (action,)), current_app=self.admin_site.name, args=args)
 
     def get_context(self, name, value, attrs):
         from django.contrib.admin.views.main import IS_POPUP_VAR, TO_FIELD_VAR
+
         rel_opts = self.rel.model._meta
         info = (rel_opts.app_label, rel_opts.model_name)
         self.widget.choices = self.choices
-        url_params = '&'.join("%s=%s" % param for param in [
-            (TO_FIELD_VAR, self.rel.get_related_field().name),
-            (IS_POPUP_VAR, 1),
-        ])
+        url_params = '&'.join(
+            "%s=%s" % param for param in [(TO_FIELD_VAR, self.rel.get_related_field().name), (IS_POPUP_VAR, 1)]
+        )
         context = {
             'rendered_widget': self.widget.render(name, value, attrs),
             'is_hidden': self.is_hidden,
@@ -360,13 +353,56 @@ class AdminUUIDInputWidget(forms.TextInput):
 # Mapping of lowercase language codes [returned by Django's get_language()] to
 # language codes supported by select2.
 # See django/contrib/admin/static/admin/js/vendor/select2/i18n/*
-SELECT2_TRANSLATIONS = {x.lower(): x for x in [
-    'ar', 'az', 'bg', 'ca', 'cs', 'da', 'de', 'el', 'en', 'es', 'et',
-    'eu', 'fa', 'fi', 'fr', 'gl', 'he', 'hi', 'hr', 'hu', 'id', 'is',
-    'it', 'ja', 'km', 'ko', 'lt', 'lv', 'mk', 'ms', 'nb', 'nl', 'pl',
-    'pt-BR', 'pt', 'ro', 'ru', 'sk', 'sr-Cyrl', 'sr', 'sv', 'th',
-    'tr', 'uk', 'vi',
-]}
+SELECT2_TRANSLATIONS = {
+    x.lower(): x
+    for x in [
+        'ar',
+        'az',
+        'bg',
+        'ca',
+        'cs',
+        'da',
+        'de',
+        'el',
+        'en',
+        'es',
+        'et',
+        'eu',
+        'fa',
+        'fi',
+        'fr',
+        'gl',
+        'he',
+        'hi',
+        'hr',
+        'hu',
+        'id',
+        'is',
+        'it',
+        'ja',
+        'km',
+        'ko',
+        'lt',
+        'lv',
+        'mk',
+        'ms',
+        'nb',
+        'nl',
+        'pl',
+        'pt-BR',
+        'pt',
+        'ro',
+        'ru',
+        'sk',
+        'sr-Cyrl',
+        'sr',
+        'sv',
+        'th',
+        'tr',
+        'uk',
+        'vi',
+    ]
+}
 SELECT2_TRANSLATIONS.update({'zh-hans': 'zh-CN', 'zh-hant': 'zh-TW'})
 
 
@@ -377,6 +413,7 @@ class AutocompleteMixin:
     Renders the necessary data attributes for select2 and adds the static form
     media.
     """
+
     url_name = '%s:%s_%s_autocomplete'
 
     def __init__(self, rel, admin_site, attrs=None, choices=(), using=None):
@@ -400,15 +437,17 @@ class AutocompleteMixin:
         """
         attrs = super().build_attrs(base_attrs, extra_attrs=extra_attrs)
         attrs.setdefault('class', '')
-        attrs.update({
-            'data-ajax--cache': 'true',
-            'data-ajax--type': 'GET',
-            'data-ajax--url': self.get_url(),
-            'data-theme': 'admin-autocomplete',
-            'data-allow-clear': json.dumps(not self.is_required),
-            'data-placeholder': '',  # Allows clearing of the input.
-            'class': attrs['class'] + (' ' if attrs['class'] else '') + 'admin-autocomplete',
-        })
+        attrs.update(
+            {
+                'data-ajax--cache': 'true',
+                'data-ajax--type': 'GET',
+                'data-ajax--url': self.get_url(),
+                'data-theme': 'admin-autocomplete',
+                'data-allow-clear': json.dumps(not self.is_required),
+                'data-placeholder': '',  # Allows clearing of the input.
+                'class': attrs['class'] + (' ' if attrs['class'] else '') + 'admin-autocomplete',
+            }
+        )
         return attrs
 
     def optgroups(self, name, value, attr=None):
@@ -416,10 +455,7 @@ class AutocompleteMixin:
         default = (None, [], 0)
         groups = [default]
         has_selected = False
-        selected_choices = {
-            str(v) for v in value
-            if str(v) not in self.choices.field.empty_values
-        }
+        selected_choices = {str(v) for v in value if str(v) not in self.choices.field.empty_values}
         if not self.is_required and not self.allow_multiple_selected:
             default[1].append(self.create_option(name, '', '', False, 0))
         choices = (
@@ -427,10 +463,7 @@ class AutocompleteMixin:
             for obj in self.choices.queryset.using(self.db).filter(pk__in=selected_choices)
         )
         for option_value, option_label in choices:
-            selected = (
-                str(option_value) in value and
-                (has_selected is False or self.allow_multiple_selected)
-            )
+            selected = str(option_value) in value and (has_selected is False or self.allow_multiple_selected)
             has_selected |= selected
             index = len(default[1])
             subgroup = default[1]
@@ -443,19 +476,10 @@ class AutocompleteMixin:
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
         i18n_file = ('admin/js/vendor/select2/i18n/%s.js' % i18n_name,) if i18n_name else ()
         return forms.Media(
-            js=(
-                'admin/js/vendor/jquery/jquery%s.js' % extra,
-                'admin/js/vendor/select2/select2.full%s.js' % extra,
-            ) + i18n_file + (
-                'admin/js/jquery.init.js',
-                'admin/js/autocomplete.js',
-            ),
-            css={
-                'screen': (
-                    'admin/css/vendor/select2/select2%s.css' % extra,
-                    'admin/css/autocomplete.css',
-                ),
-            },
+            js=('admin/js/vendor/jquery/jquery%s.js' % extra, 'admin/js/vendor/select2/select2.full%s.js' % extra)
+            + i18n_file
+            + ('admin/js/jquery.init.js', 'admin/js/autocomplete.js'),
+            css={'screen': ('admin/css/vendor/select2/select2%s.css' % extra, 'admin/css/autocomplete.css')},
         )
 
 

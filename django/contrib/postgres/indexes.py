@@ -2,14 +2,10 @@ from django.db.models import Index
 from django.db.utils import NotSupportedError
 from django.utils.functional import cached_property
 
-__all__ = [
-    'BrinIndex', 'BTreeIndex', 'GinIndex', 'GistIndex', 'HashIndex',
-    'SpGistIndex',
-]
+__all__ = ['BrinIndex', 'BTreeIndex', 'GinIndex', 'GistIndex', 'HashIndex', 'SpGistIndex']
 
 
 class PostgresIndex(Index):
-
     @cached_property
     def max_name_length(self):
         # Allow an index name longer than 30 characters when the suffix is
@@ -23,10 +19,7 @@ class PostgresIndex(Index):
         statement = super().create_sql(model, schema_editor, using=' USING %s' % self.suffix)
         with_params = self.get_with_params()
         if with_params:
-            statement.parts['extra'] = 'WITH (%s) %s' % (
-                ', '.join(with_params),
-                statement.parts['extra'],
-            )
+            statement.parts['extra'] = 'WITH (%s) %s' % (', '.join(with_params), statement.parts['extra'])
         return statement
 
     def check_supported(self, schema_editor):

@@ -14,6 +14,7 @@ class SimpleView(View):
     """
     A simple view with a docstring.
     """
+
     def get(self, request):
         return HttpResponse('This is a simple view')
 
@@ -37,7 +38,6 @@ def decorator(view):
 
 
 class DecoratedDispatchView(SimpleView):
-
     @decorator
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -59,7 +59,6 @@ class AboutTemplateAttributeView(TemplateView):
 
 
 class InstanceView(View):
-
     def get(self, request):
         return self
 
@@ -91,9 +90,7 @@ class ViewTest(SimpleTestCase):
         """
         The edge case of a http request that spoofs an existing method name is caught.
         """
-        self.assertEqual(SimpleView.as_view()(
-            self.rf.get('/', REQUEST_METHOD='DISPATCH')
-        ).status_code, 405)
+        self.assertEqual(SimpleView.as_view()(self.rf.get('/', REQUEST_METHOD='DISPATCH')).status_code, 405)
 
     def test_get_only(self):
         """
@@ -101,9 +98,7 @@ class ViewTest(SimpleTestCase):
         """
         self._assert_simple(SimpleView.as_view()(self.rf.get('/')))
         self.assertEqual(SimpleView.as_view()(self.rf.post('/')).status_code, 405)
-        self.assertEqual(SimpleView.as_view()(
-            self.rf.get('/', REQUEST_METHOD='FAKE')
-        ).status_code, 405)
+        self.assertEqual(SimpleView.as_view()(self.rf.get('/', REQUEST_METHOD='FAKE')).status_code, 405)
 
     def test_get_and_head(self):
         """
@@ -126,19 +121,14 @@ class ViewTest(SimpleTestCase):
         """
         self._assert_simple(SimplePostView.as_view()(self.rf.get('/')))
         self._assert_simple(SimplePostView.as_view()(self.rf.post('/')))
-        self.assertEqual(SimplePostView.as_view()(
-            self.rf.get('/', REQUEST_METHOD='FAKE')
-        ).status_code, 405)
+        self.assertEqual(SimplePostView.as_view()(self.rf.get('/', REQUEST_METHOD='FAKE')).status_code, 405)
 
     def test_invalid_keyword_argument(self):
         """
         View arguments must be predefined on the class and can't
         be named like a HTTP method.
         """
-        msg = (
-            "You tried to pass in the %s method name as a keyword argument "
-            "to SimpleView(). Don't do that."
-        )
+        msg = "You tried to pass in the %s method name as a keyword argument " "to SimpleView(). Don't do that."
         # Check each of the allowed method names
         for method in SimpleView.http_method_names:
             with self.assertRaisesMessage(TypeError, msg % method):
@@ -252,10 +242,7 @@ class ViewTest(SimpleTestCase):
             def setup(self, request, *args, **kwargs):
                 pass  # Not calling supre().setup()
 
-        msg = (
-            "TestView instance has no 'request' attribute. Did you override "
-            "setup() and forget to call super()?"
-        )
+        msg = "TestView instance has no 'request' attribute. Did you override " "setup() and forget to call super()?"
         with self.assertRaisesMessage(AttributeError, msg):
             TestView.as_view()(self.rf.get('/'))
 
@@ -428,8 +415,7 @@ class RedirectViewTest(SimpleTestCase):
 
     def test_include_urlencoded_args(self):
         "GET arguments can be URL-encoded when included in the redirected URL"
-        response = RedirectView.as_view(url='/bar/', query_string=True)(
-            self.rf.get('/foo/?unicode=%E2%9C%93'))
+        response = RedirectView.as_view(url='/bar/', query_string=True)(self.rf.get('/foo/?unicode=%E2%9C%93'))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/bar/?unicode=%E2%9C%93')
 
@@ -503,7 +489,6 @@ class RedirectViewTest(SimpleTestCase):
 
 
 class GetContextDataTest(SimpleTestCase):
-
     def test_get_context_data_super(self):
         test_view = views.CustomContextView()
         context = test_view.get_context_data(kwarg_test='kwarg_value')
@@ -552,7 +537,6 @@ class UseMultipleObjectMixinTest(SimpleTestCase):
 
 
 class SingleObjectTemplateResponseMixinTest(SimpleTestCase):
-
     def test_template_mixin_without_template(self):
         """
         We want to makes sure that if you use a template mixin, but forget the

@@ -13,23 +13,9 @@ FIRST_DAY_OF_WEEK = 1
 
 # The *_INPUT_FORMATS strings use the Python strftime format syntax,
 # see https://docs.python.org/library/datetime.html#strftime-strptime-behavior
-DATE_INPUT_FORMATS = [
-    '%d.%m.%Y',
-    '%d.%b.%Y',
-    '%d %B %Y',
-    '%A, %d %B %Y',
-]
-TIME_INPUT_FORMATS = [
-    '%H:%M',
-    '%H:%M:%S',
-    '%H:%M:%S.%f',
-]
-DATETIME_INPUT_FORMATS = [
-    '%d.%m.%Y, %H:%M',
-    '%d.%m.%Y, %H:%M:%S',
-    '%d.%B.%Y, %H:%M',
-    '%d.%B.%Y, %H:%M:%S',
-]
+DATE_INPUT_FORMATS = ['%d.%m.%Y', '%d.%b.%Y', '%d %B %Y', '%A, %d %B %Y']
+TIME_INPUT_FORMATS = ['%H:%M', '%H:%M:%S', '%H:%M:%S.%f']
+DATETIME_INPUT_FORMATS = ['%d.%m.%Y, %H:%M', '%d.%m.%Y, %H:%M:%S', '%d.%B.%Y, %H:%M', '%d.%B.%Y, %H:%M:%S']
 DECIMAL_SEPARATOR = ','
 THOUSAND_SEPARATOR = '.'
 NUMBER_GROUPING = 3

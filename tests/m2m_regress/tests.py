@@ -2,8 +2,16 @@ from django.core.exceptions import FieldError
 from django.test import TestCase
 
 from .models import (
-    Entry, Line, Post, RegressionModelSplit, SelfRefer, SelfReferChild,
-    SelfReferChildSibling, Tag, TagCollection, Worksheet,
+    Entry,
+    Line,
+    Post,
+    RegressionModelSplit,
+    SelfRefer,
+    SelfReferChild,
+    SelfReferChildSibling,
+    Tag,
+    TagCollection,
+    Worksheet,
 )
 
 
@@ -37,7 +45,7 @@ class M2MRegressionTests(TestCase):
         self.assertRaisesMessage(
             FieldError,
             "Choices are: id, name, references, related, selfreferchild, selfreferchildsibling",
-            lambda: SelfRefer.objects.filter(porcupine='fred')
+            lambda: SelfRefer.objects.filter(porcupine='fred'),
         )
 
     def test_m2m_inheritance_symmetry(self):

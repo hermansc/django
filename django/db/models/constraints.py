@@ -54,11 +54,7 @@ class CheckConstraint(BaseConstraint):
         return "<%s: check='%s' name=%r>" % (self.__class__.__name__, self.check, self.name)
 
     def __eq__(self, other):
-        return (
-            isinstance(other, CheckConstraint) and
-            self.name == other.name and
-            self.check == other.check
-        )
+        return isinstance(other, CheckConstraint) and self.name == other.name and self.check == other.check
 
     def deconstruct(self):
         path, args, kwargs = super().deconstruct()
@@ -101,16 +97,18 @@ class UniqueConstraint(BaseConstraint):
 
     def __repr__(self):
         return '<%s: fields=%r name=%r%s>' % (
-            self.__class__.__name__, self.fields, self.name,
+            self.__class__.__name__,
+            self.fields,
+            self.name,
             '' if self.condition is None else ' condition=%s' % self.condition,
         )
 
     def __eq__(self, other):
         return (
-            isinstance(other, UniqueConstraint) and
-            self.name == other.name and
-            self.fields == other.fields and
-            self.condition == other.condition
+            isinstance(other, UniqueConstraint)
+            and self.name == other.name
+            and self.fields == other.fields
+            and self.condition == other.condition
         )
 
     def deconstruct(self):

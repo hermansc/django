@@ -6,13 +6,11 @@ from django.test import SimpleTestCase
 
 
 class SplitDateTimeFieldTest(SimpleTestCase):
-
     def test_splitdatetimefield_1(self):
         f = SplitDateTimeField()
         self.assertIsInstance(f.widget, SplitDateTimeWidget)
         self.assertEqual(
-            datetime.datetime(2006, 1, 10, 7, 30),
-            f.clean([datetime.date(2006, 1, 10), datetime.time(7, 30)])
+            datetime.datetime(2006, 1, 10, 7, 30), f.clean([datetime.date(2006, 1, 10), datetime.time(7, 30)])
         )
         with self.assertRaisesMessage(ValidationError, "'This field is required.'"):
             f.clean(None)
@@ -30,8 +28,7 @@ class SplitDateTimeFieldTest(SimpleTestCase):
     def test_splitdatetimefield_2(self):
         f = SplitDateTimeField(required=False)
         self.assertEqual(
-            datetime.datetime(2006, 1, 10, 7, 30),
-            f.clean([datetime.date(2006, 1, 10), datetime.time(7, 30)])
+            datetime.datetime(2006, 1, 10, 7, 30), f.clean([datetime.date(2006, 1, 10), datetime.time(7, 30)])
         )
         self.assertEqual(datetime.datetime(2006, 1, 10, 7, 30), f.clean(['2006-01-10', '07:30']))
         self.assertIsNone(f.clean(None))

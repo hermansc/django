@@ -7,32 +7,22 @@ from ..utils import setup
 
 
 class StriptagsTests(SimpleTestCase):
-
     @setup({'striptags01': '{{ a|striptags }} {{ b|striptags }}'})
     def test_striptags01(self):
         output = self.engine.render_to_string(
-            'striptags01',
-            {
-                'a': '<a>x</a> <p><b>y</b></p>',
-                'b': mark_safe('<a>x</a> <p><b>y</b></p>'),
-            },
+            'striptags01', {'a': '<a>x</a> <p><b>y</b></p>', 'b': mark_safe('<a>x</a> <p><b>y</b></p>')}
         )
         self.assertEqual(output, 'x y x y')
 
     @setup({'striptags02': '{% autoescape off %}{{ a|striptags }} {{ b|striptags }}{% endautoescape %}'})
     def test_striptags02(self):
         output = self.engine.render_to_string(
-            'striptags02',
-            {
-                'a': '<a>x</a> <p><b>y</b></p>',
-                'b': mark_safe('<a>x</a> <p><b>y</b></p>'),
-            },
+            'striptags02', {'a': '<a>x</a> <p><b>y</b></p>', 'b': mark_safe('<a>x</a> <p><b>y</b></p>')}
         )
         self.assertEqual(output, 'x y x y')
 
 
 class FunctionTests(SimpleTestCase):
-
     def test_strip(self):
         self.assertEqual(
             striptags('some <b>html</b> with <script>alert("You smell")</script> disallowed <img /> tags'),

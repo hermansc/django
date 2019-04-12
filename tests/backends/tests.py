@@ -6,27 +6,36 @@ import warnings
 
 from django.core.management.color import no_style
 from django.db import (
-    DEFAULT_DB_ALIAS, DatabaseError, IntegrityError, connection, connections,
-    reset_queries, transaction,
+    DEFAULT_DB_ALIAS,
+    DatabaseError,
+    IntegrityError,
+    connection,
+    connections,
+    reset_queries,
+    transaction,
 )
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends.signals import connection_created
 from django.db.backends.utils import CursorWrapper
 from django.db.models.sql.constants import CURSOR
-from django.test import (
-    TestCase, TransactionTestCase, override_settings, skipIfDBFeature,
-    skipUnlessDBFeature,
-)
+from django.test import TestCase, TransactionTestCase, override_settings, skipIfDBFeature, skipUnlessDBFeature
 
 from .models import (
-    Article, Object, ObjectReference, Person, Post, RawData, Reporter,
-    ReporterProxy, SchoolClass, Square,
+    Article,
+    Object,
+    ObjectReference,
+    Person,
+    Post,
+    RawData,
+    Reporter,
+    ReporterProxy,
+    SchoolClass,
+    Square,
     VeryLongModelNameZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ,
 )
 
 
 class DateQuotingTest(TestCase):
-
     def test_django_date_trunc(self):
         """
         Test the custom ``django_date_trunc method``, in particular against
@@ -50,7 +59,6 @@ class DateQuotingTest(TestCase):
 
 @override_settings(DEBUG=True)
 class LastExecutedQueryTest(TestCase):
-
     def test_last_executed_query_without_previous_query(self):
         """
         last_executed_query should not raise an exception even if no previous
@@ -76,16 +84,10 @@ class LastExecutedQueryTest(TestCase):
     def test_last_executed_query(self):
         # last_executed_query() interpolate all parameters, in most cases it is
         # not equal to QuerySet.query.
-        for qs in (
-            Article.objects.filter(pk=1),
-            Article.objects.filter(pk__in=(1, 2), reporter__pk=3),
-        ):
+        for qs in (Article.objects.filter(pk=1), Article.objects.filter(pk__in=(1, 2), reporter__pk=3)):
             sql, params = qs.query.sql_with_params()
             cursor = qs.query.get_compiler(DEFAULT_DB_ALIAS).execute_sql(CURSOR)
-            self.assertEqual(
-                cursor.db.ops.last_executed_query(cursor, sql, params),
-                str(qs.query),
-            )
+            self.assertEqual(cursor.db.ops.last_executed_query(cursor, sql, params), str(qs.query))
 
     @skipUnlessDBFeature('supports_paramstyle_pyformat')
     def test_last_executed_query_dict(self):
@@ -98,22 +100,18 @@ class LastExecutedQueryTest(TestCase):
         with connection.cursor() as cursor:
             params = {'root': 2, 'square': 4}
             cursor.execute(sql, params)
-            self.assertEqual(
-                cursor.db.ops.last_executed_query(cursor, sql, params),
-                sql % params,
-            )
+            self.assertEqual(cursor.db.ops.last_executed_query(cursor, sql, params), sql % params)
 
 
 class ParameterHandlingTest(TestCase):
-
     def test_bad_parameter_count(self):
         "An executemany call with too many/not enough parameters will raise an exception (Refs #12612)"
         with connection.cursor() as cursor:
-            query = ('INSERT INTO %s (%s, %s) VALUES (%%s, %%s)' % (
+            query = 'INSERT INTO %s (%s, %s) VALUES (%%s, %%s)' % (
                 connection.introspection.identifier_converter('backends_square'),
                 connection.ops.quote_name('root'),
-                connection.ops.quote_name('square')
-            ))
+                connection.ops.quote_name('square'),
+            )
             with self.assertRaises(Exception):
                 cursor.executemany(query, [(1, 2, 3)])
             with self.assertRaises(Exception):
@@ -127,6 +125,7 @@ class LongNameTest(TransactionTestCase):
     the correct sequence name in last_insert_id and other places, so
     check it is. Refs #8901.
     """
+
     available_apps = ['backends']
 
     def test_sequence_name_length_limits_create(self):
@@ -153,16 +152,8 @@ class LongNameTest(TransactionTestCase):
         # Some convenience aliases
         VLM = VeryLongModelNameZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
         VLM_m2m = VLM.m2m_also_quite_long_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz.through
-        tables = [
-            VLM._meta.db_table,
-            VLM_m2m._meta.db_table,
-        ]
-        sequences = [
-            {
-                'column': VLM._meta.pk.column,
-                'table': VLM._meta.db_table
-            },
-        ]
+        tables = [VLM._meta.db_table, VLM_m2m._meta.db_table]
+        sequences = [{'column': VLM._meta.pk.column, 'table': VLM._meta.db_table}]
         sql_list = connection.ops.sql_flush(no_style(), tables, sequences)
         with connection.cursor() as cursor:
             for statement in sql_list:
@@ -170,7 +161,6 @@ class LongNameTest(TransactionTestCase):
 
 
 class SequenceResetTest(TestCase):
-
     def test_generic_relation(self):
         "Sequence names are correct when resetting generic relations (Ref #13941)"
         # Create an object with a manually specified PK
@@ -330,7 +320,8 @@ class BackendTestCase(TransactionTestCase):
         f3, f4 = opts2.get_field('first_name'), opts2.get_field('last_name')
         with connection.cursor() as cursor:
             cursor.execute(
-                'SELECT %s, %s FROM %s ORDER BY %s' % (
+                'SELECT %s, %s FROM %s ORDER BY %s'
+                % (
                     qn(f3.column),
                     qn(f4.column),
                     connection.introspection.identifier_converter(opts2.db_table),
@@ -392,8 +383,7 @@ class BackendTestCase(TransactionTestCase):
             # cursor should be closed, so no queries should be possible.
             cursor.execute("SELECT 1" + connection.features.bare_select_suffix)
 
-    @unittest.skipUnless(connection.vendor == 'postgresql',
-                         "Psycopg2 specific cursor.closed attribute needed")
+    @unittest.skipUnless(connection.vendor == 'postgresql', "Psycopg2 specific cursor.closed attribute needed")
     def test_cursor_contextmanager_closing(self):
         # There isn't a generic way to test that cursors are closed, but
         # psycopg2 offers us a way to check that by closed attribute.
@@ -509,7 +499,8 @@ class FkConstraintsTests(TransactionTestCase):
         # Now that we know this backend supports integrity checks we make sure
         # constraints are also enforced for proxy  Refs #17519
         a2 = Article(
-            headline='This is another test', reporter=self.r,
+            headline='This is another test',
+            reporter=self.r,
             pub_date=datetime.datetime(2012, 8, 3),
             reporter_proxy_id=30,
         )
@@ -539,7 +530,8 @@ class FkConstraintsTests(TransactionTestCase):
         Article.objects.create(
             headline='Another article',
             pub_date=datetime.datetime(1988, 5, 15),
-            reporter=self.r, reporter_proxy=r_proxy,
+            reporter=self.r,
+            reporter_proxy=r_proxy,
         )
         # Retrieve the second article from the DB
         a2 = Article.objects.get(headline='Another article')
@@ -554,11 +546,7 @@ class FkConstraintsTests(TransactionTestCase):
         """
         with transaction.atomic():
             # Create an Article.
-            Article.objects.create(
-                headline="Test article",
-                pub_date=datetime.datetime(2010, 9, 4),
-                reporter=self.r,
-            )
+            Article.objects.create(headline="Test article", pub_date=datetime.datetime(2010, 9, 4), reporter=self.r)
             # Retrieve it from the DB
             a = Article.objects.get(headline="Test article")
             a.reporter_id = 30
@@ -577,11 +565,7 @@ class FkConstraintsTests(TransactionTestCase):
         """
         with transaction.atomic():
             # Create an Article.
-            Article.objects.create(
-                headline="Test article",
-                pub_date=datetime.datetime(2010, 9, 4),
-                reporter=self.r,
-            )
+            Article.objects.create(headline="Test article", pub_date=datetime.datetime(2010, 9, 4), reporter=self.r)
             # Retrieve it from the DB
             a = Article.objects.get(headline="Test article")
             a.reporter_id = 30
@@ -598,11 +582,7 @@ class FkConstraintsTests(TransactionTestCase):
         """
         with transaction.atomic():
             # Create an Article.
-            Article.objects.create(
-                headline="Test article",
-                pub_date=datetime.datetime(2010, 9, 4),
-                reporter=self.r,
-            )
+            Article.objects.create(headline="Test article", pub_date=datetime.datetime(2010, 9, 4), reporter=self.r)
             # Retrieve it from the DB
             a = Article.objects.get(headline="Test article")
             a.reporter_id = 30
@@ -632,12 +612,14 @@ class ThreadTests(TransactionTestCase):
             # Passing django.db.connection between threads doesn't work while
             # connections[DEFAULT_DB_ALIAS] does.
             from django.db import connections
+
             connection = connections[DEFAULT_DB_ALIAS]
             # Allow thread sharing so the connection can be closed by the
             # main thread.
             connection.inc_thread_sharing()
             connection.cursor()
             connections_dict[id(connection)] = connection
+
         try:
             for x in range(2):
                 t = threading.Thread(target=runner)
@@ -667,11 +649,13 @@ class ThreadTests(TransactionTestCase):
 
         def runner():
             from django.db import connections
+
             for conn in connections.all():
                 # Allow thread sharing so the connection can be closed by the
                 # main thread.
                 conn.inc_thread_sharing()
                 connections_dict[id(conn)] = conn
+
         try:
             for x in range(2):
                 t = threading.Thread(target=runner)
@@ -697,11 +681,13 @@ class ThreadTests(TransactionTestCase):
         def do_thread():
             def runner(main_thread_connection):
                 from django.db import connections
+
                 connections['default'] = main_thread_connection
                 try:
                     Person.objects.get(first_name="John", last_name="Doe")
                 except Exception as e:
                     exceptions.append(e)
+
             t = threading.Thread(target=runner, args=[connections['default']])
             t.start()
             t.join()
@@ -736,9 +722,11 @@ class ThreadTests(TransactionTestCase):
                     other_thread_connection.close()
                 except DatabaseError as e:
                     exceptions.add(e)
+
             t2 = threading.Thread(target=runner2, args=[connections['default']])
             t2.start()
             t2.join()
+
         t1 = threading.Thread(target=runner1)
         t1.start()
         t1.join()
@@ -754,6 +742,7 @@ class ThreadTests(TransactionTestCase):
                     other_thread_connection.close()
                 except DatabaseError as e:
                     exceptions.add(e)
+
             # Enable thread sharing
             connections['default'].inc_thread_sharing()
             try:
@@ -762,6 +751,7 @@ class ThreadTests(TransactionTestCase):
                 t2.join()
             finally:
                 connections['default'].dec_thread_sharing()
+
         t1 = threading.Thread(target=runner1)
         t1.start()
         t1.join()
@@ -788,6 +778,7 @@ class MySQLPKZeroTests(TestCase):
     Zero as id for AutoField should raise exception in MySQL, because MySQL
     does not allow zero for autoincrement primary key.
     """
+
     @skipIfDBFeature('allows_auto_pk_0')
     def test_zero_as_autoval(self):
         with self.assertRaises(ValueError):
@@ -795,7 +786,6 @@ class MySQLPKZeroTests(TestCase):
 
 
 class DBConstraintTestCase(TestCase):
-
     def test_can_reference_existent(self):
         obj = Object.objects.create()
         ref = ObjectReference.objects.create(obj=obj)

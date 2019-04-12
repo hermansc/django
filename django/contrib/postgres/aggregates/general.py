@@ -3,9 +3,7 @@ from django.db.models.aggregates import Aggregate
 
 from .mixins import OrderableAggMixin
 
-__all__ = [
-    'ArrayAgg', 'BitAnd', 'BitOr', 'BoolAnd', 'BoolOr', 'JSONBAgg', 'StringAgg',
-]
+__all__ = ['ArrayAgg', 'BitAnd', 'BitOr', 'BoolAnd', 'BoolOr', 'JSONBAgg', 'StringAgg']
 
 
 class ArrayAgg(OrderableAggMixin, Aggregate):

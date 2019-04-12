@@ -7,9 +7,7 @@ isn't always a good idea, so the ``depth`` argument control how many "levels"
 the select-related behavior will traverse.
 """
 
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
@@ -77,6 +75,7 @@ class Species(models.Model):
 
     def __str__(self):
         return self.name
+
 
 # and we'll invent a new thing so we have a model with two foreign keys
 

@@ -8,12 +8,12 @@ from django.test import TestCase
 
 @unittest.skipUnless(connection.vendor == 'postgresql', 'PostgreSQL tests')
 class Tests(TestCase):
-
     def test_nodb_connection(self):
         """
         The _nodb_connection property fallbacks to the default connection
         database when access to the 'postgres' database is not granted.
         """
+
         def mocked_connect(self):
             if self.settings_dict['NAME'] is None:
                 raise DatabaseError()
@@ -31,19 +31,17 @@ class Tests(TestCase):
             "database and will use the first PostgreSQL database instead."
         )
         with self.assertWarnsMessage(RuntimeWarning, msg):
-            with mock.patch('django.db.backends.base.base.BaseDatabaseWrapper.connect',
-                            side_effect=mocked_connect, autospec=True):
-                with mock.patch.object(
-                    connection,
-                    'settings_dict',
-                    {**connection.settings_dict, 'NAME': 'postgres'},
-                ):
+            with mock.patch(
+                'django.db.backends.base.base.BaseDatabaseWrapper.connect', side_effect=mocked_connect, autospec=True
+            ):
+                with mock.patch.object(connection, 'settings_dict', {**connection.settings_dict, 'NAME': 'postgres'}):
                     nodb_conn = connection._nodb_connection
         self.assertIsNotNone(nodb_conn.settings_dict['NAME'])
         self.assertEqual(nodb_conn.settings_dict['NAME'], connections['other'].settings_dict['NAME'])
 
     def test_database_name_too_long(self):
         from django.db.backends.postgresql.base import DatabaseWrapper
+
         settings = connection.settings_dict.copy()
         max_name_length = connection.ops.max_name_length()
         settings['NAME'] = 'a' + (max_name_length * 'a')
@@ -116,6 +114,7 @@ class Tests(TestCase):
             ISOLATION_LEVEL_READ_COMMITTED as read_committed,
             ISOLATION_LEVEL_SERIALIZABLE as serializable,
         )
+
         # Since this is a django.test.TestCase, a transaction is in progress
         # and the isolation level isn't reported as 0. This test assumes that
         # PostgreSQL is configured with the default isolation level.
@@ -157,10 +156,18 @@ class Tests(TestCase):
 
     def test_lookup_cast(self):
         from django.db.backends.postgresql.operations import DatabaseOperations
+
         do = DatabaseOperations(connection=None)
         lookups = (
-            'iexact', 'contains', 'icontains', 'startswith', 'istartswith',
-            'endswith', 'iendswith', 'regex', 'iregex',
+            'iexact',
+            'contains',
+            'icontains',
+            'startswith',
+            'istartswith',
+            'endswith',
+            'iendswith',
+            'regex',
+            'iregex',
         )
         for lookup in lookups:
             with self.subTest(lookup=lookup):
@@ -172,6 +179,7 @@ class Tests(TestCase):
 
     def test_correct_extraction_psycopg2_version(self):
         from django.db.backends.postgresql.base import psycopg2_version
+
         with mock.patch('psycopg2.__version__', '4.2.1 (dt dec pq3 ext lo64)'):
             self.assertEqual(psycopg2_version(), (4, 2, 1))
         with mock.patch('psycopg2.__version__', '4.2b0.dev1 (dt dec pq3 ext lo64)'):

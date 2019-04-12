@@ -8,34 +8,24 @@ from django.db import DatabaseError, IntegrityError, connection
 from django.test import TestCase, TransactionTestCase, skipUnlessDBFeature
 from django.utils.functional import lazy
 
-from .models import (
-    Author, Book, DefaultPerson, ManualPrimaryKeyTest, Person, Profile,
-    Publisher, Tag, Thing,
-)
+from .models import Author, Book, DefaultPerson, ManualPrimaryKeyTest, Person, Profile, Publisher, Tag, Thing
 
 
 class GetOrCreateTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
-        Person.objects.create(
-            first_name='John', last_name='Lennon', birthday=date(1940, 10, 9)
-        )
+        Person.objects.create(first_name='John', last_name='Lennon', birthday=date(1940, 10, 9))
 
     def test_get_or_create_method_with_get(self):
         created = Person.objects.get_or_create(
-            first_name="John", last_name="Lennon", defaults={
-                "birthday": date(1940, 10, 9)
-            }
+            first_name="John", last_name="Lennon", defaults={"birthday": date(1940, 10, 9)}
         )[1]
         self.assertFalse(created)
         self.assertEqual(Person.objects.count(), 1)
 
     def test_get_or_create_method_with_create(self):
         created = Person.objects.get_or_create(
-            first_name='George', last_name='Harrison', defaults={
-                'birthday': date(1943, 2, 25)
-            }
+            first_name='George', last_name='Harrison', defaults={'birthday': date(1943, 2, 25)}
         )[1]
         self.assertTrue(created)
         self.assertEqual(Person.objects.count(), 2)
@@ -46,14 +36,10 @@ class GetOrCreateTests(TestCase):
         it won't create a Person.
         """
         Person.objects.get_or_create(
-            first_name='George', last_name='Harrison', defaults={
-                'birthday': date(1943, 2, 25)
-            }
+            first_name='George', last_name='Harrison', defaults={'birthday': date(1943, 2, 25)}
         )
         created = Person.objects.get_or_create(
-            first_name='George', last_name='Harrison', defaults={
-                'birthday': date(1943, 2, 25)
-            }
+            first_name='George', last_name='Harrison', defaults={'birthday': date(1943, 2, 25)}
         )[1]
 
         self.assertFalse(created)
@@ -143,18 +129,18 @@ class GetOrCreateTests(TestCase):
         lookup, you need to use 'defaults__exact'.
         """
         obj, created = Person.objects.get_or_create(
-            first_name='George', last_name='Harrison', defaults__exact='testing', defaults={
-                'birthday': date(1943, 2, 25),
-                'defaults': 'testing',
-            }
+            first_name='George',
+            last_name='Harrison',
+            defaults__exact='testing',
+            defaults={'birthday': date(1943, 2, 25), 'defaults': 'testing'},
         )
         self.assertTrue(created)
         self.assertEqual(obj.defaults, 'testing')
         obj2, created = Person.objects.get_or_create(
-            first_name='George', last_name='Harrison', defaults__exact='testing', defaults={
-                'birthday': date(1943, 2, 25),
-                'defaults': 'testing',
-            }
+            first_name='George',
+            last_name='Harrison',
+            defaults__exact='testing',
+            defaults={'birthday': date(1943, 2, 25), 'defaults': 'testing'},
         )
         self.assertFalse(created)
         self.assertEqual(obj, obj2)
@@ -164,8 +150,7 @@ class GetOrCreateTests(TestCase):
         Callables in `defaults` are evaluated if the instance is created.
         """
         obj, created = Person.objects.get_or_create(
-            first_name="George",
-            defaults={"last_name": "Harrison", "birthday": lambda: date(1943, 2, 25)},
+            first_name="George", defaults={"last_name": "Harrison", "birthday": lambda: date(1943, 2, 25)}
         )
         self.assertTrue(created)
         self.assertEqual(date(1943, 2, 25), obj.birthday)
@@ -173,23 +158,22 @@ class GetOrCreateTests(TestCase):
     def test_callable_defaults_not_called(self):
         def raise_exception():
             raise AssertionError
+
         obj, created = Person.objects.get_or_create(
-            first_name="John", last_name="Lennon",
-            defaults={"birthday": lambda: raise_exception()},
+            first_name="John", last_name="Lennon", defaults={"birthday": lambda: raise_exception()}
         )
 
     def test_defaults_not_evaluated_unless_needed(self):
         """`defaults` aren't evaluated if the instance isn't created."""
+
         def raise_exception():
             raise AssertionError
-        obj, created = Person.objects.get_or_create(
-            first_name='John', defaults=lazy(raise_exception, object)(),
-        )
+
+        obj, created = Person.objects.get_or_create(first_name='John', defaults=lazy(raise_exception, object)())
         self.assertFalse(created)
 
 
 class GetOrCreateTestsWithManualPKs(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         ManualPrimaryKeyTest.objects.create(id=1, data="Original")
@@ -256,7 +240,6 @@ class GetOrCreateTransactionTests(TransactionTestCase):
 
 
 class GetOrCreateThroughManyToMany(TestCase):
-
     def test_get_get_or_create(self):
         tag = Tag.objects.create(text='foo')
         a_thing = Thing.objects.create(name='a')
@@ -282,15 +265,10 @@ class GetOrCreateThroughManyToMany(TestCase):
 
 
 class UpdateOrCreateTests(TestCase):
-
     def test_update(self):
-        Person.objects.create(
-            first_name='John', last_name='Lennon', birthday=date(1940, 10, 9)
-        )
+        Person.objects.create(first_name='John', last_name='Lennon', birthday=date(1940, 10, 9))
         p, created = Person.objects.update_or_create(
-            first_name='John', last_name='Lennon', defaults={
-                'birthday': date(1940, 10, 10)
-            }
+            first_name='John', last_name='Lennon', defaults={'birthday': date(1940, 10, 10)}
         )
         self.assertFalse(created)
         self.assertEqual(p.first_name, 'John')
@@ -299,9 +277,7 @@ class UpdateOrCreateTests(TestCase):
 
     def test_create(self):
         p, created = Person.objects.update_or_create(
-            first_name='John', last_name='Lennon', defaults={
-                'birthday': date(1940, 10, 10)
-            }
+            first_name='John', last_name='Lennon', defaults={'birthday': date(1940, 10, 10)}
         )
         self.assertTrue(created)
         self.assertEqual(p.first_name, 'John')
@@ -309,11 +285,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertEqual(p.birthday, date(1940, 10, 10))
 
     def test_create_twice(self):
-        params = {
-            'first_name': 'John',
-            'last_name': 'Lennon',
-            'birthday': date(1940, 10, 10),
-        }
+        params = {'first_name': 'John', 'last_name': 'Lennon', 'birthday': date(1940, 10, 10)}
         Person.objects.update_or_create(**params)
         # If we execute the exact same statement, it won't create a Person.
         p, created = Person.objects.update_or_create(**params)
@@ -418,57 +390,49 @@ class UpdateOrCreateTests(TestCase):
         lookup, you need to use 'defaults__exact'.
         """
         obj, created = Person.objects.update_or_create(
-            first_name='George', last_name='Harrison', defaults__exact='testing', defaults={
-                'birthday': date(1943, 2, 25),
-                'defaults': 'testing',
-            }
+            first_name='George',
+            last_name='Harrison',
+            defaults__exact='testing',
+            defaults={'birthday': date(1943, 2, 25), 'defaults': 'testing'},
         )
         self.assertTrue(created)
         self.assertEqual(obj.defaults, 'testing')
         obj, created = Person.objects.update_or_create(
-            first_name='George', last_name='Harrison', defaults__exact='testing', defaults={
-                'birthday': date(1943, 2, 25),
-                'defaults': 'another testing',
-            }
+            first_name='George',
+            last_name='Harrison',
+            defaults__exact='testing',
+            defaults={'birthday': date(1943, 2, 25), 'defaults': 'another testing'},
         )
         self.assertFalse(created)
         self.assertEqual(obj.defaults, 'another testing')
 
     def test_create_callable_default(self):
         obj, created = Person.objects.update_or_create(
-            first_name='George', last_name='Harrison',
-            defaults={'birthday': lambda: date(1943, 2, 25)},
+            first_name='George', last_name='Harrison', defaults={'birthday': lambda: date(1943, 2, 25)}
         )
         self.assertIs(created, True)
         self.assertEqual(obj.birthday, date(1943, 2, 25))
 
     def test_update_callable_default(self):
-        Person.objects.update_or_create(
-            first_name='George', last_name='Harrison', birthday=date(1942, 2, 25),
-        )
+        Person.objects.update_or_create(first_name='George', last_name='Harrison', birthday=date(1942, 2, 25))
         obj, created = Person.objects.update_or_create(
-            first_name='George',
-            defaults={'last_name': lambda: 'NotHarrison'},
+            first_name='George', defaults={'last_name': lambda: 'NotHarrison'}
         )
         self.assertIs(created, False)
         self.assertEqual(obj.last_name, 'NotHarrison')
 
     def test_defaults_not_evaluated_unless_needed(self):
         """`defaults` aren't evaluated if the instance isn't created."""
-        Person.objects.create(
-            first_name='John', last_name='Lennon', birthday=date(1940, 10, 9)
-        )
+        Person.objects.create(first_name='John', last_name='Lennon', birthday=date(1940, 10, 9))
 
         def raise_exception():
             raise AssertionError
-        obj, created = Person.objects.get_or_create(
-            first_name='John', defaults=lazy(raise_exception, object)(),
-        )
+
+        obj, created = Person.objects.get_or_create(first_name='John', defaults=lazy(raise_exception, object)())
         self.assertFalse(created)
 
 
 class UpdateOrCreateTestsWithManualPKs(TestCase):
-
     def test_create_with_duplicate_primary_key(self):
         """
         If an existing primary key is specified with different values for other
@@ -501,9 +465,7 @@ class UpdateOrCreateTransactionTests(TransactionTestCase):
             return date(1940, 10, 10)
 
         def update_birthday_slowly():
-            Person.objects.update_or_create(
-                first_name='John', defaults={'birthday': birthday_sleep}
-            )
+            Person.objects.update_or_create(first_name='John', defaults={'birthday': birthday_sleep})
             # Avoid leaking connection for Oracle
             connection.close()
 
@@ -592,7 +554,7 @@ class UpdateOrCreateTransactionTests(TransactionTestCase):
         # (blocked) call to update().
         updated_person = Person.objects.get(first_name='John')
         self.assertEqual(updated_person.birthday, date(1940, 10, 10))  # set by update_or_create()
-        self.assertEqual(updated_person.last_name, 'NotLennon')        # set by update()
+        self.assertEqual(updated_person.last_name, 'NotLennon')  # set by update()
         self.assertGreater(after_update - before_start, timedelta(seconds=1))
 
 

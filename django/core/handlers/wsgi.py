@@ -16,6 +16,7 @@ _slashes_re = re.compile(br'/+')
 
 class LimitedStream:
     """Wrap another stream to disallow reading it past a number of bytes."""
+
     def __init__(self, stream, limit, buf_size=64 * 1024 * 1024):
         self.stream = stream
         self.remaining = limit
@@ -44,8 +45,7 @@ class LimitedStream:
         return result
 
     def readline(self, size=None):
-        while b'\n' not in self.buffer and \
-              (size is None or len(self.buffer) < size):
+        while b'\n' not in self.buffer and (size is None or len(self.buffer) < size):
             if size:
                 # since size is not None here, len(self.buffer) < size
                 chunk = self._read_limited(size - len(self.buffer))
@@ -74,8 +74,7 @@ class WSGIRequest(HttpRequest):
         # be careful to only replace the first slash in the path because of
         # http://test/something and http://test//something being different as
         # stated in https://www.ietf.org/rfc/rfc2396.txt
-        self.path = '%s/%s' % (script_name.rstrip('/'),
-                               path_info.replace('/', '', 1))
+        self.path = '%s/%s' % (script_name.rstrip('/'), path_info.replace('/', '', 1))
         self.META = environ
         self.META['PATH_INFO'] = path_info
         self.META['SCRIPT_NAME'] = script_name
@@ -184,7 +183,7 @@ def get_script_name(environ):
             # do the same with script_url before manipulating paths (#17133).
             script_url = _slashes_re.sub(b'/', script_url)
         path_info = get_bytes_from_wsgi(environ, 'PATH_INFO', '')
-        script_name = script_url[:-len(path_info)] if path_info else script_url
+        script_name = script_url[: -len(path_info)] if path_info else script_url
     else:
         script_name = get_bytes_from_wsgi(environ, 'SCRIPT_NAME', '')
 

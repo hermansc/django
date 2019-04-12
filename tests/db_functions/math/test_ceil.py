@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class CeilTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_ceil=Ceil('normal')).first()
@@ -35,9 +34,7 @@ class CeilTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=-11, normal=0, big=-100)
         obj = IntegerModel.objects.annotate(
-            small_ceil=Ceil('small'),
-            normal_ceil=Ceil('normal'),
-            big_ceil=Ceil('big'),
+            small_ceil=Ceil('small'), normal_ceil=Ceil('normal'), big_ceil=Ceil('big')
         ).first()
         self.assertIsInstance(obj.small_ceil, int)
         self.assertIsInstance(obj.normal_ceil, int)

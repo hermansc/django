@@ -10,7 +10,6 @@ from ..models import DecimalModel, FloatModel, IntegerModel
 
 
 class SqrtTests(TestCase):
-
     def test_null(self):
         IntegerModel.objects.create()
         obj = IntegerModel.objects.annotate(null_sqrt=Sqrt('normal')).first()
@@ -35,9 +34,7 @@ class SqrtTests(TestCase):
     def test_integer(self):
         IntegerModel.objects.create(small=20, normal=15, big=1)
         obj = IntegerModel.objects.annotate(
-            small_sqrt=Sqrt('small'),
-            normal_sqrt=Sqrt('normal'),
-            big_sqrt=Sqrt('big'),
+            small_sqrt=Sqrt('small'), normal_sqrt=Sqrt('normal'), big_sqrt=Sqrt('big')
         ).first()
         self.assertIsInstance(obj.small_sqrt, float)
         self.assertIsInstance(obj.normal_sqrt, float)

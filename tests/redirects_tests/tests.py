@@ -10,7 +10,6 @@ from django.test import TestCase, modify_settings, override_settings
 @modify_settings(MIDDLEWARE={'append': 'django.contrib.redirects.middleware.RedirectFallbackMiddleware'})
 @override_settings(APPEND_SLASH=False, ROOT_URLCONF='redirects_tests.urls', SITE_ID=1)
 class RedirectTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.site = Site.objects.get(pk=settings.SITE_ID)
@@ -58,10 +57,7 @@ class RedirectTests(TestCase):
 
     @modify_settings(INSTALLED_APPS={'remove': 'django.contrib.sites'})
     def test_sites_not_installed(self):
-        msg = (
-            'You cannot use RedirectFallbackMiddleware when '
-            'django.contrib.sites is not installed.'
-        )
+        msg = 'You cannot use RedirectFallbackMiddleware when ' 'django.contrib.sites is not installed.'
         with self.assertRaisesMessage(ImproperlyConfigured, msg):
             RedirectFallbackMiddleware()
 
@@ -75,7 +71,6 @@ class OverriddenRedirectFallbackMiddleware(RedirectFallbackMiddleware):
 @modify_settings(MIDDLEWARE={'append': 'redirects_tests.tests.OverriddenRedirectFallbackMiddleware'})
 @override_settings(SITE_ID=1)
 class OverriddenRedirectMiddlewareTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.site = Site.objects.get(pk=settings.SITE_ID)

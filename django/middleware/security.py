@@ -19,17 +19,16 @@ class SecurityMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         path = request.path.lstrip("/")
-        if (self.redirect and not request.is_secure() and
-                not any(pattern.search(path)
-                        for pattern in self.redirect_exempt)):
+        if (
+            self.redirect
+            and not request.is_secure()
+            and not any(pattern.search(path) for pattern in self.redirect_exempt)
+        ):
             host = self.redirect_host or request.get_host()
-            return HttpResponsePermanentRedirect(
-                "https://%s%s" % (host, request.get_full_path())
-            )
+            return HttpResponsePermanentRedirect("https://%s%s" % (host, request.get_full_path()))
 
     def process_response(self, request, response):
-        if (self.sts_seconds and request.is_secure() and
-                'Strict-Transport-Security' not in response):
+        if self.sts_seconds and request.is_secure() and 'Strict-Transport-Security' not in response:
             sts_header = "max-age=%s" % self.sts_seconds
             if self.sts_include_subdomains:
                 sts_header = sts_header + "; includeSubDomains"

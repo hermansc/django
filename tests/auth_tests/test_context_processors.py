@@ -20,10 +20,12 @@ class PermWrapperTests(SimpleTestCase):
     """
     Test some details of the PermWrapper implementation.
     """
+
     class EQLimiterObject:
         """
         This object makes sure __eq__ will not be called endlessly.
         """
+
         def __init__(self):
             self.eq_calls = 0
 
@@ -89,8 +91,9 @@ class AuthContextProcessorTests(TestCase):
         u = User.objects.create_user(username='normal', password='secret')
         u.user_permissions.add(
             Permission.objects.get(
-                content_type=ContentType.objects.get_for_model(Permission),
-                codename='add_permission'))
+                content_type=ContentType.objects.get_for_model(Permission), codename='add_permission'
+            )
+        )
         self.client.force_login(u)
         response = self.client.get('/auth_processor_perms/')
         self.assertContains(response, "Has auth permissions")
@@ -101,8 +104,9 @@ class AuthContextProcessorTests(TestCase):
         u = User.objects.create_user(username='normal', password='secret')
         u.user_permissions.add(
             Permission.objects.get(
-                content_type=ContentType.objects.get_for_model(Permission),
-                codename='add_permission'))
+                content_type=ContentType.objects.get_for_model(Permission), codename='add_permission'
+            )
+        )
         self.client.login(username='normal', password='secret')
         response = self.client.get('/auth_processor_perm_in_perms/')
         self.assertContains(response, "Has auth permissions")

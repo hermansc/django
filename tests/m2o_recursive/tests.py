@@ -4,15 +4,13 @@ from .models import Category, Person
 
 
 class ManyToOneRecursiveTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.r = Category.objects.create(id=None, name='Root category', parent=None)
         cls.c = Category.objects.create(id=None, name='Child category', parent=cls.r)
 
     def test_m2o_recursive(self):
-        self.assertQuerysetEqual(self.r.child_set.all(),
-                                 ['<Category: Child category>'])
+        self.assertQuerysetEqual(self.r.child_set.all(), ['<Category: Child category>'])
         self.assertEqual(self.r.child_set.get(name__startswith='Child').id, self.c.id)
         self.assertIsNone(self.r.parent)
         self.assertQuerysetEqual(self.c.child_set.all(), [])
@@ -20,7 +18,6 @@ class ManyToOneRecursiveTests(TestCase):
 
 
 class MultipleManyToOneRecursiveTests(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.dad = Person.objects.create(full_name='John Smith Senior', mother=None, father=None)
@@ -30,9 +27,7 @@ class MultipleManyToOneRecursiveTests(TestCase):
     def test_m2o_recursive2(self):
         self.assertEqual(self.kid.mother.id, self.mom.id)
         self.assertEqual(self.kid.father.id, self.dad.id)
-        self.assertQuerysetEqual(self.dad.fathers_child_set.all(),
-                                 ['<Person: John Smith Junior>'])
-        self.assertQuerysetEqual(self.mom.mothers_child_set.all(),
-                                 ['<Person: John Smith Junior>'])
+        self.assertQuerysetEqual(self.dad.fathers_child_set.all(), ['<Person: John Smith Junior>'])
+        self.assertQuerysetEqual(self.mom.mothers_child_set.all(), ['<Person: John Smith Junior>'])
         self.assertQuerysetEqual(self.kid.mothers_child_set.all(), [])
         self.assertQuerysetEqual(self.kid.fathers_child_set.all(), [])

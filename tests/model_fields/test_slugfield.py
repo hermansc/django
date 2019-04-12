@@ -4,7 +4,6 @@ from .models import BigS, UnicodeSlugField
 
 
 class SlugFieldTests(TestCase):
-
     def test_slugfield_max_length(self):
         """
         SlugField honors max_length.

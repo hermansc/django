@@ -2,10 +2,7 @@ from django.core import serializers
 from django.db import connection
 from django.test import TestCase
 
-from .models import (
-    Child, FKDataNaturalKey, NaturalKeyAnchor, NaturalKeyThing,
-    NaturalPKWithDefault,
-)
+from .models import Child, FKDataNaturalKey, NaturalKeyAnchor, NaturalKeyThing, NaturalPKWithDefault
 from .tests import register_tests
 
 
@@ -32,18 +29,15 @@ def natural_key_serializer_test(self, format):
     for obj in objects:
         instance = obj.__class__.objects.get(id=obj.pk)
         self.assertEqual(
-            obj.data, instance.data,
-            "Objects with PK=%d not equal; expected '%s' (%s), got '%s' (%s)" % (
-                obj.pk, obj.data, type(obj.data), instance, type(instance.data),
-            )
+            obj.data,
+            instance.data,
+            "Objects with PK=%d not equal; expected '%s' (%s), got '%s' (%s)"
+            % (obj.pk, obj.data, type(obj.data), instance, type(instance.data)),
         )
 
 
 def natural_key_test(self, format):
-    book1 = {
-        'data': '978-1590597255',
-        'title': 'The Definitive Guide to Django: Web Development Done Right',
-    }
+    book1 = {'data': '978-1590597255', 'title': 'The Definitive Guide to Django: Web Development Done Right'}
     book2 = {'data': '978-1590599969', 'title': 'Practical Django Projects'}
 
     # Create the books.
@@ -52,8 +46,7 @@ def natural_key_test(self, format):
 
     # Serialize the books.
     string_data = serializers.serialize(
-        format, NaturalKeyAnchor.objects.all(), indent=2,
-        use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        format, NaturalKeyAnchor.objects.all(), indent=2, use_natural_foreign_keys=True, use_natural_primary_keys=True
     )
 
     # Delete one book (to prove that the natural key generation will only
@@ -82,7 +75,8 @@ def natural_pk_mti_test(self, format):
     string_data = serializers.serialize(
         format,
         [child_1.parent_ptr, child_2.parent_ptr, child_2, child_1],
-        use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        use_natural_foreign_keys=True,
+        use_natural_primary_keys=True,
     )
     child_1.delete()
     child_2.delete()
@@ -101,10 +95,7 @@ def forward_ref_fk_test(self, format):
     t2 = NaturalKeyThing.objects.create(key='t2', other_thing=t1)
     t1.other_thing = t2
     t1.save()
-    string_data = serializers.serialize(
-        format, [t1, t2], use_natural_primary_keys=True,
-        use_natural_foreign_keys=True,
-    )
+    string_data = serializers.serialize(format, [t1, t2], use_natural_primary_keys=True, use_natural_foreign_keys=True)
     NaturalKeyThing.objects.all().delete()
     objs_with_deferred_fields = []
     for obj in serializers.deserialize(format, string_data, handle_forward_references=True):
@@ -124,10 +115,7 @@ def forward_ref_fk_with_error_test(self, format):
     t2 = NaturalKeyThing.objects.create(key='t2', other_thing=t1)
     t1.other_thing = t2
     t1.save()
-    string_data = serializers.serialize(
-        format, [t1], use_natural_primary_keys=True,
-        use_natural_foreign_keys=True,
-    )
+    string_data = serializers.serialize(format, [t1], use_natural_primary_keys=True, use_natural_foreign_keys=True)
     NaturalKeyThing.objects.all().delete()
     objs_with_deferred_fields = []
     for obj in serializers.deserialize(format, string_data, handle_forward_references=True):
@@ -146,8 +134,7 @@ def forward_ref_m2m_test(self, format):
     t3 = NaturalKeyThing.objects.create(key='t3')
     t1.other_things.set([t2, t3])
     string_data = serializers.serialize(
-        format, [t1, t2, t3], use_natural_primary_keys=True,
-        use_natural_foreign_keys=True,
+        format, [t1, t2, t3], use_natural_primary_keys=True, use_natural_foreign_keys=True
     )
     NaturalKeyThing.objects.all().delete()
     objs_with_deferred_fields = []
@@ -169,10 +156,7 @@ def forward_ref_m2m_with_error_test(self, format):
     t3 = NaturalKeyThing.objects.create(key='t3')
     t1.other_things.set([t2, t3])
     t1.save()
-    string_data = serializers.serialize(
-        format, [t1, t2], use_natural_primary_keys=True,
-        use_natural_foreign_keys=True,
-    )
+    string_data = serializers.serialize(format, [t1, t2], use_natural_primary_keys=True, use_natural_foreign_keys=True)
     NaturalKeyThing.objects.all().delete()
     objs_with_deferred_fields = []
     for obj in serializers.deserialize(format, string_data, handle_forward_references=True):
@@ -192,8 +176,7 @@ def pk_with_default(self, format):
     """
     obj = NaturalPKWithDefault.objects.create(name='name')
     string_data = serializers.serialize(
-        format, NaturalPKWithDefault.objects.all(), use_natural_foreign_keys=True,
-        use_natural_primary_keys=True,
+        format, NaturalPKWithDefault.objects.all(), use_natural_foreign_keys=True, use_natural_primary_keys=True
     )
     objs = list(serializers.deserialize(format, string_data))
     self.assertEqual(len(objs), 1)

@@ -53,6 +53,7 @@ class Archive:
     """
     The external API class that encapsulates an archive implementation.
     """
+
     def __init__(self, file):
         self._archive = self._archive_cls(file)(file)
 
@@ -65,16 +66,14 @@ class Archive:
             try:
                 filename = file.name
             except AttributeError:
-                raise UnrecognizedArchiveFormat(
-                    "File object not a recognized archive format.")
+                raise UnrecognizedArchiveFormat("File object not a recognized archive format.")
         base, tail_ext = os.path.splitext(filename.lower())
         cls = extension_map.get(tail_ext)
         if not cls:
             base, ext = os.path.splitext(base)
             cls = extension_map.get(ext)
         if not cls:
-            raise UnrecognizedArchiveFormat(
-                "Path not a recognized archive format: %s" % filename)
+            raise UnrecognizedArchiveFormat("Path not a recognized archive format: %s" % filename)
         return cls
 
     def __enter__(self):
@@ -97,6 +96,7 @@ class BaseArchive:
     """
     Base Archive class.  Implementations should inherit this class.
     """
+
     @staticmethod
     def _copy_permissions(mode, filename):
         """
@@ -141,7 +141,6 @@ class BaseArchive:
 
 
 class TarArchive(BaseArchive):
-
     def __init__(self, file):
         self._archive = tarfile.open(file)
 
@@ -165,8 +164,7 @@ class TarArchive(BaseArchive):
                 except (KeyError, AttributeError) as exc:
                     # Some corrupt tar files seem to produce this
                     # (specifically bad symlinks)
-                    print("In the tar file %s the member %s is invalid: %s" %
-                          (name, member.name, exc))
+                    print("In the tar file %s the member %s is invalid: %s" % (name, member.name, exc))
                 else:
                     dirname = os.path.dirname(filename)
                     if dirname:
@@ -183,7 +181,6 @@ class TarArchive(BaseArchive):
 
 
 class ZipArchive(BaseArchive):
-
     def __init__(self, file):
         self._archive = zipfile.ZipFile(file)
 

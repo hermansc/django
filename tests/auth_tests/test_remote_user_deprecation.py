@@ -7,6 +7,7 @@ from django.test import TestCase, modify_settings, override_settings
 
 class CustomRemoteUserBackend(RemoteUserBackend):
     """Override configure_user() without a request argument."""
+
     def configure_user(self, user):
         user.email = 'user@example.com'
         user.save()
@@ -21,8 +22,7 @@ class RemoteUserCustomTest(TestCase):
 
     def setUp(self):
         self.patched_settings = modify_settings(
-            AUTHENTICATION_BACKENDS={'append': self.backend},
-            MIDDLEWARE={'append': self.middleware},
+            AUTHENTICATION_BACKENDS={'append': self.backend}, MIDDLEWARE={'append': self.middleware}
         )
         self.patched_settings.enable()
 
@@ -42,8 +42,7 @@ class RemoteUserCustomTest(TestCase):
         self.assertEqual(len(warns), 1)
         self.assertEqual(
             str(warns[0].message),
-            'Update CustomRemoteUserBackend.configure_user() to accept '
-            '`request` as the first argument.'
+            'Update CustomRemoteUserBackend.configure_user() to accept ' '`request` as the first argument.',
         )
         self.assertEqual(User.objects.count(), num_users + 1)
         user = User.objects.get(username='newuser')

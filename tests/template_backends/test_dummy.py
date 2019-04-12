@@ -2,9 +2,7 @@ import re
 
 from django.forms import CharField, Form, Media
 from django.http import HttpRequest
-from django.middleware.csrf import (
-    CsrfViewMiddleware, _compare_salted_tokens as equivalent_tokens, get_token,
-)
+from django.middleware.csrf import CsrfViewMiddleware, _compare_salted_tokens as equivalent_tokens, get_token
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
 from django.template.backends.dummy import TemplateStrings
 from django.test import SimpleTestCase
@@ -19,12 +17,7 @@ class TemplateStringsTests(SimpleTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        params = {
-            'DIRS': [],
-            'APP_DIRS': True,
-            'NAME': cls.backend_name,
-            'OPTIONS': cls.options,
-        }
+        params = {'DIRS': [], 'APP_DIRS': True, 'NAME': cls.backend_name, 'OPTIONS': cls.options}
         cls.engine = cls.engine_class(params)
 
     def test_from_string(self):

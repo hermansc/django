@@ -44,6 +44,7 @@ class C01(models.Model):
     def __str__(self):
         return self.f_a
 
+
 # All of these models use the same tables as the previous set (they are shadows
 # of possibly a subset of the columns). There should be no creation errors,
 # since we have told Django they aren't managed by Django.

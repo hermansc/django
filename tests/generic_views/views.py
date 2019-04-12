@@ -50,10 +50,8 @@ class PageDetail(generic.DetailView):
 
 class DictList(generic.ListView):
     """A ListView that doesn't use a model."""
-    queryset = [
-        {'first': 'John', 'last': 'Lennon'},
-        {'first': 'Yoko', 'last': 'Ono'}
-    ]
+
+    queryset = [{'first': 'John', 'last': 'Lennon'}, {'first': 'Yoko', 'last': 'Ono'}]
     template_name = 'generic_views/list.html'
 
 
@@ -232,10 +230,7 @@ class BookDetailGetObjectCustomQueryset(BookDetail):
 
 
 class CustomMultipleObjectMixinView(generic.list.MultipleObjectMixin, generic.View):
-    queryset = [
-        {'name': 'John'},
-        {'name': 'Yoko'},
-    ]
+    queryset = [{'name': 'John'}, {'name': 'Yoko'}]
 
     def get(self, request):
         self.object_list = self.get_queryset()

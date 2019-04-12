@@ -41,8 +41,7 @@ class Feed:
         if hasattr(self, 'item_pubdate') or hasattr(self, 'item_updateddate'):
             # if item_pubdate or item_updateddate is defined for the feed, set
             # header so as ConditionalGetMiddleware is able to send 304 NOT MODIFIED
-            response['Last-Modified'] = http_date(
-                timegm(feedgen.latest_post_date().utctimetuple()))
+            response['Last-Modified'] = http_date(timegm(feedgen.latest_post_date().utctimetuple()))
         feedgen.write(response, 'utf-8')
         return response
 
@@ -86,7 +85,7 @@ class Feed:
                 code = attr.__code__
             except AttributeError:
                 code = attr.__call__.__code__
-            if code.co_argcount == 2:       # one argument is 'self'
+            if code.co_argcount == 2:  # one argument is 'self'
                 return attr(obj)
             else:
                 return attr()
@@ -136,9 +135,7 @@ class Feed:
             description=self._get_dynamic_attr('description', obj),
             language=settings.LANGUAGE_CODE,
             feed_url=add_domain(
-                current_site.domain,
-                self._get_dynamic_attr('feed_url', obj) or request.path,
-                request.is_secure(),
+                current_site.domain, self._get_dynamic_attr('feed_url', obj) or request.path, request.is_secure()
             ),
             author_name=self._get_dynamic_attr('author_name', obj),
             author_link=self._get_dynamic_attr('author_link', obj),
@@ -165,8 +162,7 @@ class Feed:
                 pass
 
         for item in self._get_dynamic_attr('items', obj):
-            context = self.get_context_data(item=item, site=current_site,
-                                            obj=obj, request=request)
+            context = self.get_context_data(item=item, site=current_site, obj=obj, request=request)
             if title_tmp is not None:
                 title = title_tmp.render(context, request)
             else:
@@ -175,11 +171,7 @@ class Feed:
                 description = description_tmp.render(context, request)
             else:
                 description = self._get_dynamic_attr('item_description', item)
-            link = add_domain(
-                current_site.domain,
-                self._get_dynamic_attr('item_link', item),
-                request.is_secure(),
-            )
+            link = add_domain(current_site.domain, self._get_dynamic_attr('item_link', item), request.is_secure())
             enclosures = self._get_dynamic_attr('item_enclosures', item)
             author_name = self._get_dynamic_attr('item_author_name', item)
             if author_name is not None:
@@ -203,8 +195,7 @@ class Feed:
                 link=link,
                 description=description,
                 unique_id=self._get_dynamic_attr('item_guid', item, link),
-                unique_id_is_permalink=self._get_dynamic_attr(
-                    'item_guid_is_permalink', item),
+                unique_id_is_permalink=self._get_dynamic_attr('item_guid_is_permalink', item),
                 enclosures=enclosures,
                 pubdate=pubdate,
                 updateddate=updateddate,

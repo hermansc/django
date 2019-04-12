@@ -3,14 +3,20 @@ from operator import attrgetter
 from django.db import IntegrityError, NotSupportedError, connection
 from django.db.models import FileField, Value
 from django.db.models.functions import Lower
-from django.test import (
-    TestCase, override_settings, skipIfDBFeature, skipUnlessDBFeature,
-)
+from django.test import TestCase, override_settings, skipIfDBFeature, skipUnlessDBFeature
 
 from .models import (
-    Country, NoFields, NullableFields, Pizzeria, ProxyCountry,
-    ProxyMultiCountry, ProxyMultiProxyCountry, ProxyProxyCountry, Restaurant,
-    State, TwoFields,
+    Country,
+    NoFields,
+    NullableFields,
+    Pizzeria,
+    ProxyCountry,
+    ProxyMultiCountry,
+    ProxyMultiProxyCountry,
+    ProxyProxyCountry,
+    Restaurant,
+    State,
+    TwoFields,
 )
 
 
@@ -20,15 +26,17 @@ class BulkCreateTests(TestCase):
             Country(name="United States of America", iso_two_letter="US"),
             Country(name="The Netherlands", iso_two_letter="NL"),
             Country(name="Germany", iso_two_letter="DE"),
-            Country(name="Czech Republic", iso_two_letter="CZ")
+            Country(name="Czech Republic", iso_two_letter="CZ"),
         ]
 
     def test_simple(self):
         created = Country.objects.bulk_create(self.data)
         self.assertEqual(len(created), 4)
-        self.assertQuerysetEqual(Country.objects.order_by("-name"), [
-            "United States of America", "The Netherlands", "Germany", "Czech Republic"
-        ], attrgetter("name"))
+        self.assertQuerysetEqual(
+            Country.objects.order_by("-name"),
+            ["United States of America", "The Netherlands", "Germany", "Czech Republic"],
+            attrgetter("name"),
+        )
 
         created = Country.objects.bulk_create([])
         self.assertEqual(created, [])
@@ -52,53 +60,36 @@ class BulkCreateTests(TestCase):
     def test_multi_table_inheritance_unsupported(self):
         expected_message = "Can't bulk create a multi-table inherited model"
         with self.assertRaisesMessage(ValueError, expected_message):
-            Pizzeria.objects.bulk_create([
-                Pizzeria(name="The Art of Pizza"),
-            ])
+            Pizzeria.objects.bulk_create([Pizzeria(name="The Art of Pizza")])
         with self.assertRaisesMessage(ValueError, expected_message):
-            ProxyMultiCountry.objects.bulk_create([
-                ProxyMultiCountry(name="Fillory", iso_two_letter="FL"),
-            ])
+            ProxyMultiCountry.objects.bulk_create([ProxyMultiCountry(name="Fillory", iso_two_letter="FL")])
         with self.assertRaisesMessage(ValueError, expected_message):
-            ProxyMultiProxyCountry.objects.bulk_create([
-                ProxyMultiProxyCountry(name="Fillory", iso_two_letter="FL"),
-            ])
+            ProxyMultiProxyCountry.objects.bulk_create([ProxyMultiProxyCountry(name="Fillory", iso_two_letter="FL")])
 
     def test_proxy_inheritance_supported(self):
-        ProxyCountry.objects.bulk_create([
-            ProxyCountry(name="Qwghlm", iso_two_letter="QW"),
-            Country(name="Tortall", iso_two_letter="TA"),
-        ])
-        self.assertQuerysetEqual(ProxyCountry.objects.all(), {
-            "Qwghlm", "Tortall"
-        }, attrgetter("name"), ordered=False)
+        ProxyCountry.objects.bulk_create(
+            [ProxyCountry(name="Qwghlm", iso_two_letter="QW"), Country(name="Tortall", iso_two_letter="TA")]
+        )
+        self.assertQuerysetEqual(ProxyCountry.objects.all(), {"Qwghlm", "Tortall"}, attrgetter("name"), ordered=False)
 
-        ProxyProxyCountry.objects.bulk_create([
-            ProxyProxyCountry(name="Netherlands", iso_two_letter="NT"),
-        ])
-        self.assertQuerysetEqual(ProxyProxyCountry.objects.all(), {
-            "Qwghlm", "Tortall", "Netherlands",
-        }, attrgetter("name"), ordered=False)
+        ProxyProxyCountry.objects.bulk_create([ProxyProxyCountry(name="Netherlands", iso_two_letter="NT")])
+        self.assertQuerysetEqual(
+            ProxyProxyCountry.objects.all(), {"Qwghlm", "Tortall", "Netherlands"}, attrgetter("name"), ordered=False
+        )
 
     def test_non_auto_increment_pk(self):
-        State.objects.bulk_create([
-            State(two_letter_code=s)
-            for s in ["IL", "NY", "CA", "ME"]
-        ])
-        self.assertQuerysetEqual(State.objects.order_by("two_letter_code"), [
-            "CA", "IL", "ME", "NY",
-        ], attrgetter("two_letter_code"))
+        State.objects.bulk_create([State(two_letter_code=s) for s in ["IL", "NY", "CA", "ME"]])
+        self.assertQuerysetEqual(
+            State.objects.order_by("two_letter_code"), ["CA", "IL", "ME", "NY"], attrgetter("two_letter_code")
+        )
 
     @skipUnlessDBFeature('has_bulk_insert')
     def test_non_auto_increment_pk_efficiency(self):
         with self.assertNumQueries(1):
-            State.objects.bulk_create([
-                State(two_letter_code=s)
-                for s in ["IL", "NY", "CA", "ME"]
-            ])
-        self.assertQuerysetEqual(State.objects.order_by("two_letter_code"), [
-            "CA", "IL", "ME", "NY",
-        ], attrgetter("two_letter_code"))
+            State.objects.bulk_create([State(two_letter_code=s) for s in ["IL", "NY", "CA", "ME"]])
+        self.assertQuerysetEqual(
+            State.objects.order_by("two_letter_code"), ["CA", "IL", "ME", "NY"], attrgetter("two_letter_code")
+        )
 
     @skipIfDBFeature('allows_auto_pk_0')
     def test_zero_as_autoval(self):
@@ -115,36 +106,26 @@ class BulkCreateTests(TestCase):
     def test_batch_same_vals(self):
         # SQLite had a problem where all the same-valued models were
         # collapsed to one insert.
-        Restaurant.objects.bulk_create([
-            Restaurant(name='foo') for i in range(0, 2)
-        ])
+        Restaurant.objects.bulk_create([Restaurant(name='foo') for i in range(0, 2)])
         self.assertEqual(Restaurant.objects.count(), 2)
 
     def test_large_batch(self):
-        TwoFields.objects.bulk_create([
-            TwoFields(f1=i, f2=i + 1) for i in range(0, 1001)
-        ])
+        TwoFields.objects.bulk_create([TwoFields(f1=i, f2=i + 1) for i in range(0, 1001)])
         self.assertEqual(TwoFields.objects.count(), 1001)
-        self.assertEqual(
-            TwoFields.objects.filter(f1__gte=450, f1__lte=550).count(),
-            101)
+        self.assertEqual(TwoFields.objects.filter(f1__gte=450, f1__lte=550).count(), 101)
         self.assertEqual(TwoFields.objects.filter(f2__gte=901).count(), 101)
 
     @skipUnlessDBFeature('has_bulk_insert')
     def test_large_single_field_batch(self):
         # SQLite had a problem with more than 500 UNIONed selects in single
         # query.
-        Restaurant.objects.bulk_create([
-            Restaurant() for i in range(0, 501)
-        ])
+        Restaurant.objects.bulk_create([Restaurant() for i in range(0, 501)])
 
     @skipUnlessDBFeature('has_bulk_insert')
     def test_large_batch_efficiency(self):
         with override_settings(DEBUG=True):
             connection.queries_log.clear()
-            TwoFields.objects.bulk_create([
-                TwoFields(f1=i, f2=i + 1) for i in range(0, 1001)
-            ])
+            TwoFields.objects.bulk_create([TwoFields(f1=i, f2=i + 1) for i in range(0, 1001)])
             self.assertLess(len(connection.queries), 10)
 
     def test_large_batch_mixed(self):
@@ -152,10 +133,9 @@ class BulkCreateTests(TestCase):
         Test inserting a large batch with objects having primary key set
         mixed together with objects without PK set.
         """
-        TwoFields.objects.bulk_create([
-            TwoFields(id=i if i % 2 == 0 else None, f1=i, f2=i + 1)
-            for i in range(100000, 101000)
-        ])
+        TwoFields.objects.bulk_create(
+            [TwoFields(id=i if i % 2 == 0 else None, f1=i, f2=i + 1) for i in range(100000, 101000)]
+        )
         self.assertEqual(TwoFields.objects.count(), 1000)
         # We can't assume much about the ID's created, except that the above
         # created IDs must exist.
@@ -171,9 +151,9 @@ class BulkCreateTests(TestCase):
         """
         with override_settings(DEBUG=True):
             connection.queries_log.clear()
-            TwoFields.objects.bulk_create([
-                TwoFields(id=i if i % 2 == 0 else None, f1=i, f2=i + 1)
-                for i in range(100000, 101000)])
+            TwoFields.objects.bulk_create(
+                [TwoFields(id=i if i % 2 == 0 else None, f1=i, f2=i + 1) for i in range(100000, 101000)]
+            )
             self.assertLess(len(connection.queries), 10)
 
     def test_explicit_batch_size(self):
@@ -206,10 +186,9 @@ class BulkCreateTests(TestCase):
 
     @skipUnlessDBFeature('has_bulk_insert')
     def test_bulk_insert_expressions(self):
-        Restaurant.objects.bulk_create([
-            Restaurant(name="Sam's Shake Shack"),
-            Restaurant(name=Lower(Value("Betty's Beetroot Bar")))
-        ])
+        Restaurant.objects.bulk_create(
+            [Restaurant(name="Sam's Shake Shack"), Restaurant(name=Lower(Value("Betty's Beetroot Bar")))]
+        )
         bbb = Restaurant.objects.filter(name="betty's beetroot bar")
         self.assertEqual(bbb.count(), 1)
 
@@ -217,9 +196,7 @@ class BulkCreateTests(TestCase):
     def test_bulk_insert_nullable_fields(self):
         # NULL can be mixed with other values in nullable fields
         nullable_fields = [field for field in NullableFields._meta.get_fields() if field.name != 'id']
-        NullableFields.objects.bulk_create([
-            NullableFields(**{field.name: None}) for field in nullable_fields
-        ])
+        NullableFields.objects.bulk_create([NullableFields(**{field.name: None}) for field in nullable_fields])
         self.assertEqual(NullableFields.objects.count(), len(nullable_fields))
         for field in nullable_fields:
             with self.subTest(field=field):
@@ -270,18 +247,11 @@ class BulkCreateTests(TestCase):
 
     @skipUnlessDBFeature('supports_ignore_conflicts')
     def test_ignore_conflicts_ignore(self):
-        data = [
-            TwoFields(f1=1, f2=1),
-            TwoFields(f1=2, f2=2),
-            TwoFields(f1=3, f2=3),
-        ]
+        data = [TwoFields(f1=1, f2=1), TwoFields(f1=2, f2=2), TwoFields(f1=3, f2=3)]
         TwoFields.objects.bulk_create(data)
         self.assertEqual(TwoFields.objects.count(), 3)
         # With ignore_conflicts=True, conflicts are ignored.
-        conflicting_objects = [
-            TwoFields(f1=2, f2=2),
-            TwoFields(f1=3, f2=3),
-        ]
+        conflicting_objects = [TwoFields(f1=2, f2=2), TwoFields(f1=3, f2=3)]
         TwoFields.objects.bulk_create([conflicting_objects[0]], ignore_conflicts=True)
         TwoFields.objects.bulk_create(conflicting_objects, ignore_conflicts=True)
         self.assertEqual(TwoFields.objects.count(), 3)

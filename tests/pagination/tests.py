@@ -2,7 +2,11 @@ import warnings
 from datetime import datetime
 
 from django.core.paginator import (
-    EmptyPage, InvalidPage, PageNotAnInteger, Paginator, QuerySetPaginator,
+    EmptyPage,
+    InvalidPage,
+    PageNotAnInteger,
+    Paginator,
+    QuerySetPaginator,
     UnorderedObjectListWarning,
 )
 from django.test import SimpleTestCase, TestCase
@@ -37,9 +41,9 @@ class PaginationTests(SimpleTestCase):
         if coerce is not None:
             got = coerce(got)
         self.assertEqual(
-            expected, got,
-            "For '%s', expected %s but got %s.  Paginator parameters were: %s"
-            % (name, expected, got, params)
+            expected,
+            got,
+            "For '%s', expected %s but got %s.  Paginator parameters were: %s" % (name, expected, got, params),
         )
 
     def test_paginator(self):
@@ -136,6 +140,7 @@ class PaginationTests(SimpleTestCase):
         class CountContainer:
             def count(self):
                 return 42
+
         # Paginator can be passed other objects with a count() method.
         paginator = Paginator(CountContainer(), 10)
         self.assertEqual(42, paginator.count)
@@ -146,6 +151,7 @@ class PaginationTests(SimpleTestCase):
         class LenContainer:
             def __len__(self):
                 return 42
+
         paginator = Paginator(LenContainer(), 10)
         self.assertEqual(42, paginator.count)
         self.assertEqual(5, paginator.num_pages)
@@ -180,7 +186,7 @@ class PaginationTests(SimpleTestCase):
             page_num = paginator.num_pages
         page = paginator.page(page_num)
         start, end = indexes
-        msg = ("For %s of page %s, expected %s but got %s. Paginator parameters were: %s")
+        msg = "For %s of page %s, expected %s but got %s. Paginator parameters were: %s"
         self.assertEqual(start, page.start_index(), msg % ('start index', page_num, start, page.start_index(), params))
         self.assertEqual(end, page.end_index(), msg % ('end index', page_num, end, page.end_index(), params))
 
@@ -309,6 +315,7 @@ class ModelPaginationTests(TestCase):
     """
     Test pagination with Django model instances
     """
+
     @classmethod
     def setUpTestData(cls):
         # Prepare a list of objects for pagination.
@@ -320,13 +327,16 @@ class ModelPaginationTests(TestCase):
         paginator = Paginator(Article.objects.order_by('id'), 5)
         p = paginator.page(1)
         self.assertEqual("<Page 1 of 2>", str(p))
-        self.assertQuerysetEqual(p.object_list, [
-            "<Article: Article 1>",
-            "<Article: Article 2>",
-            "<Article: Article 3>",
-            "<Article: Article 4>",
-            "<Article: Article 5>"
-        ])
+        self.assertQuerysetEqual(
+            p.object_list,
+            [
+                "<Article: Article 1>",
+                "<Article: Article 2>",
+                "<Article: Article 3>",
+                "<Article: Article 4>",
+                "<Article: Article 5>",
+            ],
+        )
         self.assertTrue(p.has_next())
         self.assertFalse(p.has_previous())
         self.assertTrue(p.has_other_pages())
@@ -340,12 +350,10 @@ class ModelPaginationTests(TestCase):
         paginator = Paginator(Article.objects.order_by('id'), 5)
         p = paginator.page(2)
         self.assertEqual("<Page 2 of 2>", str(p))
-        self.assertQuerysetEqual(p.object_list, [
-            "<Article: Article 6>",
-            "<Article: Article 7>",
-            "<Article: Article 8>",
-            "<Article: Article 9>"
-        ])
+        self.assertQuerysetEqual(
+            p.object_list,
+            ["<Article: Article 6>", "<Article: Article 7>", "<Article: Article 8>", "<Article: Article 9>"],
+        )
         self.assertFalse(p.has_next())
         self.assertTrue(p.has_previous())
         self.assertTrue(p.has_other_pages())
@@ -373,11 +381,7 @@ class ModelPaginationTests(TestCase):
 
         # Make sure slicing the Page object with numbers and slice objects work.
         self.assertEqual(p[0], Article.objects.get(headline='Article 1'))
-        self.assertQuerysetEqual(p[slice(2)], [
-            "<Article: Article 1>",
-            "<Article: Article 2>",
-        ]
-        )
+        self.assertQuerysetEqual(p[slice(2)], ["<Article: Article 1>", "<Article: Article 2>"])
         # After __getitem__ is called, object_list is a list
         self.assertIsInstance(p.object_list, list)
 
@@ -402,12 +406,11 @@ class ModelPaginationTests(TestCase):
         Unordered object list warning with an object that has an ordered
         attribute but not a model attribute.
         """
+
         class ObjectList:
             ordered = False
+
         object_list = ObjectList()
-        msg = (
-            "Pagination may yield inconsistent results with an unordered "
-            "object_list: {!r}.".format(object_list)
-        )
+        msg = "Pagination may yield inconsistent results with an unordered " "object_list: {!r}.".format(object_list)
         with self.assertWarnsMessage(UnorderedObjectListWarning, msg):
             Paginator(object_list, 5)

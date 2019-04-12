@@ -103,10 +103,13 @@ class InspectDBTestCase(TestCase):
 
         if connection.features.can_introspect_decimal_field:
             assertFieldType('decimal_field', "models.DecimalField(max_digits=6, decimal_places=1)")
-        else:       # Guessed arguments on SQLite, see #5014
-            assertFieldType('decimal_field', "models.DecimalField(max_digits=10, decimal_places=5)  "
-                                             "# max_digits and decimal_places have been guessed, "
-                                             "as this database handles decimal fields as float")
+        else:  # Guessed arguments on SQLite, see #5014
+            assertFieldType(
+                'decimal_field',
+                "models.DecimalField(max_digits=10, decimal_places=5)  "
+                "# max_digits and decimal_places have been guessed, "
+                "as this database handles decimal fields as float",
+            )
 
         assertFieldType('float_field', "models.FloatField()")
 
@@ -141,24 +144,13 @@ class InspectDBTestCase(TestCase):
         error_message = "inspectdb generated an attribute name which is a Python keyword"
         # Recursive foreign keys should be set to 'self'
         self.assertIn("parent = models.ForeignKey('self', models.DO_NOTHING)", output)
-        self.assertNotIn(
-            "from = models.ForeignKey(InspectdbPeople, models.DO_NOTHING)",
-            output,
-            msg=error_message,
-        )
+        self.assertNotIn("from = models.ForeignKey(InspectdbPeople, models.DO_NOTHING)", output, msg=error_message)
         # As InspectdbPeople model is defined after InspectdbMessage, it should be quoted
         self.assertIn(
-            "from_field = models.ForeignKey('InspectdbPeople', models.DO_NOTHING, db_column='from_id')",
-            output,
+            "from_field = models.ForeignKey('InspectdbPeople', models.DO_NOTHING, db_column='from_id')", output
         )
-        self.assertIn(
-            "people_pk = models.ForeignKey(InspectdbPeople, models.DO_NOTHING, primary_key=True)",
-            output,
-        )
-        self.assertIn(
-            "people_unique = models.ForeignKey(InspectdbPeople, models.DO_NOTHING, unique=True)",
-            output,
-        )
+        self.assertIn("people_pk = models.ForeignKey(InspectdbPeople, models.DO_NOTHING, primary_key=True)", output)
+        self.assertIn("people_unique = models.ForeignKey(InspectdbPeople, models.DO_NOTHING, unique=True)", output)
 
     def test_digits_column_name_introspection(self):
         """Introspection of column names consist/start with digits (#16536/#17676)"""
@@ -238,9 +230,7 @@ class InspectDBTestCase(TestCase):
         try:
             out = StringIO()
             call_command(
-                'inspectdb',
-                table_name_filter=lambda tn: tn.startswith(PeopleMoreData._meta.db_table),
-                stdout=out,
+                'inspectdb', table_name_filter=lambda tn: tn.startswith(PeopleMoreData._meta.db_table), stdout=out
             )
             output = out.getvalue()
             self.assertIn('# A unique constraint could not be introspected.', output)
@@ -249,8 +239,9 @@ class InspectDBTestCase(TestCase):
             with connection.cursor() as c:
                 c.execute('DROP INDEX Findex')
 
-    @skipUnless(connection.vendor == 'sqlite',
-                "Only patched sqlite's DatabaseIntrospection.data_types_reverse for this test")
+    @skipUnless(
+        connection.vendor == 'sqlite', "Only patched sqlite's DatabaseIntrospection.data_types_reverse for this test"
+    )
     def test_custom_fields(self):
         """
         Introspection of columns with a custom field (#21090)
@@ -258,10 +249,7 @@ class InspectDBTestCase(TestCase):
         out = StringIO()
         orig_data_types_reverse = connection.introspection.data_types_reverse
         try:
-            connection.introspection.data_types_reverse = {
-                'text': 'myfields.TextField',
-                'bigint': 'BigIntegerField',
-            }
+            connection.introspection.data_types_reverse = {'text': 'myfields.TextField', 'bigint': 'BigIntegerField'}
             call_command('inspectdb', 'inspectdb_columntypes', stdout=out)
             output = out.getvalue()
             self.assertIn("text_field = myfields.TextField()", output)
@@ -275,8 +263,9 @@ class InspectDBTestCase(TestCase):
         be visible in the output.
         """
         out = StringIO()
-        with mock.patch('django.db.connection.introspection.get_table_list',
-                        return_value=[TableInfo(name='nonexistent', type='t')]):
+        with mock.patch(
+            'django.db.connection.introspection.get_table_list', return_value=[TableInfo(name='nonexistent', type='t')]
+        ):
             call_command('inspectdb', stdout=out)
         output = out.getvalue()
         self.assertIn("# Unable to inspect table 'nonexistent'", output)
@@ -290,10 +279,7 @@ class InspectDBTransactionalTests(TransactionTestCase):
     def test_include_views(self):
         """inspectdb --include-views creates models for database views."""
         with connection.cursor() as cursor:
-            cursor.execute(
-                'CREATE VIEW inspectdb_people_view AS '
-                'SELECT id, name FROM inspectdb_people'
-            )
+            cursor.execute('CREATE VIEW inspectdb_people_view AS ' 'SELECT id, name FROM inspectdb_people')
         out = StringIO()
         view_model = 'class InspectdbPeopleView(models.Model):'
         view_managed = 'managed = False  # Created from a view.'
@@ -315,8 +301,7 @@ class InspectDBTransactionalTests(TransactionTestCase):
         """inspectdb --include-views creates models for materialized views."""
         with connection.cursor() as cursor:
             cursor.execute(
-                'CREATE MATERIALIZED VIEW inspectdb_people_materialized AS '
-                'SELECT id, name FROM inspectdb_people'
+                'CREATE MATERIALIZED VIEW inspectdb_people_materialized AS ' 'SELECT id, name FROM inspectdb_people'
             )
         out = StringIO()
         view_model = 'class InspectdbPeopleMaterialized(models.Model):'
@@ -339,15 +324,19 @@ class InspectDBTransactionalTests(TransactionTestCase):
     def test_include_partitions(self):
         """inspectdb --include-partitions creates models for partitions."""
         with connection.cursor() as cursor:
-            cursor.execute('''\
+            cursor.execute(
+                '''\
                 CREATE TABLE inspectdb_partition_parent (name text not null)
                 PARTITION BY LIST (left(upper(name), 1))
-            ''')
-            cursor.execute('''\
+            '''
+            )
+            cursor.execute(
+                '''\
                 CREATE TABLE inspectdb_partition_child
                 PARTITION OF inspectdb_partition_parent
                 FOR VALUES IN ('A', 'B', 'C')
-            ''')
+            '''
+            )
         out = StringIO()
         partition_model_parent = 'class InspectdbPartitionParent(models.Model):'
         partition_model_child = 'class InspectdbPartitionChild(models.Model):'
@@ -373,7 +362,8 @@ class InspectDBTransactionalTests(TransactionTestCase):
         with connection.cursor() as cursor:
             cursor.execute('CREATE EXTENSION IF NOT EXISTS file_fdw')
             cursor.execute('CREATE SERVER inspectdb_server FOREIGN DATA WRAPPER file_fdw')
-            cursor.execute('''\
+            cursor.execute(
+                '''\
                 CREATE FOREIGN TABLE inspectdb_iris_foreign_table (
                     petal_length real,
                     petal_width real,
@@ -382,7 +372,8 @@ class InspectDBTransactionalTests(TransactionTestCase):
                 ) SERVER inspectdb_server OPTIONS (
                     filename '/dev/null'
                 )
-            ''')
+            '''
+            )
         out = StringIO()
         foreign_table_model = 'class InspectdbIrisForeignTable(models.Model):'
         foreign_table_managed = 'managed = False'

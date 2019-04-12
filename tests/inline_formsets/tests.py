@@ -5,7 +5,6 @@ from .models import Child, Parent, Poem, Poet, School
 
 
 class DeletionTests(TestCase):
-
     def test_deletion(self):
         PoemFormSet = inlineformset_factory(Poet, Poem, can_delete=True, fields="__all__")
         poet = Poet.objects.create(name='test')
@@ -143,13 +142,9 @@ class InlineFormsetFactoryTest(TestCase):
 
     def test_any_iterable_allowed_as_argument_to_exclude(self):
         # Regression test for #9171.
-        inlineformset_factory(
-            Parent, Child, exclude=['school'], fk_name='mother'
-        )
+        inlineformset_factory(Parent, Child, exclude=['school'], fk_name='mother')
 
-        inlineformset_factory(
-            Parent, Child, exclude=('school',), fk_name='mother'
-        )
+        inlineformset_factory(Parent, Child, exclude=('school',), fk_name='mother')
 
     @skipUnlessDBFeature('allows_auto_pk_0')
     def test_zero_primary_key(self):
@@ -191,6 +186,7 @@ class InlineFormsetFactoryTest(TestCase):
         """
         A foreign key field is in Meta for all forms in the formset (#26538).
         """
+
         class PoemModelForm(ModelForm):
             def __init__(self, *args, **kwargs):
                 assert 'poet' in self._meta.fields

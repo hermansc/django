@@ -12,16 +12,23 @@ from django.test import SimpleTestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import Approximate
 
 from .models import (
-    Actor, Article, Author, AuthorProfile, BaseModel, Category, ComplexModel,
-    Movie, Player, ProxyBaseModel, ProxyProxyBaseModel, Score, Team,
+    Actor,
+    Article,
+    Author,
+    AuthorProfile,
+    BaseModel,
+    Category,
+    ComplexModel,
+    Movie,
+    Player,
+    ProxyBaseModel,
+    ProxyProxyBaseModel,
+    Score,
+    Team,
 )
 
 
-@override_settings(
-    SERIALIZATION_MODULES={
-        "json2": "django.core.serializers.json",
-    }
-)
+@override_settings(SERIALIZATION_MODULES={"json2": "django.core.serializers.json"})
 class SerializerRegistrationTests(SimpleTestCase):
     def setUp(self):
         self.old_serializers = serializers._serializers
@@ -99,17 +106,13 @@ class SerializersTestBase:
         self.jane = Author.objects.create(name="Jane")
 
         self.a1 = Article(
-            author=self.jane,
-            headline="Poker has no place on ESPN",
-            pub_date=datetime(2006, 6, 16, 11, 00)
+            author=self.jane, headline="Poker has no place on ESPN", pub_date=datetime(2006, 6, 16, 11, 00)
         )
         self.a1.save()
         self.a1.categories.set([sports, op_ed])
 
         self.a2 = Article(
-            author=self.joe,
-            headline="Time to reform copyright",
-            pub_date=datetime(2006, 6, 16, 13, 00, 11, 345)
+            author=self.joe, headline="Time to reform copyright", pub_date=datetime(2006, 6, 16, 13, 00, 11, 345)
         )
         self.a2.save()
         self.a2.categories.set([music, op_ed])
@@ -147,9 +150,7 @@ class SerializersTestBase:
         obj.save_base(raw=True)
 
         # Serialize then deserialize the test database
-        serialized_data = serializers.serialize(
-            self.serializer_name, [obj], indent=2, fields=('field1', 'field3')
-        )
+        serialized_data = serializers.serialize(self.serializer_name, [obj], indent=2, fields=('field1', 'field3'))
         result = next(serializers.deserialize(self.serializer_name, serialized_data))
 
         # The deserialized object contains data in only the serialized fields.
@@ -222,12 +223,12 @@ class SerializersTestBase:
     def test_serialize_progressbar(self):
         fake_stdout = StringIO()
         serializers.serialize(
-            self.serializer_name, Article.objects.all(),
-            progress_output=fake_stdout, object_count=Article.objects.count()
+            self.serializer_name,
+            Article.objects.all(),
+            progress_output=fake_stdout,
+            object_count=Article.objects.count(),
         )
-        self.assertTrue(
-            fake_stdout.getvalue().endswith('[' + '.' * ProgressBar.progress_width + ']\n')
-        )
+        self.assertTrue(fake_stdout.getvalue().endswith('[' + '.' * ProgressBar.progress_width + ']\n'))
 
     def test_serialize_superfluous_queries(self):
         """Ensure no superfluous queries are made when serializing ForeignKeys
@@ -291,9 +292,8 @@ class SerializersTestBase:
         # Regression for #12524 -- dates before 1000AD get prefixed
         # 0's on the year
         a = Article.objects.create(
-            author=self.jane,
-            headline="Nobody remembers the early years",
-            pub_date=datetime(1, 2, 3, 4, 5, 6))
+            author=self.jane, headline="Nobody remembers the early years", pub_date=datetime(1, 2, 3, 4, 5, 6)
+        )
 
         serial_str = serializers.serialize(self.serializer_name, [a])
         date_values = self._get_field_values(serial_str, "pub_date")
@@ -313,12 +313,16 @@ class SerializersTestBase:
         """Mapping such as fields should be deterministically ordered. (#24558)"""
         output = serializers.serialize(self.serializer_name, [self.a1], indent=2)
         categories = self.a1.categories.values_list('pk', flat=True)
-        self.assertEqual(output, self.mapping_ordering_str % {
-            'article_pk': self.a1.pk,
-            'author_pk': self.a1.author_id,
-            'first_category_pk': categories[0],
-            'second_category_pk': categories[1],
-        })
+        self.assertEqual(
+            output,
+            self.mapping_ordering_str
+            % {
+                'article_pk': self.a1.pk,
+                'author_pk': self.a1.author_id,
+                'first_category_pk': categories[0],
+                'second_category_pk': categories[1],
+            },
+        )
 
     def test_deserialize_force_insert(self):
         """Deserialized content can be saved with force_insert as a parameter."""
@@ -342,7 +346,6 @@ class SerializersTestBase:
 
 
 class SerializerAPITests(SimpleTestCase):
-
     def test_stream_class(self):
         class File:
             def __init__(self):

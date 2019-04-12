@@ -5,7 +5,6 @@ from .models import FloatModel
 
 
 class TestFloatField(TestCase):
-
     def test_float_validates_object(self):
         instance = FloatModel(size=2.5)
         # Try setting float field to unsaved object

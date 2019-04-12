@@ -4,14 +4,12 @@ from django.template import Context, Engine
 
 
 class CallableVariablesTests(TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.engine = Engine()
         super().setUpClass()
 
     def test_callable(self):
-
         class Doodad:
             def __init__(self, value):
                 self.num_calls = 0
@@ -40,7 +38,6 @@ class CallableVariablesTests(TestCase):
         self.assertEqual(my_doodad.num_calls, 2)
 
     def test_alters_data(self):
-
         class Doodad:
             alters_data = True
 
@@ -67,7 +64,6 @@ class CallableVariablesTests(TestCase):
         self.assertEqual(my_doodad.num_calls, 0)
 
     def test_do_not_call(self):
-
         class Doodad:
             do_not_call_in_templates = True
 

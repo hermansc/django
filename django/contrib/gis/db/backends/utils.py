@@ -8,6 +8,7 @@ class SpatialOperator:
     """
     Class encapsulating the behavior specific to a GIS operation (used by lookups).
     """
+
     sql_template = None
 
     def __init__(self, op=None, func=None):

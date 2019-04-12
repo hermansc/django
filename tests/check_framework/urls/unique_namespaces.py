@@ -1,13 +1,8 @@
 from django.urls import include, path
 
-common_url_patterns = ([
-    path('app-ns1/', include([])),
-    path('app-url/', include([])),
-], 'common')
+common_url_patterns = ([path('app-ns1/', include([])), path('app-url/', include([]))], 'common')
 
-nested_url_patterns = ([
-    path('common/', include(common_url_patterns, namespace='nested')),
-], 'nested')
+nested_url_patterns = ([path('common/', include(common_url_patterns, namespace='nested'))], 'nested')
 
 urlpatterns = [
     path('app-ns1-0/', include(common_url_patterns, namespace='app-include-1')),

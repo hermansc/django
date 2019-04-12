@@ -4,13 +4,9 @@ Classes to represent the definitions of aggregate functions.
 from django.core.exceptions import FieldError
 from django.db.models.expressions import Case, Func, Star, When
 from django.db.models.fields import IntegerField
-from django.db.models.functions.mixins import (
-    FixDurationInputMixin, NumericOutputFieldMixin,
-)
+from django.db.models.functions.mixins import FixDurationInputMixin, NumericOutputFieldMixin
 
-__all__ = [
-    'Aggregate', 'Avg', 'Count', 'Max', 'Min', 'StdDev', 'Sum', 'Variance',
-]
+__all__ = ['Aggregate', 'Avg', 'Count', 'Max', 'Min', 'StdDev', 'Sum', 'Variance']
 
 
 class Aggregate(Func):
@@ -74,8 +70,7 @@ class Aggregate(Func):
                 filter_sql, filter_params = self.filter.as_sql(compiler, connection)
                 template = self.filter_template % extra_context.get('template', self.template)
                 sql, params = super().as_sql(
-                    compiler, connection, template=template, filter=filter_sql,
-                    **extra_context
+                    compiler, connection, template=template, filter=filter_sql, **extra_context
                 )
                 return sql, params + filter_params
             else:

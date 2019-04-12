@@ -36,8 +36,7 @@ class VariableResolveLoggingTests(SimpleTestCase):
         self.assertEqual(len(cm.records), 1)
         log_record = cm.records[0]
         self.assertEqual(
-            log_record.getMessage(),
-            "Exception while resolving variable 'article' in template 'template_name'."
+            log_record.getMessage(), "Exception while resolving variable 'article' in template 'template_name'."
         )
         self.assertIsNotNone(log_record.exc_info)
         raised_exception = log_record.exc_info[1]
@@ -50,16 +49,10 @@ class VariableResolveLoggingTests(SimpleTestCase):
 
         self.assertEqual(len(cm.records), 1)
         log_record = cm.records[0]
-        self.assertEqual(
-            log_record.getMessage(),
-            "Exception while resolving variable 'author' in template 'unknown'."
-        )
+        self.assertEqual(log_record.getMessage(), "Exception while resolving variable 'author' in template 'unknown'.")
         self.assertIsNotNone(log_record.exc_info)
         raised_exception = log_record.exc_info[1]
-        self.assertEqual(
-            str(raised_exception),
-            "Failed lookup for key [author] in {'section': 'News'}"
-        )
+        self.assertEqual(str(raised_exception), "Failed lookup for key [author] in {'section': 'News'}")
 
     def test_no_log_when_variable_exists(self):
         with self.assertRaisesMessage(AssertionError, 'no logs'):

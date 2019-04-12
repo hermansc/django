@@ -59,6 +59,7 @@ class ListMixinTest(unittest.TestCase):
     Tests base class ListMixin by comparing a list clone which is
     a ListMixin subclass with a real Python list.
     """
+
     limit = 3
     listType = UserListA
 
@@ -95,8 +96,10 @@ class ListMixinTest(unittest.TestCase):
 
     def test02_setslice(self):
         'Slice assignment'
+
         def setfcn(x, i, j, k, L):
             x[i:j:k] = range(L)
+
         pl, ul = self.lists_of_len()
         for slen in range(self.limit + 1):
             ssl = nextRange(slen)
@@ -215,6 +218,7 @@ class ListMixinTest(unittest.TestCase):
 
     def test05_out_of_range_exceptions(self):
         'Out of range exceptions'
+
         def setfcn(x, i):
             x[i] = 20
 
@@ -223,6 +227,7 @@ class ListMixinTest(unittest.TestCase):
 
         def delfcn(x, i):
             del x[i]
+
         pl, ul = self.lists_of_len()
         for i in (-1 - self.limit, self.limit):
             with self.assertRaises(IndexError):  # 'set index %d' % i)
@@ -266,6 +271,7 @@ class ListMixinTest(unittest.TestCase):
 
         def popfcn(x, i):
             x.pop(i)
+
         with self.assertRaises(IndexError):
             popfcn(ul, self.limit)
         with self.assertRaises(IndexError):
@@ -289,6 +295,7 @@ class ListMixinTest(unittest.TestCase):
 
         def removefcn(x, v):
             return x.remove(v)
+
         with self.assertRaises(ValueError):
             indexfcn(ul, 40)
         with self.assertRaises(ValueError):
@@ -303,6 +310,7 @@ class ListMixinTest(unittest.TestCase):
 
         def setfcn(x, i, v):
             x[i] = v
+
         with self.assertRaises(TypeError):
             setfcn(ul, 2, 'hello')
         with self.assertRaises(TypeError):
@@ -318,12 +326,13 @@ class ListMixinTest(unittest.TestCase):
 
         def setfcn(x, i):
             x[:i] = []
+
         for i in range(len(ul) - ul._minlength + 1, len(ul)):
             with self.assertRaises(ValueError):
                 delfcn(ul, i)
             with self.assertRaises(ValueError):
                 setfcn(ul, i)
-        del ul[:len(ul) - ul._minlength]
+        del ul[: len(ul) - ul._minlength]
 
         ul._maxlength = 4
         for i in range(0, ul._maxlength - len(ul)):
@@ -337,6 +346,7 @@ class ListMixinTest(unittest.TestCase):
 
         def setfcn(x, i, v):
             x[i] = v
+
         with self.assertRaises(TypeError):
             setfcn(ul, slice(0, 3, 2), 2)
 

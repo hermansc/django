@@ -6,15 +6,14 @@ from django.contrib.gis.gdal.raster.base import GDALRasterBase
 from django.contrib.gis.shortcuts import numpy
 from django.utils.encoding import force_str
 
-from .const import (
-    GDAL_COLOR_TYPES, GDAL_INTEGER_TYPES, GDAL_PIXEL_TYPES, GDAL_TO_CTYPES,
-)
+from .const import GDAL_COLOR_TYPES, GDAL_INTEGER_TYPES, GDAL_PIXEL_TYPES, GDAL_TO_CTYPES
 
 
 class GDALBand(GDALRasterBase):
     """
     Wrap a GDAL raster band, needs to be obtained from a GDALRaster object.
     """
+
     def __init__(self, source, index):
         self.source = source
         self._ptr = capi.get_ds_raster_band(source._ptr, index)
@@ -79,8 +78,14 @@ class GDALBand(GDALRasterBase):
         # Prepare array with arguments for capi function
         smin, smax, smean, sstd = c_double(), c_double(), c_double(), c_double()
         stats_args = [
-            self._ptr, c_int(approximate), byref(smin), byref(smax),
-            byref(smean), byref(sstd), c_void_p(), c_void_p(),
+            self._ptr,
+            c_int(approximate),
+            byref(smin),
+            byref(smax),
+            byref(smean),
+            byref(sstd),
+            c_void_p(),
+            c_void_p(),
         ]
 
         if refresh or self._stats_refresh:
@@ -214,9 +219,20 @@ class GDALBand(GDALRasterBase):
                 data_array = ctypes_array(*data)
 
         # Access band
-        capi.band_io(self._ptr, access_flag, offset[0], offset[1],
-                     size[0], size[1], byref(data_array), shape[0],
-                     shape[1], self.datatype(), 0, 0)
+        capi.band_io(
+            self._ptr,
+            access_flag,
+            offset[0],
+            offset[1],
+            size[0],
+            size[1],
+            byref(data_array),
+            shape[0],
+            shape[1],
+            self.datatype(),
+            0,
+            0,
+        )
 
         # Return data as numpy array if possible, otherwise as list
         if data is None:
@@ -224,9 +240,7 @@ class GDALBand(GDALRasterBase):
                 return memoryview(data_array)
             elif numpy:
                 # reshape() needs a reshape parameter with the height first.
-                return numpy.frombuffer(
-                    data_array, dtype=numpy.dtype(data_array)
-                ).reshape(tuple(reversed(size)))
+                return numpy.frombuffer(data_array, dtype=numpy.dtype(data_array)).reshape(tuple(reversed(size)))
             else:
                 return list(data_array)
         else:

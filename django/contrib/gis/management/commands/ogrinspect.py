@@ -10,6 +10,7 @@ class LayerOptionAction(argparse.Action):
     Custom argparse action for the `ogrinspect` `layer_key` keyword option
     which may be an integer or a string.
     """
+
     def __call__(self, parser, namespace, value, option_string=None):
         try:
             setattr(namespace, self.dest, int(value))
@@ -23,6 +24,7 @@ class ListOptionAction(argparse.Action):
     a string list. If the string is 'True'/'true' then the option
     value will be a boolean instead.
     """
+
     def __call__(self, parser, namespace, value, option_string=None):
         if value.lower() == 'true':
             setattr(namespace, self.dest, True)
@@ -44,55 +46,57 @@ class Command(BaseCommand):
         parser.add_argument('model_name', help='Name of the model to create.')
         parser.add_argument(
             '--blank',
-            action=ListOptionAction, default=False,
+            action=ListOptionAction,
+            default=False,
             help='Use a comma separated list of OGR field names to add '
-                 'the `blank=True` option to the field definition. Set to `true` '
-                 'to apply to all applicable fields.',
+            'the `blank=True` option to the field definition. Set to `true` '
+            'to apply to all applicable fields.',
         )
         parser.add_argument(
             '--decimal',
-            action=ListOptionAction, default=False,
+            action=ListOptionAction,
+            default=False,
             help='Use a comma separated list of OGR float fields to '
-                 'generate `DecimalField` instead of the default '
-                 '`FloatField`. Set to `true` to apply to all OGR float fields.',
+            'generate `DecimalField` instead of the default '
+            '`FloatField`. Set to `true` to apply to all OGR float fields.',
         )
         parser.add_argument(
-            '--geom-name', default='geom',
-            help='Specifies the model name for the Geometry Field (defaults to `geom`)'
+            '--geom-name', default='geom', help='Specifies the model name for the Geometry Field (defaults to `geom`)'
         )
         parser.add_argument(
-            '--layer', dest='layer_key',
-            action=LayerOptionAction, default=0,
+            '--layer',
+            dest='layer_key',
+            action=LayerOptionAction,
+            default=0,
             help='The key for specifying which layer in the OGR data '
-                 'source to use. Defaults to 0 (the first layer). May be '
-                 'an integer or a string identifier for the layer.',
+            'source to use. Defaults to 0 (the first layer). May be '
+            'an integer or a string identifier for the layer.',
         )
         parser.add_argument(
-            '--multi-geom', action='store_true',
-            help='Treat the geometry in the data source as a geometry collection.',
+            '--multi-geom', action='store_true', help='Treat the geometry in the data source as a geometry collection.'
         )
+        parser.add_argument('--name-field', help='Specifies a field name to return for the __str__() method.')
         parser.add_argument(
-            '--name-field',
-            help='Specifies a field name to return for the __str__() method.',
-        )
-        parser.add_argument(
-            '--no-imports', action='store_false', dest='imports',
+            '--no-imports',
+            action='store_false',
+            dest='imports',
             help='Do not include `from django.contrib.gis.db import models` statement.',
         )
         parser.add_argument(
-            '--null', action=ListOptionAction, default=False,
+            '--null',
+            action=ListOptionAction,
+            default=False,
             help='Use a comma separated list of OGR field names to add '
-                 'the `null=True` option to the field definition. Set to `true` '
-                 'to apply to all applicable fields.',
+            'the `null=True` option to the field definition. Set to `true` '
+            'to apply to all applicable fields.',
         )
         parser.add_argument(
             '--srid',
             help='The SRID to use for the Geometry Field. If it can be '
-                 'determined, the SRID of the data source is used.',
+            'determined, the SRID of the data source is used.',
         )
         parser.add_argument(
-            '--mapping', action='store_true',
-            help='Generate mapping dictionary for use with `LayerMapping`.',
+            '--mapping', action='store_true', help='Generate mapping dictionary for use with `LayerMapping`.'
         )
 
     def handle(self, *args, **options):
@@ -107,9 +111,9 @@ class Command(BaseCommand):
         # Returning the output of ogrinspect with the given arguments
         # and options.
         from django.contrib.gis.utils.ogrinspect import _ogrinspect, mapping
+
         # Filter options to params accepted by `_ogrinspect`
-        ogr_options = {k: v for k, v in options.items()
-                       if k in get_func_args(_ogrinspect) and v is not None}
+        ogr_options = {k: v for k, v in options.items() if k in get_func_args(_ogrinspect) and v is not None}
         output = [s for s in _ogrinspect(ds, model_name, **ogr_options)]
 
         if options['mapping']:
@@ -124,10 +128,16 @@ class Command(BaseCommand):
             # This extra legwork is so that the dictionary definition comes
             # out in the same order as the fields in the model definition.
             rev_mapping = {v: k for k, v in mapping_dict.items()}
-            output.extend(['', '', '# Auto-generated `LayerMapping` dictionary for %s model' % model_name,
-                           '%s_mapping = {' % model_name.lower()])
-            output.extend("    '%s': '%s'," % (
-                rev_mapping[ogr_fld], ogr_fld) for ogr_fld in ds[options['layer_key']].fields
+            output.extend(
+                [
+                    '',
+                    '',
+                    '# Auto-generated `LayerMapping` dictionary for %s model' % model_name,
+                    '%s_mapping = {' % model_name.lower(),
+                ]
+            )
+            output.extend(
+                "    '%s': '%s'," % (rev_mapping[ogr_fld], ogr_fld) for ogr_fld in ds[options['layer_key']].fields
             )
             output.extend(["    '%s': '%s'," % (options['geom_name'], mapping_dict[options['geom_name']]), '}'])
         return '\n'.join(output) + '\n'

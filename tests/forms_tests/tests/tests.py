@@ -7,8 +7,13 @@ from django.forms.models import ModelFormMetaclass
 from django.test import SimpleTestCase, TestCase
 
 from ..models import (
-    BoundaryModel, ChoiceFieldModel, ChoiceModel, ChoiceOptionModel, Defaults,
-    FileModel, OptionalMultiChoiceModel,
+    BoundaryModel,
+    ChoiceFieldModel,
+    ChoiceModel,
+    ChoiceOptionModel,
+    Defaults,
+    FileModel,
+    OptionalMultiChoiceModel,
 )
 
 
@@ -58,6 +63,7 @@ class TestTicket14567(TestCase):
     """
     The return values of ModelMultipleChoiceFields are QuerySets
     """
+
     def test_empty_queryset_return(self):
         "If a model's ManyToManyField has blank=True and is saved with no data, a queryset is returned."
         option = ChoiceOptionModel.objects.create(name='default')
@@ -106,7 +112,7 @@ class ModelFormCallableModelDefault(TestCase):
 <option value="1" selected>ChoiceOption 1</option>
 <option value="2">ChoiceOption 2</option>
 <option value="3">ChoiceOption 3</option>
-</select><input type="hidden" name="initial-multi_choice_int" value="1" id="initial-id_multi_choice_int_0"></p>"""
+</select><input type="hidden" name="initial-multi_choice_int" value="1" id="initial-id_multi_choice_int_0"></p>""",
         )
 
     def test_initial_instance_value(self):
@@ -115,12 +121,14 @@ class ModelFormCallableModelDefault(TestCase):
         obj2 = ChoiceOptionModel.objects.create(id=2, name='option 2')
         obj3 = ChoiceOptionModel.objects.create(id=3, name='option 3')
         self.assertHTMLEqual(
-            ChoiceFieldForm(initial={
-                'choice': obj2,
-                'choice_int': obj2,
-                'multi_choice': [obj2, obj3],
-                'multi_choice_int': ChoiceOptionModel.objects.exclude(name="default"),
-            }).as_p(),
+            ChoiceFieldForm(
+                initial={
+                    'choice': obj2,
+                    'choice_int': obj2,
+                    'multi_choice': [obj2, obj3],
+                    'multi_choice_int': ChoiceOptionModel.objects.exclude(name="default"),
+                }
+            ).as_p(),
             """<p><label for="id_choice">Choice:</label> <select name="choice" id="id_choice">
 <option value="1">ChoiceOption 1</option>
 <option value="2" selected>ChoiceOption 2</option>
@@ -144,7 +152,7 @@ class ModelFormCallableModelDefault(TestCase):
 <option value="2" selected>ChoiceOption 2</option>
 <option value="3" selected>ChoiceOption 3</option>
 </select><input type="hidden" name="initial-multi_choice_int" value="2" id="initial-id_multi_choice_int_0">
-<input type="hidden" name="initial-multi_choice_int" value="3" id="initial-id_multi_choice_int_1"></p>"""
+<input type="hidden" name="initial-multi_choice_int" value="3" id="initial-id_multi_choice_int_1"></p>""",
         )
 
 
@@ -220,6 +228,7 @@ class RelatedModelFormTests(SimpleTestCase):
         """
         Test for issue 10405
         """
+
         class A(models.Model):
             ref = models.ForeignKey("B", models.CASCADE)
 
@@ -227,10 +236,7 @@ class RelatedModelFormTests(SimpleTestCase):
             model = A
             fields = '__all__'
 
-        msg = (
-            "Cannot create form field for 'ref' yet, because "
-            "its related model 'B' has not been loaded yet"
-        )
+        msg = "Cannot create form field for 'ref' yet, because " "its related model 'B' has not been loaded yet"
         with self.assertRaisesMessage(ValueError, msg):
             ModelFormMetaclass('Form', (ModelForm,), {'Meta': Meta})
 
@@ -241,6 +247,7 @@ class RelatedModelFormTests(SimpleTestCase):
         """
         Test for issue 10405
         """
+
         class C(models.Model):
             ref = models.ForeignKey("D", models.CASCADE)
 
@@ -260,10 +267,7 @@ class ManyToManyExclusionTestCase(TestCase):
         opt1 = ChoiceOptionModel.objects.create(id=1, name='default')
         opt2 = ChoiceOptionModel.objects.create(id=2, name='option 2')
         opt3 = ChoiceOptionModel.objects.create(id=3, name='option 3')
-        initial = {
-            'choice': opt1,
-            'choice_int': opt1,
-        }
+        initial = {'choice': opt1, 'choice_int': opt1}
         data = {
             'choice': opt2.pk,
             'choice_int': opt2.pk,
@@ -293,7 +297,7 @@ class EmptyLabelTestCase(TestCase):
 <option value="" selected>No Preference</option>
 <option value="f">Foo</option>
 <option value="b">Bar</option>
-</select></p>"""
+</select></p>""",
         )
 
     def test_empty_field_char_none(self):
@@ -306,7 +310,7 @@ class EmptyLabelTestCase(TestCase):
 <option value="" selected>No Preference</option>
 <option value="f">Foo</option>
 <option value="b">Bar</option>
-</select></p>"""
+</select></p>""",
         )
 
     def test_save_empty_label_forms(self):
@@ -336,7 +340,7 @@ class EmptyLabelTestCase(TestCase):
 <option value="" selected>No Preference</option>
 <option value="1">Foo</option>
 <option value="2">Bar</option>
-</select></p>"""
+</select></p>""",
         )
 
     def test_get_display_value_on_none(self):
@@ -356,7 +360,7 @@ class EmptyLabelTestCase(TestCase):
 <option value="" selected>No Preference</option>
 <option value="1">Foo</option>
 <option value="2">Bar</option>
-</select></p>"""
+</select></p>""",
         )
 
         foo_model = ChoiceModel(name='foo-test', choice_integer=1)
@@ -370,5 +374,5 @@ class EmptyLabelTestCase(TestCase):
 <option value="">No Preference</option>
 <option value="1" selected>Foo</option>
 <option value="2">Bar</option>
-</select></p>"""
+</select></p>""",
         )

@@ -12,18 +12,14 @@ class UnaccentTest(PostgreSQLTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.Model.objects.bulk_create([
-            cls.Model(field="àéÖ"),
-            cls.Model(field="aeO"),
-            cls.Model(field="aeo"),
-        ])
+        cls.Model.objects.bulk_create([cls.Model(field="àéÖ"), cls.Model(field="aeO"), cls.Model(field="aeo")])
 
     def test_unaccent(self):
         self.assertQuerysetEqual(
             self.Model.objects.filter(field__unaccent="aeO"),
             ["àéÖ", "aeO"],
             transform=lambda instance: instance.field,
-            ordered=False
+            ordered=False,
         )
 
     def test_unaccent_chained(self):
@@ -35,13 +31,13 @@ class UnaccentTest(PostgreSQLTestCase):
             self.Model.objects.filter(field__unaccent__iexact="aeO"),
             ["àéÖ", "aeO", "aeo"],
             transform=lambda instance: instance.field,
-            ordered=False
+            ordered=False,
         )
         self.assertQuerysetEqual(
             self.Model.objects.filter(field__unaccent__endswith="éÖ"),
             ["àéÖ", "aeO"],
             transform=lambda instance: instance.field,
-            ordered=False
+            ordered=False,
         )
 
     def test_unaccent_with_conforming_strings_off(self):
@@ -67,7 +63,7 @@ class UnaccentTest(PostgreSQLTestCase):
             self.Model.objects.filter(field__unaccent="aéÖ"),
             ["àéÖ", "aeO"],
             transform=lambda instance: instance.field,
-            ordered=False
+            ordered=False,
         )
 
 
@@ -76,4 +72,5 @@ class UnaccentTextFieldTest(UnaccentTest):
     TextField should have the exact same behavior as CharField
     regarding unaccent lookups.
     """
+
     Model = TextFieldModel

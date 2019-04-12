@@ -2,16 +2,12 @@ import os
 import tempfile
 import uuid
 
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey, GenericRelation,
-)
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models.fields.files import ImageField, ImageFieldFile
-from django.db.models.fields.related import (
-    ForeignKey, ForeignObject, ManyToManyField, OneToOneField,
-)
+from django.db.models.fields.related import ForeignKey, ForeignObject, ManyToManyField, OneToOneField
 from django.utils.translation import gettext_lazy as _
 
 try:
@@ -36,16 +32,8 @@ class Bar(models.Model):
 
 class Whiz(models.Model):
     CHOICES = (
-        ('Group 1', (
-            (1, 'First'),
-            (2, 'Second'),
-        )
-        ),
-        ('Group 2', (
-            (3, 'Third'),
-            (4, 'Fourth'),
-        )
-        ),
+        ('Group 1', ((1, 'First'), (2, 'Second'))),
+        ('Group 2', ((3, 'Third'), (4, 'Fourth'))),
         (0, 'Other'),
         (5, _('translated')),
     )
@@ -148,12 +136,14 @@ class PrimaryKeyCharModel(models.Model):
 
 class FksToBooleans(models.Model):
     """Model with FKs to models with {Null,}BooleanField's, #15040"""
+
     bf = models.ForeignKey(BooleanModel, models.CASCADE)
     nbf = models.ForeignKey(NullBooleanModel, models.CASCADE)
 
 
 class FkToChar(models.Model):
     """Model with FK to a model with a CharField primary key, #19299"""
+
     out = models.ForeignKey(PrimaryKeyCharModel, models.CASCADE)
 
 
@@ -206,12 +196,14 @@ class DecimalLessThanOne(models.Model):
 class FieldClassAttributeModel(models.Model):
     field_class = models.CharField
 
+
 ###############################################################################
 
 
 class DataModel(models.Model):
     short_data = models.BinaryField(max_length=10, default=b'\x08')
     data = models.BinaryField()
+
 
 ###############################################################################
 # FileField
@@ -226,11 +218,13 @@ class Document(models.Model):
 
 # If Pillow available, do these tests.
 if Image:
+
     class TestImageFieldFile(ImageFieldFile):
         """
         Custom Field File class that records whether or not the underlying file
         was opened.
         """
+
         def __init__(self, *args, **kwargs):
             self.was_opened = False
             super().__init__(*args, **kwargs)
@@ -251,6 +245,7 @@ if Image:
         """
         Model that defines an ImageField with no dimension fields.
         """
+
         name = models.CharField(max_length=50)
         mugshot = TestImageField(storage=temp_storage, upload_to='tests')
 
@@ -260,8 +255,8 @@ if Image:
         to make sure the dimension update is correctly run on concrete subclass
         instance post-initialization.
         """
-        mugshot = TestImageField(storage=temp_storage, upload_to='tests',
-                                 height_field='mugshot_height')
+
+        mugshot = TestImageField(storage=temp_storage, upload_to='tests', height_field='mugshot_height')
         mugshot_height = models.PositiveSmallIntegerField()
 
         class Meta:
@@ -272,16 +267,18 @@ if Image:
         Concrete model that subclass an abstract one with only on dimension
         field.
         """
+
         name = models.CharField(max_length=50)
 
     class PersonWithHeightAndWidth(models.Model):
         """
         Model that defines height and width fields after the ImageField.
         """
+
         name = models.CharField(max_length=50)
-        mugshot = TestImageField(storage=temp_storage, upload_to='tests',
-                                 height_field='mugshot_height',
-                                 width_field='mugshot_width')
+        mugshot = TestImageField(
+            storage=temp_storage, upload_to='tests', height_field='mugshot_height', width_field='mugshot_width'
+        )
         mugshot_height = models.PositiveSmallIntegerField()
         mugshot_width = models.PositiveSmallIntegerField()
 
@@ -289,12 +286,13 @@ if Image:
         """
         Model that defines height and width fields before the ImageField.
         """
+
         name = models.CharField(max_length=50)
         mugshot_height = models.PositiveSmallIntegerField()
         mugshot_width = models.PositiveSmallIntegerField()
-        mugshot = TestImageField(storage=temp_storage, upload_to='tests',
-                                 height_field='mugshot_height',
-                                 width_field='mugshot_width')
+        mugshot = TestImageField(
+            storage=temp_storage, upload_to='tests', height_field='mugshot_height', width_field='mugshot_width'
+        )
 
     class PersonTwoImages(models.Model):
         """
@@ -303,20 +301,23 @@ if Image:
         * Defines the height/width fields before the ImageFields
         * Has a nullable ImageField
         """
+
         name = models.CharField(max_length=50)
         mugshot_height = models.PositiveSmallIntegerField()
         mugshot_width = models.PositiveSmallIntegerField()
-        mugshot = TestImageField(storage=temp_storage, upload_to='tests',
-                                 height_field='mugshot_height',
-                                 width_field='mugshot_width')
-        headshot_height = models.PositiveSmallIntegerField(
-            blank=True, null=True)
-        headshot_width = models.PositiveSmallIntegerField(
-            blank=True, null=True)
-        headshot = TestImageField(blank=True, null=True,
-                                  storage=temp_storage, upload_to='tests',
-                                  height_field='headshot_height',
-                                  width_field='headshot_width')
+        mugshot = TestImageField(
+            storage=temp_storage, upload_to='tests', height_field='mugshot_height', width_field='mugshot_width'
+        )
+        headshot_height = models.PositiveSmallIntegerField(blank=True, null=True)
+        headshot_width = models.PositiveSmallIntegerField(blank=True, null=True)
+        headshot = TestImageField(
+            blank=True,
+            null=True,
+            storage=temp_storage,
+            upload_to='tests',
+            height_field='headshot_height',
+            width_field='headshot_width',
+        )
 
 
 class AllFieldsModel(models.Model):
@@ -344,17 +345,9 @@ class AllFieldsModel(models.Model):
     uuid = models.UUIDField()
 
     fo = ForeignObject(
-        'self',
-        on_delete=models.CASCADE,
-        from_fields=['positive_integer'],
-        to_fields=['id'],
-        related_name='reverse'
+        'self', on_delete=models.CASCADE, from_fields=['positive_integer'], to_fields=['id'], related_name='reverse'
     )
-    fk = ForeignKey(
-        'self',
-        models.CASCADE,
-        related_name='reverse2'
-    )
+    fk = ForeignKey('self', models.CASCADE, related_name='reverse2')
     m2m = ManyToManyField('self')
     oto = OneToOneField('self', models.CASCADE)
 

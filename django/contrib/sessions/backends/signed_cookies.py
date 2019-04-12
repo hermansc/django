@@ -4,7 +4,6 @@ from django.core import signing
 
 
 class SessionStore(SessionBase):
-
     def load(self):
         """
         Load the data from the key itself instead of fetching from some
@@ -72,7 +71,8 @@ class SessionStore(SessionBase):
         base64-encoded string of data as our session key.
         """
         return signing.dumps(
-            self._session, compress=True,
+            self._session,
+            compress=True,
             salt='django.contrib.sessions.backends.signed_cookies',
             serializer=self.serializer,
         )

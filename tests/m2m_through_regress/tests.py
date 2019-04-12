@@ -4,9 +4,7 @@ from django.contrib.auth.models import User
 from django.core import management
 from django.test import TestCase
 
-from .models import (
-    Car, CarDriver, Driver, Group, Membership, Person, UserMembership,
-)
+from .models import Car, CarDriver, Driver, Group, Membership, Person, UserMembership
 
 
 class M2MThroughTestCase(TestCase):
@@ -32,54 +30,26 @@ class M2MThroughTestCase(TestCase):
         cls.jane_rock = UserMembership.objects.create(user=cls.jane, group=cls.rock)
 
     def test_retrieve_reverse_m2m_items(self):
-        self.assertQuerysetEqual(
-            self.bob.group_set.all(), [
-                "<Group: Rock>",
-                "<Group: Roll>",
-            ],
-            ordered=False
-        )
+        self.assertQuerysetEqual(self.bob.group_set.all(), ["<Group: Rock>", "<Group: Roll>"], ordered=False)
 
     def test_retrieve_forward_m2m_items(self):
-        self.assertQuerysetEqual(
-            self.roll.members.all(), [
-                "<Person: Bob>",
-            ]
-        )
+        self.assertQuerysetEqual(self.roll.members.all(), ["<Person: Bob>"])
 
     def test_retrieve_reverse_m2m_items_via_custom_id_intermediary(self):
-        self.assertQuerysetEqual(
-            self.frank.group_set.all(), [
-                "<Group: Rock>",
-                "<Group: Roll>",
-            ],
-            ordered=False
-        )
+        self.assertQuerysetEqual(self.frank.group_set.all(), ["<Group: Rock>", "<Group: Roll>"], ordered=False)
 
     def test_retrieve_forward_m2m_items_via_custom_id_intermediary(self):
-        self.assertQuerysetEqual(
-            self.roll.user_members.all(), [
-                "<User: frank>",
-            ]
-        )
+        self.assertQuerysetEqual(self.roll.user_members.all(), ["<User: frank>"])
 
     def test_join_trimming_forwards(self):
         """
         Too many copies of the intermediate table aren't involved when doing a
         join (#8046, #8254).
         """
-        self.assertQuerysetEqual(
-            self.rock.members.filter(membership__price=50), [
-                "<Person: Jim>",
-            ]
-        )
+        self.assertQuerysetEqual(self.rock.members.filter(membership__price=50), ["<Person: Jim>"])
 
     def test_join_trimming_reverse(self):
-        self.assertQuerysetEqual(
-            self.bob.group_set.filter(membership__price=50), [
-                "<Group: Roll>",
-            ]
-        )
+        self.assertQuerysetEqual(self.bob.group_set.filter(membership__price=50), ["<Group: Roll>"])
 
 
 class M2MThroughSerializationTestCase(TestCase):
@@ -99,13 +69,14 @@ class M2MThroughSerializationTestCase(TestCase):
             out.getvalue().strip(),
             '[{"pk": %(m_pk)s, "model": "m2m_through_regress.membership", "fields": {"person": %(p_pk)s, "price": '
             '100, "group": %(g_pk)s}}, {"pk": %(p_pk)s, "model": "m2m_through_regress.person", "fields": {"name": '
-            '"Bob"}}, {"pk": %(g_pk)s, "model": "m2m_through_regress.group", "fields": {"name": "Roll"}}]'
-            % pks
+            '"Bob"}}, {"pk": %(g_pk)s, "model": "m2m_through_regress.group", "fields": {"name": "Roll"}}]' % pks,
         )
 
         out = StringIO()
         management.call_command("dumpdata", "m2m_through_regress", format="xml", indent=2, stdout=out)
-        self.assertXMLEqual(out.getvalue().strip(), """
+        self.assertXMLEqual(
+            out.getvalue().strip(),
+            """
 <?xml version="1.0" encoding="utf-8"?>
 <django-objects version="1.0">
   <object pk="%(m_pk)s" model="m2m_through_regress.membership">
@@ -120,7 +91,9 @@ class M2MThroughSerializationTestCase(TestCase):
     <field type="CharField" name="name">Roll</field>
   </object>
 </django-objects>
-        """.strip() % pks)
+        """.strip()
+            % pks,
+        )
 
 
 class ToFieldThroughTests(TestCase):
@@ -139,26 +112,18 @@ class ToFieldThroughTests(TestCase):
         cls.unused_car2 = Car.objects.create(make="Wartburg")
 
     def test_to_field(self):
-        self.assertQuerysetEqual(
-            self.car.drivers.all(),
-            ["<Driver: Ryan Briscoe>"]
-        )
+        self.assertQuerysetEqual(self.car.drivers.all(), ["<Driver: Ryan Briscoe>"])
 
     def test_to_field_reverse(self):
-        self.assertQuerysetEqual(
-            self.driver.car_set.all(),
-            ["<Car: Toyota>"]
-        )
+        self.assertQuerysetEqual(self.driver.car_set.all(), ["<Car: Toyota>"])
 
     def test_to_field_clear_reverse(self):
         self.driver.car_set.clear()
-        self.assertQuerysetEqual(
-            self.driver.car_set.all(), [])
+        self.assertQuerysetEqual(self.driver.car_set.all(), [])
 
     def test_to_field_clear(self):
         self.car.drivers.clear()
-        self.assertQuerysetEqual(
-            self.car.drivers.all(), [])
+        self.assertQuerysetEqual(self.car.drivers.all(), [])
 
     # Low level tests for _add_items and _remove_items. We test these methods
     # because .add/.remove aren't available for m2m fields with through, but
@@ -166,16 +131,10 @@ class ToFieldThroughTests(TestCase):
     # sure these methods are ready if the ability to use .add or .remove with
     # to_field relations is added some day.
     def test_add(self):
-        self.assertQuerysetEqual(
-            self.car.drivers.all(),
-            ["<Driver: Ryan Briscoe>"]
-        )
+        self.assertQuerysetEqual(self.car.drivers.all(), ["<Driver: Ryan Briscoe>"])
         # Yikes - barney is going to drive...
         self.car.drivers._add_items('car', 'driver', self.unused_driver)
-        self.assertQuerysetEqual(
-            self.car.drivers.all(),
-            ["<Driver: Barney Gumble>", "<Driver: Ryan Briscoe>"]
-        )
+        self.assertQuerysetEqual(self.car.drivers.all(), ["<Driver: Barney Gumble>", "<Driver: Ryan Briscoe>"])
 
     def test_m2m_relations_unusable_on_null_to_field(self):
         nullcar = Car(make=None)
@@ -187,10 +146,7 @@ class ToFieldThroughTests(TestCase):
             nullcar.drivers.all()
 
     def test_m2m_relations_unusable_on_null_pk_obj(self):
-        msg = (
-            "'Car' instance needs to have a primary key value before a "
-            "many-to-many relationship can be used."
-        )
+        msg = "'Car' instance needs to have a primary key value before a " "many-to-many relationship can be used."
         with self.assertRaisesMessage(ValueError, msg):
             Car(make='Ford').drivers.all()
 
@@ -202,16 +158,9 @@ class ToFieldThroughTests(TestCase):
 
     def test_add_reverse(self):
         car2 = Car.objects.create(make="Honda")
-        self.assertQuerysetEqual(
-            self.driver.car_set.all(),
-            ["<Car: Toyota>"]
-        )
+        self.assertQuerysetEqual(self.driver.car_set.all(), ["<Car: Toyota>"])
         self.driver.car_set._add_items('driver', 'car', car2)
-        self.assertQuerysetEqual(
-            self.driver.car_set.all(),
-            ["<Car: Toyota>", "<Car: Honda>"],
-            ordered=False
-        )
+        self.assertQuerysetEqual(self.driver.car_set.all(), ["<Car: Toyota>", "<Car: Honda>"], ordered=False)
 
     def test_add_null_reverse(self):
         nullcar = Car.objects.create(make=None)
@@ -229,22 +178,14 @@ class ToFieldThroughTests(TestCase):
             nulldriver.car_set._add_items('driver', 'car', self.car)
 
     def test_remove(self):
-        self.assertQuerysetEqual(
-            self.car.drivers.all(),
-            ["<Driver: Ryan Briscoe>"]
-        )
+        self.assertQuerysetEqual(self.car.drivers.all(), ["<Driver: Ryan Briscoe>"])
         self.car.drivers._remove_items('car', 'driver', self.driver)
-        self.assertQuerysetEqual(
-            self.car.drivers.all(), [])
+        self.assertQuerysetEqual(self.car.drivers.all(), [])
 
     def test_remove_reverse(self):
-        self.assertQuerysetEqual(
-            self.driver.car_set.all(),
-            ["<Car: Toyota>"]
-        )
+        self.assertQuerysetEqual(self.driver.car_set.all(), ["<Car: Toyota>"])
         self.driver.car_set._remove_items('driver', 'car', self.car)
-        self.assertQuerysetEqual(
-            self.driver.car_set.all(), [])
+        self.assertQuerysetEqual(self.driver.car_set.all(), [])
 
 
 class ThroughLoadDataTestCase(TestCase):
@@ -261,5 +202,5 @@ class ThroughLoadDataTestCase(TestCase):
             out.getvalue().strip(),
             '[{"pk": 1, "model": "m2m_through_regress.usermembership", "fields": {"price": 100, "group": 1, "user"'
             ': 1}}, {"pk": 1, "model": "m2m_through_regress.person", "fields": {"name": "Guido"}}, {"pk": 1, '
-            '"model": "m2m_through_regress.group", "fields": {"name": "Python Core Group"}}]'
+            '"model": "m2m_through_regress.group", "fields": {"name": "Python Core Group"}}]',
         )

@@ -21,6 +21,8 @@ class PasswordInputTest(WidgetTest):
         self.check_html(widget, 'password', '', html='<input type="password" name="password">')
         self.check_html(widget, 'password', None, html='<input type="password" name="password">')
         self.check_html(
-            widget, 'password', 'test@example.com',
+            widget,
+            'password',
+            'test@example.com',
             html='<input type="password" name="password" value="test@example.com">',
         )

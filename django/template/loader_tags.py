@@ -3,9 +3,7 @@ from collections import defaultdict
 
 from django.utils.safestring import mark_safe
 
-from .base import (
-    Node, Template, TemplateSyntaxError, TextNode, Variable, token_kwargs,
-)
+from .base import Node, Template, TemplateSyntaxError, TextNode, Variable, token_kwargs
 from .library import Library
 
 register = Library()
@@ -71,8 +69,7 @@ class BlockNode(Node):
                 "{{ block.super }} in a base template?" % self.__class__.__name__
             )
         render_context = self.context.render_context
-        if (BLOCK_CONTEXT_KEY in render_context and
-                render_context[BLOCK_CONTEXT_KEY].get_block(self.name) is not None):
+        if BLOCK_CONTEXT_KEY in render_context and render_context[BLOCK_CONTEXT_KEY].get_block(self.name) is not None:
             return mark_safe(self.render(self.context))
         return ''
 
@@ -97,12 +94,8 @@ class ExtendsNode(Node):
         passed as the skip argument. This enables extends to work recursively
         without extending the same template twice.
         """
-        history = context.render_context.setdefault(
-            self.context_key, [self.origin],
-        )
-        template, origin = context.template.engine.find_template(
-            template_name, skip=history,
-        )
+        history = context.render_context.setdefault(self.context_key, [self.origin])
+        template, origin = context.template.engine.find_template(template_name, skip=history)
         history.append(origin)
         return template
 
@@ -110,10 +103,8 @@ class ExtendsNode(Node):
         parent = self.parent_name.resolve(context)
         if not parent:
             error_msg = "Invalid template name in 'extends' tag: %r." % parent
-            if self.parent_name.filters or\
-                    isinstance(self.parent_name.var, Variable):
-                error_msg += " Got this from the '%s' variable." %\
-                    self.parent_name.token
+            if self.parent_name.filters or isinstance(self.parent_name.var, Variable):
+                error_msg += " Got this from the '%s' variable." % self.parent_name.token
             raise TemplateSyntaxError(error_msg)
         if isinstance(parent, Template):
             # parent is a django.template.Template
@@ -139,8 +130,7 @@ class ExtendsNode(Node):
             # The ExtendsNode has to be the first non-text node.
             if not isinstance(node, TextNode):
                 if not isinstance(node, ExtendsNode):
-                    blocks = {n.name: n for n in
-                              compiled_parent.nodelist.get_nodes_by_type(BlockNode)}
+                    blocks = {n.name: n for n in compiled_parent.nodelist.get_nodes_by_type(BlockNode)}
                     block_context.add_blocks(blocks)
                 break
 
@@ -178,10 +168,7 @@ class IncludeNode(Node):
         # Use the base.Template of a backends.django.Template.
         elif hasattr(template, 'template'):
             template = template.template
-        values = {
-            name: var.resolve(context)
-            for name, var in self.extra_context.items()
-        }
+        values = {name: var.resolve(context) for name, var in self.extra_context.items()}
         if self.isolated_context:
             return template.render(context.new(values))
         with context.push(**values):
@@ -228,10 +215,7 @@ def construct_relative_path(current_template_name, relative_name):
         return relative_name
 
     new_name = posixpath.normpath(
-        posixpath.join(
-            posixpath.dirname(current_template_name.lstrip('/')),
-            relative_name.strip('\'"')
-        )
+        posixpath.join(posixpath.dirname(current_template_name.lstrip('/')), relative_name.strip('\'"'))
     )
     if new_name.startswith('../'):
         raise TemplateSyntaxError(
@@ -241,8 +225,7 @@ def construct_relative_path(current_template_name, relative_name):
     if current_template_name.lstrip('/') == new_name:
         raise TemplateSyntaxError(
             "The relative path '%s' was translated to template name '%s', the "
-            "same template in which the tag appears."
-            % (relative_name, current_template_name)
+            "same template in which the tag appears." % (relative_name, current_template_name)
         )
     return '"%s"' % new_name
 
@@ -289,29 +272,24 @@ def do_include(parser, token):
     bits = token.split_contents()
     if len(bits) < 2:
         raise TemplateSyntaxError(
-            "%r tag takes at least one argument: the name of the template to "
-            "be included." % bits[0]
+            "%r tag takes at least one argument: the name of the template to " "be included." % bits[0]
         )
     options = {}
     remaining_bits = bits[2:]
     while remaining_bits:
         option = remaining_bits.pop(0)
         if option in options:
-            raise TemplateSyntaxError('The %r option was specified more '
-                                      'than once.' % option)
+            raise TemplateSyntaxError('The %r option was specified more ' 'than once.' % option)
         if option == 'with':
             value = token_kwargs(remaining_bits, parser, support_legacy=False)
             if not value:
-                raise TemplateSyntaxError('"with" in %r tag needs at least '
-                                          'one keyword argument.' % bits[0])
+                raise TemplateSyntaxError('"with" in %r tag needs at least ' 'one keyword argument.' % bits[0])
         elif option == 'only':
             value = True
         else:
-            raise TemplateSyntaxError('Unknown argument for %r tag: %r.' %
-                                      (bits[0], option))
+            raise TemplateSyntaxError('Unknown argument for %r tag: %r.' % (bits[0], option))
         options[option] = value
     isolated_context = options.get('only', False)
     namemap = options.get('with', {})
     bits[1] = construct_relative_path(parser.origin.template_name, bits[1])
-    return IncludeNode(parser.compile_filter(bits[1]), extra_context=namemap,
-                       isolated_context=isolated_context)
+    return IncludeNode(parser.compile_filter(bits[1]), extra_context=namemap, isolated_context=isolated_context)
